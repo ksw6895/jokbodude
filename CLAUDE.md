@@ -53,8 +53,9 @@ python main.py --parallel
 3. **pdf_processor.py**: Handles AI analysis
    - Uploads PDFs to Gemini API (one jokbo at a time with the lesson)
    - `analyze_single_jokbo_with_lesson()`: Analyzes one jokbo-lesson pair
-   - `analyze_pdfs_for_lesson()`: Processes multiple jokbo files and merges results
-   - `analyze_pdfs_for_lesson_parallel()`: Parallel processing version using ThreadPoolExecutor
+   - `analyze_single_jokbo_with_lesson_preloaded()`: Analyzes with pre-uploaded lesson file
+   - `analyze_pdfs_for_lesson()`: Processes multiple jokbo files sequentially
+   - `analyze_pdfs_for_lesson_parallel()`: True parallel processing with pre-uploaded lesson
    - Returns structured JSON with slide-to-question mappings
    - Manages file cleanup on destruction
    - Improved prompts for more accurate slide matching
@@ -121,9 +122,12 @@ Each output PDF contains:
    - Automatically extracts all pages for a single question
    - Preserves complete question context
 
-4. **Parallel Processing**
+4. **True Parallel Processing**
    - Added `--parallel` flag for faster processing
-   - Uses ThreadPoolExecutor with configurable workers
+   - Pre-uploads lesson file once before parallel processing
+   - Each thread has independent PDFProcessor instance
+   - Uses ThreadPoolExecutor with configurable workers (default: 3)
+   - Real concurrent processing with timestamp logging
    - Significant speed improvement for multiple jokbo files
 
 5. **Future Considerations**
