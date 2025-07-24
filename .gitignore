@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# 환경 설정
+.env
+.env.local
+.env.*.local
+
+# PDF 파일들 (족보, 강의자료, 출력물)
+jokbo/
+lesson/
+output/
+*.pdf
+
+# Zone.Identifier 파일
+*.Zone.Identifier
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 로그
+*.log
+
+# 임시 파일
+*.tmp
+temp/
+tmp/
