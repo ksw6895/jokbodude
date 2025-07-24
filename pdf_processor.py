@@ -49,7 +49,12 @@ class PDFProcessor:
     def analyze_single_jokbo_with_lesson(self, jokbo_path: str, lesson_path: str) -> Dict[str, Any]:
         """Analyze one jokbo PDF against one lesson PDF"""
         
+        # Extract the actual filename
+        jokbo_filename = Path(jokbo_path).name
+        
         prompt = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
+
+        중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요. 파일명을 변경하거나 수정하지 마세요.
 
         작업:
         1. 족보 PDF의 모든 문제를 분석하세요
@@ -68,7 +73,7 @@ class PDFProcessor:
                     "lesson_page": 페이지번호,
                     "related_jokbo_questions": [
                         {{
-                            "jokbo_filename": "족보파일명.pdf",
+                            "jokbo_filename": "{jokbo_filename}",
                             "jokbo_page": 족보페이지번호,
                             "question_number": 문제번호,
                             "question_text": "문제 내용",
