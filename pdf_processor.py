@@ -49,6 +49,61 @@ class PDFProcessor:
         self.uploaded_files.append(uploaded_file)
         return uploaded_file
     
+    def _ensure_one_question_one_slide(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        """Ensure each question appears on only one slide (the one with highest importance score)"""
+        if "related_slides" not in result:
+            return result
+        
+        # Track all questions and their slide appearances
+        question_appearances = {}  # {(filename, question_num): [(slide_page, importance_score, question_data)]}
+        
+        # Collect all question appearances
+        for slide in result["related_slides"]:
+            slide_page = slide["lesson_page"]
+            importance_score = slide.get("importance_score", 5)
+            
+            for question in slide.get("related_jokbo_questions", []):
+                key = (question["jokbo_filename"], question["question_number"])
+                if key not in question_appearances:
+                    question_appearances[key] = []
+                question_appearances[key].append((slide_page, importance_score, question))
+        
+        # Find best slide for each question
+        best_slides = {}  # {(filename, question_num): (slide_page, question_data)}
+        for key, appearances in question_appearances.items():
+            # Sort by importance score (descending) and then by page number (ascending)
+            appearances.sort(key=lambda x: (-x[1], x[0]))
+            best_slide_page, _, question_data = appearances[0]
+            best_slides[key] = (best_slide_page, question_data)
+            
+            # Log if question was on multiple slides
+            if len(appearances) > 1:
+                print(f"    문제 {key[1]}번이 {len(appearances)}개 슬라이드에 중복 → {best_slide_page}페이지만 선택")
+        
+        # Rebuild slides with only the best questions
+        new_slides = []
+        for slide in result["related_slides"]:
+            slide_page = slide["lesson_page"]
+            new_questions = []
+            
+            # Only keep questions that belong to this slide
+            for (filename, question_num), (best_page, question_data) in best_slides.items():
+                if best_page == slide_page:
+                    new_questions.append(question_data)
+            
+            if new_questions:  # Only keep slides that have questions
+                slide["related_jokbo_questions"] = new_questions
+                new_slides.append(slide)
+        
+        result["related_slides"] = new_slides
+        
+        # Update summary
+        if "summary" in result:
+            result["summary"]["total_questions"] = len(best_slides)
+            result["summary"]["total_related_slides"] = len(new_slides)
+        
+        return result
+    
     def analyze_single_jokbo_with_lesson(self, jokbo_path: str, lesson_path: str) -> Dict[str, Any]:
         """Analyze one jokbo PDF against one lesson PDF"""
         
@@ -72,10 +127,20 @@ class PDFProcessor:
         - 문제의 정답을 찾기 위해 반드시 필요한 핵심 정보가 포함되어 있는가?
         - 단순히 관련 주제가 아닌, 문제 해결에 직접적으로 필요한 내용인가?
         
+        그림 매칭 규칙:
+        - 족보 문제에 그림이 포함되어 있고, 강의 슬라이드에 동일한 그림이 있다면
+        - 해당 슬라이드의 importance_score를 높게 (9-10) 책정하세요
+        - 그림이 일치하는 슬라이드는 출제 가능성이 매우 높습니다
+        
         주의사항:
         - 너무 포괄적이거나 일반적인 연관성은 제외하세요
         - 문제와 직접적인 연관이 없는 배경 설명 슬라이드는 제외하세요
         - importance_score는 직접적 연관성이 높을수록 높게 (8-10), 간접적이면 낮게 (1-5) 책정하세요
+        
+        중요 규칙:
+        - 각 문제는 반드시 하나의 슬라이드에만 연결하세요
+        - 여러 슬라이드가 관련될 수 있다면, 가장 직접적이고 핵심적인 슬라이드 하나만 선택
+        - 한 슬라이드에는 여러 문제가 연결될 수 있습니다
         
         출력 형식:
         {{
@@ -134,6 +199,9 @@ class PDFProcessor:
                         for question in slide["related_jokbo_questions"]:
                             question["jokbo_filename"] = jokbo_filename
             
+            # Post-process to ensure each question is only on one slide
+            result = self._ensure_one_question_one_slide(result)
+            
             return result
         except json.JSONDecodeError:
             print(f"Failed to parse JSON response: {response.text}")
@@ -166,10 +234,20 @@ class PDFProcessor:
         - 문제의 정답을 찾기 위해 반드시 필요한 핵심 정보가 포함되어 있는가?
         - 단순히 관련 주제가 아닌, 문제 해결에 직접적으로 필요한 내용인가?
         
+        그림 매칭 규칙:
+        - 족보 문제에 그림이 포함되어 있고, 강의 슬라이드에 동일한 그림이 있다면
+        - 해당 슬라이드의 importance_score를 높게 (9-10) 책정하세요
+        - 그림이 일치하는 슬라이드는 출제 가능성이 매우 높습니다
+        
         주의사항:
         - 너무 포괄적이거나 일반적인 연관성은 제외하세요
         - 문제와 직접적인 연관이 없는 배경 설명 슬라이드는 제외하세요
         - importance_score는 직접적 연관성이 높을수록 높게 (8-10), 간접적이면 낮게 (1-5) 책정하세요
+        
+        중요 규칙:
+        - 각 문제는 반드시 하나의 슬라이드에만 연결하세요
+        - 여러 슬라이드가 관련될 수 있다면, 가장 직접적이고 핵심적인 슬라이드 하나만 선택
+        - 한 슬라이드에는 여러 문제가 연결될 수 있습니다
         
         출력 형식:
         {{
@@ -222,6 +300,9 @@ class PDFProcessor:
                     if "related_jokbo_questions" in slide:
                         for question in slide["related_jokbo_questions"]:
                             question["jokbo_filename"] = jokbo_filename
+            
+            # Post-process to ensure each question is only on one slide
+            result = self._ensure_one_question_one_slide(result)
             
             print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 분석 완료 - {jokbo_filename}")
             return result
