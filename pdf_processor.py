@@ -108,6 +108,14 @@ class PDFProcessor:
         
         try:
             result = json.loads(response.text)
+            
+            # Force correct filename in all questions
+            if "related_slides" in result:
+                for slide in result["related_slides"]:
+                    if "related_jokbo_questions" in slide:
+                        for question in slide["related_jokbo_questions"]:
+                            question["jokbo_filename"] = jokbo_filename
+            
             return result
         except json.JSONDecodeError:
             print(f"Failed to parse JSON response: {response.text}")
