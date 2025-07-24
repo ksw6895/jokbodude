@@ -19,7 +19,7 @@ def find_pdf_files(directory: str, pattern: str = "*.pdf") -> List[Path]:
     return [f for f in pdf_files if not f.name.endswith('.Zone.Identifier')]
 
 
-def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], output_dir: Path, jokbo_dir: str) -> bool:
+def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], output_dir: Path, jokbo_dir: str, use_parallel: bool = False) -> bool:
     """Process one lesson PDF with all jokbo PDFs"""
     try:
         print(f"\n처리 중...")
@@ -32,7 +32,12 @@ def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], o
         print("  PDF 분석 중...")
         # Convert Path objects to strings
         jokbo_path_strs = [str(path) for path in jokbo_paths]
-        analysis_result = processor.analyze_pdfs_for_lesson(jokbo_path_strs, str(lesson_path))
+        
+        if use_parallel:
+            print("  (병렬 처리 모드)")
+            analysis_result = processor.analyze_pdfs_for_lesson_parallel(jokbo_path_strs, str(lesson_path))
+        else:
+            analysis_result = processor.analyze_pdfs_for_lesson(jokbo_path_strs, str(lesson_path))
         
         if "error" in analysis_result:
             print(f"  오류 발생: {analysis_result['error']}")
@@ -64,6 +69,7 @@ def main():
     parser.add_argument("--lesson-dir", default="lesson", help="강의자료 PDF 디렉토리 (기본값: lesson)")
     parser.add_argument("--output-dir", default="output", help="출력 디렉토리 (기본값: output)")
     parser.add_argument("--single-lesson", help="특정 강의자료 파일만 사용")
+    parser.add_argument("--parallel", action="store_true", help="병렬 처리 모드 사용 (더 빠른 처리)")
     
     args = parser.parse_args()
     
@@ -88,14 +94,17 @@ def main():
         return 1
     
     print(f"족보 파일 {len(jokbo_files)}개, 강의자료 파일 {len(lesson_files)}개 발견")
-    print(f"각 강의자료별로 모든 족보와 비교하여 처리합니다.\n")
+    print(f"각 강의자료별로 모든 족보와 비교하여 처리합니다.")
+    if args.parallel:
+        print("병렬 처리 모드가 활성화되었습니다. (더 빠른 처리)")
+    print()
     
     successful = 0
     failed = 0
     
     # Process each lesson with all jokbos
     for lesson_file in lesson_files:
-        if process_lesson_with_all_jokbos(lesson_file, jokbo_files, output_dir, args.jokbo_dir):
+        if process_lesson_with_all_jokbos(lesson_file, jokbo_files, output_dir, args.jokbo_dir, args.parallel):
             successful += 1
         else:
             failed += 1

@@ -27,6 +27,9 @@ python main.py --single-lesson "lesson/specific_file.pdf"
 
 # Run with custom directories
 python main.py --jokbo-dir "custom_jokbo" --lesson-dir "custom_lesson" --output-dir "custom_output"
+
+# Run with parallel processing (faster)
+python main.py --parallel
 ```
 
 ### Environment Configuration
@@ -51,14 +54,17 @@ python main.py --jokbo-dir "custom_jokbo" --lesson-dir "custom_lesson" --output-
    - Uploads PDFs to Gemini API (one jokbo at a time with the lesson)
    - `analyze_single_jokbo_with_lesson()`: Analyzes one jokbo-lesson pair
    - `analyze_pdfs_for_lesson()`: Processes multiple jokbo files and merges results
+   - `analyze_pdfs_for_lesson_parallel()`: Parallel processing version using ThreadPoolExecutor
    - Returns structured JSON with slide-to-question mappings
    - Manages file cleanup on destruction
+   - Improved prompts for more accurate slide matching
+   - Includes wrong answer explanations in analysis
 
 4. **pdf_creator.py**: Creates filtered output PDFs
    - Extracts relevant pages from original PDFs
-   - `extract_jokbo_question()`: Crops specific question areas from jokbo PDFs
-   - Combines lecture slides with cropped exam questions
-   - Adds Gemini-generated explanations after each question
+   - `extract_jokbo_question()`: Extracts full pages from jokbo PDFs (supports multi-page questions)
+   - Combines lecture slides with full jokbo question pages
+   - Adds Gemini-generated explanations with wrong answer analysis
    - Uses PyMuPDF for PDF manipulation
    - Caches opened PDFs for performance
 
@@ -89,7 +95,38 @@ Filtered PDFs are saved as: `filtered_{lesson_name}_all_jokbos.pdf`
 Each output PDF contains:
 - Original lecture slides that have related exam questions
 - For each related question:
-  - Cropped question portion from the jokbo PDF (preserving images)
-  - Gemini-generated explanation page with answer and detailed analysis
+  - Full jokbo question page(s) from the PDF (preserving images and choices)
+  - Gemini-generated explanation page with:
+    - Correct answer
+    - Detailed explanation
+    - Wrong answer explanations (why each option is incorrect)
+    - Relevance to lecture content
 - Summary page with overall statistics and study recommendations
 - Organized by lecture page order with related questions following each slide
+
+## Recent Improvements (2025-07-24)
+
+1. **Enhanced Prompt for Better Accuracy**
+   - More strict criteria for slide relevance
+   - Focus on "directly related" content only
+   - Higher importance score thresholds (8-10 for direct relevance)
+
+2. **Wrong Answer Explanations**
+   - Added `wrong_answer_explanations` field in JSON response
+   - Each choice explained why it's incorrect
+   - Helps students understand common mistakes
+
+3. **Multi-Page Question Support**
+   - Added `jokbo_end_page` field for questions spanning multiple pages
+   - Automatically extracts all pages for a single question
+   - Preserves complete question context
+
+4. **Parallel Processing**
+   - Added `--parallel` flag for faster processing
+   - Uses ThreadPoolExecutor with configurable workers
+   - Significant speed improvement for multiple jokbo files
+
+5. **Future Considerations**
+   - Context Caching implementation for cost reduction
+   - Upgrading to latest google-genai SDK
+   - Async support for even better performance

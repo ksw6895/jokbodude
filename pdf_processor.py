@@ -4,6 +4,8 @@ import pymupdf as fitz
 from typing import List, Dict, Any, Tuple, TYPE_CHECKING
 import google.generativeai as genai
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 
 if TYPE_CHECKING:
     from google.generativeai.types import file_types
@@ -58,13 +60,21 @@ class PDFProcessor:
 
         작업:
         1. 족보 PDF의 모든 문제를 분석하세요
-        2. 각 족보 문제와 관련된 강의자료 페이지를 찾으세요
+        2. 각 족보 문제와 직접적으로 관련된 강의자료 페이지를 찾으세요
         3. 강의자료의 각 페이지별로 관련된 족보 문제들을 그룹화하세요
+        4. 각 문제의 정답과 함께 모든 선택지가 왜 오답인지도 설명하세요
+        5. 문제가 여러 페이지에 걸쳐있으면 jokbo_end_page에 끝 페이지 번호를 표시하세요
         
-        판단 기준:
-        - 족보 문제에서 다루는 주제가 강의자료에 나오는가?
-        - 족보 문제의 정답을 이해하는데 해당 강의자료가 도움이 되는가?
-        - 시험에 나올 가능성이 높은 내용인가?
+        판단 기준 (엄격하게 적용):
+        - 족보 문제가 직접적으로 다루는 개념이 해당 강의 슬라이드에 명시되어 있는가?
+        - 해당 슬라이드가 실제로 "출제 슬라이드"일 가능성이 높은가?
+        - 문제의 정답을 찾기 위해 반드시 필요한 핵심 정보가 포함되어 있는가?
+        - 단순히 관련 주제가 아닌, 문제 해결에 직접적으로 필요한 내용인가?
+        
+        주의사항:
+        - 너무 포괄적이거나 일반적인 연관성은 제외하세요
+        - 문제와 직접적인 연관이 없는 배경 설명 슬라이드는 제외하세요
+        - importance_score는 직접적 연관성이 높을수록 높게 (8-10), 간접적이면 낮게 (1-5) 책정하세요
         
         출력 형식:
         {{
@@ -75,10 +85,17 @@ class PDFProcessor:
                         {{
                             "jokbo_filename": "{jokbo_filename}",
                             "jokbo_page": 족보페이지번호,
+                            "jokbo_end_page": 족보끝페이지번호,  // 문제가 여러 페이지에 걸쳐있을 경우
                             "question_number": 문제번호,
                             "question_text": "문제 내용",
                             "answer": "정답",
                             "explanation": "해설",
+                            "wrong_answer_explanations": {{
+                                "1번": "왜 1번이 오답인지 설명",
+                                "2번": "왜 2번이 오답인지 설명",
+                                "3번": "왜 3번이 오답인지 설명",
+                                "4번": "왜 4번이 오답인지 설명"
+                            }},
                             "relevance_reason": "관련성 이유"
                         }}
                     ],
@@ -168,6 +185,97 @@ class PDFProcessor:
             if "summary" in result:
                 total_questions += result["summary"].get("total_questions", 0)
                 all_key_topics.update(result["summary"].get("key_topics", []))
+        
+        # Convert sets to lists and prepare final result
+        final_slides = []
+        for slide_data in all_related_slides.values():
+            slide_data["key_concepts"] = list(slide_data["key_concepts"])
+            final_slides.append(slide_data)
+        
+        # Sort by lesson page number
+        final_slides.sort(key=lambda x: x["lesson_page"])
+        
+        return {
+            "related_slides": final_slides,
+            "summary": {
+                "total_related_slides": len(final_slides),
+                "total_questions": total_questions,
+                "key_topics": list(all_key_topics),
+                "study_recommendations": "각 슬라이드별로 관련된 족보 문제들을 중점적으로 학습하세요."
+            }
+        }
+    
+    def analyze_pdfs_for_lesson_parallel(self, jokbo_paths: List[str], lesson_path: str, max_workers: int = 3) -> Dict[str, Any]:
+        """Analyze multiple jokbo PDFs against one lesson PDF using parallel processing"""
+        
+        all_related_slides = {}
+        total_questions = 0
+        all_key_topics = set()
+        lock = threading.Lock()
+        
+        def process_single_jokbo(jokbo_path: str) -> Dict[str, Any]:
+            """Process a single jokbo in a thread"""
+            print(f"  [Thread] 분석 중: {Path(jokbo_path).name}")
+            try:
+                result = self.analyze_single_jokbo_with_lesson(jokbo_path, lesson_path)
+                return result
+            except Exception as e:
+                print(f"    [Thread] 오류 발생: {str(e)}")
+                return {"error": str(e)}
+        
+        # Process jokbo files in parallel
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all tasks
+            future_to_jokbo = {
+                executor.submit(process_single_jokbo, jokbo_path): jokbo_path 
+                for jokbo_path in jokbo_paths
+            }
+            
+            # Process completed tasks
+            for future in as_completed(future_to_jokbo):
+                jokbo_path = future_to_jokbo[future]
+                try:
+                    result = future.result()
+                    
+                    if "error" in result:
+                        print(f"    오류 발생: {result['error']}")
+                        continue
+                    
+                    # Merge results (thread-safe)
+                    with lock:
+                        for slide in result.get("related_slides", []):
+                            lesson_page = slide["lesson_page"]
+                            if lesson_page not in all_related_slides:
+                                all_related_slides[lesson_page] = {
+                                    "lesson_page": lesson_page,
+                                    "related_jokbo_questions": [],
+                                    "importance_score": slide.get("importance_score", 5),
+                                    "key_concepts": set()
+                                }
+                            
+                            # Add questions from this jokbo
+                            all_related_slides[lesson_page]["related_jokbo_questions"].extend(
+                                slide.get("related_jokbo_questions", [])
+                            )
+                            
+                            # Update importance score (take maximum)
+                            all_related_slides[lesson_page]["importance_score"] = max(
+                                all_related_slides[lesson_page]["importance_score"],
+                                slide.get("importance_score", 5)
+                            )
+                            
+                            # Add key concepts
+                            all_related_slides[lesson_page]["key_concepts"].update(
+                                slide.get("key_concepts", [])
+                            )
+                        
+                        # Update summary data
+                        if "summary" in result:
+                            total_questions += result["summary"].get("total_questions", 0)
+                            all_key_topics.update(result["summary"].get("key_topics", []))
+                
+                except Exception as e:
+                    print(f"    처리 중 오류: {Path(jokbo_path).name} - {str(e)}")
         
         # Convert sets to lists and prepare final result
         final_slides = []

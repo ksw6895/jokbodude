@@ -32,7 +32,7 @@ class PDFCreator:
             self.jokbo_pdfs[jokbo_path] = fitz.open(jokbo_path)
         return self.jokbo_pdfs[jokbo_path]
     
-    def extract_jokbo_question(self, jokbo_filename: str, jokbo_page: int, question_number: int, question_text: str, jokbo_dir: str = "jokbo") -> fitz.Document:
+    def extract_jokbo_question(self, jokbo_filename: str, jokbo_page: int, question_number: int, question_text: str, jokbo_dir: str = "jokbo", jokbo_end_page: int = None) -> fitz.Document:
         """Extract full page containing the question from jokbo PDF"""
         jokbo_path = Path(jokbo_dir) / jokbo_filename
         if not jokbo_path.exists():
@@ -45,9 +45,18 @@ class PDFCreator:
             print(f"Warning: Page {jokbo_page} does not exist in {jokbo_filename}")
             return None
         
-        # Extract the full page containing the question
+        # Determine the end page
+        if jokbo_end_page is None:
+            jokbo_end_page = jokbo_page
+        
+        # Validate end page
+        if jokbo_end_page > len(jokbo_pdf) or jokbo_end_page < jokbo_page:
+            print(f"Warning: Invalid end page {jokbo_end_page}, using single page")
+            jokbo_end_page = jokbo_page
+        
+        # Extract the full page(s) containing the question
         question_doc = fitz.open()
-        question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_page-1)
+        question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_end_page-1)
         
         return question_doc
     
@@ -78,7 +87,8 @@ class PDFCreator:
                             question["jokbo_page"],
                             question["question_number"],
                             question.get("question_text", ""),
-                            jokbo_dir
+                            jokbo_dir,
+                            question.get("jokbo_end_page")  # Pass end page if available
                         )
                         if question_doc:
                             doc.insert_pdf(question_doc)
@@ -94,6 +104,14 @@ class PDFCreator:
                         text += f"정답: {question['answer']}\n\n"
                         if question.get('explanation'):
                             text += f"해설:\n{question['explanation']}\n\n"
+                        
+                        # 오답 설명 추가
+                        if question.get('wrong_answer_explanations'):
+                            text += f"오답 설명:\n"
+                            for choice, explanation in question['wrong_answer_explanations'].items():
+                                text += f"• {choice}: {explanation}\n"
+                            text += "\n"
+                        
                         text += f"관련성:\n{question['relevance_reason']}\n\n"
                         text += f"관련 강의 페이지: {page_num}\n\n"
                         text += f"─" * 40 + "\n"
