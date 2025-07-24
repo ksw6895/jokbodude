@@ -33,7 +33,7 @@ class PDFCreator:
         return self.jokbo_pdfs[jokbo_path]
     
     def extract_jokbo_question(self, jokbo_filename: str, jokbo_page: int, question_number: int, question_text: str, jokbo_dir: str = "jokbo") -> fitz.Document:
-        """Extract specific question from jokbo PDF page as a cropped document"""
+        """Extract full page containing the question from jokbo PDF"""
         jokbo_path = Path(jokbo_dir) / jokbo_filename
         if not jokbo_path.exists():
             print(f"Warning: Jokbo file not found: {jokbo_path}")
@@ -45,36 +45,11 @@ class PDFCreator:
             print(f"Warning: Page {jokbo_page} does not exist in {jokbo_filename}")
             return None
         
-        # Get the page
-        page = jokbo_pdf[jokbo_page-1]
+        # Extract the full page containing the question
+        question_doc = fitz.open()
+        question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_page-1)
         
-        # Search for question text to find its location
-        text_instances = page.search_for(str(question_number))
-        
-        if text_instances:
-            # Create a rect that encompasses the question area
-            # Start with the question number location and expand
-            question_rect = text_instances[0]
-            
-            # Expand the rect to include more content (estimated question area)
-            # This is a heuristic - adjust based on your PDF layout
-            expansion_factor = 5.0  # Expand to include the full question
-            question_rect.x0 = max(0, question_rect.x0 - 20)
-            question_rect.y0 = max(0, question_rect.y0 - 10)
-            question_rect.x1 = min(page.rect.width, question_rect.x1 + 200)
-            question_rect.y1 = min(page.rect.height, question_rect.y1 + 150)
-            
-            # Create new document with cropped question
-            question_doc = fitz.open()
-            new_page = question_doc.new_page(width=question_rect.width, height=question_rect.height)
-            new_page.show_pdf_page(new_page.rect, jokbo_pdf, jokbo_page-1, clip=question_rect)
-            
-            return question_doc
-        else:
-            # If we can't find the question number, return the full page
-            question_doc = fitz.open()
-            question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_page-1)
-            return question_doc
+        return question_doc
     
     def create_filtered_pdf(self, lesson_path: str, analysis_result: Dict[str, Any], output_path: str, jokbo_dir: str = "jokbo"):
         """Create new PDF with filtered slides and related jokbo questions"""
@@ -114,13 +89,15 @@ class PDFCreator:
                         page_rect = explanation_page.rect
                         
                         text = f"=== 문제 {question['question_number']} 해설 ===\n\n"
-                        text += f"[출처: {question['jokbo_filename']}]\n\n"
-                        text += f"문제: {question.get('question_text', 'N/A')}\n\n"
+                        text += f"※ 앞 페이지의 문제 {question['question_number']}번을 참고하세요\n\n"
+                        text += f"[출처: {question['jokbo_filename']} - {question['jokbo_page']}페이지]\n\n"
                         text += f"정답: {question['answer']}\n\n"
                         if question.get('explanation'):
                             text += f"해설:\n{question['explanation']}\n\n"
                         text += f"관련성:\n{question['relevance_reason']}\n\n"
-                        text += f"관련 강의 페이지: {page_num}"
+                        text += f"관련 강의 페이지: {page_num}\n\n"
+                        text += f"─" * 40 + "\n"
+                        text += f"💡 이 문제는 강의자료 {page_num}페이지의 내용과 관련이 있습니다."
                         
                         # Use CJK font for Korean text support
                         font = fitz.Font("cjk")
