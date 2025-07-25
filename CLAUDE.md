@@ -63,7 +63,7 @@ python main.py --parallel
    - Returns structured JSON with slide-to-question mappings
    - Manages file cleanup on destruction
    - Enforces 1:1 question-to-slide mapping
-   - Includes image matching with higher importance scores (9-10)
+   - Includes image matching with highest importance score (11)
 
 4. **pdf_creator.py**: Creates filtered output PDFs
    - Uses PyMuPDF as primary PDF manipulation library
@@ -116,7 +116,7 @@ Each output PDF contains:
 1. **Enhanced Prompt for Better Accuracy**
    - More strict criteria for slide relevance
    - Focus on "directly related" content only
-   - Higher importance score thresholds (8-10 for direct relevance)
+   - Higher importance score thresholds (8-10 for direct relevance, 11 for image match)
    - Enforces 1:1 question-to-slide mapping
 
 2. **Wrong Answer Explanations**
