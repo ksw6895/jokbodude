@@ -7,13 +7,19 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 from datetime import datetime
+import uuid
 
 if TYPE_CHECKING:
     from google.generativeai.types import file_types
 
 class PDFProcessor:
-    def __init__(self, model):
-        self.model = model
+    def __init__(self, model=None):
+        # Create a new model instance for each processor to avoid caching issues
+        if model is None:
+            from config import create_model
+            self.model = create_model()
+        else:
+            self.model = model
         self.uploaded_files = []
     
     def __del__(self):
@@ -26,13 +32,17 @@ class PDFProcessor:
                 print(f"  Failed to delete file {file.display_name}: {e}")
     
     def upload_pdf(self, pdf_path: str, display_name: str = None):
-        """Upload PDF file to Gemini API"""
+        """Upload PDF file to Gemini API with unique name to avoid caching"""
         if display_name is None:
             display_name = Path(pdf_path).name
+        
+        # Add unique identifier to avoid caching issues
+        unique_id = str(uuid.uuid4())[:8]
+        unique_display_name = f"{unique_id}_{display_name}"
             
         uploaded_file = genai.upload_file(
             path=pdf_path,
-            display_name=display_name,
+            display_name=unique_display_name,
             mime_type="application/pdf"
         )
         
@@ -104,14 +114,44 @@ class PDFProcessor:
         
         return result
     
+    def _validate_page_numbers(self, result: Dict[str, Any], jokbo_path: str) -> Dict[str, Any]:
+        """Validate and fix page numbers that exceed actual PDF page count"""
+        try:
+            # Get actual page count
+            pdf_doc = fitz.open(jokbo_path)
+            actual_page_count = len(pdf_doc)
+            pdf_doc.close()
+            
+            if "related_slides" in result:
+                for slide in result["related_slides"]:
+                    for question in slide.get("related_jokbo_questions", []):
+                        # Check and fix jokbo_page
+                        if question.get("jokbo_page", 0) > actual_page_count:
+                            print(f"    경고: 페이지 번호 수정 - {question.get('jokbo_page')} → {actual_page_count} (최대 페이지)")
+                            question["jokbo_page"] = actual_page_count
+                        
+                        # Check and fix jokbo_end_page if exists
+                        if "jokbo_end_page" in question and question["jokbo_end_page"] > actual_page_count:
+                            print(f"    경고: 끝 페이지 번호 수정 - {question['jokbo_end_page']} → {actual_page_count} (최대 페이지)")
+                            question["jokbo_end_page"] = actual_page_count
+        except Exception as e:
+            print(f"    페이지 검증 중 오류: {str(e)}")
+        
+        return result
+    
     def analyze_single_jokbo_with_lesson(self, jokbo_path: str, lesson_path: str) -> Dict[str, Any]:
         """Analyze one jokbo PDF against one lesson PDF"""
         
         # Extract the actual filename
         jokbo_filename = Path(jokbo_path).name
         
+        # Create a new PDFProcessor instance with new model to ensure clean state
+        # This prevents file upload contamination and caching between calls
+        clean_processor = PDFProcessor(model=None)  # Will create new model instance
+        
         prompt = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
 
+        중요: 이전에 분석한 결과나 캐시된 데이터를 무시하고, 현재 제공된 PDF 파일만을 기준으로 새롭게 분석하세요.
         중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요. 파일명을 변경하거나 수정하지 마세요.
 
         작업:
@@ -180,15 +220,15 @@ class PDFProcessor:
         """
         
         # Upload lesson PDF
-        lesson_file = self.upload_pdf(lesson_path, f"강의자료_{Path(lesson_path).name}")
+        lesson_file = clean_processor.upload_pdf(lesson_path, f"강의자료_{Path(lesson_path).name}")
         
         # Upload jokbo PDF
-        jokbo_file = self.upload_pdf(jokbo_path, f"족보_{Path(jokbo_path).name}")
+        jokbo_file = clean_processor.upload_pdf(jokbo_path, f"족보_{Path(jokbo_path).name}")
         
         # Prepare content for model
         content = [prompt, lesson_file, jokbo_file]
         
-        response = self.model.generate_content(content)
+        response = clean_processor.model.generate_content(content)
         
         try:
             result = json.loads(response.text)
@@ -203,10 +243,38 @@ class PDFProcessor:
             # Post-process to ensure each question is only on one slide
             result = self._ensure_one_question_one_slide(result)
             
+            # Validate and fix page numbers
+            result = self._validate_page_numbers(result, jokbo_path)
+            
+            # Clean up uploaded files immediately to avoid caching
+            for file in clean_processor.uploaded_files:
+                try:
+                    genai.delete_file(file.name)
+                except Exception:
+                    pass
+            
             return result
-        except json.JSONDecodeError:
-            print(f"Failed to parse JSON response: {response.text}")
-            return {"error": "Failed to parse response"}
+        except json.JSONDecodeError as e:
+            print(f"  JSON 파싱 오류 - {jokbo_filename}")
+            print(f"  오류 상세: {str(e)}")
+            print(f"  응답 길이: {len(response.text)} 문자")
+            print(f"  응답 시작 부분: {response.text[:500]}...")
+            
+            # Try to extract partial results if possible
+            try:
+                # Attempt to fix common JSON issues
+                cleaned_text = response.text.strip()
+                if cleaned_text.endswith(','):
+                    cleaned_text = cleaned_text[:-1]
+                if not cleaned_text.endswith('}'):
+                    cleaned_text += '}'
+                    
+                result = json.loads(cleaned_text)
+                print(f"  부분적 결과 복구 성공")
+                return result
+            except:
+                print(f"  부분적 결과 복구 실패")
+                return {"error": f"JSON 파싱 실패 - {jokbo_filename}", "related_slides": []}
     
     def analyze_single_jokbo_with_lesson_preloaded(self, jokbo_path: str, lesson_file) -> Dict[str, Any]:
         """Analyze one jokbo PDF against pre-uploaded lesson file"""
@@ -220,6 +288,7 @@ class PDFProcessor:
         
         prompt = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
 
+        중요: 이전에 분석한 결과나 캐시된 데이터를 무시하고, 현재 제공된 PDF 파일만을 기준으로 새롭게 분석하세요.
         중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요. 파일명을 변경하거나 수정하지 마세요.
 
         작업:
@@ -306,11 +375,30 @@ class PDFProcessor:
             # Post-process to ensure each question is only on one slide
             result = self._ensure_one_question_one_slide(result)
             
+            # Validate and fix page numbers
+            result = self._validate_page_numbers(result, jokbo_path)
+            
             print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 분석 완료 - {jokbo_filename}")
             return result
-        except json.JSONDecodeError:
-            print(f"Failed to parse JSON response: {response.text}")
-            return {"error": "Failed to parse response"}
+        except json.JSONDecodeError as e:
+            print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: JSON 파싱 오류 - {jokbo_filename}")
+            print(f"  오류 상세: {str(e)}")
+            
+            # Try to extract partial results if possible
+            try:
+                # Attempt to fix common JSON issues
+                cleaned_text = response.text.strip()
+                if cleaned_text.endswith(','):
+                    cleaned_text = cleaned_text[:-1]
+                if not cleaned_text.endswith('}'):
+                    cleaned_text += '}'
+                    
+                result = json.loads(cleaned_text)
+                print(f"  부분적 결과 복구 성공")
+                return result
+            except:
+                print(f"  부분적 결과 복구 실패")
+                return {"error": f"JSON 파싱 실패 - {jokbo_filename}", "related_slides": []}
     
     def analyze_pdfs_for_lesson(self, jokbo_paths: List[str], lesson_path: str) -> Dict[str, Any]:
         """Analyze multiple jokbo PDFs against one lesson PDF by processing each jokbo individually"""
@@ -320,9 +408,13 @@ class PDFProcessor:
         all_key_topics = set()
         
         # Process each jokbo file individually
-        for jokbo_path in jokbo_paths:
+        for i, jokbo_path in enumerate(jokbo_paths):
             print(f"  분석 중: {Path(jokbo_path).name}")
             result = self.analyze_single_jokbo_with_lesson(jokbo_path, lesson_path)
+            
+            # Add delay between analyses to avoid caching issues
+            if i < len(jokbo_paths) - 1:
+                time.sleep(1)
             
             if "error" in result:
                 print(f"    오류 발생: {result['error']}")
@@ -339,10 +431,17 @@ class PDFProcessor:
                         "key_concepts": set()
                     }
                 
-                # Add questions from this jokbo
-                all_related_slides[lesson_page]["related_jokbo_questions"].extend(
-                    slide.get("related_jokbo_questions", [])
-                )
+                # Add questions from this jokbo with validation
+                for question in slide.get("related_jokbo_questions", []):
+                    # Ensure jokbo_filename is correct
+                    if question.get("jokbo_filename") != Path(jokbo_path).name:
+                        print(f"    경고: 족보 파일명 불일치 - 수정함: {question.get('jokbo_filename')} -> {Path(jokbo_path).name}")
+                        question["jokbo_filename"] = Path(jokbo_path).name
+                    
+                    # Log question being added
+                    print(f"    추가: {question['jokbo_filename']} - 문제 {question.get('question_number', '?')}번 (페이지 {question.get('jokbo_page', '?')})")
+                    
+                    all_related_slides[lesson_page]["related_jokbo_questions"].append(question)
                 
                 # Update importance score (take maximum)
                 all_related_slides[lesson_page]["importance_score"] = max(
@@ -397,8 +496,8 @@ class PDFProcessor:
             thread_id = threading.current_thread().ident
             print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 처리 시작 - {Path(jokbo_path).name}")
             
-            # Create a new PDFProcessor instance for this thread
-            thread_processor = PDFProcessor(self.model)
+            # Create a new PDFProcessor instance with new model for this thread
+            thread_processor = PDFProcessor(model=None)  # Will create new model instance
             
             try:
                 result = thread_processor.analyze_single_jokbo_with_lesson_preloaded(jokbo_path, lesson_file)
@@ -441,10 +540,15 @@ class PDFProcessor:
                                     "key_concepts": set()
                                 }
                             
-                            # Add questions from this jokbo
-                            all_related_slides[lesson_page]["related_jokbo_questions"].extend(
-                                slide.get("related_jokbo_questions", [])
-                            )
+                            # Add questions from this jokbo with validation
+                            for question in slide.get("related_jokbo_questions", []):
+                                # Ensure jokbo_filename is correct
+                                jokbo_name = Path(jokbo_path).name
+                                if question.get("jokbo_filename") != jokbo_name:
+                                    print(f"    [{datetime.now().strftime('%H:%M:%S')}] 경고: 족보 파일명 불일치 - 수정함: {question.get('jokbo_filename')} -> {jokbo_name}")
+                                    question["jokbo_filename"] = jokbo_name
+                                
+                                all_related_slides[lesson_page]["related_jokbo_questions"].append(question)
                             
                             # Update importance score (take maximum)
                             all_related_slides[lesson_page]["importance_score"] = max(
@@ -500,6 +604,7 @@ class PDFProcessor:
             # 프롬프트는 기존과 동일하지만 족보 중심으로 수정
             prompt = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
 
+        중요: 이전에 분석한 결과나 캐시된 데이터를 무시하고, 현재 제공된 PDF 파일만을 기준으로 새롭게 분석하세요.
         중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
 
         작업:

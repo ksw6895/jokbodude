@@ -35,14 +35,17 @@ class PDFCreator:
     def extract_jokbo_question(self, jokbo_filename: str, jokbo_page: int, question_number: int, question_text: str, jokbo_dir: str = "jokbo", jokbo_end_page: int = None) -> fitz.Document:
         """Extract full page containing the question from jokbo PDF"""
         jokbo_path = Path(jokbo_dir) / jokbo_filename
+        
+        print(f"    추출 시도: {jokbo_filename} - 문제 {question_number}번 (페이지 {jokbo_page})")
+        
         if not jokbo_path.exists():
-            print(f"Warning: Jokbo file not found: {jokbo_path}")
+            print(f"    ❌ 오류: 족보 파일을 찾을 수 없습니다: {jokbo_path}")
             return None
             
         jokbo_pdf = self.get_jokbo_pdf(str(jokbo_path))
         
         if jokbo_page > len(jokbo_pdf) or jokbo_page < 1:
-            print(f"Warning: Page {jokbo_page} does not exist in {jokbo_filename}")
+            print(f"    ❌ 오류: {jokbo_filename}에 페이지 {jokbo_page}가 없습니다 (총 {len(jokbo_pdf)}페이지)")
             return None
         
         # Determine the end page
@@ -57,6 +60,8 @@ class PDFCreator:
         # Extract the full page(s) containing the question
         question_doc = fitz.open()
         question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_end_page-1)
+        
+        print(f"    ✓ 추출 성공: {jokbo_end_page - jokbo_page + 1}페이지")
         
         return question_doc
     
@@ -80,7 +85,9 @@ class PDFCreator:
                 if slide_info["related_jokbo_questions"]:
                     
                     # Create a page for each question with its explanation
-                    for question in slide_info["related_jokbo_questions"]:
+                    for i, question in enumerate(slide_info["related_jokbo_questions"]):
+                        print(f"\n  슬라이드 {page_num}의 문제 {i+1}/{len(slide_info['related_jokbo_questions'])} 처리 중...")
+                        
                         # Extract and insert the question from jokbo
                         question_doc = self.extract_jokbo_question(
                             question["jokbo_filename"], 
@@ -101,7 +108,7 @@ class PDFCreator:
                         text = f"=== 문제 {question['question_number']} 해설 ===\n\n"
                         text += f"※ 앞 페이지의 문제 {question['question_number']}번을 참고하세요\n\n"
                         text += f"[출처: {question['jokbo_filename']} - {question['jokbo_page']}페이지]\n\n"
-                        text += f"정답: {question['answer']}\n\n"
+                        text += f"정답: {question.get('answer', '정답 정보 없음')}\n\n"
                         if question.get('explanation'):
                             text += f"해설:\n{question['explanation']}\n\n"
                         

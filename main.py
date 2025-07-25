@@ -7,7 +7,7 @@ from datetime import datetime
 import argparse
 from typing import List, Tuple, Dict
 
-from config import model
+from config import create_model
 from pdf_processor import PDFProcessor
 from pdf_creator import PDFCreator
 
@@ -35,7 +35,8 @@ def process_lesson_mode(lesson_files: List[Path], jokbo_files: List[Path], outpu
             print(f"  강의자료: {lesson_file.name}")
             print(f"  족보 파일 {len(jokbo_files)}개와 비교")
             
-            processor = PDFProcessor(model)
+            # Create new model instance for each lesson to avoid caching
+            processor = PDFProcessor(model=None)
             
             print("  PDF 분석 중...")
             jokbo_path_strs = [str(path) for path in jokbo_files]
@@ -103,7 +104,8 @@ def process_jokbo_mode(jokbo_files: List[Path], lesson_files: List[Path], output
     
     successful = 0
     failed = 0
-    processor = PDFProcessor(model)
+    # Create new model instance for jokbo mode
+    processor = PDFProcessor(model=None)
     creator = PDFCreator()
     
     # 각 족보 파일에 대해 처리
@@ -223,7 +225,8 @@ def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], o
         print(f"  강의자료: {lesson_path.name}")
         print(f"  족보 파일 {len(jokbo_paths)}개와 비교")
         
-        processor = PDFProcessor(model)
+        # Create new model instance for each lesson to avoid caching
+        processor = PDFProcessor(model=None)
         creator = PDFCreator()
         
         print("  PDF 분석 중...")

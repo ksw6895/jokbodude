@@ -38,8 +38,13 @@ SAFETY_SETTINGS = [
     }
 ]
 
-model = genai.GenerativeModel(
-    model_name="gemini-2.5-pro",
-    generation_config=GENERATION_CONFIG,
-    safety_settings=SAFETY_SETTINGS,
-)
+def create_model():
+    """Create a new GenerativeModel instance to avoid caching issues"""
+    return genai.GenerativeModel(
+        model_name="gemini-2.5-pro",
+        generation_config=GENERATION_CONFIG,
+        safety_settings=SAFETY_SETTINGS,
+    )
+
+# For backward compatibility
+model = create_model()
