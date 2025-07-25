@@ -482,4 +482,133 @@ class PDFProcessor:
                 "key_topics": list(all_key_topics),
                 "study_recommendations": "각 슬라이드별로 관련된 족보 문제들을 중점적으로 학습하세요."
             }
+        }    
+    def analyze_jokbo_with_all_lessons(self, jokbo_path: str, lesson_paths: List[str]) -> Dict[str, Any]:
+        """Analyze one jokbo against all lesson PDFs"""
+        print(f"  족보 파일 분석 중: {Path(jokbo_path).name}")
+        
+        # 족보 파일 업로드
+        jokbo_filename = Path(jokbo_path).name
+        jokbo_file = self.upload_pdf(jokbo_path, f"족보_{jokbo_filename}")
+        
+        # 각 강의자료와 1:1 분석 수행
+        all_analyses = []
+        
+        for lesson_path in lesson_paths:
+            print(f"    - {Path(lesson_path).name}과 비교 중...")
+            
+            # 프롬프트는 기존과 동일하지만 족보 중심으로 수정
+            prompt = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
+
+        중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
+
+        작업:
+        1. 족보 PDF의 모든 문제를 분석하세요
+        2. 각 족보 문제와 직접적으로 관련된 강의자료 페이지를 찾으세요
+        3. 각 문제의 정답과 함께 모든 선택지가 왜 오답인지도 설명하세요
+        
+        판단 기준 (엄격하게 적용):
+        - 족보 문제가 직접적으로 다루는 개념이 해당 강의 슬라이드에 명시되어 있는가?
+        - 해당 슬라이드가 실제로 "출제 슬라이드"일 가능성이 높은가?
+        - 문제의 정답을 찾기 위해 반드시 필요한 핵심 정보가 포함되어 있는가?
+        
+        그림 매칭 규칙:
+        - 족보 문제에 그림이 포함되어 있고, 강의 슬라이드에 동일한 그림이 있다면
+        - 해당 슬라이드의 importance_score를 11점(최고점)으로 책정하세요
+        
+        주의사항:
+        - importance_score는 직접적 연관성이 높을수록 높게 (8-10), 간접적이면 낮게 (1-5) 책정하세요
+        - 단, 그림이 일치하는 경우는 예외적으로 11점을 부여하세요
+        
+        출력 형식:
+        {{
+            "lesson_filename": "{Path(lesson_path).name}",
+            "jokbo_questions": [
+                {{
+                    "jokbo_page": 족보페이지번호,
+                    "jokbo_end_page": 족보끝페이지번호,  // 문제가 여러 페이지에 걸쳐있을 경우
+                    "question_number": 문제번호,
+                    "question_text": "문제 내용",
+                    "related_lesson_page": 강의페이지번호,  // 가장 관련성 높은 페이지
+                    "importance_score": 1-11,
+                    "answer": "정답",
+                    "explanation": "해설",
+                    "wrong_answer_explanations": {{
+                        "1번": "왜 1번이 오답인지 설명",
+                        "2번": "왜 2번이 오답인지 설명",
+                        "3번": "왜 3번이 오답인지 설명",
+                        "4번": "왜 4번이 오답인지 설명"
+                    }},
+                    "relevance_reason": "관련성 이유"
+                }}
+            ]
+        }}
+        """
+            
+            # 강의자료 업로드 및 분석
+            lesson_file = self.upload_pdf(lesson_path, f"강의자료_{Path(lesson_path).name}")
+            content = [prompt, jokbo_file, lesson_file]
+            
+            try:
+                response = self.model.generate_content(content)
+                result = json.loads(response.text)
+                all_analyses.append(result)
+            except Exception as e:
+                print(f"      분석 실패: {str(e)}")
+                continue
+        
+        # 각 문제별로 최적 매칭 선택
+        optimized_result = self._optimize_jokbo_questions(jokbo_filename, all_analyses)
+        
+        return optimized_result
+    
+    def _optimize_jokbo_questions(self, jokbo_filename: str, all_analyses: List[Dict]) -> Dict[str, Any]:
+        """족보 문제별로 가장 중요도가 높은 매칭을 선택"""
+        # 문제별로 모든 매칭 수집
+        question_mappings = {}  # {question_number: [(lesson_filename, page, score, data)]}
+        
+        for analysis in all_analyses:
+            if 'jokbo_questions' not in analysis:
+                continue
+                
+            lesson_filename = analysis.get('lesson_filename', 'Unknown')
+            
+            for question in analysis['jokbo_questions']:
+                q_num = question['question_number']
+                if q_num not in question_mappings:
+                    question_mappings[q_num] = []
+                
+                question_mappings[q_num].append({
+                    'lesson_filename': lesson_filename,
+                    'lesson_page': question.get('related_lesson_page'),
+                    'importance_score': question.get('importance_score', 0),
+                    'question_data': question
+                })
+        
+        # 각 문제에 대해 최적 매칭 선택
+        optimized_questions = []
+        
+        for q_num, mappings in sorted(question_mappings.items()):
+            if mappings:
+                # 중요도 순으로 정렬 (높은 순)
+                mappings.sort(key=lambda x: -x['importance_score'])
+                best_mapping = mappings[0]
+                
+                # 최적 매칭 정보 추가
+                question_data = best_mapping['question_data'].copy()
+                question_data['best_lesson_filename'] = best_mapping['lesson_filename']
+                question_data['best_lesson_page'] = best_mapping['lesson_page']
+                
+                optimized_questions.append(question_data)
+                
+                if len(mappings) > 1:
+                    print(f"    문제 {q_num}번: {len(mappings)}개 강의자료 중 {best_mapping['lesson_filename']} 선택 (중요도: {best_mapping['importance_score']})")
+        
+        return {
+            'jokbo_filename': jokbo_filename,
+            'optimized_questions': optimized_questions,
+            'summary': {
+                'total_questions': len(optimized_questions),
+                'analyzed_lessons': len(all_analyses)
+            }
         }
