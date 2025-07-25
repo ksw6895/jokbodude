@@ -1,180 +1,112 @@
-# PDF Processing System Architecture
+# 시스템 구조 설명서
 
-## System Overview
+## 🎯 시스템 개요
 
-```mermaid
-graph TD
-    A[main.py] --> B[Find PDF Files]
-    B --> C[Process Each Lesson]
-    C --> D[For Each Jokbo]
-    D --> E[pdf_processor.py]
-    E --> F[Upload to Gemini API]
-    F --> G[Analyze Single Pair]
-    G --> H[Merge Results]
-    H --> I[pdf_creator.py]
-    I --> J[Create Output PDF]
-    
-    K[config.py] --> E
-    L[.env] --> K
+이 시스템은 의대 강의 자료(PDF)와 족보(시험 기출문제) PDF를 비교 분석하여, 시험과 관련된 강의 슬라이드만 추출해주는 프로그램입니다. Google의 AI (Gemini)를 활용하여 내용을 분석합니다.
+
+## 📊 작동 흐름
+
+### 1. 전체 처리 과정
+
+```
+강의 PDF + 족보 PDF → AI 분석 → 관련 슬라이드 추출 → 필터링된 PDF 생성
 ```
 
-## Detailed Data Flow
+### 2. 단계별 설명
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Main as main.py
-    participant Processor as pdf_processor.py
-    participant Gemini as Gemini API
-    participant Creator as pdf_creator.py
-    participant Output as Output PDF
+1. **파일 준비**
+   - `lesson/` 폴더: 강의 자료 PDF 파일들
+   - `jokbo/` 폴더: 족보(기출문제) PDF 파일들
 
-    User->>Main: Run with arguments
-    Main->>Main: Find lesson & jokbo PDFs
-    
-    loop For each lesson PDF
-        Main->>Processor: analyze_pdfs_for_lesson()
-        
-        loop For each jokbo PDF
-            Processor->>Processor: analyze_single_jokbo_with_lesson()
-            Processor->>Gemini: Upload lesson PDF
-            Processor->>Gemini: Upload jokbo PDF (one at a time)
-            Gemini->>Processor: Return analysis JSON
-            Processor->>Processor: Accumulate results
-        end
-        
-        Processor->>Processor: Merge all results
-        Processor->>Main: Return merged analysis
-        
-        Main->>Creator: create_filtered_pdf()
-        Creator->>Creator: Extract lesson slides
-        
-        loop For each related question
-            Creator->>Creator: Extract question from jokbo
-            Creator->>Creator: Create explanation page
-        end
-        
-        Creator->>Output: Save PDF
-    end
+2. **AI 분석**
+   - 각 강의 파일마다 모든 족보 파일과 1:1로 비교
+   - Gemini AI가 슬라이드와 문제의 연관성 분석
+   - 중요도 점수(1-10점) 부여
 
-    Output->>User: Filtered PDFs ready
+3. **결과 생성**
+   - 관련된 강의 슬라이드만 추출
+   - 해당 족보 문제 페이지 포함
+   - AI가 작성한 상세 해설 추가
+   - `output/` 폴더에 저장
+
+## 🔧 주요 구성 요소
+
+### 핵심 파일들
+
+1. **main.py** - 프로그램 실행 담당
+   - PDF 파일 찾기
+   - 처리 과정 관리
+   - 진행 상황 표시
+
+2. **pdf_processor.py** - AI 분석 담당
+   - PDF를 Gemini API로 전송
+   - 슬라이드-문제 매칭 분석
+   - 결과 데이터 정리
+
+3. **pdf_creator.py** - PDF 생성 담당
+   - 관련 슬라이드 추출
+   - 족보 문제 페이지 추출
+   - 해설 페이지 생성
+   - 최종 PDF 제작
+
+4. **config.py** - 설정 관리
+   - Gemini API 설정
+   - 환경 변수 관리
+
+## 📁 결과물 구조
+
+생성되는 PDF 파일(`filtered_강의명_all_jokbos.pdf`)의 구성:
+
+```
+📄 필터링된 PDF
+├── 📑 관련 강의 슬라이드 1
+├── 📑 연관된 족보 문제 페이지
+├── 📑 AI 해설 (정답 + 오답 설명)
+├── 📑 관련 강의 슬라이드 2
+├── 📑 연관된 족보 문제 페이지
+├── 📑 AI 해설
+└── 📑 요약 통계 페이지
 ```
 
-## Component Architecture
+## ⚡ 병렬 처리 기능
 
-```mermaid
-graph LR
-    subgraph Input Files
-        A1[lesson/\n*.pdf]
-        A2[jokbo/\n*.pdf]
-    end
-    
-    subgraph Core Components
-        B1[main.py<br/>- Orchestration<br/>- File discovery<br/>- Progress tracking]
-        B2[config.py<br/>- API configuration<br/>- Model settings<br/>- Safety settings]
-        B3[pdf_processor.py<br/>- PDF upload<br/>- AI analysis<br/>- Result merging]
-        B4[pdf_creator.py<br/>- PDF manipulation<br/>- Question extraction<br/>- Explanation pages]
-    end
-    
-    subgraph External Services
-        C1[Gemini API<br/>gemini-2.5-pro]
-    end
-    
-    subgraph Output
-        D1[output/\nfiltered_*.pdf]
-    end
-    
-    A1 --> B1
-    A2 --> B1
-    B1 --> B3
-    B2 --> B3
-    B3 --> C1
-    B3 --> B4
-    B4 --> D1
-```
+`--parallel` 옵션 사용 시 더 빠른 처리:
+- 여러 족보 파일을 동시에 분석
+- 강의 파일은 한 번만 업로드
+- 처리 시간 대폭 단축
 
-## PDF Creation Process
+## 🎨 주요 특징
 
-```mermaid
-flowchart TD
-    A[Start PDF Creation] --> B[Open Lesson PDF]
-    B --> C{For each related slide}
-    C --> D[Insert lesson slide page]
-    D --> E{Has related questions?}
-    E -->|Yes| F[For each question]
-    E -->|No| C
-    F --> G[Extract question from jokbo]
-    G --> H[Insert cropped question]
-    H --> I[Create explanation page]
-    I --> J[Insert explanation with Gemini analysis]
-    J --> F
-    F -->|Done| C
-    C -->|All slides done| K[Add summary page]
-    K --> L[Save output PDF]
-```
+1. **정확한 매칭**
+   - 1:1 문제-슬라이드 매핑
+   - 이미지 포함 문제 우선 매칭 (중요도 9-10점)
+   - 직접 관련된 내용만 추출
 
-## Gemini API Configuration
+2. **상세한 해설**
+   - 정답과 정답 이유
+   - 각 오답이 틀린 이유 설명
+   - 강의 내용과의 연관성 설명
 
-### Model Settings (from config.py)
+3. **다중 페이지 지원**
+   - 여러 페이지에 걸친 문제도 완전히 추출
+   - 이미지와 표 등 모든 내용 보존
 
-```python
-GENERATION_CONFIG = {
-    "temperature": 0.3,          # Low temperature for consistent results
-    "top_p": 0.95,              # Nucleus sampling parameter
-    "top_k": 40,                # Top-k sampling parameter
-    "max_output_tokens": 100000, # Maximum output tokens (very high)
-    "response_mime_type": "application/json"  # Force JSON response
-}
+## 💡 활용 팁
 
-Model: gemini-2.5-pro
-```
+1. **폴더 구조 준비**
+   ```
+   pathology/
+   ├── jokbo/     (족보 PDF 넣기)
+   ├── lesson/    (강의 PDF 넣기)
+   └── output/    (결과물 생성됨)
+   ```
 
-### Safety Settings
+2. **효과적인 사용법**
+   - 같은 과목의 족보와 강의를 매칭
+   - 병렬 처리로 시간 단축 (`--parallel`)
+   - 특정 강의만 처리 (`--single-lesson`)
 
-All safety categories are set to `BLOCK_NONE` to prevent content blocking:
-- HARM_CATEGORY_HARASSMENT
-- HARM_CATEGORY_HATE_SPEECH
-- HARM_CATEGORY_SEXUALLY_EXPLICIT
-- HARM_CATEGORY_DANGEROUS_CONTENT
-
-### API Usage Pattern
-
-1. **Upload Pattern**: One lesson PDF + One jokbo PDF at a time
-2. **Request Frequency**: Sequential processing (one jokbo at a time)
-3. **File Management**: Uploaded files are deleted after processing
-4. **Error Handling**: Retry logic for file processing states
-
-### Token Limits and Constraints
-
-- **Max Output Tokens**: 100,000 tokens (configured)
-- **Input Size**: Limited by PDF file upload size
-- **Processing Time**: 2-second polling interval for file upload status
-- **Concurrent Uploads**: Not used - sequential processing only
-
-### Response Format
-
-The API is configured to return JSON with this structure:
-```json
-{
-  "related_slides": [{
-    "lesson_page": number,
-    "related_jokbo_questions": [{
-      "jokbo_filename": string,
-      "jokbo_page": number,
-      "question_number": number,
-      "question_text": string,
-      "answer": string,
-      "explanation": string,
-      "relevance_reason": string
-    }],
-    "importance_score": 1-10,
-    "key_concepts": [string]
-  }],
-  "summary": {
-    "total_related_slides": number,
-    "total_questions": number,
-    "key_topics": [string],
-    "study_recommendations": string
-  }
-}
-```
+3. **결과물 활용**
+   - 시험 직전 핵심 내용만 복습
+   - 오답 설명으로 실수 방지
+   - 중요도 점수로 우선순위 파악

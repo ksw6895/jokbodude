@@ -14,7 +14,7 @@ This is a PDF processing system that filters lecture materials based on exam que
 python -m venv venv
 
 # Activate virtual environment
-source venv/bin/activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -41,14 +41,18 @@ python main.py --parallel
 ### Core Components
 
 1. **main.py**: Entry point that orchestrates the PDF processing workflow
-   - Finds PDF files in jokbo and lesson directories
+   - Finds PDF files in jokbo and lesson directories (ignores Zone.Identifier files)
    - Processes each lesson file against all jokbo files
    - Manages output directory and file naming
+   - Supports both sequential and parallel processing modes
+   - Progress tracking with colored output
 
 2. **config.py**: Gemini AI configuration
    - Loads API key from environment
-   - Configures model with JSON response format
+   - Configures Gemini 2.5 Pro model with JSON response format
    - Sets safety settings to avoid content blocking
+   - Temperature: 0.3 for consistent results
+   - Max output tokens: 100,000
 
 3. **pdf_processor.py**: Handles AI analysis
    - Uploads PDFs to Gemini API (one jokbo at a time with the lesson)
@@ -58,16 +62,16 @@ python main.py --parallel
    - `analyze_pdfs_for_lesson_parallel()`: True parallel processing with pre-uploaded lesson
    - Returns structured JSON with slide-to-question mappings
    - Manages file cleanup on destruction
-   - Improved prompts for more accurate slide matching
-   - Includes wrong answer explanations in analysis
+   - Enforces 1:1 question-to-slide mapping
+   - Includes image matching with higher importance scores (9-10)
 
 4. **pdf_creator.py**: Creates filtered output PDFs
-   - Extracts relevant pages from original PDFs
+   - Uses PyMuPDF as primary PDF manipulation library
    - `extract_jokbo_question()`: Extracts full pages from jokbo PDFs (supports multi-page questions)
    - Combines lecture slides with full jokbo question pages
    - Adds Gemini-generated explanations with wrong answer analysis
-   - Uses PyMuPDF for PDF manipulation
    - Caches opened PDFs for performance
+   - Creates summary page with statistics
 
 ### Data Flow
 
@@ -79,14 +83,16 @@ python main.py --parallel
    - Results from all jokbo files are merged
    - System creates a single output PDF with filtered content
    - Original lecture slides are preserved, followed by:
-     - Cropped question portions from jokbo PDFs (with images preserved)
+     - Full jokbo question page(s) from the PDF (preserving images and choices)
      - Gemini-generated explanations and answers for each question
 
 ### Key Dependencies
 
-- **google-generativeai**: Gemini AI API client
-- **PyMuPDF (fitz)**: PDF reading and manipulation
-- **reportlab**: PDF creation (though primarily using PyMuPDF)
+- **google-generativeai**: Gemini AI API client (v0.8.4)
+- **PyMuPDF (fitz)**: Primary PDF reading and manipulation
+- **PyPDF2**: Additional PDF support
+- **reportlab**: PDF creation capabilities
+- **Pillow**: Image processing
 - **python-dotenv**: Environment variable management
 
 ### Output Structure
@@ -111,6 +117,7 @@ Each output PDF contains:
    - More strict criteria for slide relevance
    - Focus on "directly related" content only
    - Higher importance score thresholds (8-10 for direct relevance)
+   - Enforces 1:1 question-to-slide mapping
 
 2. **Wrong Answer Explanations**
    - Added `wrong_answer_explanations` field in JSON response
@@ -134,3 +141,12 @@ Each output PDF contains:
    - Context Caching implementation for cost reduction
    - Upgrading to latest google-genai SDK
    - Async support for even better performance
+
+## Key Implementation Details
+
+- File uploads are managed with 2-second polling for status
+- JSON response format is enforced through model configuration
+- PDFProcessor instances manage their own file cleanup
+- Progress is displayed with colored output (green for success, red for errors)
+- Empty jokbo directories are handled gracefully
+- Zone.Identifier files are automatically ignored
