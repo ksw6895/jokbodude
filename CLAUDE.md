@@ -1,14 +1,14 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+이 파일은 Claude Code (claude.ai/code)가 이 프로젝트를 이해하고 작업할 수 있도록 돕는 가이드입니다.
 
-## Project Overview
+## 프로젝트 개요 (Project Overview)
 
-This is a PDF processing system that filters lecture materials based on exam questions (족보). It uses Google's Gemini AI API to analyze the relationship between lecture slides and exam questions, then creates filtered PDFs containing only the relevant lecture content paired with related exam questions.
+족보(기출문제)를 기반으로 강의자료를 필터링하는 PDF 처리 시스템입니다. Google Gemini AI API를 사용하여 강의 슬라이드와 시험 문제 간의 연관성을 분석하고, 관련 있는 강의 내용과 문제만을 포함한 필터링된 PDF를 생성합니다.
 
-## Development Commands
+## 개발 명령어 (Development Commands)
 
-### Setup and Running
+### 설치 및 실행 (Setup and Running)
 ```bash
 # Create virtual environment (if not exists)
 python -m venv venv
@@ -38,25 +38,25 @@ python main.py --mode jokbo-centric
 python main.py --mode jokbo-centric --parallel
 ```
 
-### Environment Configuration
+### 환경 설정 (Environment Configuration)
 1. Copy `.env.example` to `.env`
 2. Add your Gemini API key: `GEMINI_API_KEY=your_actual_api_key_here`
 
-## Architecture
+## 아키텍처 (Architecture)
 
-### Core Components
+### 핵심 컴포넌트 (Core Components)
 
-1. **main.py**: Entry point that orchestrates the PDF processing workflow
+1. **main.py**: PDF 처리 워크플로우를 조정하는 진입점
    - Finds PDF files in jokbo and lesson directories
    - Processes each lesson file against all jokbo files
    - Manages output directory and file naming
 
-2. **config.py**: Gemini AI configuration
+2. **config.py**: Gemini AI 설정
    - Loads API key from environment
    - Configures model with JSON response format
    - Sets safety settings to avoid content blocking
 
-3. **pdf_processor.py**: Handles AI analysis
+3. **pdf_processor.py**: AI 분석 처리
    - Uploads PDFs to Gemini API (one jokbo at a time with the lesson)
    - `analyze_single_jokbo_with_lesson()`: Analyzes one jokbo-lesson pair
    - `analyze_single_jokbo_with_lesson_preloaded()`: Analyzes with pre-uploaded lesson file
@@ -67,7 +67,7 @@ python main.py --mode jokbo-centric --parallel
    - Improved prompts for more accurate slide matching
    - Includes wrong answer explanations in analysis
 
-4. **pdf_creator.py**: Creates filtered output PDFs
+4. **pdf_creator.py**: 필터링된 출력 PDF 생성
    - Extracts relevant pages from original PDFs
    - `extract_jokbo_question()`: Extracts full pages from jokbo PDFs (supports multi-page questions)
    - Combines lecture slides with full jokbo question pages
@@ -75,7 +75,7 @@ python main.py --mode jokbo-centric --parallel
    - Uses PyMuPDF for PDF manipulation
    - Caches opened PDFs for performance
 
-### Data Flow
+### 데이터 흐름 (Data Flow)
 
 1. User runs `main.py` with optional arguments
 2. System scans directories for PDF files (ignoring Zone.Identifier files)
@@ -88,14 +88,14 @@ python main.py --mode jokbo-centric --parallel
      - Cropped question portions from jokbo PDFs (with images preserved)
      - Gemini-generated explanations and answers for each question
 
-### Key Dependencies
+### 주요 의존성 (Key Dependencies)
 
 - **google-generativeai**: Gemini AI API client
 - **PyMuPDF (fitz)**: PDF reading and manipulation
 - **reportlab**: PDF creation (though primarily using PyMuPDF)
 - **python-dotenv**: Environment variable management
 
-### Output Structure
+### 출력 구조 (Output Structure)
 
 Filtered PDFs are saved as: `filtered_{lesson_name}_all_jokbos.pdf`
 
@@ -111,20 +111,20 @@ Each output PDF contains:
 - Summary page with overall statistics and study recommendations
 - Organized by lecture page order with related questions following each slide
 
-## Operating Modes
+## 작동 모드 (Operating Modes)
 
-### 1. Lesson-Centric Mode (기본값)
+### 1. 강의자료 중심 모드 (Lesson-Centric - 기본값)
 - 각 강의자료를 중심으로 모든 족보와 비교
 - 출력: `filtered_{강의자료명}_all_jokbos.pdf`
 - 구조: 강의 슬라이드 → 관련 족보 문제 → 해설
 
-### 2. Jokbo-Centric Mode (족보 중심 모드)
+### 2. 족보 중심 모드 (Jokbo-Centric)
 - 각 족보를 중심으로 모든 강의자료와 비교
 - 출력: `jokbo_centric_{족보명}_all_lessons.pdf`
 - 구조: 족보 페이지 → 관련 강의 슬라이드 → 해설
 - 사용법: `python main.py --mode jokbo-centric`
 
-## Recent Improvements (2025-07-26)
+## 최근 개선사항 (Recent Improvements - 2025-07-26)
 
 1. **파일 업로드 관리 개선**
    - 처리 전 기존 업로드 파일 자동 삭제
@@ -141,7 +141,7 @@ Each output PDF contains:
    - 시험 준비에 최적화된 학습 자료 생성
    - 병렬 처리 지원으로 빠른 분석
 
-## Recent Improvements (2025-07-24)
+## 이전 개선사항 (Previous Improvements - 2025-07-24)
 
 1. **Enhanced Prompt for Better Accuracy**
    - More strict criteria for slide relevance
@@ -181,7 +181,7 @@ Each output PDF contains:
    - Upgrading to latest google-genai SDK
    - Async support for even better performance
 
-## Utility Tools
+## 유틸리티 도구 (Utility Tools)
 
 ### cleanup_gemini_files.py
 - Lists all files uploaded to Gemini API

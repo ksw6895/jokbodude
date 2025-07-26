@@ -1,33 +1,33 @@
 # PDF Processing System Architecture (시스템 아키텍처)
 
-## System Overview
+## 시스템 개요 (System Overview)
 
 ```mermaid
 graph TD
-    subgraph "📥 Input"
-        A1["📚 Lesson PDFs<br/>(강의자료)"]
-        A2["📋 Jokbo PDFs<br/>(족보)"]
+    subgraph "📥 입력 (Input)"
+        A1["📚 강의자료 PDFs<br/>(Lesson Materials)"]
+        A2["📋 족보 PDFs<br/>(Past Exams)"]
     end
     
-    subgraph "⚙️ Processing"
-        B["🎯 main.py<br/>Entry Point"] 
-        C["🔍 Find PDF Files"]
-        D["🔄 Process Mode<br/>(Lesson/Jokbo-centric)"]
-        E["🤖 pdf_processor.py<br/>AI Analysis Engine"]
+    subgraph "⚙️ 처리 과정 (Processing)"
+        B["🎯 main.py<br/>진입점"] 
+        C["🔍 PDF 파일 검색"]
+        D["🔄 처리 모드 선택<br/>(강의/족보 중심)"]
+        E["🤖 pdf_processor.py<br/>AI 분석 엔진"]
         F["☁️ Gemini API<br/>gemini-2.5-pro"]
-        G["📊 Analyze & Match<br/>Questions ↔ Slides"]
-        H["🔀 Merge Results"]
-        I["📝 pdf_creator.py<br/>PDF Generator"]
+        G["📊 분석 및 매칭<br/>문제 ↔ 슬라이드"]
+        H["🔀 결과 병합"]
+        I["📝 pdf_creator.py<br/>PDF 생성기"]
     end
     
-    subgraph "📤 Output"
-        J["✅ Filtered PDFs<br/>(학습 자료)"]
-        K["🐛 Debug Logs<br/>(API responses)"]
+    subgraph "📤 출력 (Output)"
+        J["✅ 필터링된 PDFs<br/>(학습 자료)"]
+        K["🐛 디버그 로그<br/>(API 응답)"]
     end
     
-    subgraph "🔧 Configuration"
+    subgraph "🔧 설정 (Configuration)"
         L["⚙️ config.py"]
-        M["🔐 .env<br/>(API Key)"]
+        M["🔐 .env<br/>(API 키)"]
     end
     
     A1 --> B
@@ -55,7 +55,7 @@ graph TD
     style K fill:#ffecb3
 ```
 
-## Detailed Data Flow
+## 상세 데이터 흐름 (Detailed Data Flow)
 
 ```mermaid
 sequenceDiagram
@@ -73,79 +73,79 @@ sequenceDiagram
     Main->>Main: 🧹 Clean up existing uploads
     
     rect rgb(240, 248, 255)
-        Note over Main,Output: Lesson-Centric Mode (Default)
-        loop For each lesson PDF
+        Note over Main,Output: 강의자료 중심 모드 (기본값)
+        loop 각 강의자료에 대해
             Main->>+Processor: analyze_pdfs_for_lesson()
-            Processor->>Processor: 🗑️ Delete all uploaded files
-            Processor->>Gemini: 📤 Upload lesson PDF
+            Processor->>Processor: 🗑️ 기존 업로드 파일 삭제
+            Processor->>Gemini: 📤 강의자료 업로드
             
-            loop For each jokbo PDF
-                Processor->>Gemini: 📤 Upload jokbo PDF
-                Processor->>Gemini: 🤔 Analyze relationship
-                Gemini-->>Processor: 📊 Return JSON analysis
-                Processor->>Debug: 💾 Save API response
-                Processor->>Gemini: 🗑️ Delete jokbo file
-                Processor->>Processor: 📁 Accumulate results
+            loop 각 족보에 대해
+                Processor->>Gemini: 📤 족보 업로드
+                Processor->>Gemini: 🤔 연관성 분석
+                Gemini-->>Processor: 📊 JSON 분석 결과 반환
+                Processor->>Debug: 💾 API 응답 저장
+                Processor->>Gemini: 🗑️ 족보 파일 삭제
+                Processor->>Processor: 📁 결과 누적
             end
             
-            Processor->>Processor: 🔀 Merge all results
-            Processor-->>-Main: Return merged analysis
+            Processor->>Processor: 🔀 모든 결과 병합
+            Processor-->>-Main: 병합된 분석 결과 반환
             
             Main->>+Creator: create_filtered_pdf()
-            Creator->>Creator: 📑 Extract lesson slides
+            Creator->>Creator: 📑 강의 슬라이드 추출
             
-            loop For each related question
-                Creator->>Creator: 📋 Extract full jokbo page
-                Creator->>Creator: 💡 Create explanation page
+            loop 각 관련 문제에 대해
+                Creator->>Creator: 📋 족보 전체 페이지 추출
+                Creator->>Creator: 💡 해설 페이지 생성
             end
             
-            Creator->>Creator: 📊 Add summary page
-            Creator->>-Output: 💾 Save filtered PDF
+            Creator->>Creator: 📊 요약 페이지 추가
+            Creator->>-Output: 💾 필터링된 PDF 저장
         end
     end
 
-    Output-->>User: ✅ Filtered PDFs ready in output/
+    Output-->>User: ✅ 필터링된 PDF가 output/ 폴더에 준비됨
 ```
 
-## Component Architecture
+## 컴포넌트 구조 (Component Architecture)
 
 ```mermaid
 graph TB
-    subgraph "📥 Input Files"
+    subgraph "📥 입력 파일 (Input Files)"
         A1["📚 lesson/<br/>강의자료 PDFs"]
         A2["📋 jokbo/<br/>족보 PDFs"]
     end
     
-    subgraph "⚙️ Core Components"
-        B1["🎯 main.py<br/>━━━━━━━━━━━━<br/>• Orchestration<br/>• Mode selection<br/>• Progress tracking"]
-        B2["⚙️ config.py<br/>━━━━━━━━━━━━<br/>• API configuration<br/>• Model: gemini-2.5-pro<br/>• Temperature: 0.3"]
-        B3["🤖 pdf_processor.py<br/>━━━━━━━━━━━━<br/>• Upload management<br/>• AI analysis<br/>• Result merging<br/>• Debug logging"]
-        B4["📝 pdf_creator.py<br/>━━━━━━━━━━━━<br/>• PDF manipulation<br/>• Page extraction<br/>• Explanation generation<br/>• CJK font support"]
+    subgraph "⚙️ 핵심 컴포넌트 (Core Components)"
+        B1["🎯 main.py<br/>━━━━━━━━━━━━<br/>• 전체 조정<br/>• 모드 선택<br/>• 진행 추적"]
+        B2["⚙️ config.py<br/>━━━━━━━━━━━━<br/>• API 설정<br/>• 모델: gemini-2.5-pro<br/>• Temperature: 0.3"]
+        B3["🤖 pdf_processor.py<br/>━━━━━━━━━━━━<br/>• 업로드 관리<br/>• AI 분석<br/>• 결과 병합<br/>• 디버그 로깅"]
+        B4["📝 pdf_creator.py<br/>━━━━━━━━━━━━<br/>• PDF 조작<br/>• 페이지 추출<br/>• 해설 생성<br/>• 한글 폰트 지원"]
     end
     
-    subgraph "☁️ External Services"
-        C1["🌟 Gemini API<br/>━━━━━━━━━━━━<br/>• gemini-2.5-pro<br/>• JSON response<br/>• 100K tokens"]
+    subgraph "☁️ 외부 서비스 (External Services)"
+        C1["🌟 Gemini API<br/>━━━━━━━━━━━━<br/>• gemini-2.5-pro<br/>• JSON 응답<br/>• 100K 토큰"]
     end
     
-    subgraph "📤 Output"
-        D1["✅ output/<br/>filtered PDFs"]
-        D2["🐛 output/debug/<br/>API responses"]
+    subgraph "📤 출력 (Output)"
+        D1["✅ output/<br/>필터링된 PDFs"]
+        D2["🐛 output/debug/<br/>API 응답"]
     end
     
-    subgraph "🔧 Utilities"
-        E1["🧹 cleanup_gemini_files.py<br/>━━━━━━━━━━━━<br/>• List uploaded files<br/>• Selective deletion<br/>• Quota management"]
+    subgraph "🔧 유틸리티 (Utilities)"
+        E1["🧹 cleanup_gemini_files.py<br/>━━━━━━━━━━━━<br/>• 업로드 파일 조회<br/>• 선택적 삭제<br/>• 할당량 관리"]
     end
     
-    A1 -.->|Read| B1
-    A2 -.->|Read| B1
-    B1 ==>|Process| B3
-    B2 -->|Config| B3
-    B3 ==>|Upload & Analyze| C1
+    A1 -.->|읽기| B1
+    A2 -.->|읽기| B1
+    B1 ==>|처리| B3
+    B2 -->|설정| B3
+    B3 ==>|업로드 & 분석| C1
     C1 ==>|JSON| B3
-    B3 ==>|Results| B4
-    B3 -.->|Debug| D2
-    B4 ==>|Generate| D1
-    C1 <-.->|Manage| E1
+    B3 ==>|결과| B4
+    B3 -.->|디버그| D2
+    B4 ==>|생성| D1
+    C1 <-.->|관리| E1
     
     style A1 fill:#e3f2fd,stroke:#1976d2
     style A2 fill:#e3f2fd,stroke:#1976d2
@@ -159,38 +159,38 @@ graph TB
     style E1 fill:#e0f2f1,stroke:#00796b
 ```
 
-## PDF Creation Process
+## PDF 생성 프로세스 (PDF Creation Process)
 
 ```mermaid
 flowchart TD
-    Start(["🚀 Start PDF Creation"]) --> Mode{"📋 Processing Mode?"}
+    Start(["🚀 PDF 생성 시작"]) --> Mode{"📋 처리 모드?"}
     
-    Mode -->|"Lesson-Centric"| LC["📚 Open Lesson PDF"]
-    Mode -->|"Jokbo-Centric"| JC["📋 Open Jokbo PDF"]
+    Mode -->|"강의자료 중심"| LC["📚 강의자료 PDF 열기"]
+    Mode -->|"족보 중심"| JC["📋 족보 PDF 열기"]
     
-    %% Lesson-Centric Flow
-    LC --> LC1{"📑 For each<br/>related slide"}
-    LC1 --> LC2["📄 Insert lesson slide"]
-    LC2 --> LC3{"❓ Has related<br/>questions?"}
-    LC3 -->|"Yes"| LC4["📋 Extract jokbo pages"]
-    LC3 -->|"No"| LC1
-    LC4 --> LC5["💡 Create explanation<br/>• Answer<br/>• Wrong answers<br/>• Relevance"]
+    %% 강의자료 중심 흐름
+    LC --> LC1{"📑 각 관련<br/>슬라이드에 대해"}
+    LC1 --> LC2["📄 강의 슬라이드 삽입"]
+    LC2 --> LC3{"❓ 관련 문제<br/>있음?"}
+    LC3 -->|"예"| LC4["📋 족보 페이지 추출"]
+    LC3 -->|"아니오"| LC1
+    LC4 --> LC5["💡 해설 생성<br/>• 정답<br/>• 오답 설명<br/>• 관련성"]
     LC5 --> LC1
     
-    %% Jokbo-Centric Flow
-    JC --> JC1{"📋 For each<br/>jokbo page"}
-    JC1 --> JC2["📄 Insert jokbo page"]
-    JC2 --> JC3{"📚 Has related<br/>slides?"}
-    JC3 -->|"Yes"| JC4["📑 Extract lesson slides"]
-    JC3 -->|"No"| JC1
-    JC4 --> JC5["💡 Create explanation<br/>• Related slides list<br/>• Answer & explanation"]
+    %% 족보 중심 흐름
+    JC --> JC1{"📋 각 족보<br/>페이지에 대해"}
+    JC1 --> JC2["📄 족보 페이지 삽입"]
+    JC2 --> JC3{"📚 관련 슬라이드<br/>있음?"}
+    JC3 -->|"예"| JC4["📑 강의 슬라이드 추출"]
+    JC3 -->|"아니오"| JC1
+    JC4 --> JC5["💡 해설 생성<br/>• 관련 슬라이드 목록<br/>• 정답 & 해설"]
     JC5 --> JC1
     
-    %% Common End
-    LC1 -->|"Done"| Summary["📊 Add Summary Page<br/>• Statistics<br/>• Recommendations"]
-    JC1 -->|"Done"| Summary
-    Summary --> Save["💾 Save Output PDF"]
-    Save --> End(["✅ Complete"])
+    %% 공통 끝
+    LC1 -->|"완료"| Summary["📊 요약 페이지 추가<br/>• 통계<br/>• 학습 권장사항"]
+    JC1 -->|"완료"| Summary
+    Summary --> Save["💾 출력 PDF 저장"]
+    Save --> End(["✅ 완료"])
     
     style Start fill:#e8f5e9,stroke:#4caf50
     style End fill:#e8f5e9,stroke:#4caf50
@@ -201,9 +201,9 @@ flowchart TD
     style Save fill:#e0f2f1,stroke:#009688
 ```
 
-## Gemini API Configuration
+## Gemini API 설정 (Configuration)
 
-### Model Settings (from config.py)
+### 모델 설정 (Model Settings)
 
 ```python
 GENERATION_CONFIG = {
@@ -217,15 +217,15 @@ GENERATION_CONFIG = {
 Model: gemini-2.5-pro
 ```
 
-### Safety Settings
+### 안전 설정 (Safety Settings)
 
-All safety categories are set to `BLOCK_NONE` to prevent content blocking:
+모든 안전 카테고리를 `BLOCK_NONE`으로 설정하여 콘텐츠 차단 방지:
 - HARM_CATEGORY_HARASSMENT
 - HARM_CATEGORY_HATE_SPEECH
 - HARM_CATEGORY_SEXUALLY_EXPLICIT
 - HARM_CATEGORY_DANGEROUS_CONTENT
 
-### API Usage Pattern
+### API 사용 패턴 (Usage Pattern)
 
 1. **Upload Pattern**: One lesson PDF + One jokbo PDF at a time
 2. **Request Frequency**: Sequential processing (one jokbo at a time)
@@ -237,16 +237,16 @@ All safety categories are set to `BLOCK_NONE` to prevent content blocking:
 4. **Error Handling**: Retry logic for file processing states
 5. **Debug Support**: All API responses saved to output/debug/ for troubleshooting
 
-### Token Limits and Constraints
+### 토큰 제한 및 제약사항 (Token Limits)
 
 - **Max Output Tokens**: 100,000 tokens (configured)
 - **Input Size**: Limited by PDF file upload size
 - **Processing Time**: 2-second polling interval for file upload status
 - **Concurrent Uploads**: Not used - sequential processing only
 
-### Response Format
+### 응답 형식 (Response Format)
 
-#### Lesson-Centric Mode Response
+#### 강의자료 중심 모드 응답 (Lesson-Centric)
 ```json
 {
   "related_slides": [{
@@ -279,7 +279,7 @@ All safety categories are set to `BLOCK_NONE` to prevent content blocking:
 }
 ```
 
-#### Jokbo-Centric Mode Response
+#### 족보 중심 모드 응답 (Jokbo-Centric)
 ```json
 {
   "jokbo_pages": [{
@@ -329,30 +329,30 @@ All safety categories are set to `BLOCK_NONE` to prevent content blocking:
 - Pre-upload 방식으로 공통 파일 재사용
 - 각 스레드별 독립적인 PDFProcessor 인스턴스
 
-## Key Features (주요 기능)
+## 주요 기능 (Key Features)
 
-### 1. Smart File Upload Management
-- Pre-process cleanup of all uploaded files
-- Sequential upload/delete pattern for memory efficiency
-- Automatic retry logic for failed deletions
+### 1. 스마트 파일 업로드 관리
+- 처리 전 모든 업로드 파일 삭제
+- 메모리 효율을 위한 순차적 업로드/삭제
+- 실패 시 자동 재시도 로직
 
-### 2. Debug Support
-- All Gemini API responses saved to `output/debug/`
-- Includes timestamps, filenames, raw response, and parsing status
-- Essential for troubleshooting
+### 2. 디버그 지원
+- 모든 Gemini API 응답을 `output/debug/`에 저장
+- 타임스탬프, 파일명, 원본 응답, 파싱 상태 포함
+- 문제 해결에 필수적
 
-### 3. Prompt Engineering
-- Strict exclusion of lecture-embedded questions
-- Accurate page/question number enforcement
-- Filename preservation for consistency
+### 3. 프롬프트 엔지니어링
+- 강의자료 내 문제 엄격 제외
+- 정확한 페이지/문제 번호 강제
+- 일관성을 위한 파일명 보존
 
-### 4. Multi-Page Question Support
-- Handles questions spanning multiple pages
-- Uses `jokbo_end_page` field for proper extraction
+### 4. 여러 페이지 문제 지원
+- 여러 페이지에 걸친 문제 처리
+- 적절한 추출을 위해 `jokbo_end_page` 필드 사용
 
-### 5. Wrong Answer Explanations
-- Detailed explanations for why each option is incorrect
-- Helps students understand common mistakes
+### 5. 오답 해설 기능
+- 각 선택지가 오답인 이유 상세 설명
+- 학생들의 일반적인 실수 이해 도움
 
 ## Recent Updates (최근 업데이트)
 
