@@ -30,6 +30,12 @@ python main.py --jokbo-dir "custom_jokbo" --lesson-dir "custom_lesson" --output-
 
 # Run with parallel processing (faster)
 python main.py --parallel
+
+# Run in jokbo-centric mode (족보 중심 모드)
+python main.py --mode jokbo-centric
+
+# Run in jokbo-centric mode with parallel processing
+python main.py --mode jokbo-centric --parallel
 ```
 
 ### Environment Configuration
@@ -105,6 +111,36 @@ Each output PDF contains:
 - Summary page with overall statistics and study recommendations
 - Organized by lecture page order with related questions following each slide
 
+## Operating Modes
+
+### 1. Lesson-Centric Mode (기본값)
+- 각 강의자료를 중심으로 모든 족보와 비교
+- 출력: `filtered_{강의자료명}_all_jokbos.pdf`
+- 구조: 강의 슬라이드 → 관련 족보 문제 → 해설
+
+### 2. Jokbo-Centric Mode (족보 중심 모드)
+- 각 족보를 중심으로 모든 강의자료와 비교
+- 출력: `jokbo_centric_{족보명}_all_lessons.pdf`
+- 구조: 족보 페이지 → 관련 강의 슬라이드 → 해설
+- 사용법: `python main.py --mode jokbo-centric`
+
+## Recent Improvements (2025-07-26)
+
+1. **파일 업로드 관리 개선**
+   - 처리 전 기존 업로드 파일 자동 삭제
+   - 족보/강의자료 개별 업로드 및 즉시 삭제
+   - 메모리 효율성 및 API 사용량 최적화
+
+2. **문제 번호 인식 정확도 향상**
+   - 실제 PDF에 표시된 문제 번호 사용
+   - 페이지 내 순서가 아닌 실제 번호 추출
+   - 페이지 번호 정확성 검증 강화
+
+3. **족보 중심 모드 추가**
+   - 족보를 기준으로 관련 강의자료 매칭
+   - 시험 준비에 최적화된 학습 자료 생성
+   - 병렬 처리 지원으로 빠른 분석
+
 ## Recent Improvements (2025-07-24)
 
 1. **Enhanced Prompt for Better Accuracy**
@@ -130,7 +166,24 @@ Each output PDF contains:
    - Real concurrent processing with timestamp logging
    - Significant speed improvement for multiple jokbo files
 
-5. **Future Considerations**
+5. **Debug Support**
+   - Gemini API responses saved to `output/debug/`
+   - JSON format with timestamp, filenames, response text
+   - Useful for troubleshooting parsing errors
+
+6. **Improved Prompts**
+   - Strict exclusion of lecture material embedded questions
+   - Accurate page number enforcement
+   - Better question number recognition
+
+7. **Future Considerations**
    - Context Caching implementation for cost reduction
    - Upgrading to latest google-genai SDK
    - Async support for even better performance
+
+## Utility Tools
+
+### cleanup_gemini_files.py
+- Lists all files uploaded to Gemini API
+- Selective or bulk deletion of uploaded files
+- Useful for managing API quota and cleaning up after errors

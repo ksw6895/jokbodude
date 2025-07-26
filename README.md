@@ -114,6 +114,20 @@ python main.py --single-lesson "lesson/특정강의.pdf"
 python main.py --jokbo-dir "내족보폴더" --lesson-dir "내강의폴더" --output-dir "결과폴더"
 ```
 
+### 병렬 처리 모드 (더 빠른 속도)
+
+```bash
+python main.py --parallel
+```
+
+### 족보 중심 모드
+
+```bash
+python main.py --mode jokbo-centric
+```
+
+각 족보를 기준으로 관련 강의자료를 매칭합니다. 시험 직전 족보 위주 학습에 유용합니다.
+
 ## 폴더 구조 📁
 
 ```
@@ -121,10 +135,12 @@ jokbodude/
 ├── jokbo/              # 족보 PDF 파일들을 넣는 곳
 ├── lesson/             # 강의자료 PDF 파일들을 넣는 곳
 ├── output/             # 분석 결과가 저장되는 곳
+│   └── debug/          # Gemini API 응답 저장 (디버깅용)
 ├── main.py             # 메인 실행 파일
 ├── config.py           # Gemini API 설정
 ├── pdf_processor.py    # PDF 분석 엔진
 ├── pdf_creator.py      # PDF 생성 엔진
+├── cleanup_gemini_files.py  # Gemini 업로드 파일 정리 도구
 └── requirements.txt    # Python 패키지 목록
 ```
 
