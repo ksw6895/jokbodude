@@ -120,7 +120,7 @@ graph TB
         B1["🎯 main.py<br/>━━━━━━━━━━━━<br/>• 전체 조정<br/>• 모드 선택<br/>• 진행 추적"]
         B2["⚙️ config.py<br/>━━━━━━━━━━━━<br/>• API 설정<br/>• 모델: gemini-2.5-pro<br/>• Temperature: 0.3"]
         B3["🤖 pdf_processor.py<br/>━━━━━━━━━━━━<br/>• 업로드 관리<br/>• AI 분석<br/>• 결과 병합<br/>• 디버그 로깅"]
-        B4["📝 pdf_creator.py<br/>━━━━━━━━━━━━<br/>• PDF 조작<br/>• 페이지 추출<br/>• 해설 생성<br/>• 한글 폰트 지원"]
+        B4["📝 pdf_creator.py<br/>━━━━━━━━━━━━<br/>• PDF 조작<br/>• 페이지 추출<br/>• 텍스트박스 해설<br/>• CJK 폰트 지원"]
     end
     
     subgraph "☁️ 외부 서비스 (External Services)"
@@ -174,7 +174,7 @@ flowchart TD
     LC2 --> LC3{"❓ 관련 문제<br/>있음?"}
     LC3 -->|"예"| LC4["📋 족보 페이지 추출"]
     LC3 -->|"아니오"| LC1
-    LC4 --> LC5["💡 해설 생성<br/>• 정답<br/>• 오답 설명<br/>• 관련성"]
+    LC4 --> LC5["💡 텍스트박스 해설<br/>• 정답<br/>• 오답 설명<br/>• 관련성"]
     LC5 --> LC1
     
     %% 족보 중심 흐름
@@ -183,7 +183,7 @@ flowchart TD
     JC2 --> JC3{"📚 관련 슬라이드<br/>있음?"}
     JC3 -->|"예"| JC4["📑 강의 슬라이드 추출"]
     JC3 -->|"아니오"| JC1
-    JC4 --> JC5["💡 해설 생성<br/>• 관련 슬라이드 목록<br/>• 정답 & 해설"]
+    JC4 --> JC5["💡 텍스트박스 해설<br/>• 관련 슬라이드 목록<br/>• 정답 & 해설"]
     JC5 --> JC1
     
     %% 공통 끝
@@ -355,6 +355,13 @@ Model: gemini-2.5-pro
 - 학생들의 일반적인 실수 이해 도움
 
 ## Recent Updates (최근 업데이트)
+
+### 2025-07-27
+1. **PyMuPDF Story API 오류 수정**
+   - Story.draw() 메서드 TypeError 해결
+   - Story 클래스 대신 insert_textbox() 사용
+   - PyMuPDF 버전 호환성 문제 해결
+   - CJK 폰트로 한글 텍스트 렌더링 개선
 
 ### 2025-07-26
 1. **파일 업로드 관리 개선**

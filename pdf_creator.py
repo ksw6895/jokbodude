@@ -96,41 +96,40 @@ class PDFCreator:
                         
                         # Add explanation page
                         explanation_page = doc.new_page()
-                        page_rect = explanation_page.rect
                         
-                        text = f"=== 문제 {question['question_number']} 해설 ===\n\n"
-                        text += f"※ 앞 페이지의 문제 {question['question_number']}번을 참고하세요\n\n"
-                        text += f"[출처: {question['jokbo_filename']} - {question['jokbo_page']}페이지]\n\n"
-                        text += f"정답: {question['answer']}\n\n"
+                        # Create text content
+                        text_content = f"=== 문제 {question['question_number']} 해설 ===\n\n"
+                        text_content += f"※ 앞 페이지의 문제 {question['question_number']}번을 참고하세요\n\n"
+                        text_content += f"[출처: {question['jokbo_filename']} - {question['jokbo_page']}페이지]\n\n"
+                        text_content += f"정답: {question['answer']}\n\n"
+                        
                         if question.get('explanation'):
-                            text += f"해설:\n{question['explanation']}\n\n"
+                            text_content += f"해설:\n{question['explanation']}\n\n"
                         
                         # 오답 설명 추가
                         if question.get('wrong_answer_explanations'):
-                            text += f"오답 설명:\n"
+                            text_content += "오답 설명:\n"
                             for choice, explanation in question['wrong_answer_explanations'].items():
-                                text += f"• {choice}: {explanation}\n"
-                            text += "\n"
+                                text_content += f"  {choice}: {explanation}\n"
+                            text_content += "\n"
                         
-                        text += f"관련성:\n{question['relevance_reason']}\n\n"
-                        text += f"관련 강의 페이지: {page_num}\n\n"
-                        text += f"─" * 40 + "\n"
-                        text += f"💡 이 문제는 강의자료 {page_num}페이지의 내용과 관련이 있습니다."
+                        if question.get('relevance_reason'):
+                            text_content += f"관련성:\n{question['relevance_reason']}\n\n"
                         
-                        # Use CJK font for Korean text support
+                        text_content += f"관련 강의 페이지: {page_num}\n\n"
+                        text_content += f"💡 이 문제는 강의자료 {page_num}페이지의 내용과 관련이 있습니다."
+                        
+                        # Use CJK font for Korean text
                         font = fitz.Font("cjk")
-                        fontname = "F0"
-                        fontsize = 11
-                        
-                        # Insert font into page
+                        fontname = "F1"
                         explanation_page.insert_font(fontname=fontname, fontbuffer=font.buffer)
                         
-                        text_rect = fitz.Rect(50, 50, page_rect.width - 50, page_rect.height - 50)
-                        
-                        rc = explanation_page.insert_textbox(
+                        # Insert text into the page
+                        text_rect = fitz.Rect(50, 50, explanation_page.rect.width - 50, explanation_page.rect.height - 50)
+                        explanation_page.insert_textbox(
                             text_rect,
-                            text,
-                            fontsize=fontsize,
+                            text_content,
+                            fontsize=11,
                             fontname=fontname,
                             align=fitz.TEXT_ALIGN_LEFT
                         )
@@ -197,19 +196,25 @@ class PDFCreator:
         jokbo_pdf = fitz.open(jokbo_path)
         jokbo_filename = Path(jokbo_path).name
         
+        # Track which jokbo pages have been inserted to avoid duplicates
+        inserted_jokbo_pages = set()
+        
         for page_info in analysis_result.get("jokbo_pages", []):
             jokbo_page_num = page_info["jokbo_page"]
             
             if jokbo_page_num <= len(jokbo_pdf):
-                # Insert the jokbo page
-                doc.insert_pdf(jokbo_pdf, from_page=jokbo_page_num-1, to_page=jokbo_page_num-1)
-                
                 # Process each question on this page
                 for question in page_info.get("questions", []):
                     related_slides = question.get("related_lesson_slides", [])
                     
+                    # Only process questions that have related lesson slides
                     if related_slides:
-                        # Add related lesson slides
+                        # Insert the jokbo page if not already inserted
+                        if jokbo_page_num not in inserted_jokbo_pages:
+                            doc.insert_pdf(jokbo_pdf, from_page=jokbo_page_num-1, to_page=jokbo_page_num-1)
+                            inserted_jokbo_pages.add(jokbo_page_num)
+                        
+                        # Add related lesson slides for this specific question
                         for slide_info in related_slides:
                             slide_doc = self.extract_lesson_slide(
                                 slide_info["lesson_filename"],
@@ -220,45 +225,43 @@ class PDFCreator:
                                 doc.insert_pdf(slide_doc)
                                 slide_doc.close()
                         
-                        # Add explanation page for this question
+                        # Add explanation page
                         explanation_page = doc.new_page()
-                        page_rect = explanation_page.rect
                         
-                        text = f"=== 문제 {question['question_number']} 해설 ===\n\n"
-                        text += f"[출처: {jokbo_filename} - {jokbo_page_num}페이지]\n\n"
-                        text += f"정답: {question['answer']}\n\n"
+                        # Create text content
+                        text_content = f"=== 문제 {question['question_number']} 해설 ===\n\n"
+                        text_content += f"[출처: {jokbo_filename} - {jokbo_page_num}페이지]\n\n"
+                        text_content += f"정답: {question['answer']}\n\n"
+                        
                         if question.get('explanation'):
-                            text += f"해설:\n{question['explanation']}\n\n"
+                            text_content += f"해설:\n{question['explanation']}\n\n"
                         
                         # 오답 설명 추가
                         if question.get('wrong_answer_explanations'):
-                            text += f"오답 설명:\n"
+                            text_content += "오답 설명:\n"
                             for choice, explanation in question['wrong_answer_explanations'].items():
-                                text += f"• {choice}: {explanation}\n"
-                            text += "\n"
+                                text_content += f"  {choice}: {explanation}\n"
+                            text_content += "\n"
                         
-                        text += f"관련 강의 슬라이드:\n"
+                        text_content += "관련 강의 슬라이드:\n"
                         for slide_info in related_slides:
-                            text += f"• {slide_info['lesson_filename']} - {slide_info['lesson_page']}페이지\n"
-                            text += f"  관련성: {slide_info['relevance_reason']}\n"
+                            text_content += f"• {slide_info['lesson_filename']} - {slide_info['lesson_page']}페이지\n"
+                            text_content += f"  관련성: {slide_info['relevance_reason']}\n"
+                        text_content += "\n"
                         
-                        text += f"\n─" * 40 + "\n"
-                        text += f"💡 이 문제는 위의 강의자료들과 관련이 있습니다."
+                        text_content += "💡 이 문제는 위의 강의자료들과 관련이 있습니다."
                         
-                        # Use CJK font for Korean text support
+                        # Use CJK font for Korean text
                         font = fitz.Font("cjk")
-                        fontname = "F0"
-                        fontsize = 11
-                        
-                        # Insert font into page
+                        fontname = "F1"
                         explanation_page.insert_font(fontname=fontname, fontbuffer=font.buffer)
                         
-                        text_rect = fitz.Rect(50, 50, page_rect.width - 50, page_rect.height - 50)
-                        
-                        rc = explanation_page.insert_textbox(
+                        # Insert text into the page
+                        text_rect = fitz.Rect(50, 50, explanation_page.rect.width - 50, explanation_page.rect.height - 50)
+                        explanation_page.insert_textbox(
                             text_rect,
-                            text,
-                            fontsize=fontsize,
+                            text_content,
+                            fontsize=11,
                             fontname=fontname,
                             align=fitz.TEXT_ALIGN_LEFT
                         )

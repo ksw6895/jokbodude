@@ -153,9 +153,12 @@ class PDFProcessor:
         print("  기존 업로드 파일 정리 중...")
         self.delete_all_uploaded_files()
         
-        prompt = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
+        prompt = f"""당신은 병리학 교수입니다. 두 개의 PDF 파일을 받았습니다:
+        - 첫 번째 파일: 강의자료 PDF (참고용)
+        - 두 번째 파일: 족보 PDF "{jokbo_filename}" (분석 대상)
 
-        중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요. 파일명을 변경하거나 수정하지 마세요.
+        ⚠️ 매우 중요: 문제는 오직 두 번째 파일(족보 PDF)에서만 추출하세요!
+        강의자료에 있는 예제 문제는 절대 추출하지 마세요!
 
         작업:
         1. 족보 PDF의 모든 문제를 분석하세요
@@ -243,12 +246,30 @@ class PDFProcessor:
         try:
             result = json.loads(response.text)
             
-            # Force correct filename in all questions
+            # Get total pages in jokbo PDF
+            jokbo_path = Path(jokbo_path) if isinstance(jokbo_path, str) else jokbo_path
+            with fitz.open(str(jokbo_path)) as pdf:
+                total_jokbo_pages = len(pdf)
+            
+            # Validate and filter results
             if "related_slides" in result:
                 for slide in result["related_slides"]:
                     if "related_jokbo_questions" in slide:
+                        valid_questions = []
                         for question in slide["related_jokbo_questions"]:
+                            # Force correct filename
                             question["jokbo_filename"] = jokbo_filename
+                            
+                            # Validate page number
+                            jokbo_page = question.get("jokbo_page", 0)
+                            if jokbo_page < 1 or jokbo_page > total_jokbo_pages:
+                                print(f"  경고: 잘못된 페이지 번호 감지 - 문제 {question.get('question_number', '?')}번, 페이지 {jokbo_page} (족보 총 {total_jokbo_pages}페이지)")
+                                print(f"  → 이 문제는 강의자료에 포함된 문제일 가능성이 높습니다. 제외합니다.")
+                                continue
+                            
+                            valid_questions.append(question)
+                        
+                        slide["related_jokbo_questions"] = valid_questions
             
             return result
         except json.JSONDecodeError:
@@ -265,9 +286,12 @@ class PDFProcessor:
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 족보 업로드 시작 - {jokbo_filename}")
         jokbo_file = self.upload_pdf(jokbo_path, f"족보_{jokbo_filename}")
         
-        prompt = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
+        prompt = f"""당신은 병리학 교수입니다. 두 개의 PDF 파일을 받았습니다:
+        - 첫 번째 파일: 강의자료 PDF (참고용)
+        - 두 번째 파일: 족보 PDF "{jokbo_filename}" (분석 대상)
 
-        중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요. 파일명을 변경하거나 수정하지 마세요.
+        ⚠️ 매우 중요: 문제는 오직 두 번째 파일(족보 PDF)에서만 추출하세요!
+        강의자료에 있는 예제 문제는 절대 추출하지 마세요!
 
         작업:
         1. 족보 PDF의 모든 문제를 분석하세요
@@ -351,12 +375,29 @@ class PDFProcessor:
         try:
             result = json.loads(response.text)
             
-            # Force correct filename in all questions
+            # Get total pages in jokbo PDF
+            with fitz.open(str(jokbo_path)) as pdf:
+                total_jokbo_pages = len(pdf)
+            
+            # Validate and filter results
             if "related_slides" in result:
                 for slide in result["related_slides"]:
                     if "related_jokbo_questions" in slide:
+                        valid_questions = []
                         for question in slide["related_jokbo_questions"]:
+                            # Force correct filename
                             question["jokbo_filename"] = jokbo_filename
+                            
+                            # Validate page number
+                            jokbo_page = question.get("jokbo_page", 0)
+                            if jokbo_page < 1 or jokbo_page > total_jokbo_pages:
+                                print(f"  경고: 잘못된 페이지 번호 감지 - 문제 {question.get('question_number', '?')}번, 페이지 {jokbo_page} (족보 총 {total_jokbo_pages}페이지)")
+                                print(f"  → 이 문제는 강의자료에 포함된 문제일 가능성이 높습니다. 제외합니다.")
+                                continue
+                            
+                            valid_questions.append(question)
+                        
+                        slide["related_jokbo_questions"] = valid_questions
             
             print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 분석 완료 - {jokbo_filename}")
             return result

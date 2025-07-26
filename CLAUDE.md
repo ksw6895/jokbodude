@@ -124,7 +124,15 @@ Each output PDF contains:
 - 구조: 족보 페이지 → 관련 강의 슬라이드 → 해설
 - 사용법: `python main.py --mode jokbo-centric`
 
-## 최근 개선사항 (Recent Improvements - 2025-07-26)
+## 최근 개선사항 (Recent Improvements - 2025-07-27)
+
+1. **PyMuPDF Story API 오류 수정**
+   - Story.draw() 메서드 오류 해결
+   - Story 클래스 대신 insert_textbox() 사용으로 안정성 향상
+   - PyMuPDF 버전 호환성 문제 해결
+   - 한글 텍스트 렌더링을 위한 CJK 폰트 사용
+
+## 이전 개선사항 (Previous Improvements - 2025-07-26)
 
 1. **파일 업로드 관리 개선**
    - 처리 전 기존 업로드 파일 자동 삭제
