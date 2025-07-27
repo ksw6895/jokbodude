@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 import pymupdf as fitz
-from typing import List, Dict, Any, Tuple, TYPE_CHECKING
+from typing import List, Dict, Any, Tuple, TYPE_CHECKING, Optional
 import google.generativeai as genai
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -30,6 +30,8 @@ class PDFProcessor:
         # Create debug directory if it doesn't exist
         self.debug_dir = Path("output/debug")
         self.debug_dir.mkdir(parents=True, exist_ok=True)
+        # Cache for PDF page counts
+        self.pdf_page_counts = {}
     
     def __del__(self):
         """Clean up uploaded files when object is destroyed"""
@@ -39,6 +41,59 @@ class PDFProcessor:
                 print(f"  Deleted uploaded file: {file.display_name}")
             except Exception as e:
                 print(f"  Failed to delete file {file.display_name}: {e}")
+    
+    def get_pdf_page_count(self, pdf_path: str) -> int:
+        """Get total page count of a PDF file
+        
+        Args:
+            pdf_path: Path to the PDF file
+            
+        Returns:
+            Total number of pages in the PDF
+        """
+        if pdf_path not in self.pdf_page_counts:
+            with fitz.open(pdf_path) as doc:
+                self.pdf_page_counts[pdf_path] = len(doc)
+        return self.pdf_page_counts[pdf_path]
+    
+    def validate_and_adjust_page_number(self, page_num: int, start_page: int, end_page: int, 
+                                      total_pages: int, chunk_path: str) -> Optional[int]:
+        """Validate and adjust page number with retry logic
+        
+        Args:
+            page_num: The page number to validate/adjust
+            start_page: Start page of the chunk
+            end_page: End page of the chunk
+            total_pages: Total pages in the PDF
+            chunk_path: Path identifier for debugging
+            
+        Returns:
+            Adjusted page number or None if invalid
+        """
+        chunk_page_count = end_page - start_page + 1
+        
+        # Case 1: Page number is within chunk range (1 to chunk_page_count)
+        # This is likely a chunk-relative page number
+        if 1 <= page_num <= chunk_page_count:
+            adjusted = page_num + (start_page - 1)
+            print(f"  페이지 조정: 청크 상대값 {page_num} → 절대값 {adjusted} (청크 p{start_page}-{end_page})")
+            return adjusted
+        
+        # Case 2: Page number is within the actual chunk's absolute range
+        # This is likely already an absolute page number
+        if start_page <= page_num <= end_page:
+            print(f"  페이지 유지: 절대값 {page_num} (청크 범위 p{start_page}-{end_page} 내)")
+            return page_num
+        
+        # Case 3: Page number is within total PDF range but outside chunk
+        # This might be a mistaken reference or API error
+        if 1 <= page_num <= total_pages:
+            print(f"  경고: 페이지 {page_num}은 청크 p{start_page}-{end_page} 범위 밖이지만 PDF 전체 범위 내 - 재분석 필요")
+            return None
+        
+        # Case 4: Page number is completely invalid
+        print(f"  오류: 잘못된 페이지 번호 {page_num} (PDF 전체 {total_pages}페이지 초과) - 재분석 필요")
+        return None
     
     def split_pdf_for_analysis(self, pdf_path: str, max_pages: int = 40) -> List[Tuple[str, int, int]]:
         """Split PDF into smaller chunks for analysis
@@ -1041,9 +1096,21 @@ class PDFProcessor:
     
     def _analyze_jokbo_with_lesson_chunk_preloaded(self, jokbo_file, lesson_chunk_path: str, 
                                                    jokbo_filename: str, lesson_filename: str,
-                                                   start_page: int, end_page: int) -> Tuple[Dict[str, Any], Any]:
+                                                   start_page: int, end_page: int,
+                                                   lesson_total_pages: int,
+                                                   max_retries: int = 3) -> Tuple[Dict[str, Any], Any]:
         """Analyze pre-uploaded jokbo with a chunk of lesson PDF in parallel mode
         
+        Args:
+            jokbo_file: Pre-uploaded jokbo file object
+            lesson_chunk_path: Path to lesson chunk PDF
+            jokbo_filename: Original jokbo filename
+            lesson_filename: Original lesson filename  
+            start_page: Start page of chunk
+            end_page: End page of chunk
+            lesson_total_pages: Total pages in the lesson PDF
+            max_retries: Maximum retries for invalid page numbers
+            
         Returns:
             Tuple of (result_dict, uploaded_file_to_delete)
         """
@@ -1094,19 +1161,54 @@ class PDFProcessor:
             cleaned_text = re.sub(r'"(\d+)"번"', r'"\1번"', cleaned_text)
             
             result = json.loads(cleaned_text)
-            # Adjust page numbers to account for chunk offset
+            
+            # Process page numbers with validation and potential retry
+            retry_needed = False
+            invalid_questions = set()
+            
             if "jokbo_pages" in result:
                 for page_info in result["jokbo_pages"]:
                     for question in page_info.get("questions", []):
+                        question_num = question.get("question_number", "Unknown")
+                        has_invalid_page = False
+                        
                         for slide in question.get("related_lesson_slides", []):
                             if "lesson_page" in slide:
                                 page_num = slide["lesson_page"]
-                                chunk_page_count = end_page - start_page + 1
-                                if page_num <= chunk_page_count:
-                                    slide["lesson_page"] = page_num + (start_page - 1)
-                                    print(f"DEBUG: Adjusted chunk-relative page {page_num} to absolute page {slide['lesson_page']} for chunk p{start_page}-{end_page}")
+                                adjusted_page = self.validate_and_adjust_page_number(
+                                    page_num, start_page, end_page, lesson_total_pages, 
+                                    f"Q{question_num}"
+                                )
+                                
+                                if adjusted_page is None:
+                                    has_invalid_page = True
+                                    retry_needed = True
                                 else:
-                                    print(f"DEBUG: Page {page_num} appears to be absolute (exceeds chunk size {chunk_page_count}), keeping as-is for chunk p{start_page}-{end_page}")
+                                    slide["lesson_page"] = adjusted_page
+                        
+                        if has_invalid_page:
+                            invalid_questions.add(question_num)
+            
+            # If retry is needed and we have retries left
+            if retry_needed and max_retries > 0:
+                print(f"  재분석 시도 (남은 횟수: {max_retries}) - 문제 {', '.join(invalid_questions)}에서 잘못된 페이지 번호 감지")
+                self.delete_file_safe(lesson_chunk_file)
+                time.sleep(2)  # Wait before retry
+                return self._analyze_jokbo_with_lesson_chunk_preloaded(
+                    jokbo_file, lesson_chunk_path, jokbo_filename, lesson_filename,
+                    start_page, end_page, lesson_total_pages, max_retries - 1
+                )
+            
+            # If still have invalid pages after all retries, remove those questions
+            if retry_needed:
+                print(f"  경고: 재시도 후에도 잘못된 페이지 번호 - 문제 {', '.join(invalid_questions)} 제외")
+                if "jokbo_pages" in result:
+                    for page_info in result["jokbo_pages"]:
+                        page_info["questions"] = [
+                            q for q in page_info.get("questions", [])
+                            if q.get("question_number") not in invalid_questions
+                        ]
+            
             return result, lesson_chunk_file
         except json.JSONDecodeError as e:
             print(f"  JSON 파싱 실패 (청크 p{start_page}-{end_page}): {str(e)}")
@@ -1114,16 +1216,40 @@ class PDFProcessor:
             partial_result = self.parse_partial_json(cleaned_text, "jokbo-centric")
             if "error" not in partial_result or partial_result.get("jokbo_pages"):
                 print(f"  부분 파싱으로 청크 데이터 일부 복구")
-                # Still need to adjust page numbers for chunk offset
+                # Apply same page validation logic to partial results
                 if "jokbo_pages" in partial_result:
+                    invalid_questions = set()
                     for page_info in partial_result["jokbo_pages"]:
                         for question in page_info.get("questions", []):
+                            question_num = question.get("question_number", "Unknown")
+                            has_invalid_page = False
+                            
                             for slide in question.get("related_lesson_slides", []):
                                 if "lesson_page" in slide:
                                     page_num = slide["lesson_page"]
-                                    chunk_page_count = end_page - start_page + 1
-                                    if page_num <= chunk_page_count:
-                                        slide["lesson_page"] = page_num + (start_page - 1)
+                                    adjusted_page = self.validate_and_adjust_page_number(
+                                        page_num, start_page, end_page, lesson_total_pages,
+                                        f"Q{question_num}"
+                                    )
+                                    
+                                    if adjusted_page is None:
+                                        has_invalid_page = True
+                                        invalid_questions.add(question_num)
+                                    else:
+                                        slide["lesson_page"] = adjusted_page
+                            
+                            if has_invalid_page:
+                                invalid_questions.add(question_num)
+                    
+                    # Remove questions with invalid pages
+                    if invalid_questions:
+                        print(f"  부분 파싱 결과에서 잘못된 페이지 번호 문제 제외: {', '.join(invalid_questions)}")
+                        for page_info in partial_result["jokbo_pages"]:
+                            page_info["questions"] = [
+                                q for q in page_info.get("questions", [])
+                                if q.get("question_number") not in invalid_questions
+                            ]
+                
                 return partial_result, lesson_chunk_file
             else:
                 debug_file = self.debug_dir / f"failed_json_chunk_p{start_page}-{end_page}.txt"
@@ -1155,6 +1281,7 @@ class PDFProcessor:
         
         print(f"  강의자료 청크 준비 중...")
         for lesson_path in lesson_paths:
+            lesson_total_pages = self.get_pdf_page_count(lesson_path)
             lesson_chunks = self.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)
             for chunk_path, start_page, end_page in lesson_chunks:
                 all_chunks.append({
@@ -1162,7 +1289,8 @@ class PDFProcessor:
                     'lesson_filename': Path(lesson_path).name,
                     'chunk_path': chunk_path,
                     'start_page': start_page,
-                    'end_page': end_page
+                    'end_page': end_page,
+                    'total_pages': lesson_total_pages
                 })
         
         print(f"  총 {len(all_chunks)}개 청크를 병렬 처리합니다.")
@@ -1197,7 +1325,8 @@ class PDFProcessor:
                     jokbo_file, temp_pdf, 
                     jokbo_file.display_name.replace("족보_", ""),
                     lesson_filename,
-                    start_page, end_page
+                    start_page, end_page,
+                    chunk_info['total_pages']
                 )
                 
                 # Clean up temp file if created
