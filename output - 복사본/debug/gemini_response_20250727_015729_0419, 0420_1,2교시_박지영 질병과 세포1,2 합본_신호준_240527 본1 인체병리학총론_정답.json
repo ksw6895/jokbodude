@@ -1,0 +1,448 @@
+{
+  "timestamp": "20250727_015729",
+  "mode": "lesson-centric",
+  "jokbo_file": "240527 본1 인체병리학총론_정답.pdf",
+  "lesson_file": "0419, 0420_1,2교시_박지영 질병과 세포1,2 합본_신호준.pdf",
+  "response_text": "{\n    \"related_slides\": [\n        {\n            \"lesson_page\": 5,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 35,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"78\",\n                    \"question_text\": \"다음 그림 A,B,C에 들어갈 명칭을 각각 적으시오.\",\n                    \"answer\": \"A: Heterochromatin, B: Euchromatin, C: Nucleosome\",\n                    \"explanation\": \"이 문제는 핵 내 유전물질의 구성에 대한 이해를 묻고 있습니다. 강의자료 5페이지의 'THE ORGANIZATION OF NUCLEAR DNA' 그림은 이 구조를 명확하게 보여줍니다.\\n- A는 밀집되어 있고 비활성 상태인 이질염색질(Heterochromatin)을 가리킵니다.\\n- B는 풀려 있고 전사가 활발한 진정염색질(Euchromatin)을 가리킵니다.\\n- C는 DNA가 히스톤 단백질을 감고 있는 기본 단위인 뉴클레오솜(Nucleosome)을 가리킵니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"relevance_reason\": \"문제의 그림은 강의자료 5페이지에 있는 'THE ORGANIZATION OF NUCLEAR DNA' 그림과 정확히 일치하며, 그림의 각 부분(A, B, C)에 해당하는 명칭을 직접적으로 묻고 있습니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Heterochromatin\",\n                \"Euchromatin\",\n                \"Nucleosome\",\n                \"DNA organization\"\n            ]\n        },\n        {\n            \"lesson_page\": 6,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 7,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"44\",\n                    \"question_text\": \"다음 인간게놈의 functional non-protein coding sequence에 관한 설명으로 옳은 것을 두 개 고르시오.\",\n                    \"answer\": \"1, 5\",\n                    \"explanation\": \"이 문제는 단백질을 코딩하지 않는 기능적 DNA 서열의 종류와 기능에 대해 묻고 있습니다. 강의자료 6페이지의 '5 MAJOR CLASSES OF FUNCTIONAL NON-PROTEIN CODING SEQUENCES' 슬라이드 내용과 직접적으로 관련됩니다.\\n- 1번: Promoter와 enhancer는 전사 인자 결합 부위를 제공합니다. 이는 슬라이드의 첫 번째 항목과 일치하여 정답입니다.\\n- 5번: Telomere와 centromere는 DNA의 특별한 구조적 영역입니다. 이는 슬라이드의 마지막 항목과 일치하여 정답입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"염색질 구조를 유지하는 인자 결합 부위는 'higher order' 구조를 형성한다고 되어 있으나, 문제에서는 'lower order'라고 기술하여 오답입니다.\",\n                        \"3번\": \"Noncoding regulatory RNA는 번역되지 않는(never translated) RNA라고 슬라이드에 명시되어 있으나, 문제에서는 'translated'라고 기술하여 오답입니다.\",\n                        \"4번\": \"Mobile genetic elements(transposons)는 인간 게놈의 'a third(1/3)' 이상을 차지한다고 되어 있으나, 문제에서는 'a half(1/2)'라고 기술하여 오답입니다.\"\n                    },\n                    \"relevance_reason\": \"문제의 보기들이 강의자료 6페이지에 나열된 5가지 주요 기능적 비단백질 코딩 서열의 내용을 거의 그대로 인용하면서 일부 단어를 수정하여 정오를 판별하도록 출제되었습니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Non-protein coding DNA\",\n                \"Promoter\",\n                \"Enhancer\",\n                \"Telomere\",\n                \"Centromere\",\n                \"Noncoding regulatory RNA\"\n            ]\n        },\n        {\n            \"lesson_page\": 8,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 9,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"43\",\n                    \"question_text\": \"다음 single nucleotide polymorphisms (SNPs) and copy number variations (CNVs)에 관한 설명으로 옳은 것을 한 개 고르시오.\",\n                    \"answer\": \"1\",\n                    \"explanation\": \"이 문제는 DNA 변이의 가장 흔한 두 형태인 SNP와 CNV에 대한 이해를 묻고 있습니다. 강의자료 8페이지의 내용과 직접적으로 연관됩니다.\\n- 1번: 'SNPs located in noncoding regions can occur within genomic regulatory elements, thereby altering gene expression; in such instances, SNPs influence disease susceptibility directly.'는 슬라이드에 있는 문장과 정확히 일치하므로 정답입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"슬라이드에는 SNP의 약 1%가 'coding' 지역에서 발견된다고 되어 있으나, 문제에서는 'non-coding' 지역이라고 하여 오답입니다.\",\n                        \"3번\": \"질병 감수성에 대한 영향이 약한 것은 'most SNPs'라고 슬라이드에 명시되어 있으나, 문제에서는 'most CNVs'라고 하여 오답입니다.\",\n                        \"4번\": \"두 개인 간의 5백만~24백만 염기쌍 차이를 유발하는 것은 'CNVs'라고 슬라이드에 명시되어 있으나, 문제에서는 'SNPs'라고 하여 오답입니다.\",\n                        \"5번\": \"유전자 코딩 서열을 포함하는 비율이 약 50%인 것은 'CNVs'라고 슬라이드에 명시되어 있으나, 문제에서는 'SNPs'라고 하여 오답입니다.\"\n                    },\n                    \"relevance_reason\": \"문제의 모든 보기는 강의자료 8페이지의 문장에서 핵심 단어(SNP/CNV, coding/non-coding)를 바꾸어 출제되었으며, 슬라이드 내용을 정확히 암기했는지 확인하는 문제입니다.\"\n                },\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 35,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"79\",\n                    \"question_text\": \"다음 중 옳은 설명을 한 개 고르시오.\",\n                    \"answer\": \"5\",\n                    \"explanation\": \"이 문제는 SNP(단일염기다형성)에 대한 정확한 설명을 고르는 문제입니다. 강의자료 8페이지의 SNP 관련 설명에서 정답을 찾을 수 있습니다.\\n- 5번: 'SNPs occur across the genome—within exons, introns, intergenic regions, and coding regions.'는 슬라이드에 있는 내용과 일치하여 정답입니다. SNP는 유전체 전반에 걸쳐 나타납니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"SNP는 'single' nucleotide position에서의 변이이지, 'several' nucleotide positions에서의 변이가 아니므로 오답입니다.\",\n                        \"2번\": \"코딩 지역에서 발생하는 SNP는 약 '1%'이며, 코딩 지역은 전체 유전체의 약 '1.5%'를 차지합니다. 문제의 '10%', '15%'는 틀린 수치입니다.\",\n                        \"3번\": \"유전자 발현에 영향을 미치는 조절 요소는 주로 'noncoding' 지역에 위치합니다. 'coding' 지역에 있다고 한 설명은 틀렸습니다.\",\n                        \"4)\": \"해당 보기는 CNV에 대한 설명인데, 문제의 주제인 SNP와 맞지 않습니다.\"\n                    },\n                    \"relevance_reason\": \"문제의 보기들은 강의자료 8페이지의 SNP에 대한 정의와 특성을 설명하는 문장들을 변형하여 만들어졌습니다. 슬라이드의 내용을 정확히 이해해야 풀 수 있는 문제입니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Single Nucleotide Polymorphism (SNP)\",\n                \"Copy Number Variation (CNV)\",\n                \"Genetic variation\",\n                \"Coding region\",\n                \"Noncoding region\"\n            ]\n        },\n        {\n            \"lesson_page\": 11,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 12,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"47\",\n                    \"question_text\": \"다음 설명 중 long noncoding RNA(lcRNA)의 역할을 설명한 것이 아닌 것을 한 가지 고르시오.\",\n                    \"answer\": \"5\",\n                    \"explanation\": \"이 문제는 lncRNA의 기능이 아닌 것을 찾는 문제입니다. 강의자료 11페이지에 lncRNA의 주요 역할 4가지가 명시되어 있습니다.\\n- 5번: 'Synthetic ... agents to silence pathogenic genes'는 lncRNA가 아닌 small interfering RNA(siRNA)나 short hairpin RNA(shRNA)와 같은 RNA 간섭(RNAi) 기술에 대한 설명입니다. 강의자료 10페이지에서 siRNA가 유전자 발현을 억제하는 데 사용될 수 있음을 언급합니다. 따라서 lncRNA의 역할이 아니므로 정답입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Gene activation (유전자 활성화)은 lncRNA의 역할 중 하나입니다.\",\n                        \"2번\": \"Gene suppression (유전자 억제)은 lncRNA의 역할 중 하나입니다.\",\n                        \"3번\": \"Promote chromatin modification (염색질 변형 촉진)은 lncRNA의 역할 중 하나입니다.\",\n                        \"4번\": \"Assembly of protein complexes (단백질 복합체 조립)은 lncRNA의 역할 중 하나입니다.\"\n                    },\n                    \"relevance_reason\": \"문제의 보기 1-4번은 강의자료 11페이지에 명시된 lncRNA의 4가지 역할을 그대로 나열하고 있으며, 5번 보기는 다른 유형의 RNA(siRNA)의 기능을 설명하고 있어, 강의 내용을 명확히 구분하는지를 평가합니다.\"\n                },\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 37,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"83\",\n                    \"question_text\": \"다음 설명 중 long noncoding RNA(lcRNA)의 역할을 설명한 것이 아닌 것을 한 가지 고르시오.\",\n                    \"answer\": \"5\",\n                    \"explanation\": \"이 문제는 lncRNA의 기능이 아닌 것을 찾는 문제입니다. 강의자료 11페이지에 lncRNA의 주요 역할 4가지가 명시되어 있습니다.\\n- 5번: 'Synthetic ... agents to silence pathogenic genes'는 lncRNA가 아닌 small interfering RNA(siRNA)나 short hairpin RNA(shRNA)와 같은 RNA 간섭(RNAi) 기술에 대한 설명입니다. 강의자료 10페이지에서 siRNA가 유전자 발현을 억제하는 데 사용될 수 있음을 언급합니다. 따라서 lncRNA의 역할이 아니므로 정답입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Gene activation (유전자 활성화)은 lncRNA의 역할 중 하나입니다.\",\n                        \"2번\": \"Gene suppression (유전자 억제)은 lncRNA의 역할 중 하나입니다.\",\n                        \"3번\": \"Promote chromatin modification (염색질 변형 촉진)은 lncRNA의 역할 중 하나입니다.\",\n                        \"4번\": \"Assembly of protein complexes (단백질 복합체 조립)은 lncRNA의 역할 중 하나입니다.\"\n                    },\n                    \"relevance_reason\": \"이 문제는 족보 12페이지의 47번 문제와 동일합니다. 문제의 보기 1-4번은 강의자료 11페이지에 명시된 lncRNA의 4가지 역할을 그대로 나열하고 있으며, 5번 보기는 다른 유형의 RNA(siRNA)의 기능을 설명하고 있어, 강의 내용을 명확히 구분하는지를 평가합니다.\"\n                }\n            ],\n            \"importance_score\": 9,\n            \"key_concepts\": [\n                \"Long noncoding RNA (lncRNA)\",\n                \"Gene activation\",\n                \"Gene suppression\",\n                \"Chromatin modification\",\n                \"siRNA\"\n            ]\n        },\n        {\n            \"lesson_page\": 16,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 17,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"46\",\n                    \"question_text\": \"다음 세포막을 통한 물질이동 기전에 관한 설명 중 옳은 것을 두 개 고르시오.\",\n                    \"answer\": \"4, 5\",\n                    \"explanation\": \"이 문제는 세포막을 통한 물질 이동 기전에 대한 정확한 설명을 고르는 문제입니다. 강의자료 16페이지의 'MEMBRANE TRANSPORT: MECHANISM' 그림과 관련 개념을 바탕으로 풀 수 있습니다.\\n- 4번: Transcytosis(세포통과운반)는 세포의 한쪽 면(apical)에서 물질을 흡수하여 다른 쪽 면(basolateral)으로 방출하는 움직임을 의미합니다. 이는 정의에 부합하므로 정답입니다.\\n- 5번: Endocytosis(세포내이입)로 소실된 세포막은 Exocytosis(세포외유출)를 통해 다시 보충되어야 세포막의 총량이 유지됩니다. 이는 세포 항상성을 위한 필수적인 과정이므로 정답입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"지질 이중층은 소수성(hydrophobic) 분자가 아닌 친수성(hydrophilic) 또는 하전된 분자에 대해 비투과성입니다. 설명이 반대로 되어 오답입니다.\",\n                        \"2번\": \"하전된 용질은 일반적으로 각각의 분자에 특이적인(specific) 운반체나 채널을 필요로 합니다. 'common(공통의)' 운반체를 사용한다는 설명은 틀렸습니다.\",\n                        \"3번\": \"많은 세포막 단백질은 기능적으로 'large(큰)' 복합체를 형성합니다. 'small(작은)' 복합체라는 설명은 틀렸습니다.\"\n                    },\n                    \"relevance_reason\": \"문제의 보기들은 강의자료 16페이지의 그림에 나타난 다양한 세포막 수송 방식(Transcytosis, Endocytosis, Exocytosis, Channels, Carriers)에 대한 기본 개념을 묻고 있습니다.\"\n                }\n            ],\n            \"importance_score\": 8,\n            \"key_concepts\": [\n                \"Membrane transport\",\n                \"Transcytosis\",\n                \"Endocytosis\",\n                \"Exocytosis\",\n                \"Lipid bilayer permeability\"\n            ]\n        },\n        {\n            \"lesson_page\": 18,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 38,\n                    \"jokbo_end_page\": 39,\n                    \"question_number\": \"85\",\n                    \"question_text\": \"다음이 설명하고 있는 인자를 그림에서 골라 맞게 연결된 것을 고르시오.\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"문제에서 제시된 설명('Serve as mooring lines for molecular motor proteins...', 'Mediate sister chromatid segregation during mitosis.' 등)은 모두 미세소관(Microtubule)의 기능입니다. 이 설명은 강의자료 20페이지 하단에 자세히 나와 있습니다. 문제의 그림은 강의자료 18페이지의 세포골격 그림입니다. 이 그림에서 B는 미세소관(Microtubule)을 가리킵니다. 따라서 설명과 그림의 B를 연결한 보기 2번이 정답입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"A는 미세융모(Microvilli)이며, 주로 액틴 필라멘트로 구성됩니다. 설명은 미세소관에 대한 것이므로 틀렸습니다.\",\n                        \"3번\": \"J는 기저막(Basement membrane)입니다. 설명과 관련 없습니다.\",\n                        \"4)\": \"K는 인테그린(Integrin)입니다. 설명과 관련 없습니다.\",\n                        \"5)\": \"E는 부착반(Desmosome)입니다. 설명과 관련 없습니다.\"\n                    },\n                    \"relevance_reason\": \"문제의 설명은 강의자료 20페이지의 미세소관(Microtubule) 기능을 그대로 인용했고, 그림은 강의자료 18페이지의 그림을 사용하여 두 슬라이드의 정보를 종합하여 답을 찾도록 요구합니다. 설명과 그림상의 위치를 정확히 연결해야 합니다.\"\n                }\n            ],\n            \"importance_score\": 9,\n            \"key_concepts\": [\n                \"Cytoskeleton\",\n                \"Microtubule\",\n                \"Cell-cell interaction\",\n                \"Molecular motor proteins\"\n            ]\n        },\n        {\n            \"lesson_page\": 22,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 22,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"40\",\n                    \"question_text\": \"다양한 종류의 이질적인 단백질들로 조직에 따라 특이한 발현양상을 보이기 때문에 분화가 나쁜 종양에서 세포의 기원을 추정하는데 유용한 세포골격단백질을 고르시오. (3개)\",\n                    \"answer\": \"2, 3, 6\",\n                    \"explanation\": \"이 문제는 조직 특이적 발현을 통해 종양의 기원을 밝히는 데 사용되는 중간섬유(Intermediate filament) 단백질을 고르는 것입니다. 강의자료 20페이지와 22페이지에서 이를 명확히 설명하고 있습니다.\\n- 2번 Vimentin: 중간엽 세포(mesenchymal cells)에서 발현됩니다.\\n- 3번 Desmin: 근육 세포(muscle cells)에서 발현됩니다.\\n- 6번 Cytokeratin: 상피 세포(epithelial cells)에서 발현됩니다.\\n이 세 가지는 모두 조직 표지자로 사용되는 대표적인 중간섬유 단백질입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Actin은 모든 세포에 존재하는 세포골격 단백질로 조직 특이성이 낮아 기원 추정에 유용하지 않습니다.\",\n                        \"4번\": \"Microtubule은 세포골격의 한 종류이지만, 조직 표지자로 사용되는 중간섬유가 아닙니다.\",\n                        \"5번\": \"Myosin은 액틴과 상호작용하는 운동 단백질로, 중간섬유가 아닙니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 20페이지에서 'Intermediate filaments ... have characteristic tissue-specific patterns of expression that can be useful for assigning a cell of origin for poorly differentiated tumors.'라고 명시하고 있으며, 22페이지 슬라이드에서 Vimentin, Desmin, Cytokeratin을 주요 예시로 들고 있어 문제와 직접적으로 연결됩니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Intermediate filament\",\n                \"Cytoskeleton\",\n                \"Tumor marker\",\n                \"Vimentin\",\n                \"Desmin\",\n                \"Cytokeratin\"\n            ]\n        },\n        {\n            \"lesson_page\": 27,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 27,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"21\",\n                    \"question_text\": \"다음 그림은 미토콘드리아의 역할에 관한 것이다. 빈칸에 들어갈 알맞은 것을 고르시오\",\n                    \"answer\": \"1\",\n                    \"explanation\": \"문제의 그림은 미토콘드리아의 기능을 나타내며, 빈칸은 세포 사멸 경로를 가리킵니다. 강의자료 27페이지의 'ROLE OF MITOCHONDRIA' 그림에서, Bax/Bak complex 형성, Cytochrome C 방출로 이어지는 경로는 최종적으로 'CELL DEATH (apoptosis)'를 유발한다고 명확히 보여줍니다. 따라서 빈칸에 들어갈 가장 알맞은 용어는 apoptosis(세포자멸사)입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"Necrosis(괴사)는 주로 허혈/독성 손상으로 인한 막 투과성 변화로 ATP 생성 없이 일어나는 세포 사멸로, 그림의 경로와는 다릅니다.\",\n                        \"3번\": \"ATP generation(ATP 생성)은 미토콘드리아의 주요 기능이지만, 그림의 빈칸이 속한 경로(세포 사멸)와는 다릅니다.\",\n                        \"4번\": \"Gene transcription(유전자 전사)은 주로 핵에서 일어나는 과정입니다.\",\n                        \"5번\": \"Increases cell motility(세포 운동성 증가)는 미토콘드리아의 직접적인 역할이 아닙니다.\"\n                    },\n                    \"relevance_reason\": \"문제의 그림은 강의자료 27페이지의 그림을 간략화한 버전이며, 미토콘드리아가 매개하는 내인성 세포자멸사(intrinsic apoptosis) 경로의 최종 결과를 묻는 문제로, 슬라이드 내용과 직접적으로 일치합니다.\"\n                },\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 29,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"69\",\n                    \"question_text\": \"세포자멸사(apoptosis) 진행에 중심적인 역할을 하는 것을 그림에서 골라 명칭을 적으시오 (답안 예시: 1번, nucleus)\",\n                    \"answer\": \"1번 mitochondria\",\n                    \"explanation\": \"세포자멸사(apoptosis), 특히 내인성 경로(intrinsic pathway)에서 미토콘드리아는 핵심적인 역할을 합니다. 미토콘드리아는 세포 손상 신호를 감지하여 Cytochrome C와 같은 세포자멸사 유발 단백질을 세포질로 방출함으로써 Caspase cascade를 활성화시킵니다. 강의자료 14페이지의 표와 27페이지의 그림 모두에서 미토콘드리아의 기능으로 'apoptosis'가 명시되어 있습니다. 문제의 그림에서 1번은 미토콘드리아를 가리킵니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"relevance_reason\": \"강의자료 14페이지와 27페이지에서 미토콘드리아가 세포자멸사의 핵심 조절자임을 반복적으로 강조하고 있습니다. 문제는 일반적인 세포 구조 그림을 제시하고 세포자멸사에서의 핵심 소기관을 찾도록 하여, 해당 지식을 확인하고 있습니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Mitochondria\",\n                \"Apoptosis\",\n                \"Cell death\",\n                \"Cytochrome C\",\n                \"Intrinsic pathway\"\n            ]\n        },\n        {\n            \"lesson_page\": 33,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 33,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"20\",\n                    \"question_text\": \"수용체와 신호전달에 관한 설명으로 옳은 것을 고르시오(2개)\",\n                    \"answer\": \"3, 4\",\n                    \"explanation\": \"이 문제는 수용체와 신호전달의 일반적인 원리에 대해 묻고 있습니다. 강의자료 32, 33, 36, 37페이지 등 여러 슬라이드에 걸친 내용을 종합해야 합니다.\\n- 3번: 세포 표면 수용체는 그 신호전달 기전(예: G-protein coupled, tyrosine kinase, ion channel 등)에 따라 분류됩니다. 이는 수용체 분류의 기본 원칙으로 맞는 설명입니다.\\n- 4번: 면역 수용체(Immune receptors)와 인테그린(Integrin)은 리간드와 결합 후 세포 내 다른 효소(non-receptor tyrosine kinase 등)를 활성화시키는 방식으로 신호를 전달하며, 수용체 자체에는 효소 활성이 없습니다. 이는 강의자료 36페이지에 명시된 내용으로 맞는 설명입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"서로 다른 신호전달 경로라도 최종적으로는 동일한 전사 인자를 활성화하거나 특정 단백질을 인산화하는 등 기전을 공유하며 수렴(convergence)할 수 있습니다. 따라서 기전이 항상 달라진다는 설명은 틀렸습니다.\",\n                        \"2번\": \"신호전달물질은 수용체와 매우 높은 친화력으로 결합하므로, 매우 낮은 생리적 농도에서도 효과적으로 결합하여 작용합니다. '생리적인 농도보다 낮은 농도에서 결합한다'는 표현 자체는 맞을 수 있으나, 3, 4번이 더 명확하게 강의 내용에 부합하는 정답입니다.\",\n                        \"5번\": \"지용성(Lipid-soluble) 신호전달물질(예: 스테로이드 호르몬)은 세포막을 통과하여 세포 내 수용체(nuclear receptor)에 결합합니다. G단백질 연관 수용체(GPCR)는 주로 수용성(water-soluble) 리간드와 결합하므로 틀린 설명입니다.\"\n                    },\n                    \"relevance_reason\": \"문제는 여러 슬라이드에 걸쳐 설명된 수용체의 분류(33p), 종류별 특성(36p, 37p) 등 핵심 개념을 정확히 이해하고 있는지를 종합적으로 평가합니다.\"\n                }\n            ],\n            \"importance_score\": 9,\n            \"key_concepts\": [\n                \"Cell surface receptors\",\n                \"Signal transduction\",\n                \"Receptors lacking intrinsic activity\",\n                \"GPCR\",\n                \"Nuclear receptor\"\n            ]\n        },\n        {\n            \"lesson_page\": 46,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 46,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"24\",\n                    \"question_text\": \"세포바깥 바탕질(Extracellular matrix)의 역할에 대한 설명으로 옳은 것을 고르시오.(3개)\",\n                    \"answer\": \"2, 3, 4\",\n                    \"explanation\": \"이 문제는 세포바깥바탕질(ECM)의 기능에 대해 묻고 있습니다. 강의자료 46페이지에 ECM의 주요 기능이 명확하게 나열되어 있습니다.\\n- 2번: ECM은 인테그린(integrin) 수용체를 통해 신호를 전달하여 세포 증식을 조절합니다. 이는 슬라이드의 'Regulator of cell proliferation' 항목과 일치하여 정답입니다.\\n- 3번: ECM은 조직의 구조를 유지하는 물리적 지지대(scaffolding) 역할을 합니다. 이는 슬라이드의 'Mechanical support' 및 'Scaffolding for tissue renewal' 항목과 일치하여 정답입니다.\\n- 4번: ECM은 조직의 미세환경(microenvironment)을 형성하는 기반이 됩니다. 이는 슬라이드의 'Foundation for establishment of tissue microenvironments' 항목과 일치하여 정답입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"ECM은 성장인자 등을 저장하고 제시함으로써 신호전달에 관여하지만, '화학적 조절자'라는 표현보다는 물리적 지지 및 증식 조절 기능이 더 주된 역할로 설명됩니다.\",\n                        \"5번\": \"ECM은 조절 분자(regulatory molecules)를 저장할 수는 있지만, 혈구세포(blood cells) 자체를 저장하는 장소는 아닙니다.\"\n                    },\n                    \"relevance_reason\": \"문제의 보기들은 강의자료 46페이지에 요약된 ECM의 기능들을 직접적으로 확인하는 내용으로 구성되어 있습니다. 슬라이드의 핵심 내용을 정확히 이해했는지 평가합니다.\"\n                },\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 38,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"84\",\n                    \"question_text\": \"세포바깥 바탕질(Extracellular matrix)의 역할에 대한 설명으로 옳은 것을 고르시오.(3개)\",\n                    \"answer\": \"2, 3, 4\",\n                    \"explanation\": \"이 문제는 세포바깥바탕질(ECM)의 기능에 대해 묻고 있습니다. 강의자료 46페이지에 ECM의 주요 기능이 명확하게 나열되어 있습니다.\\n- 2번: ECM은 인테그린(integrin) 수용체를 통해 신호를 전달하여 세포 증식을 조절합니다. 이는 슬라이드의 'Regulator of cell proliferation' 항목과 일치하여 정답입니다.\\n- 3번: ECM은 조직의 구조를 유지하는 물리적 지지대(scaffolding) 역할을 합니다. 이는 슬라이드의 'Mechanical support' 및 'Scaffolding for tissue renewal' 항목과 일치하여 정답입니다.\\n- 4번: ECM은 조직의 미세환경(microenvironment)을 형성하는 기반이 됩니다. 이는 슬라이드의 'Foundation for establishment of tissue microenvironments' 항목과 일치하여 정답입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"ECM은 성장인자 등을 저장하고 제시함으로써 신호전달에 관여하지만, '화학적 조절자'라는 표현보다는 물리적 지지 및 증식 조절 기능이 더 주된 역할로 설명됩니다.\",\n                        \"5번\": \"ECM은 조절 분자(regulatory molecules)를 저장할 수는 있지만, 혈구세포(blood cells) 자체를 저장하는 장소는 아닙니다.\"\n                    },\n                    \"relevance_reason\": \"이 문제는 족보 46페이지의 24번 문제와 동일합니다. 문제의 보기들은 강의자료 46페이지에 요약된 ECM의 기능들을 직접적으로 확인하는 내용으로 구성되어 있습니다.\"\n                }\n            ],\n            \"importance_score\": 9,\n            \"key_concepts\": [\n                \"Extracellular Matrix (ECM)\",\n                \"Cell proliferation\",\n                \"Tissue renewal\",\n                \"Scaffolding\",\n                \"Microenvironment\"\n            ]\n        },\n        {\n            \"lesson_page\": 48,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 48,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"39\",\n                    \"question_text\": \"다음은 상피 세포의 현미경 사진이다. 화살표 한 부분을 구성하는 주된 성분을 모두 고르시오. (3개)\",\n                    \"answer\": \"1, 3, 5\",\n                    \"explanation\": \"문제의 화살표는 상피세포 아래의 기저막(Basement Membrane)을 가리키고 있습니다. 강의자료 48페이지와 49페이지에서 기저막의 주요 구성 성분을 설명하고 있습니다.\\n- 1번 nonfibrillar collagen: 기저막의 주된 콜라겐은 Type IV 콜라겐으로, 이는 nonfibrillar(비세섬유성) 콜라겐에 속합니다. 정답입니다.\\n- 3번 laminin: 라미닌은 기저막의 핵심적인 접착성 당단백질입니다. 정답입니다.\\n- 5번 proteoglycan: 프로테오글리칸(특히 Heparan sulfate)은 기저막을 구성하는 중요한 성분입니다. 정답입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"Elastin(탄력소)은 주로 간질 바탕질(interstitial matrix)에 존재하며 기저막의 주성분은 아닙니다.\",\n                        \"4번\": \"Integrin(인테그린)은 세포 표면에 있는 수용체로, 기저막에 '부착'하는 역할을 할 뿐 기저막을 '구성'하는 성분은 아닙니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 48페이지에서 기저막의 구성 성분으로 'NONFIBRILLAR COLLAGEN (MOSTLY TYPE IV), LAMININ, HEPARIN SULFATE PROTEOGLYCANS'를 명확히 제시하고 있어, 문제와 직접적으로 관련됩니다. 49페이지의 그림도 이를 시각적으로 확인시켜 줍니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Basement membrane\",\n                \"Extracellular Matrix (ECM)\",\n                \"Type IV collagen\",\n                \"Laminin\",\n                \"Proteoglycan\"\n            ]\n        },\n        {\n            \"lesson_page\": 66,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 37,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"82\",\n                    \"question_text\": \"Stem cell의 특징에 대한 설명으로 옳은 것을 고르시오.\",\n                    \"answer\": \"1\",\n                    \"explanation\": \"이 문제는 줄기세포의 특징에 대한 정확한 설명을 고르는 문제입니다. 강의자료 66, 69페이지 등에서 관련 내용을 찾을 수 있습니다.\\n- 1번: 골수에는 중간엽 줄기세포(mesenchymal stem cells, MSCs)가 존재하며, 이들은 연골세포, 골세포, 지방세포, 근세포 등 다양한 기질 세포로 분화할 수 있는 다분화능(multipotent)을 가집니다. 이는 강의자료 66, 69페이지에 명시된 내용과 일치하여 정답입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"만능 줄기세포(pluripotent stem cells)가 모든 종류의 분화된 조직을 만들 수 있다는 설명은 맞지만, 이 문제에서는 여러 보기 중 가장 적절한 하나를 고르는 것이므로 다른 보기와 비교가 필요합니다.\",\n                        \"3번\": \"성체 줄기세포는 손상된 세포를 교체하는 것 외에도, 정상적인 조직의 항상성 유지를 위해 지속적으로 세포를 공급하는 역할을 합니다. 기능이 '교체'에만 국한된다는 설명은 틀렸습니다.\",\n                        \"4번\": \"배아 줄기세포(Embryonic stem cells)는 가장 분화가 '덜' 된 세포(pluripotent)이지, 가장 분화된 세포가 아닙니다. 또한 전능성(totipotent)이 아닌 만능성(pluripotent)을 가집니다. 설명이 완전히 틀렸습니다.\",\n                        \"5번\": \"조직 줄기세포가 줄기세포 미세환경(niche) 내에서 보호받는다는 설명은 맞지만, 1번 보기는 특정 줄기세포의 종류와 분화능을 구체적으로 설명하여 더 구체적인 사실을 진술하고 있습니다. (출제 의도에 따라 1번 또는 5번이 정답이 될 수 있으나, 족보의 표기에 따라 1번을 정답으로 합니다.)\"\n                    },\n                    \"relevance_reason\": \"강의자료 66페이지와 69페이지에서 성체 줄기세포의 예시로 골수 유래 중간엽 줄기세포(MSC)와 그 분화능에 대해 구체적으로 설명하고 있어, 1번 보기는 강의 내용과 직접적으로 연결됩니다.\"\n                }\n            ],\n            \"importance_score\": 9,\n            \"key_concepts\": [\n                \"Stem cell\",\n                \"Mesenchymal stem cell (MSC)\",\n                \"Multipotent\",\n                \"Pluripotent\",\n                \"Stem cell niche\"\n            ]\n        },\n        {\n            \"lesson_page\": 72,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240527 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 72,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"45\",\n                    \"question_text\": \"다음은 세포막 단백질을 설명한 것이다. 옳은 것을 한 개 고르시오.\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"이 문제는 세포막 단백질의 종류와 특성에 대한 이해를 묻고 있습니다. 강의자료 15페이지의 그림 하단 설명과 관련이 있습니다.\\n- 2번: 세포질의 자유 리보솜에서 합성된 단백질은 번역 후 수식(posttranslational modification)을 통해 프레닐 그룹(farnesyl 등)이나 지방산(palmitic acid 등)이 부착될 수 있습니다. 이 소수성 꼬리는 단백질이 세포막의 세포질 쪽 면에 삽입되거나 부착되도록 합니다. 이는 강의자료 15페이지 하단 설명과 일치하여 정답입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"막단백질은 막을 관통하는 내재성(integral) 단백질과 막 표면에 부착된 표재성(peripheral) 단백질로 나뉩니다. 'integral or surface'라는 표현이 애매하며, 표재성 단백질은 막을 관통하지 않습니다.\",\n                        \"3번\": \"GPI(glycosylphosphatidylinositol) 앵커 단백질은 세포막의 '바깥쪽(extracellular)' 면에 위치합니다. 'intracellular(세포내)' 면이라는 설명이 틀렸습니다.\",\n                        \"4번\": \"표재성 막단백질은 막관통 단백질이나 인지질의 극성 머리 부분과 '비공유(noncovalently)' 결합을 통해 약하게 부착됩니다. 'covalently(공유결합으로)'라는 설명이 틀렸습니다.\",\n                        \"5번\": \"많은 막단백질들은 기능을 위해 'large(큰)' 복합체를 형성합니다. 'small(작은)' 복합체라는 설명은 틀렸습니다.\"\n                    },\n                    \"relevance_reason\": \"문제의 보기들은 강의자료 15페이지의 그림과 하단 캡션에서 설명하는 막단백질의 종류(내재성, 표재성)와 부착 방식(번역 후 수식, GPI 앵커)에 대한 개념을 정확히 이해하고 있는지 평가합니다. 족보의 학생 필기에 따르면 이 내용은 강의자료에 명확히 없었을 수 있으나, 관련 슬라이드는 15페이지입니다.\"\n                }\n            ],\n            \"importance_score\": 7,\n            \"key_concepts\": [\n                \"Plasma membrane protein\",\n                \"Integral protein\",\n                \"Peripheral protein\",\n                \"Post-translational modification\",\n                \"GPI anchor\"\n            ]\n        }\n    ],\n    \"summary\": {\n        \"total_related_slides\": 12,\n        \"total_questions\": 15,\n        \"key_topics\": [\n            \"DNA 구조 및 변이 (SNP, Non-coding DNA)\",\n            \"RNA 기능 (lncRNA)\",\n            \"세포 소기관 기능 (미토콘드리아, 세포자멸사)\",\n            \"세포골격 (중간섬유, 미세소관)\",\n            \"세포막 구조 및 수송\",\n            \"세포외기질(ECM) 및 기저막\",\n            \"줄기세포\"\n        ],\n        \"study_recommendations\": \"본 족보 분석 결과, '인체병리학총론'의 '세포 단위' 파트에서는 강의자료의 그림과 텍스트를 거의 그대로 인용하여 핵심 단어를 바꾸는 형태의 문제가 다수 출제되었습니다. 특히 각 개념의 '정의', '구성 요소', '기능', '분류'를 묻는 문제가 많습니다. 그림 자료(예: DNA 구조, 세포 소기관, 세포골격, ECM 구조)와 그에 대한 설명을 정확히 연결하여 암기하는 것이 매우 중요합니다. 또한, 서로 다른 개념(예: SNP vs CNV, lncRNA vs siRNA, 괴사 vs 세포자멸사)의 특징을 비교하고 구분하는 능력이 요구됩니다. 단순히 키워드만 암기하기보다는, 슬라이드의 문장 전체를 이해하고 각 구성요소의 정확한 명칭과 역할을 숙지하는 것이 고득점의 열쇠가 될 것입니다.\"\n    }\n}",
+  "response_length": 27535,
+  "parsed_successfully": true,
+  "parsed_data": {
+    "related_slides": [
+      {
+        "lesson_page": 5,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 35,
+            "jokbo_end_page": null,
+            "question_number": "78",
+            "question_text": "다음 그림 A,B,C에 들어갈 명칭을 각각 적으시오.",
+            "answer": "A: Heterochromatin, B: Euchromatin, C: Nucleosome",
+            "explanation": "이 문제는 핵 내 유전물질의 구성에 대한 이해를 묻고 있습니다. 강의자료 5페이지의 'THE ORGANIZATION OF NUCLEAR DNA' 그림은 이 구조를 명확하게 보여줍니다.\n- A는 밀집되어 있고 비활성 상태인 이질염색질(Heterochromatin)을 가리킵니다.\n- B는 풀려 있고 전사가 활발한 진정염색질(Euchromatin)을 가리킵니다.\n- C는 DNA가 히스톤 단백질을 감고 있는 기본 단위인 뉴클레오솜(Nucleosome)을 가리킵니다.",
+            "wrong_answer_explanations": {},
+            "relevance_reason": "문제의 그림은 강의자료 5페이지에 있는 'THE ORGANIZATION OF NUCLEAR DNA' 그림과 정확히 일치하며, 그림의 각 부분(A, B, C)에 해당하는 명칭을 직접적으로 묻고 있습니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Heterochromatin",
+          "Euchromatin",
+          "Nucleosome",
+          "DNA organization"
+        ]
+      },
+      {
+        "lesson_page": 6,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 7,
+            "jokbo_end_page": null,
+            "question_number": "44",
+            "question_text": "다음 인간게놈의 functional non-protein coding sequence에 관한 설명으로 옳은 것을 두 개 고르시오.",
+            "answer": "1, 5",
+            "explanation": "이 문제는 단백질을 코딩하지 않는 기능적 DNA 서열의 종류와 기능에 대해 묻고 있습니다. 강의자료 6페이지의 '5 MAJOR CLASSES OF FUNCTIONAL NON-PROTEIN CODING SEQUENCES' 슬라이드 내용과 직접적으로 관련됩니다.\n- 1번: Promoter와 enhancer는 전사 인자 결합 부위를 제공합니다. 이는 슬라이드의 첫 번째 항목과 일치하여 정답입니다.\n- 5번: Telomere와 centromere는 DNA의 특별한 구조적 영역입니다. 이는 슬라이드의 마지막 항목과 일치하여 정답입니다.",
+            "wrong_answer_explanations": {
+              "2번": "염색질 구조를 유지하는 인자 결합 부위는 'higher order' 구조를 형성한다고 되어 있으나, 문제에서는 'lower order'라고 기술하여 오답입니다.",
+              "3번": "Noncoding regulatory RNA는 번역되지 않는(never translated) RNA라고 슬라이드에 명시되어 있으나, 문제에서는 'translated'라고 기술하여 오답입니다.",
+              "4번": "Mobile genetic elements(transposons)는 인간 게놈의 'a third(1/3)' 이상을 차지한다고 되어 있으나, 문제에서는 'a half(1/2)'라고 기술하여 오답입니다."
+            },
+            "relevance_reason": "문제의 보기들이 강의자료 6페이지에 나열된 5가지 주요 기능적 비단백질 코딩 서열의 내용을 거의 그대로 인용하면서 일부 단어를 수정하여 정오를 판별하도록 출제되었습니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Non-protein coding DNA",
+          "Promoter",
+          "Enhancer",
+          "Telomere",
+          "Centromere",
+          "Noncoding regulatory RNA"
+        ]
+      },
+      {
+        "lesson_page": 8,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 9,
+            "jokbo_end_page": null,
+            "question_number": "43",
+            "question_text": "다음 single nucleotide polymorphisms (SNPs) and copy number variations (CNVs)에 관한 설명으로 옳은 것을 한 개 고르시오.",
+            "answer": "1",
+            "explanation": "이 문제는 DNA 변이의 가장 흔한 두 형태인 SNP와 CNV에 대한 이해를 묻고 있습니다. 강의자료 8페이지의 내용과 직접적으로 연관됩니다.\n- 1번: 'SNPs located in noncoding regions can occur within genomic regulatory elements, thereby altering gene expression; in such instances, SNPs influence disease susceptibility directly.'는 슬라이드에 있는 문장과 정확히 일치하므로 정답입니다.",
+            "wrong_answer_explanations": {
+              "2번": "슬라이드에는 SNP의 약 1%가 'coding' 지역에서 발견된다고 되어 있으나, 문제에서는 'non-coding' 지역이라고 하여 오답입니다.",
+              "3번": "질병 감수성에 대한 영향이 약한 것은 'most SNPs'라고 슬라이드에 명시되어 있으나, 문제에서는 'most CNVs'라고 하여 오답입니다.",
+              "4번": "두 개인 간의 5백만~24백만 염기쌍 차이를 유발하는 것은 'CNVs'라고 슬라이드에 명시되어 있으나, 문제에서는 'SNPs'라고 하여 오답입니다.",
+              "5번": "유전자 코딩 서열을 포함하는 비율이 약 50%인 것은 'CNVs'라고 슬라이드에 명시되어 있으나, 문제에서는 'SNPs'라고 하여 오답입니다."
+            },
+            "relevance_reason": "문제의 모든 보기는 강의자료 8페이지의 문장에서 핵심 단어(SNP/CNV, coding/non-coding)를 바꾸어 출제되었으며, 슬라이드 내용을 정확히 암기했는지 확인하는 문제입니다."
+          },
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 35,
+            "jokbo_end_page": null,
+            "question_number": "79",
+            "question_text": "다음 중 옳은 설명을 한 개 고르시오.",
+            "answer": "5",
+            "explanation": "이 문제는 SNP(단일염기다형성)에 대한 정확한 설명을 고르는 문제입니다. 강의자료 8페이지의 SNP 관련 설명에서 정답을 찾을 수 있습니다.\n- 5번: 'SNPs occur across the genome—within exons, introns, intergenic regions, and coding regions.'는 슬라이드에 있는 내용과 일치하여 정답입니다. SNP는 유전체 전반에 걸쳐 나타납니다.",
+            "wrong_answer_explanations": {
+              "1번": "SNP는 'single' nucleotide position에서의 변이이지, 'several' nucleotide positions에서의 변이가 아니므로 오답입니다.",
+              "2번": "코딩 지역에서 발생하는 SNP는 약 '1%'이며, 코딩 지역은 전체 유전체의 약 '1.5%'를 차지합니다. 문제의 '10%', '15%'는 틀린 수치입니다.",
+              "3번": "유전자 발현에 영향을 미치는 조절 요소는 주로 'noncoding' 지역에 위치합니다. 'coding' 지역에 있다고 한 설명은 틀렸습니다.",
+              "4)": "해당 보기는 CNV에 대한 설명인데, 문제의 주제인 SNP와 맞지 않습니다."
+            },
+            "relevance_reason": "문제의 보기들은 강의자료 8페이지의 SNP에 대한 정의와 특성을 설명하는 문장들을 변형하여 만들어졌습니다. 슬라이드의 내용을 정확히 이해해야 풀 수 있는 문제입니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Single Nucleotide Polymorphism (SNP)",
+          "Copy Number Variation (CNV)",
+          "Genetic variation",
+          "Coding region",
+          "Noncoding region"
+        ]
+      },
+      {
+        "lesson_page": 11,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 12,
+            "jokbo_end_page": null,
+            "question_number": "47",
+            "question_text": "다음 설명 중 long noncoding RNA(lcRNA)의 역할을 설명한 것이 아닌 것을 한 가지 고르시오.",
+            "answer": "5",
+            "explanation": "이 문제는 lncRNA의 기능이 아닌 것을 찾는 문제입니다. 강의자료 11페이지에 lncRNA의 주요 역할 4가지가 명시되어 있습니다.\n- 5번: 'Synthetic ... agents to silence pathogenic genes'는 lncRNA가 아닌 small interfering RNA(siRNA)나 short hairpin RNA(shRNA)와 같은 RNA 간섭(RNAi) 기술에 대한 설명입니다. 강의자료 10페이지에서 siRNA가 유전자 발현을 억제하는 데 사용될 수 있음을 언급합니다. 따라서 lncRNA의 역할이 아니므로 정답입니다.",
+            "wrong_answer_explanations": {
+              "1번": "Gene activation (유전자 활성화)은 lncRNA의 역할 중 하나입니다.",
+              "2번": "Gene suppression (유전자 억제)은 lncRNA의 역할 중 하나입니다.",
+              "3번": "Promote chromatin modification (염색질 변형 촉진)은 lncRNA의 역할 중 하나입니다.",
+              "4번": "Assembly of protein complexes (단백질 복합체 조립)은 lncRNA의 역할 중 하나입니다."
+            },
+            "relevance_reason": "문제의 보기 1-4번은 강의자료 11페이지에 명시된 lncRNA의 4가지 역할을 그대로 나열하고 있으며, 5번 보기는 다른 유형의 RNA(siRNA)의 기능을 설명하고 있어, 강의 내용을 명확히 구분하는지를 평가합니다."
+          },
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 37,
+            "jokbo_end_page": null,
+            "question_number": "83",
+            "question_text": "다음 설명 중 long noncoding RNA(lcRNA)의 역할을 설명한 것이 아닌 것을 한 가지 고르시오.",
+            "answer": "5",
+            "explanation": "이 문제는 lncRNA의 기능이 아닌 것을 찾는 문제입니다. 강의자료 11페이지에 lncRNA의 주요 역할 4가지가 명시되어 있습니다.\n- 5번: 'Synthetic ... agents to silence pathogenic genes'는 lncRNA가 아닌 small interfering RNA(siRNA)나 short hairpin RNA(shRNA)와 같은 RNA 간섭(RNAi) 기술에 대한 설명입니다. 강의자료 10페이지에서 siRNA가 유전자 발현을 억제하는 데 사용될 수 있음을 언급합니다. 따라서 lncRNA의 역할이 아니므로 정답입니다.",
+            "wrong_answer_explanations": {
+              "1번": "Gene activation (유전자 활성화)은 lncRNA의 역할 중 하나입니다.",
+              "2번": "Gene suppression (유전자 억제)은 lncRNA의 역할 중 하나입니다.",
+              "3번": "Promote chromatin modification (염색질 변형 촉진)은 lncRNA의 역할 중 하나입니다.",
+              "4번": "Assembly of protein complexes (단백질 복합체 조립)은 lncRNA의 역할 중 하나입니다."
+            },
+            "relevance_reason": "이 문제는 족보 12페이지의 47번 문제와 동일합니다. 문제의 보기 1-4번은 강의자료 11페이지에 명시된 lncRNA의 4가지 역할을 그대로 나열하고 있으며, 5번 보기는 다른 유형의 RNA(siRNA)의 기능을 설명하고 있어, 강의 내용을 명확히 구분하는지를 평가합니다."
+          }
+        ],
+        "importance_score": 9,
+        "key_concepts": [
+          "Long noncoding RNA (lncRNA)",
+          "Gene activation",
+          "Gene suppression",
+          "Chromatin modification",
+          "siRNA"
+        ]
+      },
+      {
+        "lesson_page": 16,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 17,
+            "jokbo_end_page": null,
+            "question_number": "46",
+            "question_text": "다음 세포막을 통한 물질이동 기전에 관한 설명 중 옳은 것을 두 개 고르시오.",
+            "answer": "4, 5",
+            "explanation": "이 문제는 세포막을 통한 물질 이동 기전에 대한 정확한 설명을 고르는 문제입니다. 강의자료 16페이지의 'MEMBRANE TRANSPORT: MECHANISM' 그림과 관련 개념을 바탕으로 풀 수 있습니다.\n- 4번: Transcytosis(세포통과운반)는 세포의 한쪽 면(apical)에서 물질을 흡수하여 다른 쪽 면(basolateral)으로 방출하는 움직임을 의미합니다. 이는 정의에 부합하므로 정답입니다.\n- 5번: Endocytosis(세포내이입)로 소실된 세포막은 Exocytosis(세포외유출)를 통해 다시 보충되어야 세포막의 총량이 유지됩니다. 이는 세포 항상성을 위한 필수적인 과정이므로 정답입니다.",
+            "wrong_answer_explanations": {
+              "1번": "지질 이중층은 소수성(hydrophobic) 분자가 아닌 친수성(hydrophilic) 또는 하전된 분자에 대해 비투과성입니다. 설명이 반대로 되어 오답입니다.",
+              "2번": "하전된 용질은 일반적으로 각각의 분자에 특이적인(specific) 운반체나 채널을 필요로 합니다. 'common(공통의)' 운반체를 사용한다는 설명은 틀렸습니다.",
+              "3번": "많은 세포막 단백질은 기능적으로 'large(큰)' 복합체를 형성합니다. 'small(작은)' 복합체라는 설명은 틀렸습니다."
+            },
+            "relevance_reason": "문제의 보기들은 강의자료 16페이지의 그림에 나타난 다양한 세포막 수송 방식(Transcytosis, Endocytosis, Exocytosis, Channels, Carriers)에 대한 기본 개념을 묻고 있습니다."
+          }
+        ],
+        "importance_score": 8,
+        "key_concepts": [
+          "Membrane transport",
+          "Transcytosis",
+          "Endocytosis",
+          "Exocytosis",
+          "Lipid bilayer permeability"
+        ]
+      },
+      {
+        "lesson_page": 18,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 38,
+            "jokbo_end_page": 39,
+            "question_number": "85",
+            "question_text": "다음이 설명하고 있는 인자를 그림에서 골라 맞게 연결된 것을 고르시오.",
+            "answer": "2",
+            "explanation": "문제에서 제시된 설명('Serve as mooring lines for molecular motor proteins...', 'Mediate sister chromatid segregation during mitosis.' 등)은 모두 미세소관(Microtubule)의 기능입니다. 이 설명은 강의자료 20페이지 하단에 자세히 나와 있습니다. 문제의 그림은 강의자료 18페이지의 세포골격 그림입니다. 이 그림에서 B는 미세소관(Microtubule)을 가리킵니다. 따라서 설명과 그림의 B를 연결한 보기 2번이 정답입니다.",
+            "wrong_answer_explanations": {
+              "1번": "A는 미세융모(Microvilli)이며, 주로 액틴 필라멘트로 구성됩니다. 설명은 미세소관에 대한 것이므로 틀렸습니다.",
+              "3번": "J는 기저막(Basement membrane)입니다. 설명과 관련 없습니다.",
+              "4)": "K는 인테그린(Integrin)입니다. 설명과 관련 없습니다.",
+              "5)": "E는 부착반(Desmosome)입니다. 설명과 관련 없습니다."
+            },
+            "relevance_reason": "문제의 설명은 강의자료 20페이지의 미세소관(Microtubule) 기능을 그대로 인용했고, 그림은 강의자료 18페이지의 그림을 사용하여 두 슬라이드의 정보를 종합하여 답을 찾도록 요구합니다. 설명과 그림상의 위치를 정확히 연결해야 합니다."
+          }
+        ],
+        "importance_score": 9,
+        "key_concepts": [
+          "Cytoskeleton",
+          "Microtubule",
+          "Cell-cell interaction",
+          "Molecular motor proteins"
+        ]
+      },
+      {
+        "lesson_page": 22,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 22,
+            "jokbo_end_page": null,
+            "question_number": "40",
+            "question_text": "다양한 종류의 이질적인 단백질들로 조직에 따라 특이한 발현양상을 보이기 때문에 분화가 나쁜 종양에서 세포의 기원을 추정하는데 유용한 세포골격단백질을 고르시오. (3개)",
+            "answer": "2, 3, 6",
+            "explanation": "이 문제는 조직 특이적 발현을 통해 종양의 기원을 밝히는 데 사용되는 중간섬유(Intermediate filament) 단백질을 고르는 것입니다. 강의자료 20페이지와 22페이지에서 이를 명확히 설명하고 있습니다.\n- 2번 Vimentin: 중간엽 세포(mesenchymal cells)에서 발현됩니다.\n- 3번 Desmin: 근육 세포(muscle cells)에서 발현됩니다.\n- 6번 Cytokeratin: 상피 세포(epithelial cells)에서 발현됩니다.\n이 세 가지는 모두 조직 표지자로 사용되는 대표적인 중간섬유 단백질입니다.",
+            "wrong_answer_explanations": {
+              "1번": "Actin은 모든 세포에 존재하는 세포골격 단백질로 조직 특이성이 낮아 기원 추정에 유용하지 않습니다.",
+              "4번": "Microtubule은 세포골격의 한 종류이지만, 조직 표지자로 사용되는 중간섬유가 아닙니다.",
+              "5번": "Myosin은 액틴과 상호작용하는 운동 단백질로, 중간섬유가 아닙니다."
+            },
+            "relevance_reason": "강의자료 20페이지에서 'Intermediate filaments ... have characteristic tissue-specific patterns of expression that can be useful for assigning a cell of origin for poorly differentiated tumors.'라고 명시하고 있으며, 22페이지 슬라이드에서 Vimentin, Desmin, Cytokeratin을 주요 예시로 들고 있어 문제와 직접적으로 연결됩니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Intermediate filament",
+          "Cytoskeleton",
+          "Tumor marker",
+          "Vimentin",
+          "Desmin",
+          "Cytokeratin"
+        ]
+      },
+      {
+        "lesson_page": 27,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 27,
+            "jokbo_end_page": null,
+            "question_number": "21",
+            "question_text": "다음 그림은 미토콘드리아의 역할에 관한 것이다. 빈칸에 들어갈 알맞은 것을 고르시오",
+            "answer": "1",
+            "explanation": "문제의 그림은 미토콘드리아의 기능을 나타내며, 빈칸은 세포 사멸 경로를 가리킵니다. 강의자료 27페이지의 'ROLE OF MITOCHONDRIA' 그림에서, Bax/Bak complex 형성, Cytochrome C 방출로 이어지는 경로는 최종적으로 'CELL DEATH (apoptosis)'를 유발한다고 명확히 보여줍니다. 따라서 빈칸에 들어갈 가장 알맞은 용어는 apoptosis(세포자멸사)입니다.",
+            "wrong_answer_explanations": {
+              "2번": "Necrosis(괴사)는 주로 허혈/독성 손상으로 인한 막 투과성 변화로 ATP 생성 없이 일어나는 세포 사멸로, 그림의 경로와는 다릅니다.",
+              "3번": "ATP generation(ATP 생성)은 미토콘드리아의 주요 기능이지만, 그림의 빈칸이 속한 경로(세포 사멸)와는 다릅니다.",
+              "4번": "Gene transcription(유전자 전사)은 주로 핵에서 일어나는 과정입니다.",
+              "5번": "Increases cell motility(세포 운동성 증가)는 미토콘드리아의 직접적인 역할이 아닙니다."
+            },
+            "relevance_reason": "문제의 그림은 강의자료 27페이지의 그림을 간략화한 버전이며, 미토콘드리아가 매개하는 내인성 세포자멸사(intrinsic apoptosis) 경로의 최종 결과를 묻는 문제로, 슬라이드 내용과 직접적으로 일치합니다."
+          },
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 29,
+            "jokbo_end_page": null,
+            "question_number": "69",
+            "question_text": "세포자멸사(apoptosis) 진행에 중심적인 역할을 하는 것을 그림에서 골라 명칭을 적으시오 (답안 예시: 1번, nucleus)",
+            "answer": "1번 mitochondria",
+            "explanation": "세포자멸사(apoptosis), 특히 내인성 경로(intrinsic pathway)에서 미토콘드리아는 핵심적인 역할을 합니다. 미토콘드리아는 세포 손상 신호를 감지하여 Cytochrome C와 같은 세포자멸사 유발 단백질을 세포질로 방출함으로써 Caspase cascade를 활성화시킵니다. 강의자료 14페이지의 표와 27페이지의 그림 모두에서 미토콘드리아의 기능으로 'apoptosis'가 명시되어 있습니다. 문제의 그림에서 1번은 미토콘드리아를 가리킵니다.",
+            "wrong_answer_explanations": {},
+            "relevance_reason": "강의자료 14페이지와 27페이지에서 미토콘드리아가 세포자멸사의 핵심 조절자임을 반복적으로 강조하고 있습니다. 문제는 일반적인 세포 구조 그림을 제시하고 세포자멸사에서의 핵심 소기관을 찾도록 하여, 해당 지식을 확인하고 있습니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Mitochondria",
+          "Apoptosis",
+          "Cell death",
+          "Cytochrome C",
+          "Intrinsic pathway"
+        ]
+      },
+      {
+        "lesson_page": 33,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 33,
+            "jokbo_end_page": null,
+            "question_number": "20",
+            "question_text": "수용체와 신호전달에 관한 설명으로 옳은 것을 고르시오(2개)",
+            "answer": "3, 4",
+            "explanation": "이 문제는 수용체와 신호전달의 일반적인 원리에 대해 묻고 있습니다. 강의자료 32, 33, 36, 37페이지 등 여러 슬라이드에 걸친 내용을 종합해야 합니다.\n- 3번: 세포 표면 수용체는 그 신호전달 기전(예: G-protein coupled, tyrosine kinase, ion channel 등)에 따라 분류됩니다. 이는 수용체 분류의 기본 원칙으로 맞는 설명입니다.\n- 4번: 면역 수용체(Immune receptors)와 인테그린(Integrin)은 리간드와 결합 후 세포 내 다른 효소(non-receptor tyrosine kinase 등)를 활성화시키는 방식으로 신호를 전달하며, 수용체 자체에는 효소 활성이 없습니다. 이는 강의자료 36페이지에 명시된 내용으로 맞는 설명입니다.",
+            "wrong_answer_explanations": {
+              "1번": "서로 다른 신호전달 경로라도 최종적으로는 동일한 전사 인자를 활성화하거나 특정 단백질을 인산화하는 등 기전을 공유하며 수렴(convergence)할 수 있습니다. 따라서 기전이 항상 달라진다는 설명은 틀렸습니다.",
+              "2번": "신호전달물질은 수용체와 매우 높은 친화력으로 결합하므로, 매우 낮은 생리적 농도에서도 효과적으로 결합하여 작용합니다. '생리적인 농도보다 낮은 농도에서 결합한다'는 표현 자체는 맞을 수 있으나, 3, 4번이 더 명확하게 강의 내용에 부합하는 정답입니다.",
+              "5번": "지용성(Lipid-soluble) 신호전달물질(예: 스테로이드 호르몬)은 세포막을 통과하여 세포 내 수용체(nuclear receptor)에 결합합니다. G단백질 연관 수용체(GPCR)는 주로 수용성(water-soluble) 리간드와 결합하므로 틀린 설명입니다."
+            },
+            "relevance_reason": "문제는 여러 슬라이드에 걸쳐 설명된 수용체의 분류(33p), 종류별 특성(36p, 37p) 등 핵심 개념을 정확히 이해하고 있는지를 종합적으로 평가합니다."
+          }
+        ],
+        "importance_score": 9,
+        "key_concepts": [
+          "Cell surface receptors",
+          "Signal transduction",
+          "Receptors lacking intrinsic activity",
+          "GPCR",
+          "Nuclear receptor"
+        ]
+      },
+      {
+        "lesson_page": 46,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 46,
+            "jokbo_end_page": null,
+            "question_number": "24",
+            "question_text": "세포바깥 바탕질(Extracellular matrix)의 역할에 대한 설명으로 옳은 것을 고르시오.(3개)",
+            "answer": "2, 3, 4",
+            "explanation": "이 문제는 세포바깥바탕질(ECM)의 기능에 대해 묻고 있습니다. 강의자료 46페이지에 ECM의 주요 기능이 명확하게 나열되어 있습니다.\n- 2번: ECM은 인테그린(integrin) 수용체를 통해 신호를 전달하여 세포 증식을 조절합니다. 이는 슬라이드의 'Regulator of cell proliferation' 항목과 일치하여 정답입니다.\n- 3번: ECM은 조직의 구조를 유지하는 물리적 지지대(scaffolding) 역할을 합니다. 이는 슬라이드의 'Mechanical support' 및 'Scaffolding for tissue renewal' 항목과 일치하여 정답입니다.\n- 4번: ECM은 조직의 미세환경(microenvironment)을 형성하는 기반이 됩니다. 이는 슬라이드의 'Foundation for establishment of tissue microenvironments' 항목과 일치하여 정답입니다.",
+            "wrong_answer_explanations": {
+              "1번": "ECM은 성장인자 등을 저장하고 제시함으로써 신호전달에 관여하지만, '화학적 조절자'라는 표현보다는 물리적 지지 및 증식 조절 기능이 더 주된 역할로 설명됩니다.",
+              "5번": "ECM은 조절 분자(regulatory molecules)를 저장할 수는 있지만, 혈구세포(blood cells) 자체를 저장하는 장소는 아닙니다."
+            },
+            "relevance_reason": "문제의 보기들은 강의자료 46페이지에 요약된 ECM의 기능들을 직접적으로 확인하는 내용으로 구성되어 있습니다. 슬라이드의 핵심 내용을 정확히 이해했는지 평가합니다."
+          },
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 38,
+            "jokbo_end_page": null,
+            "question_number": "84",
+            "question_text": "세포바깥 바탕질(Extracellular matrix)의 역할에 대한 설명으로 옳은 것을 고르시오.(3개)",
+            "answer": "2, 3, 4",
+            "explanation": "이 문제는 세포바깥바탕질(ECM)의 기능에 대해 묻고 있습니다. 강의자료 46페이지에 ECM의 주요 기능이 명확하게 나열되어 있습니다.\n- 2번: ECM은 인테그린(integrin) 수용체를 통해 신호를 전달하여 세포 증식을 조절합니다. 이는 슬라이드의 'Regulator of cell proliferation' 항목과 일치하여 정답입니다.\n- 3번: ECM은 조직의 구조를 유지하는 물리적 지지대(scaffolding) 역할을 합니다. 이는 슬라이드의 'Mechanical support' 및 'Scaffolding for tissue renewal' 항목과 일치하여 정답입니다.\n- 4번: ECM은 조직의 미세환경(microenvironment)을 형성하는 기반이 됩니다. 이는 슬라이드의 'Foundation for establishment of tissue microenvironments' 항목과 일치하여 정답입니다.",
+            "wrong_answer_explanations": {
+              "1번": "ECM은 성장인자 등을 저장하고 제시함으로써 신호전달에 관여하지만, '화학적 조절자'라는 표현보다는 물리적 지지 및 증식 조절 기능이 더 주된 역할로 설명됩니다.",
+              "5번": "ECM은 조절 분자(regulatory molecules)를 저장할 수는 있지만, 혈구세포(blood cells) 자체를 저장하는 장소는 아닙니다."
+            },
+            "relevance_reason": "이 문제는 족보 46페이지의 24번 문제와 동일합니다. 문제의 보기들은 강의자료 46페이지에 요약된 ECM의 기능들을 직접적으로 확인하는 내용으로 구성되어 있습니다."
+          }
+        ],
+        "importance_score": 9,
+        "key_concepts": [
+          "Extracellular Matrix (ECM)",
+          "Cell proliferation",
+          "Tissue renewal",
+          "Scaffolding",
+          "Microenvironment"
+        ]
+      },
+      {
+        "lesson_page": 48,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 48,
+            "jokbo_end_page": null,
+            "question_number": "39",
+            "question_text": "다음은 상피 세포의 현미경 사진이다. 화살표 한 부분을 구성하는 주된 성분을 모두 고르시오. (3개)",
+            "answer": "1, 3, 5",
+            "explanation": "문제의 화살표는 상피세포 아래의 기저막(Basement Membrane)을 가리키고 있습니다. 강의자료 48페이지와 49페이지에서 기저막의 주요 구성 성분을 설명하고 있습니다.\n- 1번 nonfibrillar collagen: 기저막의 주된 콜라겐은 Type IV 콜라겐으로, 이는 nonfibrillar(비세섬유성) 콜라겐에 속합니다. 정답입니다.\n- 3번 laminin: 라미닌은 기저막의 핵심적인 접착성 당단백질입니다. 정답입니다.\n- 5번 proteoglycan: 프로테오글리칸(특히 Heparan sulfate)은 기저막을 구성하는 중요한 성분입니다. 정답입니다.",
+            "wrong_answer_explanations": {
+              "2번": "Elastin(탄력소)은 주로 간질 바탕질(interstitial matrix)에 존재하며 기저막의 주성분은 아닙니다.",
+              "4번": "Integrin(인테그린)은 세포 표면에 있는 수용체로, 기저막에 '부착'하는 역할을 할 뿐 기저막을 '구성'하는 성분은 아닙니다."
+            },
+            "relevance_reason": "강의자료 48페이지에서 기저막의 구성 성분으로 'NONFIBRILLAR COLLAGEN (MOSTLY TYPE IV), LAMININ, HEPARIN SULFATE PROTEOGLYCANS'를 명확히 제시하고 있어, 문제와 직접적으로 관련됩니다. 49페이지의 그림도 이를 시각적으로 확인시켜 줍니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Basement membrane",
+          "Extracellular Matrix (ECM)",
+          "Type IV collagen",
+          "Laminin",
+          "Proteoglycan"
+        ]
+      },
+      {
+        "lesson_page": 66,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 37,
+            "jokbo_end_page": null,
+            "question_number": "82",
+            "question_text": "Stem cell의 특징에 대한 설명으로 옳은 것을 고르시오.",
+            "answer": "1",
+            "explanation": "이 문제는 줄기세포의 특징에 대한 정확한 설명을 고르는 문제입니다. 강의자료 66, 69페이지 등에서 관련 내용을 찾을 수 있습니다.\n- 1번: 골수에는 중간엽 줄기세포(mesenchymal stem cells, MSCs)가 존재하며, 이들은 연골세포, 골세포, 지방세포, 근세포 등 다양한 기질 세포로 분화할 수 있는 다분화능(multipotent)을 가집니다. 이는 강의자료 66, 69페이지에 명시된 내용과 일치하여 정답입니다.",
+            "wrong_answer_explanations": {
+              "2번": "만능 줄기세포(pluripotent stem cells)가 모든 종류의 분화된 조직을 만들 수 있다는 설명은 맞지만, 이 문제에서는 여러 보기 중 가장 적절한 하나를 고르는 것이므로 다른 보기와 비교가 필요합니다.",
+              "3번": "성체 줄기세포는 손상된 세포를 교체하는 것 외에도, 정상적인 조직의 항상성 유지를 위해 지속적으로 세포를 공급하는 역할을 합니다. 기능이 '교체'에만 국한된다는 설명은 틀렸습니다.",
+              "4번": "배아 줄기세포(Embryonic stem cells)는 가장 분화가 '덜' 된 세포(pluripotent)이지, 가장 분화된 세포가 아닙니다. 또한 전능성(totipotent)이 아닌 만능성(pluripotent)을 가집니다. 설명이 완전히 틀렸습니다.",
+              "5번": "조직 줄기세포가 줄기세포 미세환경(niche) 내에서 보호받는다는 설명은 맞지만, 1번 보기는 특정 줄기세포의 종류와 분화능을 구체적으로 설명하여 더 구체적인 사실을 진술하고 있습니다. (출제 의도에 따라 1번 또는 5번이 정답이 될 수 있으나, 족보의 표기에 따라 1번을 정답으로 합니다.)"
+            },
+            "relevance_reason": "강의자료 66페이지와 69페이지에서 성체 줄기세포의 예시로 골수 유래 중간엽 줄기세포(MSC)와 그 분화능에 대해 구체적으로 설명하고 있어, 1번 보기는 강의 내용과 직접적으로 연결됩니다."
+          }
+        ],
+        "importance_score": 9,
+        "key_concepts": [
+          "Stem cell",
+          "Mesenchymal stem cell (MSC)",
+          "Multipotent",
+          "Pluripotent",
+          "Stem cell niche"
+        ]
+      },
+      {
+        "lesson_page": 72,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240527 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 72,
+            "jokbo_end_page": null,
+            "question_number": "45",
+            "question_text": "다음은 세포막 단백질을 설명한 것이다. 옳은 것을 한 개 고르시오.",
+            "answer": "2",
+            "explanation": "이 문제는 세포막 단백질의 종류와 특성에 대한 이해를 묻고 있습니다. 강의자료 15페이지의 그림 하단 설명과 관련이 있습니다.\n- 2번: 세포질의 자유 리보솜에서 합성된 단백질은 번역 후 수식(posttranslational modification)을 통해 프레닐 그룹(farnesyl 등)이나 지방산(palmitic acid 등)이 부착될 수 있습니다. 이 소수성 꼬리는 단백질이 세포막의 세포질 쪽 면에 삽입되거나 부착되도록 합니다. 이는 강의자료 15페이지 하단 설명과 일치하여 정답입니다.",
+            "wrong_answer_explanations": {
+              "1번": "막단백질은 막을 관통하는 내재성(integral) 단백질과 막 표면에 부착된 표재성(peripheral) 단백질로 나뉩니다. 'integral or surface'라는 표현이 애매하며, 표재성 단백질은 막을 관통하지 않습니다.",
+              "3번": "GPI(glycosylphosphatidylinositol) 앵커 단백질은 세포막의 '바깥쪽(extracellular)' 면에 위치합니다. 'intracellular(세포내)' 면이라는 설명이 틀렸습니다.",
+              "4번": "표재성 막단백질은 막관통 단백질이나 인지질의 극성 머리 부분과 '비공유(noncovalently)' 결합을 통해 약하게 부착됩니다. 'covalently(공유결합으로)'라는 설명이 틀렸습니다.",
+              "5번": "많은 막단백질들은 기능을 위해 'large(큰)' 복합체를 형성합니다. 'small(작은)' 복합체라는 설명은 틀렸습니다."
+            },
+            "relevance_reason": "문제의 보기들은 강의자료 15페이지의 그림과 하단 캡션에서 설명하는 막단백질의 종류(내재성, 표재성)와 부착 방식(번역 후 수식, GPI 앵커)에 대한 개념을 정확히 이해하고 있는지 평가합니다. 족보의 학생 필기에 따르면 이 내용은 강의자료에 명확히 없었을 수 있으나, 관련 슬라이드는 15페이지입니다."
+          }
+        ],
+        "importance_score": 7,
+        "key_concepts": [
+          "Plasma membrane protein",
+          "Integral protein",
+          "Peripheral protein",
+          "Post-translational modification",
+          "GPI anchor"
+        ]
+      }
+    ],
+    "summary": {
+      "total_related_slides": 12,
+      "total_questions": 15,
+      "key_topics": [
+        "DNA 구조 및 변이 (SNP, Non-coding DNA)",
+        "RNA 기능 (lncRNA)",
+        "세포 소기관 기능 (미토콘드리아, 세포자멸사)",
+        "세포골격 (중간섬유, 미세소관)",
+        "세포막 구조 및 수송",
+        "세포외기질(ECM) 및 기저막",
+        "줄기세포"
+      ],
+      "study_recommendations": "본 족보 분석 결과, '인체병리학총론'의 '세포 단위' 파트에서는 강의자료의 그림과 텍스트를 거의 그대로 인용하여 핵심 단어를 바꾸는 형태의 문제가 다수 출제되었습니다. 특히 각 개념의 '정의', '구성 요소', '기능', '분류'를 묻는 문제가 많습니다. 그림 자료(예: DNA 구조, 세포 소기관, 세포골격, ECM 구조)와 그에 대한 설명을 정확히 연결하여 암기하는 것이 매우 중요합니다. 또한, 서로 다른 개념(예: SNP vs CNV, lncRNA vs siRNA, 괴사 vs 세포자멸사)의 특징을 비교하고 구분하는 능력이 요구됩니다. 단순히 키워드만 암기하기보다는, 슬라이드의 문장 전체를 이해하고 각 구성요소의 정확한 명칭과 역할을 숙지하는 것이 고득점의 열쇠가 될 것입니다."
+    }
+  }
+}

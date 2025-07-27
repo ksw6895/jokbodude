@@ -1,0 +1,229 @@
+{
+  "timestamp": "20250727_012608",
+  "mode": "lesson-centric",
+  "jokbo_file": "240530 본1 인체병리학총론_정답.pdf",
+  "lesson_file": "0419, 0420_1,2교시_박지영 질병과 세포1,2 합본_신호준.pdf",
+  "response_text": "{\n    \"related_slides\": [\n        {\n            \"lesson_page\": 27,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240530 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 15,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"38\",\n                    \"question_text\": \"Apoptosis에 관한 그림이다. 옳은 것은?\",\n                    \"answer\": \"5\",\n                    \"explanation\": \"정답은 5번입니다. 세포자멸사(Apoptosis)의 내인성 경로(Mitochondrial pathway)에서 BCL2 단백질은 세포자멸사를 억제하는 조절자(regulator) 역할을 합니다. BCL2는 BAX, BAK과 같은 세포자멸사 유발 단백질의 활성을 막아 미토콘드리아 외막 투과성(MOMP)을 억제하고, 결과적으로 시토크롬 C의 방출을 막아 세포자멸사를 방해합니다. 따라서 BCL2 유전자의 기능이 항진되면 세포자멸사가 억제됩니다. 강의자료 27페이지의 그림은 미토콘드리아가 Bax/Bak 복합체에 의해 세포자멸사 신호를 매개하는 과정을 보여주며, 이는 BCL2와 같은 단백질에 의해 조절됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1\": \"종양 발생에서는 내인성(intrinsic) 경로가 더 중요하게 작용하는 경우가 많습니다. 많은 항암 치료가 이 경로를 활성화시켜 암세포를 사멸시킵니다.\",\n                        \"2\": \"대부분의 종양은 세포자멸사에 대한 저항성을 획득하여 활발하게 관찰되지 않습니다. 이는 암의 주요 특징(hallmark) 중 하나입니다.\",\n                        \"3\": \"시토크롬 C(Cytochrome C)는 세포자멸사 과정에서 미토콘드리아에서 세포질로 방출되며, 골지체에서 분비되지 않습니다. 강의자료 27페이지 그림에 명확히 나타나 있습니다.\",\n                        \"4\": \"세포자멸사는 염증 반응을 동반하지 않는 '조용한' 세포 사멸 과정입니다. 주변에 염증을 유발하는 것은 괴사(necrosis)의 특징입니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 27페이지는 문제의 보기 5번을 이해하는 데 핵심적인 미토콘드리아의 세포자멸사 조절 기능, 특히 시토크롬 C 방출과 관련된 내인성 경로를 상세히 설명하고 있습니다. BCL2의 역할을 이해하기 위해 필수적인 배경 지식을 제공합니다.\"\n                }\n            ],\n            \"importance_score\": 9,\n            \"key_concepts\": [\n                \"Mitochondria\",\n                \"Apoptosis\",\n                \"Intrinsic pathway\",\n                \"Cytochrome C\",\n                \"BCL2 family\"\n            ]\n        },\n        {\n            \"lesson_page\": 35,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240530 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 13,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"33\",\n                    \"question_text\": \"다음 그림은 receptor tyrosine kinase와 downstream components에 대한 그림이다. 설명 중 옳은 것은?\",\n                    \"answer\": \"4\",\n                    \"explanation\": \"정답은 4번입니다. 폐암에서 KRAS 유전자 돌연변이와 EGFR 유전자 돌연변이는 거의 동시에 발견되지 않는 상호 배타적인(mutually exclusive) 관계에 있습니다. 이는 두 유전자가 동일한 하위 신호 전달 경로(RAS-MAPK)를 공유하기 때문으로, 하나의 유전자에 활성 돌연변이가 생기면 다른 유전자의 돌연변이는 추가적인 성장 이점을 주지 않기 때문입니다. 강의자료 35페이지의 그림은 EGFR과 같은 성장인자 수용체(receptor tyrosine kinase)가 RAS를 활성화시키는 상위 단계에 있음을 보여주어 이 관계를 이해하는 기초를 제공합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1\": \"EGFR 유전자의 증폭은 폐암(특히 선암)의 중요한 원인이지만, 흡연과 관련된 KRAS 돌연변이 등이 더 흔할 수 있어 '가장 흔한 원인'이라고 단정하기는 어렵습니다.\",\n                        \"2\": \"HER2(ERBB2)는 EGFR(ERBB1)과 같은 family에 속하는 대표적인 receptor tyrosine kinase입니다.\",\n                        \"3\": \"PTEN은 PI3K 경로를 억제하는 역할을 하므로, 기능 상실 시 암을 유발하는 대표적인 종양 억제 유전자(tumor suppressor gene)입니다. Oncogene이 아닙니다.\",\n                        \"5\": \"Receptor tyrosine kinase가 리간드와 결합한 후 이합체화(dimerization)를 형성하는 것은 신호 전달의 가장 기본적이고 흔한 활성화 기전입니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 35페이지는 문제에 제시된 그림과 동일한 그림으로, Receptor Tyrosine Kinase(EGFR 등)에서 시작하여 RAS-RAF-MAPK 경로와 PI3K-AKT-mTOR 경로로 이어지는 신호 전달 과정을 정확히 보여줍니다. 문제의 모든 보기를 분석하기 위해 반드시 필요한 핵심 도식입니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Receptor Tyrosine Kinase (RTK)\",\n                \"RAS pathway\",\n                \"PI3K pathway\",\n                \"Growth factor signaling\",\n                \"PTEN\"\n            ]\n        },\n        {\n            \"lesson_page\": 39,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240530 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 10,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"29\",\n                    \"question_text\": \"다음은 종양 발생에 관여하는 한 pathway의 그림과, 그리고 대장에 발생한 병변에 대한 사진이다. 설명 중 옳은 것은?\",\n                    \"answer\": \"4\",\n                    \"explanation\": \"정답은 4번입니다. 문제의 사진은 수많은 선종성 용종이 대장에 발생한 가족성 선종성 용종증(FAP)을 보여주며, 이는 생식세포(germline) APC 유전자 돌연변이에 의해 발생합니다. 그림은 WNT 신호전달 경로를 보여주는데, APC는 β-catenin을 분해하는 복합체의 핵심 구성 요소입니다. APC에 돌연변이가 생기면 β-catenin이 분해되지 않고 핵으로 이동하여 지속적인 세포 증식을 유발합니다. 강의자료 39페이지는 WNT 단백질 리간드에 결합하는 Frizzled 수용체와 β-catenin 조절에 대해 설명하여 이 경로의 기본 원리를 제공합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1\": \"해당 경로에는 종양 억제 유전자(APC)와 암유전자(β-catenin)가 모두 관여합니다.\",\n                        \"2\": \"WNT 신호전달 경로는 대장암 발생에 가장 중요하게 관여하며, 폐암 발생의 주된 경로는 아닙니다.\",\n                        \"3\": \"사진은 APC 유전자의 생식세포 돌연변이(germline mutation)로 인한 FAP이며, β-catenin의 체세포 돌연변이(somatic mutation)로 인한 산발성 대장암과는 발생 기전이 다릅니다.\",\n                        \"5\": \"사진은 APC 유전자의 germline mutation과 관련이 깊습니다. β-catenin의 germline mutation은 매우 드뭅니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 39페이지는 문제의 핵심 기전인 WNT 신호 전달 경로에서 Frizzled 수용체가 β-catenin의 세포 내 수준을 조절한다고 설명합니다. 이는 APC 돌연변이가 어떻게 암을 유발하는지 이해하는 데 필수적인 내용입니다.\"\n                }\n            ],\n            \"importance_score\": 9,\n            \"key_concepts\": [\n                \"WNT signaling pathway\",\n                \"Frizzled receptor\",\n                \"β-catenin\",\n                \"APC gene\",\n                \"Familial Adenomatous Polyposis (FAP)\"\n            ]\n        },\n        {\n            \"lesson_page\": 43,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240530 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 15,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"37\",\n                    \"question_text\": \"다음은 종양 조직과, 종양 조직에서 관찰된 혈관을 보여주는 병리 사진이다. 이제 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"1\",\n                    \"explanation\": \"정답은 1번입니다. 종양이 일정 크기 이상으로 성장하기 위해서는 산소와 영양분을 공급받기 위한 새로운 혈관의 형성, 즉 혈관생성(angiogenesis)이 필수적입니다. VEGF(Vascular endothelial growth factor)는 혈관내피세포의 증식과 이동을 촉진하여 혈관생성을 유도하는 가장 중요한 성장인자 중 하나입니다. 강의자료 43페이지의 표는 VEGF의 기능으로 '혈관내피세포 증식 촉진'과 '혈관생성'을 명시하고 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2\": \"종양 혈관은 정상 혈관과 달리 구조적으로 비정상적이고 투과성이 높으며, 기능적으로 미성숙합니다.\",\n                        \"3\": \"종양세포의 혈관생성은 주변 조직과의 상호작용뿐만 아니라, p53 기능상실이나 RAS 활성화 같은 driver mutation에 의해 직접적으로 조절됩니다.\",\n                        \"4\": \"VEGF 억제제(bevacizumab 등)는 많은 암종에서 효과적인 치료제이지만, 완치에 이르는 경우는 드물며 치료 저항성이 흔하게 발생합니다.\",\n                        \"5\": \"HIF1α (Hypoxia-inducible factor 1-alpha)는 저산소 상태에서 활성화되어 VEGF의 전사를 촉진하는 핵심 인자이므로, VEGF 생성에 깊이 관여합니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 43페이지는 문제의 핵심 개념인 VEGF의 기능을 명확하게 설명하고 있으며, 'angiogenesis'를 직접적으로 언급하여 문제의 정답을 찾는 데 결정적인 정보를 제공합니다.\"\n                }\n            ],\n            \"importance_score\": 8,\n            \"key_concepts\": [\n                \"Angiogenesis\",\n                \"VEGF\",\n                \"Growth factors\",\n                \"Tumor microenvironment\"\n            ]\n        },\n        {\n            \"lesson_page\": 49,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240530 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 1,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"4\",\n                    \"question_text\": \"50세 여성이 정기 건강검진에서 실시한 자궁경부도말검사에서 이상소견이 있어 산부인과를 방문하였다. 자궁경부 생검 조직의 현미경 소견에서 상피의 전층에 걸쳐 atypical tumor cell세포이 관찰되었다. 그러나 상피의 기저막은 잘 유지되어 있었다. 진단은?\",\n                    \"answer\": \"3\",\n                    \"explanation\": \"정답은 3번, 제자리암종(Carcinoma in situ)입니다. 제자리암종은 악성 종양세포가 상피층 전체를 차지하지만, 기저막(basement membrane)을 침범하지 않은 상태를 의미합니다. 문제에서 '상피의 전층에 걸쳐 atypical tumor cell'이 관찰되었고 '기저막은 잘 유지'되었다는 소견은 제자리암종의 정의와 정확히 일치합니다. 강의자료 49페이지의 그림은 상피와 기질 사이의 기저막을 명확히 보여주며, 이를 경계로 비침윤성 암(non-invasive)과 침윤성 암(invasive)을 구분하는 개념을 시각적으로 설명합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1\": \"화생(Metaplasia)은 한 종류의 성숙한 세포가 다른 종류의 성숙한 세포로 바뀌는 것으로, 악성 소견이 아닙니다.\",\n                        \"2\": \"이형성(Dysplasia)은 상피 내 종양의 전 단계로, 비정형 세포가 상피의 일부 층에만 국한된 경우를 말합니다. 전층을 침범하면 제자리암종입니다.\",\n                        \"4\": \"미세침윤암종(Microinvasive carcinoma)은 종양세포가 기저막을 미세하게 뚫고 침범하기 시작한 단계입니다.\",\n                        \"5\": \"침윤성 암종(Invasive carcinoma)은 종양세포가 기저막을 명확히 파괴하고 기질로 침범한 상태입니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 49페이지는 제자리암종과 침윤암을 구분하는 결정적 기준인 '기저막'의 구조와 위치, 기능을 명확한 그림으로 보여줍니다. 문제에서 제시된 '기저막은 잘 유지되었다'는 소견의 의미를 파악하는 데 직접적인 도움을 줍니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Basement membrane\",\n                \"Carcinoma in situ\",\n                \"Invasion\",\n                \"Extracellular Matrix (ECM)\",\n                \"Neoplasia\"\n            ]\n        },\n        {\n            \"lesson_page\": 62,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240530 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 14,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"36\",\n                    \"question_text\": \"TP53 유전자에 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"4\",\n                    \"explanation\": \"정답은 4번입니다. TP53 유전자의 생식세포 돌연변이(germline mutation)는 리-프라우메니 증후군(Li-Fraumeni syndrome, LFS)이라는 유전성 암 증후군을 유발합니다. 이 증후군을 가진 사람은 젊은 나이에 다양한 종류의 암이 발생할 위험이 매우 높습니다. 강의자료 62페이지는 TP53의 핵심적인 역할을 설명하는데, 'DNA 손상이 너무 심해 복구할 수 없을 때, 주로 p53 의존적 기전을 통해 세포자멸사로 세포를 제거한다'고 명시하여 TP53이 '게놈의 수호자'로서 얼마나 중요한지를 보여줍니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1\": \"TP53 유전자의 돌연변이는 인간의 악성 종양에서 가장 흔하게 발견되는 유전적 변이 중 하나로, 매우 흔하게 관찰됩니다.\",\n                        \"2\": \"TP53은 대표적인 종양 억제 유전자이며, MYC은 대표적인 암유전자(oncogene)로 서로 반대의 기능을 수행합니다.\",\n                        \"3\": \"TP53의 상태는 악성 종양의 치료 저항성과 밀접한 관련이 있습니다. 정상 TP53은 항암치료(DNA 손상 유발)에 의한 세포자멸사를 유도하여 치료 효과를 높이지만, 돌연변이가 생기면 치료 저항성이 생깁니다.\",\n                        \"5\": \"TP53은 세포주기 조절(G1/S checkpoint)과 DNA 복구, 세포자멸사 모두에 관여하는 핵심 조절인자입니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 62페이지는 TP53의 핵심 기능인 DNA 손상 감지 및 p53 의존적 세포자멸사 유도를 직접적으로 설명하고 있습니다. 이는 TP53 관련 질환인 리-프라우메니 증후군을 이해하는 근간이 되는 내용입니다.\"\n                }\n            ],\n            \"importance_score\": 9,\n            \"key_concepts\": [\n                \"TP53\",\n                \"Tumor suppressor gene\",\n                \"Apoptosis\",\n                \"DNA damage\",\n                \"Cell cycle checkpoint\",\n                \"Li-Fraumeni syndrome\"\n            ]\n        },\n        {\n            \"lesson_page\": 63,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240530 본1 인체병리학총론_정답.pdf\",\n                    \"jokbo_page\": 11,\n                    \"jokbo_end_page\": 12,\n                    \"question_number\": \"32\",\n                    \"question_text\": \"Cell cycle regulation에 관한 그림이다. 옳은 것은?\",\n                    \"answer\": \"5\",\n                    \"explanation\": \"정답은 5번입니다. 문제의 그림에서 '2'는 G1기에서 S기로의 진행을 조절하는 Cyclin D-CDK4/6 복합체를 억제하는 CDK 억제제(inhibitor) 그룹을 가리킵니다. 강의자료 63페이지의 동일한 그림(FIGURE 1.19)을 보면, 이 그룹은 p15, p16, p18, p19로 구성된 INK4 family 억제제임을 명확히 보여줍니다. 따라서 p16은 '2'에 관여하는 중요한 CDK inhibitor가 맞습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1\": \"세포주기에서 G1/S checkpoint(제한점, restriction point)가 세포 분열 여부를 결정하는 가장 중요한 단계로 간주됩니다.\",\n                        \"2\": \"DNA replication(복제)은 S phase에서 발생합니다. G2 phase는 분열을 준비하는 단계입니다.\",\n                        \"3\": \"그림에서 '1'이 가리키는 것은 Rb 단백질입니다. Rb은 E2F 전사인자를 억제하여 G1/S 진행을 막는 중요한 종양 억제 유전자입니다. SMAD4는 TGF-β 신호 전달에 관여하는 단백질입니다.\",\n                        \"4\": \"그림에서 '1'은 Rb 단백질입니다. TP53은 DNA 손상 시 p21을 활성화하여 CDK를 억제하는 상위 조절자이지만, '1'이 직접 가리키는 단백질은 아닙니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 63페이지는 문제에 사용된 그림과 정확히 동일한 'FIGURE 1.19'를 포함하고 있으며, 세포주기를 조절하는 모든 요소(Cyclins, CDKs, CDKIs, Rb)의 역할과 상호작용을 상세하게 설명하고 있어 문제 해결에 결정적인 정보를 제공합니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Cell cycle\",\n                \"Cyclin-dependent kinase (CDK)\",\n                \"CDK inhibitors (CDKI)\",\n                \"p16 (INK4a)\",\n                \"Rb protein\",\n                \"G1/S checkpoint\"\n            ]\n        }\n    ],\n    \"summary\": {\n        \"total_related_slides\": 7,\n        \"total_questions\": 7,\n        \"key_topics\": [\n            \"Cell Signaling (RTK, WNT)\",\n            \"Cell Cycle Regulation (CDK, Rb, p53)\",\n            \"Apoptosis (Mitochondrial Pathway, BCL2)\",\n            \"Extracellular Matrix (Basement Membrane, Angiogenesis)\",\n            \"Cancer Biology Basics (Invasion, Carcinoma in situ)\"\n        ],\n        \"study_recommendations\": \"본 강의자료는 세포의 기본 기능과 조절 기전에 대해 다루고 있으며, 특히 신호 전달, 세포 주기, 세포 사멸, 세포외기질 파트에서 기출 문제가 다수 출제되었습니다. 각 신호 전달 경로(RTK, WNT)의 구성 요소와 흐름을 도식과 함께 암기하고, 세포 주기 각 단계의 조절 인자(Cyclin, CDK, p16, Rb, p53)들의 상호 관계를 정확히 이해하는 것이 중요합니다. 또한, 세포외기질의 구성 요소, 특히 기저막의 역할과 혈관생성 인자(VEGF)의 기능은 암의 침윤 및 성장과 직접적으로 연결되므로 반드시 숙지해야 합니다. 강의자료에 포함된 그림과 도표는 시험 문제에 그대로 활용되는 경향이 있으므로, 그림의 모든 요소를 꼼꼼히 학습하는 것이 고득점의 핵심입니다.\"\n    }\n}",
+  "response_length": 13239,
+  "parsed_successfully": true,
+  "parsed_data": {
+    "related_slides": [
+      {
+        "lesson_page": 27,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240530 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 15,
+            "jokbo_end_page": null,
+            "question_number": "38",
+            "question_text": "Apoptosis에 관한 그림이다. 옳은 것은?",
+            "answer": "5",
+            "explanation": "정답은 5번입니다. 세포자멸사(Apoptosis)의 내인성 경로(Mitochondrial pathway)에서 BCL2 단백질은 세포자멸사를 억제하는 조절자(regulator) 역할을 합니다. BCL2는 BAX, BAK과 같은 세포자멸사 유발 단백질의 활성을 막아 미토콘드리아 외막 투과성(MOMP)을 억제하고, 결과적으로 시토크롬 C의 방출을 막아 세포자멸사를 방해합니다. 따라서 BCL2 유전자의 기능이 항진되면 세포자멸사가 억제됩니다. 강의자료 27페이지의 그림은 미토콘드리아가 Bax/Bak 복합체에 의해 세포자멸사 신호를 매개하는 과정을 보여주며, 이는 BCL2와 같은 단백질에 의해 조절됩니다.",
+            "wrong_answer_explanations": {
+              "1": "종양 발생에서는 내인성(intrinsic) 경로가 더 중요하게 작용하는 경우가 많습니다. 많은 항암 치료가 이 경로를 활성화시켜 암세포를 사멸시킵니다.",
+              "2": "대부분의 종양은 세포자멸사에 대한 저항성을 획득하여 활발하게 관찰되지 않습니다. 이는 암의 주요 특징(hallmark) 중 하나입니다.",
+              "3": "시토크롬 C(Cytochrome C)는 세포자멸사 과정에서 미토콘드리아에서 세포질로 방출되며, 골지체에서 분비되지 않습니다. 강의자료 27페이지 그림에 명확히 나타나 있습니다.",
+              "4": "세포자멸사는 염증 반응을 동반하지 않는 '조용한' 세포 사멸 과정입니다. 주변에 염증을 유발하는 것은 괴사(necrosis)의 특징입니다."
+            },
+            "relevance_reason": "강의자료 27페이지는 문제의 보기 5번을 이해하는 데 핵심적인 미토콘드리아의 세포자멸사 조절 기능, 특히 시토크롬 C 방출과 관련된 내인성 경로를 상세히 설명하고 있습니다. BCL2의 역할을 이해하기 위해 필수적인 배경 지식을 제공합니다."
+          }
+        ],
+        "importance_score": 9,
+        "key_concepts": [
+          "Mitochondria",
+          "Apoptosis",
+          "Intrinsic pathway",
+          "Cytochrome C",
+          "BCL2 family"
+        ]
+      },
+      {
+        "lesson_page": 35,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240530 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 13,
+            "jokbo_end_page": null,
+            "question_number": "33",
+            "question_text": "다음 그림은 receptor tyrosine kinase와 downstream components에 대한 그림이다. 설명 중 옳은 것은?",
+            "answer": "4",
+            "explanation": "정답은 4번입니다. 폐암에서 KRAS 유전자 돌연변이와 EGFR 유전자 돌연변이는 거의 동시에 발견되지 않는 상호 배타적인(mutually exclusive) 관계에 있습니다. 이는 두 유전자가 동일한 하위 신호 전달 경로(RAS-MAPK)를 공유하기 때문으로, 하나의 유전자에 활성 돌연변이가 생기면 다른 유전자의 돌연변이는 추가적인 성장 이점을 주지 않기 때문입니다. 강의자료 35페이지의 그림은 EGFR과 같은 성장인자 수용체(receptor tyrosine kinase)가 RAS를 활성화시키는 상위 단계에 있음을 보여주어 이 관계를 이해하는 기초를 제공합니다.",
+            "wrong_answer_explanations": {
+              "1": "EGFR 유전자의 증폭은 폐암(특히 선암)의 중요한 원인이지만, 흡연과 관련된 KRAS 돌연변이 등이 더 흔할 수 있어 '가장 흔한 원인'이라고 단정하기는 어렵습니다.",
+              "2": "HER2(ERBB2)는 EGFR(ERBB1)과 같은 family에 속하는 대표적인 receptor tyrosine kinase입니다.",
+              "3": "PTEN은 PI3K 경로를 억제하는 역할을 하므로, 기능 상실 시 암을 유발하는 대표적인 종양 억제 유전자(tumor suppressor gene)입니다. Oncogene이 아닙니다.",
+              "5": "Receptor tyrosine kinase가 리간드와 결합한 후 이합체화(dimerization)를 형성하는 것은 신호 전달의 가장 기본적이고 흔한 활성화 기전입니다."
+            },
+            "relevance_reason": "강의자료 35페이지는 문제에 제시된 그림과 동일한 그림으로, Receptor Tyrosine Kinase(EGFR 등)에서 시작하여 RAS-RAF-MAPK 경로와 PI3K-AKT-mTOR 경로로 이어지는 신호 전달 과정을 정확히 보여줍니다. 문제의 모든 보기를 분석하기 위해 반드시 필요한 핵심 도식입니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Receptor Tyrosine Kinase (RTK)",
+          "RAS pathway",
+          "PI3K pathway",
+          "Growth factor signaling",
+          "PTEN"
+        ]
+      },
+      {
+        "lesson_page": 39,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240530 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 10,
+            "jokbo_end_page": null,
+            "question_number": "29",
+            "question_text": "다음은 종양 발생에 관여하는 한 pathway의 그림과, 그리고 대장에 발생한 병변에 대한 사진이다. 설명 중 옳은 것은?",
+            "answer": "4",
+            "explanation": "정답은 4번입니다. 문제의 사진은 수많은 선종성 용종이 대장에 발생한 가족성 선종성 용종증(FAP)을 보여주며, 이는 생식세포(germline) APC 유전자 돌연변이에 의해 발생합니다. 그림은 WNT 신호전달 경로를 보여주는데, APC는 β-catenin을 분해하는 복합체의 핵심 구성 요소입니다. APC에 돌연변이가 생기면 β-catenin이 분해되지 않고 핵으로 이동하여 지속적인 세포 증식을 유발합니다. 강의자료 39페이지는 WNT 단백질 리간드에 결합하는 Frizzled 수용체와 β-catenin 조절에 대해 설명하여 이 경로의 기본 원리를 제공합니다.",
+            "wrong_answer_explanations": {
+              "1": "해당 경로에는 종양 억제 유전자(APC)와 암유전자(β-catenin)가 모두 관여합니다.",
+              "2": "WNT 신호전달 경로는 대장암 발생에 가장 중요하게 관여하며, 폐암 발생의 주된 경로는 아닙니다.",
+              "3": "사진은 APC 유전자의 생식세포 돌연변이(germline mutation)로 인한 FAP이며, β-catenin의 체세포 돌연변이(somatic mutation)로 인한 산발성 대장암과는 발생 기전이 다릅니다.",
+              "5": "사진은 APC 유전자의 germline mutation과 관련이 깊습니다. β-catenin의 germline mutation은 매우 드뭅니다."
+            },
+            "relevance_reason": "강의자료 39페이지는 문제의 핵심 기전인 WNT 신호 전달 경로에서 Frizzled 수용체가 β-catenin의 세포 내 수준을 조절한다고 설명합니다. 이는 APC 돌연변이가 어떻게 암을 유발하는지 이해하는 데 필수적인 내용입니다."
+          }
+        ],
+        "importance_score": 9,
+        "key_concepts": [
+          "WNT signaling pathway",
+          "Frizzled receptor",
+          "β-catenin",
+          "APC gene",
+          "Familial Adenomatous Polyposis (FAP)"
+        ]
+      },
+      {
+        "lesson_page": 43,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240530 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 15,
+            "jokbo_end_page": null,
+            "question_number": "37",
+            "question_text": "다음은 종양 조직과, 종양 조직에서 관찰된 혈관을 보여주는 병리 사진이다. 이제 대한 설명 중 옳은 것은?",
+            "answer": "1",
+            "explanation": "정답은 1번입니다. 종양이 일정 크기 이상으로 성장하기 위해서는 산소와 영양분을 공급받기 위한 새로운 혈관의 형성, 즉 혈관생성(angiogenesis)이 필수적입니다. VEGF(Vascular endothelial growth factor)는 혈관내피세포의 증식과 이동을 촉진하여 혈관생성을 유도하는 가장 중요한 성장인자 중 하나입니다. 강의자료 43페이지의 표는 VEGF의 기능으로 '혈관내피세포 증식 촉진'과 '혈관생성'을 명시하고 있습니다.",
+            "wrong_answer_explanations": {
+              "2": "종양 혈관은 정상 혈관과 달리 구조적으로 비정상적이고 투과성이 높으며, 기능적으로 미성숙합니다.",
+              "3": "종양세포의 혈관생성은 주변 조직과의 상호작용뿐만 아니라, p53 기능상실이나 RAS 활성화 같은 driver mutation에 의해 직접적으로 조절됩니다.",
+              "4": "VEGF 억제제(bevacizumab 등)는 많은 암종에서 효과적인 치료제이지만, 완치에 이르는 경우는 드물며 치료 저항성이 흔하게 발생합니다.",
+              "5": "HIF1α (Hypoxia-inducible factor 1-alpha)는 저산소 상태에서 활성화되어 VEGF의 전사를 촉진하는 핵심 인자이므로, VEGF 생성에 깊이 관여합니다."
+            },
+            "relevance_reason": "강의자료 43페이지는 문제의 핵심 개념인 VEGF의 기능을 명확하게 설명하고 있으며, 'angiogenesis'를 직접적으로 언급하여 문제의 정답을 찾는 데 결정적인 정보를 제공합니다."
+          }
+        ],
+        "importance_score": 8,
+        "key_concepts": [
+          "Angiogenesis",
+          "VEGF",
+          "Growth factors",
+          "Tumor microenvironment"
+        ]
+      },
+      {
+        "lesson_page": 49,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240530 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 1,
+            "jokbo_end_page": null,
+            "question_number": "4",
+            "question_text": "50세 여성이 정기 건강검진에서 실시한 자궁경부도말검사에서 이상소견이 있어 산부인과를 방문하였다. 자궁경부 생검 조직의 현미경 소견에서 상피의 전층에 걸쳐 atypical tumor cell세포이 관찰되었다. 그러나 상피의 기저막은 잘 유지되어 있었다. 진단은?",
+            "answer": "3",
+            "explanation": "정답은 3번, 제자리암종(Carcinoma in situ)입니다. 제자리암종은 악성 종양세포가 상피층 전체를 차지하지만, 기저막(basement membrane)을 침범하지 않은 상태를 의미합니다. 문제에서 '상피의 전층에 걸쳐 atypical tumor cell'이 관찰되었고 '기저막은 잘 유지'되었다는 소견은 제자리암종의 정의와 정확히 일치합니다. 강의자료 49페이지의 그림은 상피와 기질 사이의 기저막을 명확히 보여주며, 이를 경계로 비침윤성 암(non-invasive)과 침윤성 암(invasive)을 구분하는 개념을 시각적으로 설명합니다.",
+            "wrong_answer_explanations": {
+              "1": "화생(Metaplasia)은 한 종류의 성숙한 세포가 다른 종류의 성숙한 세포로 바뀌는 것으로, 악성 소견이 아닙니다.",
+              "2": "이형성(Dysplasia)은 상피 내 종양의 전 단계로, 비정형 세포가 상피의 일부 층에만 국한된 경우를 말합니다. 전층을 침범하면 제자리암종입니다.",
+              "4": "미세침윤암종(Microinvasive carcinoma)은 종양세포가 기저막을 미세하게 뚫고 침범하기 시작한 단계입니다.",
+              "5": "침윤성 암종(Invasive carcinoma)은 종양세포가 기저막을 명확히 파괴하고 기질로 침범한 상태입니다."
+            },
+            "relevance_reason": "강의자료 49페이지는 제자리암종과 침윤암을 구분하는 결정적 기준인 '기저막'의 구조와 위치, 기능을 명확한 그림으로 보여줍니다. 문제에서 제시된 '기저막은 잘 유지되었다'는 소견의 의미를 파악하는 데 직접적인 도움을 줍니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Basement membrane",
+          "Carcinoma in situ",
+          "Invasion",
+          "Extracellular Matrix (ECM)",
+          "Neoplasia"
+        ]
+      },
+      {
+        "lesson_page": 62,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240530 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 14,
+            "jokbo_end_page": null,
+            "question_number": "36",
+            "question_text": "TP53 유전자에 대한 설명 중 옳은 것은?",
+            "answer": "4",
+            "explanation": "정답은 4번입니다. TP53 유전자의 생식세포 돌연변이(germline mutation)는 리-프라우메니 증후군(Li-Fraumeni syndrome, LFS)이라는 유전성 암 증후군을 유발합니다. 이 증후군을 가진 사람은 젊은 나이에 다양한 종류의 암이 발생할 위험이 매우 높습니다. 강의자료 62페이지는 TP53의 핵심적인 역할을 설명하는데, 'DNA 손상이 너무 심해 복구할 수 없을 때, 주로 p53 의존적 기전을 통해 세포자멸사로 세포를 제거한다'고 명시하여 TP53이 '게놈의 수호자'로서 얼마나 중요한지를 보여줍니다.",
+            "wrong_answer_explanations": {
+              "1": "TP53 유전자의 돌연변이는 인간의 악성 종양에서 가장 흔하게 발견되는 유전적 변이 중 하나로, 매우 흔하게 관찰됩니다.",
+              "2": "TP53은 대표적인 종양 억제 유전자이며, MYC은 대표적인 암유전자(oncogene)로 서로 반대의 기능을 수행합니다.",
+              "3": "TP53의 상태는 악성 종양의 치료 저항성과 밀접한 관련이 있습니다. 정상 TP53은 항암치료(DNA 손상 유발)에 의한 세포자멸사를 유도하여 치료 효과를 높이지만, 돌연변이가 생기면 치료 저항성이 생깁니다.",
+              "5": "TP53은 세포주기 조절(G1/S checkpoint)과 DNA 복구, 세포자멸사 모두에 관여하는 핵심 조절인자입니다."
+            },
+            "relevance_reason": "강의자료 62페이지는 TP53의 핵심 기능인 DNA 손상 감지 및 p53 의존적 세포자멸사 유도를 직접적으로 설명하고 있습니다. 이는 TP53 관련 질환인 리-프라우메니 증후군을 이해하는 근간이 되는 내용입니다."
+          }
+        ],
+        "importance_score": 9,
+        "key_concepts": [
+          "TP53",
+          "Tumor suppressor gene",
+          "Apoptosis",
+          "DNA damage",
+          "Cell cycle checkpoint",
+          "Li-Fraumeni syndrome"
+        ]
+      },
+      {
+        "lesson_page": 63,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240530 본1 인체병리학총론_정답.pdf",
+            "jokbo_page": 11,
+            "jokbo_end_page": 12,
+            "question_number": "32",
+            "question_text": "Cell cycle regulation에 관한 그림이다. 옳은 것은?",
+            "answer": "5",
+            "explanation": "정답은 5번입니다. 문제의 그림에서 '2'는 G1기에서 S기로의 진행을 조절하는 Cyclin D-CDK4/6 복합체를 억제하는 CDK 억제제(inhibitor) 그룹을 가리킵니다. 강의자료 63페이지의 동일한 그림(FIGURE 1.19)을 보면, 이 그룹은 p15, p16, p18, p19로 구성된 INK4 family 억제제임을 명확히 보여줍니다. 따라서 p16은 '2'에 관여하는 중요한 CDK inhibitor가 맞습니다.",
+            "wrong_answer_explanations": {
+              "1": "세포주기에서 G1/S checkpoint(제한점, restriction point)가 세포 분열 여부를 결정하는 가장 중요한 단계로 간주됩니다.",
+              "2": "DNA replication(복제)은 S phase에서 발생합니다. G2 phase는 분열을 준비하는 단계입니다.",
+              "3": "그림에서 '1'이 가리키는 것은 Rb 단백질입니다. Rb은 E2F 전사인자를 억제하여 G1/S 진행을 막는 중요한 종양 억제 유전자입니다. SMAD4는 TGF-β 신호 전달에 관여하는 단백질입니다.",
+              "4": "그림에서 '1'은 Rb 단백질입니다. TP53은 DNA 손상 시 p21을 활성화하여 CDK를 억제하는 상위 조절자이지만, '1'이 직접 가리키는 단백질은 아닙니다."
+            },
+            "relevance_reason": "강의자료 63페이지는 문제에 사용된 그림과 정확히 동일한 'FIGURE 1.19'를 포함하고 있으며, 세포주기를 조절하는 모든 요소(Cyclins, CDKs, CDKIs, Rb)의 역할과 상호작용을 상세하게 설명하고 있어 문제 해결에 결정적인 정보를 제공합니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Cell cycle",
+          "Cyclin-dependent kinase (CDK)",
+          "CDK inhibitors (CDKI)",
+          "p16 (INK4a)",
+          "Rb protein",
+          "G1/S checkpoint"
+        ]
+      }
+    ],
+    "summary": {
+      "total_related_slides": 7,
+      "total_questions": 7,
+      "key_topics": [
+        "Cell Signaling (RTK, WNT)",
+        "Cell Cycle Regulation (CDK, Rb, p53)",
+        "Apoptosis (Mitochondrial Pathway, BCL2)",
+        "Extracellular Matrix (Basement Membrane, Angiogenesis)",
+        "Cancer Biology Basics (Invasion, Carcinoma in situ)"
+      ],
+      "study_recommendations": "본 강의자료는 세포의 기본 기능과 조절 기전에 대해 다루고 있으며, 특히 신호 전달, 세포 주기, 세포 사멸, 세포외기질 파트에서 기출 문제가 다수 출제되었습니다. 각 신호 전달 경로(RTK, WNT)의 구성 요소와 흐름을 도식과 함께 암기하고, 세포 주기 각 단계의 조절 인자(Cyclin, CDK, p16, Rb, p53)들의 상호 관계를 정확히 이해하는 것이 중요합니다. 또한, 세포외기질의 구성 요소, 특히 기저막의 역할과 혈관생성 인자(VEGF)의 기능은 암의 침윤 및 성장과 직접적으로 연결되므로 반드시 숙지해야 합니다. 강의자료에 포함된 그림과 도표는 시험 문제에 그대로 활용되는 경향이 있으므로, 그림의 모든 요소를 꼼꼼히 학습하는 것이 고득점의 핵심입니다."
+    }
+  }
+}

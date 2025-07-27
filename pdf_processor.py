@@ -607,7 +607,13 @@ class PDFProcessor:
         self.delete_file_safe(lesson_chunk_file)
         
         try:
-            result = json.loads(response.text)
+            # Clean up common JSON errors from Gemini
+            cleaned_text = response.text
+            # Fix incorrectly quoted keys like "4"번" -> "4번"
+            import re
+            cleaned_text = re.sub(r'"(\d+)"번"', r'"\1번"', cleaned_text)
+            
+            result = json.loads(cleaned_text)
             # Adjust page numbers to account for chunk offset
             if "jokbo_pages" in result:
                 for page_info in result["jokbo_pages"]:
@@ -617,8 +623,12 @@ class PDFProcessor:
                             if "lesson_page" in slide:
                                 slide["lesson_page"] += (start_page - 1)
             return result
-        except json.JSONDecodeError:
-            print(f"Failed to parse JSON response for chunk p{start_page}-{end_page}")
+        except json.JSONDecodeError as e:
+            print(f"Failed to parse JSON response for chunk p{start_page}-{end_page}: {e}")
+            # Try to save the problematic response for debugging
+            debug_file = self.debug_dir / f"failed_json_chunk_p{start_page}-{end_page}.txt"
+            with open(debug_file, 'w', encoding='utf-8') as f:
+                f.write(response.text)
             return {"error": "Failed to parse response"}
     
     def _merge_jokbo_centric_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:

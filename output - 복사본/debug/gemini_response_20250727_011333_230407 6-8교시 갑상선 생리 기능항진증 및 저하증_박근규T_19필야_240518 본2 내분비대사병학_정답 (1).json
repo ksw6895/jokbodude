@@ -1,0 +1,263 @@
+{
+  "timestamp": "20250727_011333",
+  "mode": "lesson-centric",
+  "jokbo_file": "240518 본2 내분비대사병학_정답 (1).pdf",
+  "lesson_file": "230407 6-8교시 갑상선 생리 기능항진증 및 저하증_박근규T_19필야.pdf",
+  "response_text": "{\n    \"related_slides\": [\n        {\n            \"lesson_page\": 14,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240518 본2 내분비대사병학_정답 (1).pdf\",\n                    \"jokbo_page\": 16,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"28\",\n                    \"question_text\": \"Thyroid hormone에 대한 설명으로 맞는 것의 조합은?\\n가. T4는 T3보다 metabolic activity가 3배 정도 더 강하다.\\n나. T3는 주로 T4로 전환되어 그 작용을 나타내므로, T4의 전구체로 생각할 수 있다.\\n다. T3의 반감기는 T4의 반감기보다 9~10배 길다.\\n라. T4에서 T3로의 전환이 감소하는 경우는 fasting, acute trauma, oral contrast agents 등이 있다.\",\n                    \"answer\": \"3) 나, 라\",\n                    \"explanation\": \"이 문제는 갑상선 호르몬의 특성에 대한 이해를 묻고 있습니다. '나'와 '라'가 옳은 설명입니다.\\n나: T3의 대부분은 말초 조직에서 T4로부터 전환되어 생성되므로 T4는 T3의 전구체(prohormone)로 볼 수 있습니다. (강의자료 10페이지)\\n라: 기아, 외상, 조영제 등 특정 상황에서는 T4가 T3로 전환되는 과정이 억제됩니다. (강의자료 15페이지)\\n족보 PDF에 정답이 2번(가, 다)으로 잘못 표기되어 있으나, 강의자료에 근거하면 3번(나, 라)이 정답입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"가\": \"강의자료 14페이지 표에 따르면, T3의 상대적 대사 효능(Relative metabolic potency)은 1인 반면 T4는 0.3으로, T3가 T4보다 약 3배 더 강력합니다. 따라서 T4가 더 강하다는 설명은 틀렸습니다.\",\n                        \"다\": \"강의자료 14페이지 표에 따르면, T4의 혈청 반감기는 7일인 반면 T3는 2일입니다. 따라서 T4의 반감기가 T3보다 훨씬 깁니다. T3의 반감기가 더 길다는 설명은 틀렸습니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 14페이지의 'Characteristics of Circulating T4 and T3' 표는 문제의 보기 '가'와 '다'의 진위를 직접적으로 판단할 수 있는 핵심 정보(대사 효능, 반감기)를 제공합니다. 이 표가 없으면 문제의 절반을 풀 수 없습니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Thyroid hormone characteristics\",\n                \"T3 and T4 potency\",\n                \"T3 and T4 half-life\",\n                \"Peripheral conversion\"\n            ]\n        },\n        {\n            \"lesson_page\": 22,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240518 본2 내분비대사병학_정답 (1).pdf\",\n                    \"jokbo_page\": 26,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"49\",\n                    \"question_text\": \"여러 갑상선중독증 상황에서 RAIU 양상이 다른 경우는?\",\n                    \"answer\": \"5) 그레이브스 병\",\n                    \"explanation\": \"방사성 요오드 섭취율(RAIU)은 갑상선중독증의 원인을 감별하는 데 중요한 검사입니다. 그레이브스병은 갑상선 자체에서 호르몬 생성이 증가(hyperthyroidism)하는 대표적인 질환으로, TSH 수용체 항체에 의해 갑상선이 지속적으로 자극받아 요오드 섭취율이 증가합니다. 반면 나머지 보기들은 갑상선 세포 파괴로 저장된 호르몬이 유출되거나(thyroiditis) 외부에서 호르몬을 섭취하는 경우로, 갑상선 자체의 기능은 항진되어 있지 않아 RAIU가 감소합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"인위성 갑상선 중독(thyrotoxicosis factitia)은 외부에서 갑상선 호르몬을 복용하는 경우로, 뇌하수체-갑상선 축이 억제되어 갑상선의 요오드 섭취가 거의 없습니다 (RAIU 감소).\",\n                        \"2번\": \"무통성 갑상선염(painless/silent thyroiditis)은 갑상선 조직의 염증으로 세포가 파괴되어 저장된 호르몬이 혈중으로 방출되는 상태이므로 RAIU는 감소합니다. (강의자료 58페이지)\",\n                        \"3번\": \"아급성 갑상선염(subacute thyroiditis) 역시 바이러스 감염 등에 의한 갑상선 파괴가 원인이므로 RAIU가 현저히 감소합니다. (강의자료 57페이지)\",\n                        \"4번\": \"요오드 유발성 갑상선 중독(Jod-Basedow phenomenon)은 요오드 과다 공급으로 인한 갑상선 기능 항진이지만, 방사성 요오드와 비방사성 요오드가 경쟁하므로 RAIU는 낮게 측정될 수 있습니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 22페이지의 'Causes of Thyrotoxicosis' 표는 갑상선중독증을 'Primary Hyperthyroidism' (예: Graves' disease)과 'Thyrotoxicosis without Hyperthyroidism' (예: Subacute/Silent thyroiditis)으로 명확히 구분합니다. 이 분류는 RAIU의 증가와 감소를 이해하는 핵심이며, 문제 해결에 직접적인 근거를 제공합니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Causes of Thyrotoxicosis\",\n                \"Radioactive Iodine Uptake (RAIU)\",\n                \"Graves' disease\",\n                \"Thyroiditis\"\n            ]\n        },\n        {\n            \"lesson_page\": 24,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240518 본2 내분비대사병학_정답 (1).pdf\",\n                    \"jokbo_page\": 27,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"51\",\n                    \"question_text\": \"그레이브스 병을 일으키는 자가항체로, 그레이브스 병 환자를 항갑상선제로 치료하면 이 항체의 역가가 점차 감소한다. 이 항체를 측정하기 위해서는 환자의 IgG를 갑상선 세포에 처리한 후 cAMP를 측정하는데, 자극 여부는 알 수 있으나 TSH 수용체와의 결합하는지는 알 수 없다. 이에 해당하는 것은?\",\n                    \"answer\": \"1) Thyroid stimulating antibody (TSAb)\",\n                    \"explanation\": \"문제에서 설명하는 검사 방법은 환자의 혈청 내 면역글로불린(IgG)이 배양된 갑상선 세포를 자극하여 세포 내 신호전달물질인 cAMP를 생성하는지를 측정하는 생물학적 분석(bioassay)입니다. 이는 항체의 '기능(자극 여부)'을 직접적으로 평가하는 방법으로, '갑상선 자극 항체(Thyroid stimulating immunoglobulin, TSI 또는 TSAb)' 검사의 정의와 정확히 일치합니다. 문제의 마지막 문장('자극 여부는 알 수 있으나... 결합하는지는 알 수 없다')은 다소 혼란스럽게 서술되었으나, 검사 원리 자체가 TSI를 지칭합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"TSH binding inhibitor immunoglobulin (TBII)는 방사성 동위원소로 표지된 TSH가 TSH 수용체에 결합하는 것을 환자의 항체가 얼마나 '방해'하는지를 측정합니다. 즉, 결합 저해 여부는 알 수 있지만, 그 항체가 수용체를 자극하는지(stimulating) 또는 차단하는지(blocking) 기능은 알 수 없습니다. 문제에서 설명하는 cAMP 측정과는 무관합니다.\",\n                        \"3번\": \"Thyroid blocking antibody (TBAb)는 TSH 수용체에 결합하여 TSH의 작용을 차단하는 항체로, 갑상선 기능 저하를 유발할 수 있습니다. TSI와는 기능이 정반대입니다.\",\n                        \"4번\": \"Thyroid stimulating blocking antibody (TSB Ab)는 자극과 차단 기능을 동시에 가진 항체를 의미하는 용어이나, 표준적인 검사 분류는 아닙니다.\",\n                        \"5번\": \"Antithyroglobulin antibody (TgAb)는 갑상선 글로불린에 대한 자가항체로, 하시모토 갑상선염 등에서 주로 발견되며 TSH 수용체를 자극하는 기능은 없습니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 24페이지는 그레이브스병 진단에 사용되는 주요 자가항체인 TSH 수용체 항체를 TBII와 TSI로 나누어 명확히 설명합니다. 특히 TSI에 대해 '자극 형 Ab만을 측정함'이라고 기술하고, 그 원리를 설명하여 문제에서 제시된 cAMP 측정법이 TSI임을 직접적으로 알려줍니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Graves' disease autoantibodies\",\n                \"TSH receptor antibody (TRAb)\",\n                \"Thyroid stimulating immunoglobulin (TSI)\",\n                \"TSH binding inhibiting immunoglobulin (TBII)\"\n            ]\n        },\n        {\n            \"lesson_page\": 27,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240518 본2 내분비대사병학_정답 (1).pdf\",\n                    \"jokbo_page\": 30,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"57\",\n                    \"question_text\": \"19세 남자환자가 아침에 갑자기 다리에 힘이 빠져 내원하였다. 2달전부터 10kg 체중감소가 있고 가슴 두근거림과 발한이 동반되었다. 약물 복용력은 없었으며 음주도 하지 않았다. 혈압은 140/70, 맥박은 115였다. Na/K/Cl 140/2.5/104 mEq/L. 가장 먼저 검사해야 하는 것은?\",\n                    \"answer\": \"5) Free T4/TSH\",\n                    \"explanation\": \"젊은 남성에서 체중 감소, 심계항진, 발한 등 갑상선기능항진증을 시사하는 증상과 함께 급성 이완성 마비, 그리고 혈액검사상 현저한 저칼륨혈증(K+ 2.5mEq/L)이 동반된 것은 '갑상선중독성 주기성 마비(Thyrotoxic periodic paralysis)'를 강력히 시사하는 소견입니다. 따라서 원인이 되는 갑상선기능항진증을 진단하기 위해 혈중 유리 T4(Free T4)와 갑상선자극호르몬(TSH) 검사를 가장 먼저 시행해야 합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Parathyroid hormone은 칼슘 대사를 조절하는 호르몬으로, 현재 환자의 증상 및 저칼륨혈증과는 직접적인 관련이 적습니다.\",\n                        \"2번\": \"Calcitonin은 갑상선 C-cell에서 분비되며 칼슘을 낮추는 역할을 하지만, 주된 증상과는 관련이 없습니다.\",\n                        \"3번\": \"Plasma metanephrin/normmetanephrine은 갈색세포종 진단에 사용되는 검사입니다. 고혈압이 있지만, 주기성 마비와 저칼륨혈증을 설명하기 어렵습니다.\",\n                        \"4번\": \"ACTH/cortisol은 부신 기능을 평가하는 검사로, 현재 증상과 가장 부합하는 진단과는 거리가 멉니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 27페이지는 '갑상선중독성 주기성마비(thyrotoxic periodic paralysis)'에 대해 집중적으로 다룹니다. '동양 남자', '마비 당시 hypokalemia 동반', '갑상선 기능항진증이 회복되면 완전 소실' 등의 핵심 특징을 설명하고, '젊은 남자가 자다가 하지 마비'가 오면 '갑상선 호르몬 검사'를 해야 한다고 명시하여 문제의 상황과 진단 과정을 직접적으로 설명합니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Thyrotoxic periodic paralysis\",\n                \"Hypokalemia\",\n                \"Hyperthyroidism\",\n                \"Thyroid function test\"\n            ]\n        },\n        {\n            \"lesson_page\": 30,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240518 본2 내분비대사병학_정답 (1).pdf\",\n                    \"jokbo_page\": 22,\n                    \"jokbo_end_page\": 23,\n                    \"question_number\": \"43\",\n                    \"question_text\": \"40세 남자가 오른쪽 목에 덩이가 만져진다며 병원에 왔다. 6개월 전부터 체중이 줄고 땀이 많이 났다고 한다. 앞목 부위에서 2.0 cm의 덩이가 부드럽게 만져졌고 압통은 없으며 덩이는 잘 움직인다. 혈압 140/80 mmHg, 맥박 98회/분, 호흡 14회/분이다. 검사 결과는 다음과 같다. 다음으로 시행할 검사는? (T3 280 ng/dL, 유리 T4 2.7 ng/dL, 갑상샘자극호르몬 <0.01 mIU/L)\",\n                    \"answer\": \"1) 갑상선 스캔\",\n                    \"explanation\": \"환자는 검사 결과(TSH 감소, T3/T4 증가) 명백한 갑상선기능항진증 소견을 보이고 있으며, 촉진되는 결절이 있습니다. 이 경우 갑상선기능항진증의 원인이 그레이브스병인지, 아니면 자율적으로 호르몬을 분비하는 중독성 선종(toxic adenoma)이나 중독성 다결절성 갑상선종(toxic multinodular goiter)인지를 감별해야 합니다. 갑상선 스캔(radionuclide scan)은 이를 감별하는 가장 좋은 방법입니다. 그레이브스병은 미만성으로 섭취율이 증가하는 반면, 중독성 결절은 해당 결절에만 국소적으로 섭취율이 증가('열결절', hot nodule)하고 주변 정상 조직은 억제된 양상을 보입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"갑상선 초음파는 결절의 모양, 크기, 악성도 위험을 평가하는 데 유용하지만, 결절의 기능(호르몬 분비 여부)을 평가할 수는 없어 기능항진증의 원인 감별에는 제한적입니다.\",\n                        \"3번\": \"목 컴퓨터단층촬영(CT)은 갑상선 결절의 기능 평가나 원인 감별에 일차적으로 사용되지 않습니다.\",\n                        \"4번\": \"혈청 갑상선글로불린은 갑상선암 환자의 추적 관찰 등에 사용되며, 기능항진증의 원인 감별에는 도움이 되지 않습니다.\",\n                        \"5번\": \"덩이 가는바늘흡인세포검사(FNA)는 결절의 악성 여부를 판단하기 위한 검사입니다. 기능성 결절(열결절)은 악성 가능성이 매우 낮아 일반적으로 FNA를 먼저 시행하지 않습니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 30페이지의 'Evaluation of Thyrotoxicosis' 알고리즘은 이 문제의 상황과 정확히 일치합니다. TSH가 낮고 T4가 높은 'Primary thyrotoxicosis'로 진단된 후, 그레이브스병의 특징이 없다면 'Multinodular goiter or toxic adenoma?'를 감별하기 위해 다음 단계로 스캔을 시행하도록 안내하고 있습니다. 이는 문제 해결의 핵심적인 흐름을 보여줍니다.\"\n                },\n                {\n                    \"jokbo_filename\": \"240518 본2 내분비대사병학_정답 (1).pdf\",\n                    \"jokbo_page\": 24,\n                    \"jokbo_end_page\": 25,\n                    \"question_number\": \"46\",\n                    \"question_text\": \"다음 중 갑상선호르몬 저항성에 해당하는 것은?\",\n                    \"answer\": \"4) 4\",\n                    \"explanation\": \"갑상선호르몬 저항성 증후군(Thyroid hormone resistance syndrome)은 말초 조직이 갑상선 호르몬에 적절히 반응하지 못하는 상태입니다. 이로 인해 혈중 갑상선 호르몬(free T4, T3) 수치는 높지만, 뇌하수체 역시 저항성을 보여 TSH 분비를 억제하지 못하므로 TSH 수치가 정상이거나 오히려 증가하는 '부적절한 TSH' 소견을 보입니다. 문제의 그림에서 4번 박스는 'TSH normal or increased, high unbound T4'로, 갑상선호르몬 저항성 증후군의 전형적인 검사 소견을 나타냅니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"TSH low, unbound T4 high: TSH가 억제되고 T4가 높으므로, 갑상선 자체에서 호르몬을 과다분비하는 일차성 갑상선기능항진증(예: 그레이브스병, 중독성 선종)에 해당합니다.\",\n                        \"2번\": \"TSH low, unbound T4 normal, High unbound T3: T3 중독증(T3 toxicosis)에 해당합니다.\",\n                        \"3번\": \"TSH low, unbound T4 normal, Normal unbound T3: 무증상 갑상선기능항진증(Subclinical hyperthyroidism)에 해당합니다.\",\n                        \"5번\": \"TSH and unbound T4 normal: 정상 갑상선 기능 상태입니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 30페이지의 'Evaluation of Thyrotoxicosis' 알고리즘에서 'TSH normal or increased, high unbound T4' 박스 안에 'thyroid hormone resistance syndrome'이 명확하게 기재되어 있습니다. 문제의 다이어그램은 이 알고리즘을 그대로 가져온 것이므로, 이 슬라이드는 문제의 정답을 찾는 직접적인 출처입니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Thyrotoxicosis diagnostic algorithm\",\n                \"Thyroid scan\",\n                \"Toxic adenoma\",\n                \"Thyroid hormone resistance syndrome\"\n            ]\n        },\n        {\n            \"lesson_page\": 31,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240518 본2 내분비대사병학_정답 (1).pdf\",\n                    \"jokbo_page\": 28,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"54\",\n                    \"question_text\": \"다음 항갑상선제에 대한 설명 중 맞는 것은?\\n가. Propylthiouracil은 갑상선 중독 위기 시에 methimazole 보다 더 선호된다.\\n나. Methimazole은 Propylthiouracil 보다 간독성이 심하게 나타난다.\\n다. Methimazole 은 반감기 및 작용시간이 더 길어, 하루에 한 번 투여 가능하다.\\n라. Propylthiouracil 투여 후 무과립구증이 발생하면 methimazole로 변경한다.\",\n                    \"answer\": \"2) 가, 다\",\n                    \"explanation\": \"이 문제는 항갑상선제의 종류별 특징과 임상 적용에 대한 지식을 평가합니다. '가'와 '다'가 옳은 설명입니다.\\n가: Propylthiouracil(PTU)은 갑상선 내 호르몬 합성을 억제할 뿐만 아니라, 말초에서 T4가 활성형인 T3로 전환되는 것을 억제하는 추가적인 작용기전이 있습니다. 이 때문에 작용 발현이 빠르고 중증 상태 조절에 유리하여 갑상선 중독 위기(thyroid storm) 시 Methimazole(MMI)보다 우선적으로 사용됩니다. (강의자료 31, 40페이지)\\n다: Methimazole은 PTU보다 반감기가 길어 하루 한 번 복용이 가능하여 복약 편의성이 좋습니다. (강의자료 31페이지)\",\n                    \"wrong_answer_explanations\": {\n                        \"나\": \"간독성은 PTU의 부작용으로 더 심각하게 보고되며, 특히 심한 간부전을 유발할 수 있어 1차 치료제로는 MMI가 선호됩니다. (강의자료 31페이지 'PTU 부작용으로 심한 간독성이 있어서...')\",\n                        \"라\": \"무과립구증은 두 약제 모두에서 발생할 수 있는 드물지만 치명적인 부작용으로, 교차 반응성(cross-reactivity)의 위험이 있어 한 약제에서 발생하면 다른 약제로 변경하지 않고 즉시 투약을 중단해야 합니다. (강의자료 32페이지)\"\n                    },\n                    \"relevance_reason\": \"강의자료 31페이지는 항갑상선제(MMI, PTU)의 작용기전, 용법, 특징을 종합적으로 설명합니다. 특히 PTU가 말초 전환을 억제한다는 점과 MMI가 pro-drug을 통해 작용한다는 점 등 핵심적인 내용을 담고 있어 문제의 보기 '가', '다'를 판단하는 데 직접적인 근거가 됩니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Antithyroid drugs (ATD)\",\n                \"Methimazole (MMI)\",\n                \"Propylthiouracil (PTU)\",\n                \"Agranulocytosis\",\n                \"Thyroid storm\"\n            ]\n        },\n        {\n            \"lesson_page\": 52,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240518 본2 내분비대사병학_정답 (1).pdf\",\n                    \"jokbo_page\": 22,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"41\",\n                    \"question_text\": \"34세 여자 환자가 전신쇄약감 증상 있어 시행한 검사상, TSH 12 uIU/ml, free T4 1.2 ng/dl, T3 101 ng/dl로 TSH만 증가하였고, anti TPO antibody 양성 소견을 보였다. 환자의 치료에 있어 고려해야 할 사항은?\\n가. 레보티록신 치료 시작을 고려한다.\\n나. 뇌하수체 TSH 분비 이상의 가능성이 높다.\\n다. 환자가 임신한 경우라도 레보티록신 치료를 고려한다.\\n라. 투약없이 3개월 후 갑상선 기능검사를 다시 시행한다.\",\n                    \"answer\": \"2) 가, 다\",\n                    \"explanation\": \"환자는 혈중 TSH 수치가 12 uIU/ml로 상승해 있고 free T4, T3는 정상 범위이며, anti-TPO 항체가 양성이므로 하시모토 갑상선염에 의한 '무증상 갑상선기능저하증(Subclinical hypothyroidism)'으로 진단할 수 있습니다. '가'와 '다'가 옳은 설명입니다.\\n가: TSH 수치가 10 uIU/L 이상으로 명확히 상승했으므로, 향후 명백한 갑상선기능저하증으로 진행할 가능성이 높고 심혈관계 합병증 위험을 줄이기 위해 레보티록신 치료를 시작하는 것이 권고됩니다.\\n다: 임신 중에는 태아의 신경계 발달에 모체의 갑상선 호르몬이 필수적입니다. 모체의 갑상선 기능 저하는 유산, 조산, 태아의 지능 저하 등을 유발할 수 있으므로, 임신을 했거나 계획 중이라면 더욱 적극적으로 치료해야 합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"나\": \"뇌하수체에서 TSH를 과다 분비하는 종양(TSH-secreting pituitary adenoma)이라면 TSH와 함께 free T4/T3도 상승하는 갑상선기능'항진증'의 양상을 보입니다. 이 환자는 free T4/T3가 정상이므로 해당되지 않습니다.\",\n                        \"라\": \"TSH가 10 이상으로 명확한 치료 적응증에 해당하므로, 경과를 관찰하기보다는 치료를 시작하는 것이 적절합니다. TSH가 4~10 사이일 경우 증상이나 동반 질환 유무에 따라 경과 관찰을 고려할 수 있습니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 52페이지는 무증상 갑상선기능저하증의 치료 기준을 명확하게 제시합니다. 특히 'TSH level이 10 uU/L 이상인 경우에는 치료를 권유'한다는 내용은 문제의 핵심인 치료 여부를 결정하는 직접적인 근거가 됩니다. 또한 '임신' 시 치료를 권한다는 내용도 포함되어 보기 '다'의 타당성을 뒷받침합니다.\"\n                }\n            ],\n            \"importance_score\": 10,\n            \"key_concepts\": [\n                \"Subclinical hypothyroidism\",\n                \"Treatment indication\",\n                \"TSH level\",\n                \"Anti-TPO antibody\",\n                \"Hypothyroidism in pregnancy\"\n            ]\n        },\n        {\n            \"lesson_page\": 59,\n            \"related_jokbo_questions\": [\n                {\n                    \"jokbo_filename\": \"240518 본2 내분비대사병학_정답 (1).pdf\",\n                    \"jokbo_page\": 24,\n                    \"jokbo_end_page\": null,\n                    \"question_number\": \"45\",\n                    \"question_text\": \"그림과 같은 질환의 발생 기전과 거리가 먼 것을 한 개 고르시오.\",\n                    \"answer\": \"2) virus-induced host tissue damage that stimulates a cytotoxic T-lymphocyte response to one or more thyroid antigens that damages thyroid follicle cells\",\n                    \"explanation\": \"제시된 그림은 림프구 침윤, 림프 여포(lymphoid follicle)와 배중심(germinal center) 형성, 호산성 세포(Hurthle cell) 변화 등을 특징으로 하는 '하시모토 갑상선염(Hashimoto's thyroiditis)'의 전형적인 병리 소견입니다. 하시모토 갑상선염은 자가면역 기전에 의해 발생합니다. 보기 2번은 바이러스 감염이 선행하여 발생하는 '아급성 갑상선염(Subacute thyroiditis)'의 발생 기전으로, 하시모토 갑상선염과는 병인이 다릅니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"자기관용(self tolerance)의 파괴 및 자가면역 유도는 모든 자가면역질환의 근본적인 기전으로, 하시모토 갑상선염의 시작점입니다.\",\n                        \"3번\": \"CD4+ T세포(Th1)가 활성화되어 분비하는 사이토카인(IFN-γ 등)은 대식세포를 활성화시키고 갑상선 세포 손상을 유발하는 주요 기전 중 하나입니다.\",\n                        \"4)\": \"항갑상선 항체(anti-TPO, anti-Tg)가 생성되어 항체 의존성 세포 매개 세포독성(ADCC)을 통해 갑상선 여포 세포를 파괴할 수 있습니다.\",\n                        \"5번\": \"CD8+ 세포독성 T세포가 직접 갑상선 세포를 공격하여 파괴하는 것 역시 하시모토 갑상선염의 중요한 세포 매개 면역 기전입니다.\"\n                    },\n                    \"relevance_reason\": \"강의자료 59페이지는 하시모토 갑상선염의 원인과 병리를 설명하며 '자가면역기전', '임파구 침윤', '자가항체' 등을 핵심으로 제시합니다. 반면, 강의자료 56페이지에서는 아급성 갑상선염의 원인으로 'virus 감염'을 명시하고 있습니다. 두 슬라이드를 비교하면 문제에서 제시된 질환(하시모토)과 보기 2번(아급성)의 기전이 명확히 다름을 알 수 있어, 정답을 고르는 데 결정적인 역할을 합니다.\"\n                }\n            ],\n            \"importance_score\": 9,\n            \"key_concepts\": [\n                \"Hashimoto's thyroiditis\",\n                \"Subacute thyroiditis\",\n                \"Pathogenesis\",\n                \"Autoimmunity\",\n                \"Viral infection\"\n            ]\n        }\n    ],\n    \"summary\": {\n        \"total_related_slides\": 7,\n        \"total_questions\": 7,\n        \"key_topics\": [\n            \"Thyroid hormone physiology (T3/T4)\",\n            \"Thyrotoxicosis diagnosis and causes\",\n            \"Graves' disease (autoantibodies, treatment)\",\n            \"Subclinical hypothyroidism\",\n            \"Thyroiditis (Hashimoto's, Subacute)\",\n            \"Thyrotoxic periodic paralysis\"\n        ],\n        \"study_recommendations\": \"강의자료 전반에 걸쳐 갑상선 기능 항진증과 저하증의 원인 감별, 진단 알고리즘, 치료법이 중요하게 다루어집니다. 특히 그레이브스병, 하시모토 갑상선염, 아급성 갑상선염의 병태생리 및 감별 포인트를 숙지해야 합니다. T3/T4의 생리적 특성(효능, 반감기, 전환)과 항갑상선제의 종류별 특징 및 부작용은 반드시 암기해야 할 부분입니다. 표와 그림으로 정리된 진단 알고리즘(강의자료 30p)과 비교표(14p, 22p)는 출제 빈도가 높으므로 집중적인 학습이 필요합니다.\"\n    }\n}",
+  "response_length": 17970,
+  "parsed_successfully": true,
+  "parsed_data": {
+    "related_slides": [
+      {
+        "lesson_page": 14,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240518 본2 내분비대사병학_정답 (1).pdf",
+            "jokbo_page": 16,
+            "jokbo_end_page": null,
+            "question_number": "28",
+            "question_text": "Thyroid hormone에 대한 설명으로 맞는 것의 조합은?\n가. T4는 T3보다 metabolic activity가 3배 정도 더 강하다.\n나. T3는 주로 T4로 전환되어 그 작용을 나타내므로, T4의 전구체로 생각할 수 있다.\n다. T3의 반감기는 T4의 반감기보다 9~10배 길다.\n라. T4에서 T3로의 전환이 감소하는 경우는 fasting, acute trauma, oral contrast agents 등이 있다.",
+            "answer": "3) 나, 라",
+            "explanation": "이 문제는 갑상선 호르몬의 특성에 대한 이해를 묻고 있습니다. '나'와 '라'가 옳은 설명입니다.\n나: T3의 대부분은 말초 조직에서 T4로부터 전환되어 생성되므로 T4는 T3의 전구체(prohormone)로 볼 수 있습니다. (강의자료 10페이지)\n라: 기아, 외상, 조영제 등 특정 상황에서는 T4가 T3로 전환되는 과정이 억제됩니다. (강의자료 15페이지)\n족보 PDF에 정답이 2번(가, 다)으로 잘못 표기되어 있으나, 강의자료에 근거하면 3번(나, 라)이 정답입니다.",
+            "wrong_answer_explanations": {
+              "가": "강의자료 14페이지 표에 따르면, T3의 상대적 대사 효능(Relative metabolic potency)은 1인 반면 T4는 0.3으로, T3가 T4보다 약 3배 더 강력합니다. 따라서 T4가 더 강하다는 설명은 틀렸습니다.",
+              "다": "강의자료 14페이지 표에 따르면, T4의 혈청 반감기는 7일인 반면 T3는 2일입니다. 따라서 T4의 반감기가 T3보다 훨씬 깁니다. T3의 반감기가 더 길다는 설명은 틀렸습니다."
+            },
+            "relevance_reason": "강의자료 14페이지의 'Characteristics of Circulating T4 and T3' 표는 문제의 보기 '가'와 '다'의 진위를 직접적으로 판단할 수 있는 핵심 정보(대사 효능, 반감기)를 제공합니다. 이 표가 없으면 문제의 절반을 풀 수 없습니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Thyroid hormone characteristics",
+          "T3 and T4 potency",
+          "T3 and T4 half-life",
+          "Peripheral conversion"
+        ]
+      },
+      {
+        "lesson_page": 22,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240518 본2 내분비대사병학_정답 (1).pdf",
+            "jokbo_page": 26,
+            "jokbo_end_page": null,
+            "question_number": "49",
+            "question_text": "여러 갑상선중독증 상황에서 RAIU 양상이 다른 경우는?",
+            "answer": "5) 그레이브스 병",
+            "explanation": "방사성 요오드 섭취율(RAIU)은 갑상선중독증의 원인을 감별하는 데 중요한 검사입니다. 그레이브스병은 갑상선 자체에서 호르몬 생성이 증가(hyperthyroidism)하는 대표적인 질환으로, TSH 수용체 항체에 의해 갑상선이 지속적으로 자극받아 요오드 섭취율이 증가합니다. 반면 나머지 보기들은 갑상선 세포 파괴로 저장된 호르몬이 유출되거나(thyroiditis) 외부에서 호르몬을 섭취하는 경우로, 갑상선 자체의 기능은 항진되어 있지 않아 RAIU가 감소합니다.",
+            "wrong_answer_explanations": {
+              "1번": "인위성 갑상선 중독(thyrotoxicosis factitia)은 외부에서 갑상선 호르몬을 복용하는 경우로, 뇌하수체-갑상선 축이 억제되어 갑상선의 요오드 섭취가 거의 없습니다 (RAIU 감소).",
+              "2번": "무통성 갑상선염(painless/silent thyroiditis)은 갑상선 조직의 염증으로 세포가 파괴되어 저장된 호르몬이 혈중으로 방출되는 상태이므로 RAIU는 감소합니다. (강의자료 58페이지)",
+              "3번": "아급성 갑상선염(subacute thyroiditis) 역시 바이러스 감염 등에 의한 갑상선 파괴가 원인이므로 RAIU가 현저히 감소합니다. (강의자료 57페이지)",
+              "4번": "요오드 유발성 갑상선 중독(Jod-Basedow phenomenon)은 요오드 과다 공급으로 인한 갑상선 기능 항진이지만, 방사성 요오드와 비방사성 요오드가 경쟁하므로 RAIU는 낮게 측정될 수 있습니다."
+            },
+            "relevance_reason": "강의자료 22페이지의 'Causes of Thyrotoxicosis' 표는 갑상선중독증을 'Primary Hyperthyroidism' (예: Graves' disease)과 'Thyrotoxicosis without Hyperthyroidism' (예: Subacute/Silent thyroiditis)으로 명확히 구분합니다. 이 분류는 RAIU의 증가와 감소를 이해하는 핵심이며, 문제 해결에 직접적인 근거를 제공합니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Causes of Thyrotoxicosis",
+          "Radioactive Iodine Uptake (RAIU)",
+          "Graves' disease",
+          "Thyroiditis"
+        ]
+      },
+      {
+        "lesson_page": 24,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240518 본2 내분비대사병학_정답 (1).pdf",
+            "jokbo_page": 27,
+            "jokbo_end_page": null,
+            "question_number": "51",
+            "question_text": "그레이브스 병을 일으키는 자가항체로, 그레이브스 병 환자를 항갑상선제로 치료하면 이 항체의 역가가 점차 감소한다. 이 항체를 측정하기 위해서는 환자의 IgG를 갑상선 세포에 처리한 후 cAMP를 측정하는데, 자극 여부는 알 수 있으나 TSH 수용체와의 결합하는지는 알 수 없다. 이에 해당하는 것은?",
+            "answer": "1) Thyroid stimulating antibody (TSAb)",
+            "explanation": "문제에서 설명하는 검사 방법은 환자의 혈청 내 면역글로불린(IgG)이 배양된 갑상선 세포를 자극하여 세포 내 신호전달물질인 cAMP를 생성하는지를 측정하는 생물학적 분석(bioassay)입니다. 이는 항체의 '기능(자극 여부)'을 직접적으로 평가하는 방법으로, '갑상선 자극 항체(Thyroid stimulating immunoglobulin, TSI 또는 TSAb)' 검사의 정의와 정확히 일치합니다. 문제의 마지막 문장('자극 여부는 알 수 있으나... 결합하는지는 알 수 없다')은 다소 혼란스럽게 서술되었으나, 검사 원리 자체가 TSI를 지칭합니다.",
+            "wrong_answer_explanations": {
+              "2번": "TSH binding inhibitor immunoglobulin (TBII)는 방사성 동위원소로 표지된 TSH가 TSH 수용체에 결합하는 것을 환자의 항체가 얼마나 '방해'하는지를 측정합니다. 즉, 결합 저해 여부는 알 수 있지만, 그 항체가 수용체를 자극하는지(stimulating) 또는 차단하는지(blocking) 기능은 알 수 없습니다. 문제에서 설명하는 cAMP 측정과는 무관합니다.",
+              "3번": "Thyroid blocking antibody (TBAb)는 TSH 수용체에 결합하여 TSH의 작용을 차단하는 항체로, 갑상선 기능 저하를 유발할 수 있습니다. TSI와는 기능이 정반대입니다.",
+              "4번": "Thyroid stimulating blocking antibody (TSB Ab)는 자극과 차단 기능을 동시에 가진 항체를 의미하는 용어이나, 표준적인 검사 분류는 아닙니다.",
+              "5번": "Antithyroglobulin antibody (TgAb)는 갑상선 글로불린에 대한 자가항체로, 하시모토 갑상선염 등에서 주로 발견되며 TSH 수용체를 자극하는 기능은 없습니다."
+            },
+            "relevance_reason": "강의자료 24페이지는 그레이브스병 진단에 사용되는 주요 자가항체인 TSH 수용체 항체를 TBII와 TSI로 나누어 명확히 설명합니다. 특히 TSI에 대해 '자극 형 Ab만을 측정함'이라고 기술하고, 그 원리를 설명하여 문제에서 제시된 cAMP 측정법이 TSI임을 직접적으로 알려줍니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Graves' disease autoantibodies",
+          "TSH receptor antibody (TRAb)",
+          "Thyroid stimulating immunoglobulin (TSI)",
+          "TSH binding inhibiting immunoglobulin (TBII)"
+        ]
+      },
+      {
+        "lesson_page": 27,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240518 본2 내분비대사병학_정답 (1).pdf",
+            "jokbo_page": 30,
+            "jokbo_end_page": null,
+            "question_number": "57",
+            "question_text": "19세 남자환자가 아침에 갑자기 다리에 힘이 빠져 내원하였다. 2달전부터 10kg 체중감소가 있고 가슴 두근거림과 발한이 동반되었다. 약물 복용력은 없었으며 음주도 하지 않았다. 혈압은 140/70, 맥박은 115였다. Na/K/Cl 140/2.5/104 mEq/L. 가장 먼저 검사해야 하는 것은?",
+            "answer": "5) Free T4/TSH",
+            "explanation": "젊은 남성에서 체중 감소, 심계항진, 발한 등 갑상선기능항진증을 시사하는 증상과 함께 급성 이완성 마비, 그리고 혈액검사상 현저한 저칼륨혈증(K+ 2.5mEq/L)이 동반된 것은 '갑상선중독성 주기성 마비(Thyrotoxic periodic paralysis)'를 강력히 시사하는 소견입니다. 따라서 원인이 되는 갑상선기능항진증을 진단하기 위해 혈중 유리 T4(Free T4)와 갑상선자극호르몬(TSH) 검사를 가장 먼저 시행해야 합니다.",
+            "wrong_answer_explanations": {
+              "1번": "Parathyroid hormone은 칼슘 대사를 조절하는 호르몬으로, 현재 환자의 증상 및 저칼륨혈증과는 직접적인 관련이 적습니다.",
+              "2번": "Calcitonin은 갑상선 C-cell에서 분비되며 칼슘을 낮추는 역할을 하지만, 주된 증상과는 관련이 없습니다.",
+              "3번": "Plasma metanephrin/normmetanephrine은 갈색세포종 진단에 사용되는 검사입니다. 고혈압이 있지만, 주기성 마비와 저칼륨혈증을 설명하기 어렵습니다.",
+              "4번": "ACTH/cortisol은 부신 기능을 평가하는 검사로, 현재 증상과 가장 부합하는 진단과는 거리가 멉니다."
+            },
+            "relevance_reason": "강의자료 27페이지는 '갑상선중독성 주기성마비(thyrotoxic periodic paralysis)'에 대해 집중적으로 다룹니다. '동양 남자', '마비 당시 hypokalemia 동반', '갑상선 기능항진증이 회복되면 완전 소실' 등의 핵심 특징을 설명하고, '젊은 남자가 자다가 하지 마비'가 오면 '갑상선 호르몬 검사'를 해야 한다고 명시하여 문제의 상황과 진단 과정을 직접적으로 설명합니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Thyrotoxic periodic paralysis",
+          "Hypokalemia",
+          "Hyperthyroidism",
+          "Thyroid function test"
+        ]
+      },
+      {
+        "lesson_page": 30,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240518 본2 내분비대사병학_정답 (1).pdf",
+            "jokbo_page": 22,
+            "jokbo_end_page": 23,
+            "question_number": "43",
+            "question_text": "40세 남자가 오른쪽 목에 덩이가 만져진다며 병원에 왔다. 6개월 전부터 체중이 줄고 땀이 많이 났다고 한다. 앞목 부위에서 2.0 cm의 덩이가 부드럽게 만져졌고 압통은 없으며 덩이는 잘 움직인다. 혈압 140/80 mmHg, 맥박 98회/분, 호흡 14회/분이다. 검사 결과는 다음과 같다. 다음으로 시행할 검사는? (T3 280 ng/dL, 유리 T4 2.7 ng/dL, 갑상샘자극호르몬 <0.01 mIU/L)",
+            "answer": "1) 갑상선 스캔",
+            "explanation": "환자는 검사 결과(TSH 감소, T3/T4 증가) 명백한 갑상선기능항진증 소견을 보이고 있으며, 촉진되는 결절이 있습니다. 이 경우 갑상선기능항진증의 원인이 그레이브스병인지, 아니면 자율적으로 호르몬을 분비하는 중독성 선종(toxic adenoma)이나 중독성 다결절성 갑상선종(toxic multinodular goiter)인지를 감별해야 합니다. 갑상선 스캔(radionuclide scan)은 이를 감별하는 가장 좋은 방법입니다. 그레이브스병은 미만성으로 섭취율이 증가하는 반면, 중독성 결절은 해당 결절에만 국소적으로 섭취율이 증가('열결절', hot nodule)하고 주변 정상 조직은 억제된 양상을 보입니다.",
+            "wrong_answer_explanations": {
+              "2번": "갑상선 초음파는 결절의 모양, 크기, 악성도 위험을 평가하는 데 유용하지만, 결절의 기능(호르몬 분비 여부)을 평가할 수는 없어 기능항진증의 원인 감별에는 제한적입니다.",
+              "3번": "목 컴퓨터단층촬영(CT)은 갑상선 결절의 기능 평가나 원인 감별에 일차적으로 사용되지 않습니다.",
+              "4번": "혈청 갑상선글로불린은 갑상선암 환자의 추적 관찰 등에 사용되며, 기능항진증의 원인 감별에는 도움이 되지 않습니다.",
+              "5번": "덩이 가는바늘흡인세포검사(FNA)는 결절의 악성 여부를 판단하기 위한 검사입니다. 기능성 결절(열결절)은 악성 가능성이 매우 낮아 일반적으로 FNA를 먼저 시행하지 않습니다."
+            },
+            "relevance_reason": "강의자료 30페이지의 'Evaluation of Thyrotoxicosis' 알고리즘은 이 문제의 상황과 정확히 일치합니다. TSH가 낮고 T4가 높은 'Primary thyrotoxicosis'로 진단된 후, 그레이브스병의 특징이 없다면 'Multinodular goiter or toxic adenoma?'를 감별하기 위해 다음 단계로 스캔을 시행하도록 안내하고 있습니다. 이는 문제 해결의 핵심적인 흐름을 보여줍니다."
+          },
+          {
+            "jokbo_filename": "240518 본2 내분비대사병학_정답 (1).pdf",
+            "jokbo_page": 24,
+            "jokbo_end_page": 25,
+            "question_number": "46",
+            "question_text": "다음 중 갑상선호르몬 저항성에 해당하는 것은?",
+            "answer": "4) 4",
+            "explanation": "갑상선호르몬 저항성 증후군(Thyroid hormone resistance syndrome)은 말초 조직이 갑상선 호르몬에 적절히 반응하지 못하는 상태입니다. 이로 인해 혈중 갑상선 호르몬(free T4, T3) 수치는 높지만, 뇌하수체 역시 저항성을 보여 TSH 분비를 억제하지 못하므로 TSH 수치가 정상이거나 오히려 증가하는 '부적절한 TSH' 소견을 보입니다. 문제의 그림에서 4번 박스는 'TSH normal or increased, high unbound T4'로, 갑상선호르몬 저항성 증후군의 전형적인 검사 소견을 나타냅니다.",
+            "wrong_answer_explanations": {
+              "1번": "TSH low, unbound T4 high: TSH가 억제되고 T4가 높으므로, 갑상선 자체에서 호르몬을 과다분비하는 일차성 갑상선기능항진증(예: 그레이브스병, 중독성 선종)에 해당합니다.",
+              "2번": "TSH low, unbound T4 normal, High unbound T3: T3 중독증(T3 toxicosis)에 해당합니다.",
+              "3번": "TSH low, unbound T4 normal, Normal unbound T3: 무증상 갑상선기능항진증(Subclinical hyperthyroidism)에 해당합니다.",
+              "5번": "TSH and unbound T4 normal: 정상 갑상선 기능 상태입니다."
+            },
+            "relevance_reason": "강의자료 30페이지의 'Evaluation of Thyrotoxicosis' 알고리즘에서 'TSH normal or increased, high unbound T4' 박스 안에 'thyroid hormone resistance syndrome'이 명확하게 기재되어 있습니다. 문제의 다이어그램은 이 알고리즘을 그대로 가져온 것이므로, 이 슬라이드는 문제의 정답을 찾는 직접적인 출처입니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Thyrotoxicosis diagnostic algorithm",
+          "Thyroid scan",
+          "Toxic adenoma",
+          "Thyroid hormone resistance syndrome"
+        ]
+      },
+      {
+        "lesson_page": 31,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240518 본2 내분비대사병학_정답 (1).pdf",
+            "jokbo_page": 28,
+            "jokbo_end_page": null,
+            "question_number": "54",
+            "question_text": "다음 항갑상선제에 대한 설명 중 맞는 것은?\n가. Propylthiouracil은 갑상선 중독 위기 시에 methimazole 보다 더 선호된다.\n나. Methimazole은 Propylthiouracil 보다 간독성이 심하게 나타난다.\n다. Methimazole 은 반감기 및 작용시간이 더 길어, 하루에 한 번 투여 가능하다.\n라. Propylthiouracil 투여 후 무과립구증이 발생하면 methimazole로 변경한다.",
+            "answer": "2) 가, 다",
+            "explanation": "이 문제는 항갑상선제의 종류별 특징과 임상 적용에 대한 지식을 평가합니다. '가'와 '다'가 옳은 설명입니다.\n가: Propylthiouracil(PTU)은 갑상선 내 호르몬 합성을 억제할 뿐만 아니라, 말초에서 T4가 활성형인 T3로 전환되는 것을 억제하는 추가적인 작용기전이 있습니다. 이 때문에 작용 발현이 빠르고 중증 상태 조절에 유리하여 갑상선 중독 위기(thyroid storm) 시 Methimazole(MMI)보다 우선적으로 사용됩니다. (강의자료 31, 40페이지)\n다: Methimazole은 PTU보다 반감기가 길어 하루 한 번 복용이 가능하여 복약 편의성이 좋습니다. (강의자료 31페이지)",
+            "wrong_answer_explanations": {
+              "나": "간독성은 PTU의 부작용으로 더 심각하게 보고되며, 특히 심한 간부전을 유발할 수 있어 1차 치료제로는 MMI가 선호됩니다. (강의자료 31페이지 'PTU 부작용으로 심한 간독성이 있어서...')",
+              "라": "무과립구증은 두 약제 모두에서 발생할 수 있는 드물지만 치명적인 부작용으로, 교차 반응성(cross-reactivity)의 위험이 있어 한 약제에서 발생하면 다른 약제로 변경하지 않고 즉시 투약을 중단해야 합니다. (강의자료 32페이지)"
+            },
+            "relevance_reason": "강의자료 31페이지는 항갑상선제(MMI, PTU)의 작용기전, 용법, 특징을 종합적으로 설명합니다. 특히 PTU가 말초 전환을 억제한다는 점과 MMI가 pro-drug을 통해 작용한다는 점 등 핵심적인 내용을 담고 있어 문제의 보기 '가', '다'를 판단하는 데 직접적인 근거가 됩니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Antithyroid drugs (ATD)",
+          "Methimazole (MMI)",
+          "Propylthiouracil (PTU)",
+          "Agranulocytosis",
+          "Thyroid storm"
+        ]
+      },
+      {
+        "lesson_page": 52,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240518 본2 내분비대사병학_정답 (1).pdf",
+            "jokbo_page": 22,
+            "jokbo_end_page": null,
+            "question_number": "41",
+            "question_text": "34세 여자 환자가 전신쇄약감 증상 있어 시행한 검사상, TSH 12 uIU/ml, free T4 1.2 ng/dl, T3 101 ng/dl로 TSH만 증가하였고, anti TPO antibody 양성 소견을 보였다. 환자의 치료에 있어 고려해야 할 사항은?\n가. 레보티록신 치료 시작을 고려한다.\n나. 뇌하수체 TSH 분비 이상의 가능성이 높다.\n다. 환자가 임신한 경우라도 레보티록신 치료를 고려한다.\n라. 투약없이 3개월 후 갑상선 기능검사를 다시 시행한다.",
+            "answer": "2) 가, 다",
+            "explanation": "환자는 혈중 TSH 수치가 12 uIU/ml로 상승해 있고 free T4, T3는 정상 범위이며, anti-TPO 항체가 양성이므로 하시모토 갑상선염에 의한 '무증상 갑상선기능저하증(Subclinical hypothyroidism)'으로 진단할 수 있습니다. '가'와 '다'가 옳은 설명입니다.\n가: TSH 수치가 10 uIU/L 이상으로 명확히 상승했으므로, 향후 명백한 갑상선기능저하증으로 진행할 가능성이 높고 심혈관계 합병증 위험을 줄이기 위해 레보티록신 치료를 시작하는 것이 권고됩니다.\n다: 임신 중에는 태아의 신경계 발달에 모체의 갑상선 호르몬이 필수적입니다. 모체의 갑상선 기능 저하는 유산, 조산, 태아의 지능 저하 등을 유발할 수 있으므로, 임신을 했거나 계획 중이라면 더욱 적극적으로 치료해야 합니다.",
+            "wrong_answer_explanations": {
+              "나": "뇌하수체에서 TSH를 과다 분비하는 종양(TSH-secreting pituitary adenoma)이라면 TSH와 함께 free T4/T3도 상승하는 갑상선기능'항진증'의 양상을 보입니다. 이 환자는 free T4/T3가 정상이므로 해당되지 않습니다.",
+              "라": "TSH가 10 이상으로 명확한 치료 적응증에 해당하므로, 경과를 관찰하기보다는 치료를 시작하는 것이 적절합니다. TSH가 4~10 사이일 경우 증상이나 동반 질환 유무에 따라 경과 관찰을 고려할 수 있습니다."
+            },
+            "relevance_reason": "강의자료 52페이지는 무증상 갑상선기능저하증의 치료 기준을 명확하게 제시합니다. 특히 'TSH level이 10 uU/L 이상인 경우에는 치료를 권유'한다는 내용은 문제의 핵심인 치료 여부를 결정하는 직접적인 근거가 됩니다. 또한 '임신' 시 치료를 권한다는 내용도 포함되어 보기 '다'의 타당성을 뒷받침합니다."
+          }
+        ],
+        "importance_score": 10,
+        "key_concepts": [
+          "Subclinical hypothyroidism",
+          "Treatment indication",
+          "TSH level",
+          "Anti-TPO antibody",
+          "Hypothyroidism in pregnancy"
+        ]
+      },
+      {
+        "lesson_page": 59,
+        "related_jokbo_questions": [
+          {
+            "jokbo_filename": "240518 본2 내분비대사병학_정답 (1).pdf",
+            "jokbo_page": 24,
+            "jokbo_end_page": null,
+            "question_number": "45",
+            "question_text": "그림과 같은 질환의 발생 기전과 거리가 먼 것을 한 개 고르시오.",
+            "answer": "2) virus-induced host tissue damage that stimulates a cytotoxic T-lymphocyte response to one or more thyroid antigens that damages thyroid follicle cells",
+            "explanation": "제시된 그림은 림프구 침윤, 림프 여포(lymphoid follicle)와 배중심(germinal center) 형성, 호산성 세포(Hurthle cell) 변화 등을 특징으로 하는 '하시모토 갑상선염(Hashimoto's thyroiditis)'의 전형적인 병리 소견입니다. 하시모토 갑상선염은 자가면역 기전에 의해 발생합니다. 보기 2번은 바이러스 감염이 선행하여 발생하는 '아급성 갑상선염(Subacute thyroiditis)'의 발생 기전으로, 하시모토 갑상선염과는 병인이 다릅니다.",
+            "wrong_answer_explanations": {
+              "1번": "자기관용(self tolerance)의 파괴 및 자가면역 유도는 모든 자가면역질환의 근본적인 기전으로, 하시모토 갑상선염의 시작점입니다.",
+              "3번": "CD4+ T세포(Th1)가 활성화되어 분비하는 사이토카인(IFN-γ 등)은 대식세포를 활성화시키고 갑상선 세포 손상을 유발하는 주요 기전 중 하나입니다.",
+              "4)": "항갑상선 항체(anti-TPO, anti-Tg)가 생성되어 항체 의존성 세포 매개 세포독성(ADCC)을 통해 갑상선 여포 세포를 파괴할 수 있습니다.",
+              "5번": "CD8+ 세포독성 T세포가 직접 갑상선 세포를 공격하여 파괴하는 것 역시 하시모토 갑상선염의 중요한 세포 매개 면역 기전입니다."
+            },
+            "relevance_reason": "강의자료 59페이지는 하시모토 갑상선염의 원인과 병리를 설명하며 '자가면역기전', '임파구 침윤', '자가항체' 등을 핵심으로 제시합니다. 반면, 강의자료 56페이지에서는 아급성 갑상선염의 원인으로 'virus 감염'을 명시하고 있습니다. 두 슬라이드를 비교하면 문제에서 제시된 질환(하시모토)과 보기 2번(아급성)의 기전이 명확히 다름을 알 수 있어, 정답을 고르는 데 결정적인 역할을 합니다."
+          }
+        ],
+        "importance_score": 9,
+        "key_concepts": [
+          "Hashimoto's thyroiditis",
+          "Subacute thyroiditis",
+          "Pathogenesis",
+          "Autoimmunity",
+          "Viral infection"
+        ]
+      }
+    ],
+    "summary": {
+      "total_related_slides": 7,
+      "total_questions": 7,
+      "key_topics": [
+        "Thyroid hormone physiology (T3/T4)",
+        "Thyrotoxicosis diagnosis and causes",
+        "Graves' disease (autoantibodies, treatment)",
+        "Subclinical hypothyroidism",
+        "Thyroiditis (Hashimoto's, Subacute)",
+        "Thyrotoxic periodic paralysis"
+      ],
+      "study_recommendations": "강의자료 전반에 걸쳐 갑상선 기능 항진증과 저하증의 원인 감별, 진단 알고리즘, 치료법이 중요하게 다루어집니다. 특히 그레이브스병, 하시모토 갑상선염, 아급성 갑상선염의 병태생리 및 감별 포인트를 숙지해야 합니다. T3/T4의 생리적 특성(효능, 반감기, 전환)과 항갑상선제의 종류별 특징 및 부작용은 반드시 암기해야 할 부분입니다. 표와 그림으로 정리된 진단 알고리즘(강의자료 30p)과 비교표(14p, 22p)는 출제 빈도가 높으므로 집중적인 학습이 필요합니다."
+    }
+  }
+}

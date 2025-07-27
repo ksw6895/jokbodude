@@ -1,0 +1,1064 @@
+{
+  "timestamp": "20250727_035953",
+  "mode": "jokbo-centric",
+  "jokbo_file": "240530 본1 인체병리학총론_정답.pdf",
+  "lesson_file": "20250418_1_2교시_염증과 수복_파트1.pdf",
+  "response_text": "{\n    \"jokbo_pages\": [\n        {\n            \"jokbo_page\": 1,\n            \"questions\": [\n                {\n                    \"question_number\": 1,\n                    \"question_text\": \"위 내시경 검사에서 채취한 생검 조직에서 관찰되는 다음 소견 중 악성종양을 나타내는 가장 중요한 소견은?\",\n                    \"answer\": \"5) Invasion\",\n                    \"explanation\": \"악성종양을 양성종양과 구별하는 가장 결정적인 기준은 침윤(Invasion)입니다. 침윤은 종양세포가 기저막을 뚫고 주변 조직으로 파고드는 현상을 말하며, 이는 악성세포만이 보이는 특징입니다. 다른 소견들(다형성, 이형성, 괴사, 핵/세포질 비율 증가)은 악성종양에서 흔히 관찰되지만, 침윤만큼 절대적인 기준은 아닙니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Pleomorphism(다형성)은 세포의 크기와 모양이 다양함을 의미하며, 악성종양의 특징 중 하나이지만 반응성 변화에서도 보일 수 있습니다.\",\n                        \"2번\": \"Atypia(이형성)는 세포의 비정상적인 형태를 의미하며, 악성으로 진행할 수 있는 전암병변에서도 관찰되나 그 자체로 악성을 확진하지는 않습니다.\",\n                        \"3번\": \"Necrosis(괴사)는 종양이 너무 빨리 자라 혈액 공급이 부족할 때 발생할 수 있으나, 염증 등 다른 조건에서도 발생할 수 있습니다.\",\n                        \"4번\": \"Increased nuclear/cytoplasmic ratio(핵/세포질 비율 증가)는 악성세포의 특징이지만, 이 역시 침윤만큼 결정적인 소견은 아닙니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 2,\n                    \"question_text\": \"종양의 특성에 관한 기술 중 옳은 것은?\",\n                    \"answer\": \"4) 악성도가 높은 종양은 poorly differentiation을 보인다.\",\n                    \"explanation\": \"악성도가 높은 종양일수록 정상 세포의 형태와 기능을 잃어버리는 분화도(differentiation)가 나쁜(poorly differentiated) 양상을 보입니다. 이는 악성종양의 중요한 특징 중 하나입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"악성종양의 growth fraction(성장분율)은 초기에는 높지만 종양이 커지면서 혈액 공급 부족 등으로 감소하는 경향을 보입니다.\",\n                        \"2번\": \"종양이 임상적으로 발견될 때는 대부분의 세포가 비증식 상태(non-proliferating pool)에 있습니다.\",\n                        \"3번\": \"양성종양은 팽창성 성장을 하며, 침윤성 성장은 악성종양의 특징입니다.\",\n                        \"5번\": \"빨리 성장하는 종양(growth fraction이 높은 종양)은 세포분열이 활발하므로, 세포분열 주기에 작용하는 항암약제에 더 잘 반응하는 경향이 있습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 3,\n                    \"question_text\": \"다음 중 암과 관련된 질환의 조합으로 옳은 것은?\",\n                    \"answer\": \"1) Familial adenomatous polyposis / adenocarcinoma of colon\",\n                    \"explanation\": \"가족성 선종성 용종증(Familial adenomatous polyposis, FAP)은 APC 유전자의 생식세포 돌연변이로 인해 발생하며, 치료하지 않을 경우 거의 100% 대장 선암(adenocarcinoma of colon)으로 진행하는 대표적인 유전성 암 증후군입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"기관지 편평상피화생(Bronchial squamous metaplasia)은 주로 편평세포암(squamous cell carcinoma)의 전구 병변이며, 소세포암(small cell carcinoma)과는 직접적인 관련성이 적습니다.\",\n                        \"3번\": \"HPV 감염은 자궁경부암, 구인두암 등과 관련이 있으며, MALT 림프종은 주로 Helicobacter pylori 감염과 관련이 있습니다.\",\n                        \"4번\": \"Helicobacter pylori 감염은 위선암 및 MALT 림프종과 관련이 있으며, 간세포암(Hepatocellular carcinoma)은 주로 B형/C형 간염 바이러스, 알코올성 간질환 등과 관련이 있습니다.\",\n                        \"5번\": \"바렛 식도(Barrett esophagus)는 식도 선암(adenocarcinoma of esophagus)의 전구 병변이며, 편평세포암(squamous cell carcinoma)과는 관련이 적습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 4,\n                    \"question_text\": \"50세 여성이 정기 건강검진에서 실시한 자궁경부도말검사에서 이상소견이 있어 산부인과를 방문하였다. 자궁경부 생검 조직의 현미경 소견에서 상피의 전층에 걸쳐 atypical tumor cell세포이 관찰되었다. 그러나 상피의 기저막은 잘 유지되어 있었다. 진단은?\",\n                    \"answer\": \"3) Carcinoma in situ\",\n                    \"explanation\": \"상피세포층 전체에 걸쳐 이형성(dysplasia)이 심한 악성 세포가 관찰되지만, 기저막(basement membrane)을 침범하지 않은 상태를 상피내암(Carcinoma in situ, CIS)이라고 합니다. 이는 침윤암의 바로 전 단계에 해당합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"화생(Metaplasia)은 한 종류의 성숙한 세포가 다른 종류의 성숙한 세포로 바뀌는 것으로, 악성 변화는 아닙니다.\",\n                        \"2번\": \"이형성(Dysplasia)은 상피 내 세포의 이형성을 의미하지만, 전층을 침범하지 않은 경우를 포함하는 더 넓은 개념입니다. 문제에서는 '전층에 걸쳐' 관찰되므로 상피내암이 더 정확한 진단입니다.\",\n                        \"4\" : \"미세침윤암(Microinvasive carcinoma)은 기저막을 뚫고 아주 약간의 침윤이 시작된 단계입니다.\",\n                        \"5번\": \"침윤암(Invasive carcinoma)은 종양세포가 기저막을 명확히 뚫고 기질로 침범한 상태를 의미합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 2,\n            \"questions\": [\n                {\n                    \"question_number\": 5,\n                    \"question_text\": \"70-year-old man who has a 50 pack year history of cigarette smoking has had a chronic cough for the past 20 years. He has begun to lose weight during the past year. He has a chest radiograph that reveals a right hilar mass. A sputum cytology shows atypical, hyperchromatic cells. What is the most common initial pathway for metastases from this lesion?\",\n                    \"answer\": \"2) Lymphatics\",\n                    \"explanation\": \"암종(Carcinoma)의 가장 흔한 초기 전이 경로는 림프관(Lymphatics)을 통한 림프절 전이입니다. 폐암, 특히 폐문부(hilar)에 발생한 암의 경우, 기관지 주변 및 종격동 림프절로 먼저 전이되는 것이 일반적입니다. 혈행성 전이도 일어나지만 림프관 전이가 더 흔한 초기 경로입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"흉막강(Pleural cavity)으로의 전이는 직접 파종(seeding)에 의한 것이며, 초기 전이 경로로는 덜 일반적입니다.\",\n                        \"3번\": \"혈류(Bloodstream)를 통한 전이는 특히 육종(sarcoma)에서 흔하며, 암종에서도 일어나지만 림프관 전이 이후 또는 동시에 일어나는 경우가 많습니다.\",\n                        \"4번\": \"기관지(Bronchi)를 통한 전파는 암의 성장 방식이지 전이(metastasis)의 일반적인 경로는 아닙니다.\",\n                        \"5번\": \"흉벽(Chest wall)으로의 전이는 직접 침윤(direct invasion)에 해당합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 6,\n                    \"question_text\": \"40세 여성의 신체검사에서 우측 유방에 1.5cm 크기의 결절이 발견되었다. 결절은 경계가 불분명하며 주변 조직과 단단하게 유착되어있고 통증을 동반하고 있다. 주위 림프절은 정상이었다. 다음 중 가장 가능성이 높은 진단은?\",\n                    \"answer\": \"5) Invasive ductal carcinoma\",\n                    \"explanation\": \"경계가 불분명하고, 주변 조직에 단단하게 유착된 유방 결절은 악성종양, 특히 침윤성 유관암(Invasive ductal carcinoma)의 전형적인 임상 소견입니다. 양성 종양은 보통 경계가 명확하고 유동성이 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"섬유선종(Fibroadenoma)은 경계가 명확하고 유동성이 있는 양성 종양입니다.\",\n                        \"2번\": \"혈관종(Hemangioma)은 유방에서 드물며, 보통 부드러운 종괴로 나타납니다.\",\n                        \"3번\": \"관내유두종(Intraductal papilloma)은 보통 유두 분비물을 동반하는 작은 양성 종양입니다.\",\n                        \"4번\": \"악성 림프종(Malignant lymphoma)이 유방에 원발성으로 생기는 경우는 매우 드뭅니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 7,\n                    \"question_text\": \"20세 여자 환자가 우측 난소에 5cm 크기의 낭성 종양이 발견되어 수술로 제거하였다. 종양의 현미경 검사에서 epithelial cell, cartilage 등이 관찰되었다. 이 종양의 진단은?\",\n                    \"answer\": \"3) Mature cystic teratoma\",\n                    \"explanation\": \"여러 배엽(외배엽, 중배엽, 내배엽)에서 유래한 다양한 종류의 성숙한 조직(상피세포, 연골, 신경조직, 지방 등)을 포함하는 종양을 기형종(teratoma)이라고 합니다. 난소에서 발견된 낭성 종양에 상피세포와 연골이 함께 관찰되는 것은 성숙 낭성 기형종(Mature cystic teratoma)의 특징적인 소견입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"다형성 선종(Pleomorphic adenoma)은 주로 침샘에 발생하는 혼합 종양입니다.\",\n                        \"2번\": \"유두종(Papilloma)은 상피세포가 유두상으로 증식하는 양성 종양입니다.\",\n                        \"4번\": \"과오종(Hamartoma)은 해당 장기에 정상적으로 존재하는 조직이 비정상적으로 혼합, 배열된 양성 병변입니다.\",\n                        \"5번\": \"분리종(Choristoma)은 정상적인 조직이 비정상적인 위치에 존재하는 것을 말합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 3,\n            \"questions\": [\n                {\n                    \"question_number\": 8,\n                    \"question_text\": \"다음 중 allergic reaction에서 late phase reaction의 증상을 초래하는 원인이 되는 세포는?\",\n                    \"answer\": \"2) eosinophil\",\n                    \"explanation\": \"알레르기 반응은 비만세포(mast cell)에 의해 매개되는 즉시형 반응(immediate reaction)과, 수 시간 후 호산구(eosinophil) 및 다른 백혈구들이 몰려와 염증을 지속시키는 후기 반응(late phase reaction)으로 나뉩니다. 따라서 후기 반응의 주된 원인 세포는 호산구입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"비만세포(Mast cell)는 알레르기 반응의 즉시형/초기 반응을 유발합니다.\",\n                        \"3번\": \"대식세포(Macrophage)는 주로 만성 염증 및 식균 작용에 관여합니다.\",\n                        \"4번\": \"호중구(Neutrophil)는 주로 급성 세균 감염에 대한 초기 방어에 중요합니다.\",\n                        \"5번\": \"림프구(Lymphocyte)는 항원 특이적 면역 반응을 담당하지만, 알레르기 후기 반응의 주된 효과 세포는 호산구입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 56,\n                            \"relevance_reason\": \"강의자료 56페이지(p.79)에서 알레르기 반응(allergic reactions)에서 호산구(eosinophils)가 주요 세포 유형(main cell type)일 수 있다고 명시하고 있어, 문제와 직접적으로 관련됩니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": 9,\n                    \"question_text\": \"systemic immune complex disease의 주된 형태학적 변화는?\",\n                    \"answer\": \"1) acute vasculitis\",\n                    \"explanation\": \"전신성 면역 복합체 질환(systemic immune complex disease)은 항원-항체 면역 복합체가 혈관벽에 침착되어 보체계를 활성화시키고, 이로 인해 호중구가 모여들어 혈관벽에 염증을 일으키는 급성 혈관염(acute vasculitis)이 주된 형태학적 특징입니다. 대표적인 예로 전신홍반루푸스(SLE)가 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"호산구성 침윤(eosinophilic infiltration)은 주로 알레르기 반응이나 기생충 감염에서 관찰됩니다.\",\n                        \"3번\": \"괴사(necrosis)는 혈관염의 결과로 나타날 수 있지만, 혈관염 자체가 더 주된 변화입니다.\",\n                        \"4번\": \"혈관주위 형질세포 집적(perivascular cuffing of plasma cells)은 주로 만성 염증에서 관찰됩니다.\",\n                        \"5번\": \"육아종성 반응(granulomatous reaction)은 결핵이나 특정 자가면역질환에서 보이는 만성 염증의 한 형태입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 8,\n                            \"relevance_reason\": \"강의자료 8페이지 표에서 사구체신염(Glomerulonephritis)과 같은 면역 복합체 질환에서 항체, 보체, 호중구(neutrophils)가 관여한다고 설명합니다. 이는 혈관염(vasculitis)의 병태생리와 일치합니다.\"\n                        },\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 15,\n                            \"relevance_reason\": \"강의자료 15페이지(p.74)에서 염증의 원인으로 면역 반응(Immune reactions)을 언급하고 있어, 면역 복합체 질환이 염증 반응을 유발함을 알 수 있습니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": 10,\n                    \"question_text\": \"45세 여자 환자가 서서히 진행되는 근무력증으로 병원에 왔다. 신체검사에서 arthralgia 또는 myalgia는 없었으며 흉부단층촬영에서 mediastinal mass가 관찰되었다. 이 질환의 기전으로 가장 적당한 것은?\",\n                    \"answer\": \"4) Antibody Mediated Cellular Dysfunction\",\n                    \"explanation\": \"중증 근무력증(Myasthenia Gravis)은 아세틸콜린 수용체에 대한 자가항체가 생성되어 신경근 접합부의 신호 전달을 방해하는 대표적인 제2형 과민반응 질환입니다. 이는 항체가 세포 표면 수용체에 결합하여 세포의 기능을 저해하거나 비정상적으로 활성화시키는 '항체 매개 세포 기능장애(Antibody-Mediated Cellular Dysfunction)'에 해당합니다. 흉선종(mediastinal mass)이 동반되는 경우가 많습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"아르투스 반응(Arthus reaction)은 국소적인 면역 복합체 매개 혈관염입니다.\",\n                        \"2번\": \"아나필락시스(Anaphylaxis)는 IgE 매개의 전신적인 제1형 과민반응입니다.\",\n                        \"3번\": \"보체 매개 염증(Complement mediated Inflammation)은 항체가 세포에 결합 후 보체가 활성화되어 세포를 파괴하는 기전입니다.\",\n                        \"5번\": \"옵소닌화 및 포식작용(Opsonization and Phagocytosis)은 항체나 보체가 병원체에 붙어 포식세포의 탐식을 돕는 과정입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 11,\n                    \"question_text\": \"만성 기침 환자의 폐 생검 조직에서 epithelioid cell과 Langhans giant cells로 구성된 작은 결절이 관찰되었다. 이 병소의 형성에 가장 중요한 역할을 하는 것은?\",\n                    \"answer\": \"3) IFN-γ\",\n                    \"explanation\": \"유상피세포(epithelioid cell)와 랑한스 거대세포(Langhans giant cells)로 구성된 결절은 육아종(granuloma)을 의미합니다. 육아종 형성의 핵심적인 사이토카인은 대식세포를 활성화시켜 유상피세포로 분화시키는 인터페론 감마(IFN-γ)입니다. 이는 주로 Th1 세포에서 분비됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"C5a는 강력한 주화성 인자(chemoattractant) 및 아나필라톡신으로, 백혈구를 염증 부위로 유인합니다.\",\n                        \"2번\": \"IL-5는 호산구의 분화와 활성화를 촉진합니다.\",\n                        \"4번\": \"PAF(혈소판 활성 인자)는 혈관 확장, 혈관 투과성 증가 등 다양한 염증 반응에 관여합니다.\",\n                        \"5번\": \"TNF(종양괴사인자)는 육아종 형성에 관여하지만, 대식세포를 직접적으로 활성화시키는 가장 핵심적인 사이토카인은 IFN-γ입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 73,\n                            \"relevance_reason\": \"강의자료 73페이지(p.83)에서 대식세포(macrophage)와 호중구(neutrophil)가 IFN-γ와 같은 사이토카인에 의해 활성화되어 미생물 사멸에 관여한다고 설명합니다. 대식세포의 활성화는 육아종 형성의 핵심 과정입니다.\"\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 4,\n            \"questions\": [\n                {\n                    \"question_number\": 12,\n                    \"question_text\": \"29세 여성이 잦은 피로감과 관절의 통증으로 내과 외래를 찾았다. 환자의 신체검사에서 얼굴에 나비모양의 erythematous malar rash가 있고 햇볕에 노출되면 증상이 더욱 심해진다고 한다. 이 환자의 진단에 가장 specific한 autoantibody는?\",\n                    \"answer\": \"5) Ab to Double stranded DNA\",\n                    \"explanation\": \"나비모양 발진(malar rash)과 광과민성(photosensitivity)은 전신홍반루푸스(Systemic Lupus Erythematosus, SLE)의 특징적인 임상 소견입니다. SLE 진단에 가장 특이적인(specific) 자가항체는 항 이중나선 DNA 항체(Ab to dsDNA)와 항 Sm 항체(Ab to Sm Ag)입니다. 보기 중에서는 Ab to dsDNA가 해당됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"항 중심절 항체(Ab to Anti centromere)는 CREST 증후군(제한성 전신경화증)에 특이적입니다.\",\n                        \"2번\": \"항 SS-A 항체(Anti-Ro)는 쇼그렌 증후군과 신생아 루푸스에서 주로 발견됩니다.\",\n                        \"3번\": \"항 DNA Topoisomerase I 항체(Anti-Scl-70)는 미만성 전신경화증에 특이적입니다.\",\n                        \"4번\": \"항 핵 RNP 항체(Ab to nuclear RNP)는 혼합 결합조직병(MCTD)에서 높게 나타납니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 13,\n                    \"question_text\": \"45세 여자환자가 다음의 증상을 호소하였다. 음식물은 삼키기 힘들고, 손가락이 굳어져서 컴퓨터 자판을 두드리기 어려운데 관절에 통증이나 변형은 없다. 또 얼굴이 땅기며 주름살이 없어졌다. 병원을 방문하여 피부 생검 조직에서 심한 섬유화가 관찰되었다. 이 환자의 진단에 가장 specific한 autoantibody는?\",\n                    \"answer\": \"5) Ab to DNA Topoisomerase I\",\n                    \"explanation\": \"피부 경화, 손가락 굳음(sclerodactyly), 식도 운동 장애로 인한 연하곤란 등은 전신경화증(Systemic Sclerosis, Scleroderma)의 특징적인 증상입니다. 특히 광범위한 피부 침범과 내부 장기 침범을 보이는 미만성 전신경화증(diffuse systemic sclerosis)에서 항 DNA Topoisomerase I (anti-Scl-70) 항체가 특이적으로 발견됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"항 Sm 항체(Ab to Sm Ag)는 전신홍반루푸스(SLE)에 특이적입니다.\",\n                        \"2번\": \"항 dsDNA 항체(Ab to Ds DNA)는 전신홍반루푸스(SLE)에 특이적입니다.\",\n                        \"3번\": \"항 핵 RNP 항체(Ab to nuclear RNP)는 혼합 결합조직병(MCTD)에서 높게 나타납니다.\",\n                        \"4번\": \"항 SS-A 항체(Anti-Ro)는 쇼그렌 증후군에서 주로 발견됩니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 14,\n                    \"question_text\": \"50세 여자환자가 눈의 심한 염증으로 병원을 방문하였다. 진찰 결과 keratoconjunctivitis와 xerostomia의 소견을 보였다. 환자의 혈액검사에서 antinuclear antibody (ANA) titer가 높게 검출되었다. 이 환자의 합병증 중 가장 예후가 나쁠 것으로 생각되는 소견은?\",\n                    \"answer\": \"3) Malignant lymphoma\",\n                    \"explanation\": \"안구 건조(keratoconjunctivitis sicca)와 구강 건조(xerostomia)는 쇼그렌 증후군(Sjogren syndrome)의 주 증상입니다. 쇼그렌 증후군 환자는 일반인에 비해 B세포 림프종, 특히 MALT 림프종과 같은 악성 림프종(Malignant lymphoma)의 발생 위험이 현저히 높으며, 이는 예후에 가장 큰 영향을 미치는 심각한 합병증입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Pneumocystis carinii pneumonia는 주로 세포매개면역이 저하된 환자(예: AIDS)에서 발생하는 기회감염입니다.\",\n                        \"2번\": \"흡수장애 증후군(Malabsorption syndrome)은 쇼그렌 증후군의 합병증으로 나타나기 어렵습니다.\",\n                        \"4번\": \"미만성 폐 간질 섬유화(Diffuse pulmonary interstitial fibrosis)는 전신경화증 등 다른 자가면역질환에서 더 흔한 합병증입니다.\",\n                        \"5번\": \"카포시 육종(Kaposi sarcoma)은 HHV-8 바이러스와 관련이 있으며 면역저하자에서 발생합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 5,\n            \"questions\": [\n                {\n                    \"question_number\": 15,\n                    \"question_text\": \"다음 중 가장 심각한 면역결핍에 의한 증상을 보이는 질환은?\",\n                    \"answer\": \"1) ADA deficiency\",\n                    \"explanation\": \"아데노신 데아미나제(Adenosine Deaminase, ADA) 결핍증은 중증복합면역결핍증(Severe Combined Immunodeficiency, SCID)의 한 원인입니다. SCID는 T세포와 B세포의 기능이 모두 심각하게 저하되어 체액성 면역과 세포성 면역이 모두 손상되는 가장 심각한 형태의 선천성 면역결핍 질환입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"저감마글로불린혈증(hypogammaglobulinemia)은 항체 생성에만 문제가 있는 질환입니다.\",\n                        \"3번\": \"디조지 증후군(DiGeorge Syndrome)은 주로 T세포 기능에 문제가 있는 질환입니다.\",\n                        \"4번\": \"단독 IgA 결핍증(Isolated IgA Deficiency)은 가장 흔한 면역결핍이지만 대부분 증상이 없거나 경미합니다.\",\n                        \"5번\": \"브루톤 X연관 무감마글로불린혈증(X-Linked Agammaglobulinemia of Bruton)은 B세포 발달 장애로 항체 생성이 결핍되지만, T세포 기능은 정상입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 16,\n                    \"question_text\": \"선천성 기형 없이 full-term으로 태어난 신생아가 생후 6개월 후 잦은 감기증상으로 소아과에 입원하였다. 신생아는 심한 폐렴의 소견을 보였고 가래검사에서 Hemophilus influenzae와 Streptococcus pneumoniae가 배양되었다. 진단으로 가장 가능성이 높은 것은?\",\n                    \"answer\": \"5) X-Linked Agammaglobulinemia of Bruton\",\n                    \"explanation\": \"생후 6개월까지는 모체로부터 받은 IgG 항체 덕분에 건강하다가, 이 항체가 소실되는 시점부터 반복적인 세균 감염(특히 피막을 가진 H. influenzae, S. pneumoniae)을 보이는 것은 B세포 기능 부전의 전형적인 양상입니다. 이는 B세포 발달에 장애가 있는 브루톤 X연관 무감마글로불린혈증(X-Linked Agammaglobulinemia of Bruton)을 강력히 시사합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"X연관 SCID는 T세포와 B세포 기능이 모두 없어 생후 초반부터 심각한 감염을 보입니다.\",\n                        \"2번\": \"HIV 감염은 후천성 면역결핍으로, 신생아에서 이런 양상을 보이는 것은 일반적이지 않습니다.\",\n                        \"3번\": \"디조지 증후군은 T세포 결핍으로 바이러스, 진균 감염에 더 취약합니다.\",\n                        \"4\" : \"단독 IgA 결핍증은 대부분 증상이 없거나 경미한 호흡기 감염을 보입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 17,\n                    \"question_text\": \"다음 세포 중 HIV의 주요 감염 표적이 되는 세포는?\",\n                    \"answer\": \"4) Helper T-cell\",\n                    \"explanation\": \"인간면역결핍바이러스(HIV)는 세포 표면의 CD4 분자를 주요 수용체로 사용하여 세포를 감염시킵니다. 보조 T세포(Helper T-cell)는 CD4를 발현하는 대표적인 세포로, HIV의 주된 감염 표적이 됩니다. 이 세포의 파괴가 후천성면역결핍증후군(AIDS)의 핵심 병태생리입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"호산구(Eosinophil)는 CD4를 발현하지 않습니다.\",\n                        \"2번\": \"B세포(B-cell)는 CD4를 발현하지 않습니다.\",\n                        \"3번\": \"세포독성 T세포(Cytotoxic T-cell)는 CD8을 발현하며, HIV의 표적이 아닙니다.\",\n                        \"5번\": \"NK세포(NK cell)는 CD4를 발현하지 않습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 18,\n                    \"question_text\": \"40세 남자 환자가 심한 고열을 주소로 내원하였다. 병원에서 시행한 검사에서 HIV 양성 소견을 보였다. 이 환자는 심한 전신 감염 소견을 보이며 사망하여 부검을 시행하였고 폐조직에서 폐렴의 소견과 함께 폐포내에 거품 모양의 삼출액이 관찰되었다. 가장 가능성이 높은 진단은?\",\n                    \"answer\": \"1) pneumocystis pneumonia\",\n                    \"explanation\": \"HIV 감염으로 인해 세포매개면역이 심각하게 저하된 환자에서 발생하는 대표적인 기회감염 폐렴이 주폐포자충 폐렴(Pneumocystis jirovecii pneumonia, PCP)입니다. 병리조직학적으로 폐포 내에 거품 모양 또는 솜사탕 같은 호산성의 삼출물(foamy or cotton-candy like eosinophilic exudates)이 관찰되는 것이 특징입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"결핵(tuberculosis)은 건락성 괴사를 동반한 육아종을 형성하는 것이 특징입니다.\",\n                        \"3번\": \"세균성 폐렴(bacterial pneumonia)은 주로 폐포 내에 호중구 삼출물이 차는 양상을 보입니다.\",\n                        \"4번\": \"CMV 폐렴(CMV pneumonia)은 '부엉이 눈' 모양의 핵내 봉입체(owl's eye inclusion)를 보이는 것이 특징입니다.\",\n                        \"5번\": \"크립토코쿠스 폐렴(cryptococcal pneumonia)은 협막이 뚜렷한 효모균이 관찰됩니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 6,\n            \"questions\": [\n                {\n                    \"question_number\": 19,\n                    \"question_text\": \"50세 남자 환자가 수년간 서서히 진행된 신부전의 소견으로 신장 조직검사를 시행하였다. 현미경 소견에서 신사구체와 혈관에 많은 양의 pink amorphous material deposition이 관찰되었고 면역염색에서 lambda light chains 양성이었다. 이 질환의 선행 원인은?\",\n                    \"answer\": \"2) Plasma cell myeloma\",\n                    \"explanation\": \"신사구체와 혈관에 침착된 분홍색의 무정형 물질(pink amorphous material)은 아밀로이드(amyloid) 또는 경쇄(light chain) 침착을 시사합니다. 면역염색에서 람다 경쇄(lambda light chains)가 양성인 것은 형질세포(plasma cell)의 클론성 증식으로 인해 특정 경쇄가 과도하게 생산되고 있음을 의미합니다. 이러한 소견은 형질세포 골수종(Plasma cell myeloma) 또는 그와 관련된 질환에서 나타나는 AL 아밀로이드증 또는 경쇄 침착 질환(light chain deposition disease)을 강력히 시사합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"전신홍반루푸스(SLE)는 면역 복합체 침착에 의한 사구체신염을 유발합니다.\",\n                        \"3번\": \"류마티스 관절염(Rheumatoid arthritis)은 만성 염증으로 인한 AA 아밀로이드증을 유발할 수 있습니다.\",\n                        \"4번\": \"전신경화증(Systemic sclerosis)은 주로 혈관 변화와 섬유화를 특징으로 합니다.\",\n                        \"5번\": \"알츠하이머병(Alzheimer disease)은 뇌에 Aβ 아밀로이드가 침착되는 질환입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 20,\n                    \"question_text\": \"rheumatoid arthritis 환자의 rectal biopsy에서 submucosal region에 pink amorphous material의 침착이 보이고 Congo red stain에서 green birefringence가 관찰된다. 이 물질의 성분은?\",\n                    \"answer\": \"3) amyloid-associated protein\",\n                    \"explanation\": \"Congo red 염색에서 편광 현미경 하에 사과녹색 복굴절(apple-green birefringence)을 보이는 것은 아밀로이드(amyloid) 침착의 확진 소견입니다. 류마티스 관절염과 같은 만성 염증성 질환에 동반되는 전신성 아밀로이드증은 혈청 아밀로이드 A (serum amyloid A, SAA)라는 급성기 반응 단백질로부터 유래한 아밀로이드 연관 단백질(amyloid-associated protein, AA protein)이 침착되어 발생합니다. 이를 AA 아밀로이드증이라고 합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"경쇄(Light chains)는 형질세포 질환에서 유래하며 AL 아밀로이드증을 일으킵니다.\",\n                        \"2번\": \"트랜스티레틴(Transthyretin)은 노인성 전신 아밀로이드증이나 가족성 아밀로이드 다발신경병증의 원인 물질입니다.\",\n                        \"4번\": \"베타-2-마이크로글로불린(Beta-2-microglobulin)은 장기간 혈액투석을 받는 환자에서 관절에 침착되어 아밀로이드증을 유발합니다.\",\n                        \"5번\": \"베타-아밀로이드 단백질(Beta-amyloid protein)은 알츠하이머병에서 뇌에 침착됩니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 21,\n                    \"question_text\": \"Xenobiotic metabolism 중 그 특성이 다른 하나는?\",\n                    \"answer\": \"2) Oxidation\",\n                    \"explanation\": \"생체이물(Xenobiotics) 대사는 1단계(Phase I)와 2단계(Phase II) 반응으로 나뉩니다. 1단계 반응은 주로 시토크롬 P-450(cytochrome P-450) 효소계에 의해 산화(oxidation), 환원, 가수분해 등을 통해 극성 작용기를 도입하는 과정입니다. 2단계 반응은 1단계 반응의 산물에 내인성 물질(글루쿠론산, 황산 등)을 결합(conjugation)시켜 수용성을 높여 배설을 용이하게 하는 과정입니다. 산화(Oxidation)는 1단계 반응이며, 글루쿠론산화(Glucuronidation), 메틸화(Methylation), 황산화(Sulfation), 포합(Conjugation)은 모두 2단계 반응에 해당합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"글루쿠론산화(Glucuronidation)는 2단계 포합 반응입니다.\",\n                        \"3번\": \"메틸화(Methylation)는 2단계 포합 반응입니다.\",\n                        \"4번\": \"황산화(Sulfation)는 2단계 포합 반응입니다.\",\n                        \"5번\": \"포합(Conjugation)은 2단계 반응을 총칭하는 용어입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 22,\n                    \"question_text\": \"Ionizing radiation에 sensitive organ이 아닌 것은?\",\n                    \"answer\": \"5) Uterus\",\n                    \"explanation\": \"전리 방사선(ionizing radiation)은 세포 분열이 활발한 조직에 더 큰 손상을 줍니다. 고환(Testis), 골수(Bone marrow), 림프 조직(Lymphoid tissue), 위장관 점막(Mucosa of gastrointestinal tract) 등은 세포 교체가 매우 빠른 조직으로 방사선에 매우 민감합니다. 반면, 자궁(Uterus)은 주로 분열하지 않는 근육세포로 구성되어 있어 상대적으로 방사선에 대한 민감도가 낮습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"고환(Testis)의 생식세포는 분열이 매우 활발하여 방사선에 매우 민감합니다.\",\n                        \"2번\": \"골수(Bone marrow)는 지속적으로 혈액세포를 만들어내는 곳으로 방사선에 매우 민감합니다.\",\n                        \"3번\": \"림프 조직(Lymphoid tissue)의 림프구는 분열하지 않는 상태에서도 방사선에 매우 민감한 세포입니다.\",\n                        \"4번\": \"위장관 점막(Mucosa of gastrointestinal tract)은 세포 교체가 빨라 방사선에 민감합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 7,\n            \"questions\": [\n                {\n                    \"question_number\": 23,\n                    \"question_text\": \"다음 사진과 관련된 설명과 관련이 적은 것은?\",\n                    \"answer\": \"3) Albumin deprivation으로 인한 증상이 가장 늦게 나타난다\",\n                    \"explanation\": \"사진은 복부 팽만(부종)과 피부 병변을 보이는 아이로, 단백질 결핍이 주된 원인인 콰시오커(Kwashiorkor)를 나타냅니다. 콰시오커의 핵심 병태생리는 단백질 결핍으로 인한 알부민(albumin) 합성 저하이며, 이로 인한 저알부민혈증은 혈장 삼투압을 감소시켜 전신 부종(generalized edema)을 유발합니다. 이 부종은 콰시오커의 가장 특징적이고 초기에 나타나는 증상 중 하나이므로, 가장 늦게 나타난다는 설명은 틀렸습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"콰시오커는 심각한 영양실조(severe malnutrition)의 한 형태입니다.\",\n                        \"2번\": \"칼로리 섭취는 비교적 유지되면서 단백질 섭취가 극심하게 부족할 때 발생합니다.\",\n                        \"4번\": \"단백소실성 장병증이나 광범위한 화상 등 체내 단백질이 대량으로 소실되는 경우에도 유사한 상태가 발생할 수 있습니다.\",\n                        \"5번\": \"피부의 색소 변화(과다/저하), 탈모, 모발 색 변화 등의 피부 및 모발 이상이 흔하게 동반됩니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 8,\n            \"questions\": [\n                {\n                    \"question_number\": 24,\n                    \"question_text\": \"65세 남자가 4개월 전부터 시작한 기침 및 쇠약감을 주소로 내원하였다. 폐 CT에서 main bronchus 근처에서 생긴 종양이 발견되었다. 폐절제술을 통해 확인된 육안 및 조직소견이다. 가장 관련성이 높은 위험인자는?\",\n                    \"answer\": \"2) Smoking\",\n                    \"explanation\": \"사진은 폐 중심부(main bronchus 근처)에 발생한 종괴와 현미경적으로 각질(keratin)을 형성하는 편평세포암(squamous cell carcinoma) 소견을 보입니다. 폐의 중심부에 발생하는 편평세포암과 소세포암은 흡연(Smoking)과 가장 강력한 인과관계가 있는 폐암 종류입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"석면(Asbestos)은 주로 악성 중피종(malignant mesothelioma) 및 폐 선암의 위험을 높입니다.\",\n                        \"3번\": \"알코올(Alcohol)은 폐암의 직접적인 주요 위험인자는 아닙니다.\",\n                        \"4번\": \"라돈(Radon)은 폐암의 위험인자이지만, 흡연만큼 강력하고 흔한 원인은 아닙니다.\",\n                        \"5번\": \"니코틴(Nicotine)은 담배의 중독성 물질이지만, 발암 자체는 담배 연기 속의 다른 여러 발암물질에 의해 일어납니다. 따라서 흡연이 더 포괄적이고 정확한 위험인자입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 25,\n                    \"question_text\": \"Xenobiotics에 관련된 설명으로 틀린 것은?\",\n                    \"answer\": \"5) Therapeutic drugs의 xenobiotic metabolism은 주로 phase I reaction을 통해 이루어지며, 특히catalase의 활성도가 중요하다\",\n                    \"explanation\": \"치료 약물의 대사는 주로 1단계(phase I) 반응을 통해 이루어지는 것은 맞지만, 1단계 반응의 핵심 효소는 시토크롬 P-450(cytochrome P-450)입니다. 카탈라아제(Catalase)는 과산화수소를 분해하는 효소로, 생체이물 대사와는 직접적인 관련이 적습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"시토크롬 P-450은 1단계 생체이물 대사의 핵심 효소이며, 주로 간세포의 소포체에 존재합니다.\",\n                        \"2번\": \"생체이물 대사 과정에서 생성되는 반응성 대사산물(reactive metabolites)은 DNA, 단백질 등에 손상을 주어 세포 독성이나 발암성을 나타낼 수 있습니다.\",\n                        \"3번\": \"영양 상태나 호르몬 상태는 생체이물 대사 효소의 발현 및 활성도에 영향을 줄 수 있습니다.\",\n                        \"4\" : \"생체이물 대사 효소의 활성도는 유전적 다형성(인종), 성별, 연령에 따라 개인차가 큽니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 26,\n                    \"question_text\": \"소아의 lead poisoning에 대한 설명으로 틀린 것은?\",\n                    \"answer\": \"1) 성인에 비해 흡수율은 낮지만, intestine mucosa를 통한 흡수율은 훨씬 높다\",\n                    \"explanation\": \"소아는 성인에 비해 납(lead)의 위장관 흡수율이 훨씬 높습니다 (성인 ~15%, 소아 ~50%). 이로 인해 같은 양에 노출되더라도 소아에서 더 심각한 독성을 나타낼 수 있습니다. 따라서 흡수율이 낮다는 설명은 틀렸습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"납은 단백질의 sulfhydryl group에 강하게 결합하여 효소 기능을 저해하고, 2가 양이온이므로 칼슘 대사를 방해하여 뼈에 축적되고 신경계 독성을 유발합니다.\",\n                        \"3번\": \"소아는 혈액-뇌 장벽(Blood-Brain Barrier)이 미성숙하여 납이 뇌로 쉽게 통과하여 심각한 신경 독성을 일으킵니다.\",\n                        \"4번\": \"뇌병증(Encephalopathy), 정신 지체 등 중추신경계 손상은 성인보다 소아에서 훨씬 흔하고 심각하게 발생합니다.\",\n                        \"5번\": \"납 중독은 용혈성 빈혈(hemolytic anemia)과 같은 혈액학적 이상을 흔히 동반합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 9,\n            \"questions\": [\n                {\n                    \"question_number\": 27,\n                    \"question_text\": \"다음 사진에 해당하는 설명과 관련이 적은 것은?\",\n                    \"answer\": \"4) Oral contraceptive 복용하는 환자에서 더 흔하게 발생한다\",\n                    \"explanation\": \"사진은 알코올성 간질환의 진행 과정을 보여줍니다 (지방간 → 알코올성 간염 → 간경변). 경구 피임약(Oral contraceptive) 복용은 알코올성 간질환과 직접적인 관련이 없으며, 드물게 간선종(hepatic adenoma)이나 혈전증과 같은 다른 간 문제를 유발할 수 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"알코올은 간세포에 직접적인 독성을 나타내어 지방 대사 이상 등을 유발합니다.\",\n                        \"2번\": \"초기 변화는 간세포 내에 지방이 축적되는 지방간(Fatty liver)입니다.\",\n                        \"3번\": \"지방간이 지속되고 염증이 동반되면 간세포 괴사(hepatocyte necrosis)와 간 기능 저하를 특징으로 하는 알코올성 간염으로 진행할 수 있습니다.\",\n                        \"5번\": \"만성적인 염증과 간세포의 재생이 반복되면서 섬유화가 진행되어 비가역적인 간경변(cirrhosis)으로 이어집니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 28,\n                    \"question_text\": \"그림과 같은 소견과 관련된 중금속은?\",\n                    \"answer\": \"1) Lead\",\n                    \"explanation\": \"그림은 납 중독의 특징적인 소견들을 보여줍니다. 잇몸의 푸른 선(Burton's line), 뼈의 성장판에 납이 침착되어 보이는 방사선 소견(lead lines), 그리고 적혈구의 호염기성 반점(basophilic stippling)은 모두 납 중독에서 관찰될 수 있는 대표적인 징후입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"니켈(Nickel)은 주로 접촉성 피부염이나 흡입 시 폐암을 유발할 수 있습니다.\",\n                        \"3번\": \"수은(Mercury)은 주로 신경계 독성(미나마타병)과 신장 독성을 유발합니다.\",\n                        \"4번\": \"비소(Arsenic)는 피부의 색소침착 및 각화증, 여러 장기의 암을 유발할 수 있습니다.\",\n                        \"5번\": \"카드뮴(Cadmium)은 주로 폐질환과 신장 손상, 골연화증(이타이이타이병)을 유발합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 29,\n                    \"question_text\": \"다음은 종양 발생에 관여하는 한 pathway의 그림과, 그리고 대장에 발생한 병변에 대한 사진이다. 설명 중 옳은 것은?\",\n                    \"answer\": \"4) 오른쪽 대장 내시경 소견은 APC 유전자의 germline mutation과 깊은 연관이 있다\",\n                    \"explanation\": \"왼쪽 그림은 Wnt 신호전달경로를 보여주며, 이 경로의 핵심 조절인자가 APC(Adenomatous Polyposis Coli)라는 종양억제유전자입니다. 오른쪽 사진은 대장에 수많은 용종이 발생한 가족성 선종성 용종증(Familial Adenomatous Polyposis, FAP)의 내시경 소견으로, 이는 APC 유전자의 생식세포 돌연변이(germline mutation)에 의해 발생합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"해당 pathway에는 종양억제유전자(APC)와 종양유전자(β-catenin)가 모두 관여합니다.\",\n                        \"2번\": \"Wnt/APC 경로는 대장암 발생에 가장 중요하게 관여하며, 폐암과는 관련성이 적습니다.\",\n                        \"3번\": \"오른쪽 소견은 APC 유전자의 germline mutation에 의한 것이며, β-catenin의 체세포 돌연변이(somatic mutation)는 산발성 대장암의 일부에서 발견됩니다.\",\n                        \"5번\": \"β-catenin의 germline mutation은 매우 드물며, FAP의 원인이 아닙니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 10,\n            \"questions\": [\n                {\n                    \"question_number\": 30,\n                    \"question_text\": \"다음 중 oncogene은?\",\n                    \"answer\": \"5) ALK\",\n                    \"explanation\": \"종양유전자(Oncogene)는 정상 세포의 성장과 분화를 촉진하는 유전자(proto-oncogene)가 돌연변이나 과발현으로 인해 비정상적으로 활성화된 것입니다. ALK(Anaplastic Lymphoma Kinase)는 receptor tyrosine kinase로, 유전자 재배열(rearrangement)을 통해 지속적으로 활성화되어 폐암, 림프종 등에서 종양유전자로 작용합니다. 나머지 보기들은 모두 종양억제유전자(tumor suppressor gene)입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"PTEN은 PI3K/AKT 신호전달을 억제하는 종양억제유전자입니다.\",\n                        \"2번\": \"RB는 세포주기 G1/S 이행을 조절하는 대표적인 종양억제유전자입니다.\",\n                        \"3번\": \"CDKN2A는 p16과 p14ARF 단백질을 코딩하여 세포주기를 억제하는 종양억제유전자입니다.\",\n                        \"4번\": \"APC는 Wnt 신호전달을 억제하는 종양억제유전자입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 31,\n                    \"question_text\": \"다음 그림에 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"1) 해당 fusion gene에 의해서 발생한 chronic myeloid leukemia는 tyrosine kinase inhibitor를 표적 치료제로 사용하며, 이는 oncogene addiction을 설명할 수 있는 좋은 예시이다.\",\n                    \"explanation\": \"그림은 9번과 22번 염색체의 전좌(translocation)로 인해 BCR-ABL 융합 유전자(fusion gene)가 생성되어 만성 골수성 백혈병(Chronic Myeloid Leukemia, CML)이 발생하는 과정을 보여줍니다. BCR-ABL은 비정상적인 티로신 키나아제(tyrosine kinase) 활성을 가져 세포를 무한 증식시킵니다. 이마티닙(Imatinib)과 같은 티로신 키나아제 억제제(TKI)는 이 비정상 단백질만 선택적으로 억제하여 탁월한 치료 효과를 보입니다. 이는 암세포가 특정 종양유전자의 활성에 중독(addiction)되어 생존하는 'oncogene addiction' 현상과 이를 표적하는 치료의 대표적인 예입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"ABL은 non-receptor tyrosine kinase입니다.\",\n                        \"3번\": \"BCR은 receptor tyrosine kinase가 아닙니다.\",\n                        \"4번\": \"유전자 융합은 일반적으로 각 유전자의 특정 부위(예: BCR의 특정 exon과 ABL의 tyrosine kinase domain)가 연결되어 일어납니다. 텔로미어(telomere) 부분과는 관련이 없습니다.\",\n                        \"5번\": \"CML에서 TKI를 이용한 표적 치료는 매우 효과적이어서 대부분의 환자가 장기적인 관해를 유지하며 예후가 매우 좋습니다. 재발이 흔하고 예후가 불량하다는 설명은 틀렸습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 12,\n            \"questions\": [\n                {\n                    \"question_number\": 32,\n                    \"question_text\": \"Cell cycle regulation에 관한 그림이다. 옳은 것은?\",\n                    \"answer\": \"5) 2에 관여하는 중요한 CDK inhibitor가 p16이다.\",\n                    \"explanation\": \"그림에서 2번은 Cyclin D-CDK4/6 복합체의 활성을 억제하는 CDK 억제제(inhibitor)들을 가리킵니다. 이 복합체는 세포주기의 G1기 진행에 중요하며, 이를 억제하는 대표적인 억제제는 INK4 family(p16, p15, p18, p19)입니다. 따라서 p16(CDKN2A)이 2번에 관여하는 중요한 CDK inhibitor라는 설명이 맞습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"세포주기에서 G1/S 확인점(checkpoint)은 DNA 복제를 시작할지 결정하는 매우 중요한 지점으로, G2/M 확인점보다 일반적으로 더 중요하게 여겨집니다.\",\n                        \"2번\": \"DNA 복제(replication)는 S기(S phase)에 일어납니다. G2기는 복제가 끝난 후 세포 분열을 준비하는 시기입니다.\",\n                        \"3번\": \"그림에서 1번은 Cyclin D-CDK4/6 복합체에 의해 RB 단백질이 인산화되어 E2F가 활성화되는 과정을 나타냅니다. 이 과정에 관여하는 중요한 유전자는 RB(TP53)이며, SMAD4는 TGF-β 신호 전달에 관여합니다.\",\n                        \"4번\": \"1번에 관여하는 중요한 유전자는 RB입니다. TP53은 DNA 손상 시 p21을 활성화하여 세포주기를 멈추는 역할을 합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 33,\n                    \"question_text\": \"다음 그림은 receptor tyrosine kinase와 downstream components에 대한 그림이다. 설명 중 옳은 것은?\",\n                    \"answer\": \"4) RAS family gene의 하나인 KRAS와 receptor tyrosine kinase의 하나인 EGFR 유전자의 동시 돌연변이 (co-mutation)은 폐암에서 매우 드물게 관찰된다.\",\n                    \"explanation\": \"그림은 성장인자 수용체(receptor tyrosine kinase, RTK) 신호가 RAS-MAPK 경로와 PI3K-AKT 경로를 통해 세포 성장으로 이어지는 과정을 보여줍니다. EGFR(RTK)과 KRAS는 동일한 신호전달경로의 상하위에 위치합니다. 둘 중 하나에 활성 돌연변이가 생기면 경로 전체가 활성화되므로, 암세포가 두 유전자에 동시에 돌연변이를 가질 필요가 없습니다. 따라서 EGFR과 KRAS의 동시 돌연변이는 상호 배타적(mutually exclusive)이며 매우 드물게 관찰됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"폐암 발생의 가장 흔한 원인은 흡연이며, EGFR 증폭은 폐 선암의 일부, 특히 비흡연 여성에서 발견되는 중요한 돌연변이지만 가장 흔한 원인은 아닙니다.\",\n                        \"2번\": \"HER2 (ERBB2)는 EGFR family에 속하는 대표적인 receptor tyrosine kinase입니다.\",\n                        \"3번\": \"PTEN은 PI3K 신호전달을 억제하는 종양억제유전자(tumor suppressor gene)입니다. PTEN 기능이 소실되면 신호가 과도하게 활성화됩니다.\",\n                        \"5번\": \"성장인자가 수용체에 결합하면 수용체들이 서로 이합체화(dimerization)를 형성하는 것이 신호 전달의 첫 단계이며, 이는 매우 흔하고 중요한 과정입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 13,\n            \"questions\": [\n                {\n                    \"question_number\": 34,\n                    \"question_text\": \"다음은 종양의 발생과 진행 과정을 나타낸 모식도이다. 이 그림에 대한 옳은 해석은?\",\n                    \"answer\": \"5) 종양의 발생과 진행과정을 거쳐 획득된 genetically heterogeneous subclone은 치료 저항성의 기전에 관여한다.\",\n                    \"explanation\": \"그림은 단일 세포에서 시작된 종양이 유전적 변이를 축적하면서 다양한 유전적 특성을 가진 아클론(subclone)들로 구성된 이질적인(heterogeneous) 집단으로 진화하는 과정을 보여줍니다. 이러한 종양 내 이질성은 특정 치료에 반응하지 않는 저항성 아클론이 존재하게 하여, 치료 후 재발이나 치료 실패의 중요한 원인이 됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"종양 발생은 발암물질 등에 의한 유전적 변이(initiating mutation)의 축적이 핵심적인 역할을 합니다.\",\n                        \"2번\": \"종양 발생의 초기 단계 세포에서 모든 유전적 변이가 이미 발생한 상태가 아니라, 시간이 지나면서 점진적으로 변이가 축적됩니다.\",\n                        \"3번\": \"종양의 성장에 직접적으로 기여하는 변이를 운전자 돌연변이(driver mutation)라고 하며, 성장에 직접 기여하지 않는 변이를 동승자 돌연변이(passenger mutation)라고 합니다. 동승자 돌연변이는 종양 획득에는 큰 기여를 하지 않습니다.\",\n                        \"4번\": \"최초의 돌연변이(Initiating mutation)는 대부분 운전자 돌연변이(driver mutation)입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 14,\n            \"questions\": [\n                {\n                    \"question_number\": 35,\n                    \"question_text\": \"다음은 immune checkpoint와 immune checkpoint blockade에 관한 그림이다. 설명 중 옳은 것은?\",\n                    \"answer\": \"2) Antigen cross presentation이 dendritic cell과 cytotoxic T cell interaction에 관여한다.\",\n                    \"explanation\": \"항원제시세포(dendritic cell)가 외부 항원(예: 종양 항원)을 섭취하여 MHC class I을 통해 세포독성 T세포(CTL, CD8+ T cell)에게 제시하는 과정을 항원 교차제시(antigen cross-presentation)라고 합니다. 이는 CTL이 종양세포를 인식하고 공격하는 데 필수적인 과정으로, 그림 A의 림프절에서 일어나는 초기 활성화 단계에 해당합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"면역관문억제제(immune checkpoint blockade)는 T세포의 기능을 활성화시키는 것이 핵심 기전이며, B세포나 항체는 직접적인 작용 대상이 아닙니다.\",\n                        \"3번\": \"세포독성 T세포(CTL)는 MHC class I 분자와 결합된 항원을 인식합니다. MHC class II는 보조 T세포(helper T cell)가 인식합니다.\",\n                        \"4번\": \"PD-1/PD-L1 억제제와 같은 면역관문억제제는 일부 암에서 장기적인 치료 반응을 유도하여 획기적인 치료법으로 평가받고 있습니다.\",\n                        \"5번\": \"DNA 부정합 수리 결핍(DNA mismatch repair deficiency)이 있는 종양은 돌연변이가 많아 새로운 항원(neoantigen)을 많이 생성하므로, 면역관문억제제에 대한 반응성이 매우 좋은 것으로 알려져 있습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 36,\n                    \"question_text\": \"TP53 유전자에 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"4) Germline mutation이 있는 경우 Li-Fraumeni syndrome (LFS) 이라 불린다.\",\n                    \"explanation\": \"TP53 유전자의 생식세포 돌연변이(germline mutation)를 가지고 태어나는 경우, 젊은 나이에 다양한 종류의 암(육종, 유방암, 뇌종양 등)이 발생하는 유전성 암 증후군인 리-프라우메니 증후군(Li-Fraumeni syndrome)이 발생합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"TP53은 '게놈의 수호자'라 불리는 가장 중요한 종양억제유전자 중 하나로, 대부분의 인간 악성 종양에서 돌연변이가 발견됩니다.\",\n                        \"2번\": \"MYC은 세포 증식을 촉진하는 대표적인 종양유전자(oncogene)로, TP53과는 반대 역할을 합니다.\",\n                        \"3번\": \"TP53 기능의 소실은 세포사멸(apoptosis)을 회피하게 만들어 항암 치료에 대한 저항성을 유발하는 중요한 기전입니다.\",\n                        \"5번\": \"TP53은 DNA 손상을 감지하여 세포주기 조절(cell cycle regulation), DNA 수리(DNA repair), 세포사멸(apoptosis)을 유도하는 핵심적인 역할을 모두 수행합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 15,\n            \"questions\": [\n                {\n                    \"question_number\": 37,\n                    \"question_text\": \"다음은 종양 조직과, 종양 조직에서 관찰된 혈관을 보여주는 병리 사진이다. 이제 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"1) VEGF가 혈관생성 (angiogenesis)에 관여하였을 것이다.\",\n                    \"explanation\": \"종양이 일정 크기 이상으로 자라기 위해서는 산소와 영양분을 공급받기 위한 새로운 혈관 생성이 필수적입니다. 이 과정을 혈관신생(angiogenesis)이라고 하며, 종양세포가 분비하는 혈관내피성장인자(Vascular Endothelial Growth Factor, VEGF)가 가장 중요한 역할을 합니다. 사진의 종양 내 혈관들은 이러한 과정에 의해 생성된 것입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"종양 혈관은 구조적으로 비정상적이고, 누출이 심하며(leaky), 구불구불한 형태를 보여 정상 혈관과 조직학적, 기능적으로 다릅니다.\",\n                        \"3번\": \"혈관생성은 종양세포와 주변 기질세포 간의 상호작용에 의해 일어나지만, 이를 유도하는 신호는 RAS, MYC과 같은 운전자 돌연변이(driver mutation)에 의해 활성화되는 경우가 많습니다.\",\n                        \"4번\": \"VEGF 억제제(bevacizumab)는 혈관생성을 억제하여 종양 성장을 늦추는 효과적인 표적치료제이지만, 단독 사용으로 완치에 이르는 경우는 드물며 주로 다른 항암제와 병용하여 생존 기간을 연장하는 데 사용됩니다.\",\n                        \"5번\": \"HIF1α(Hypoxia-inducible factor 1-alpha)는 저산소 상태에서 안정화되어 VEGF의 전사를 촉진하는 핵심 인자입니다. 따라서 VEGF 생성에 관여합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 38,\n                    \"question_text\": \"Apoptosis에 관한 그림이다. 옳은 것은?\",\n                    \"answer\": \"5) BCL2 유전자의 기능이 항진되는 경우, apoptosis를 방해하는 (inhibition) 역할을 한다.\",\n                    \"explanation\": \"그림은 세포사멸(Apoptosis)의 내인성 경로(Mitochondrial pathway)와 외인성 경로(Death receptor pathway)를 보여줍니다. 내인성 경로에서 BCL2는 대표적인 항세포사멸(anti-apoptotic) 단백질로, 미토콘드리아 막을 안정화시켜 사이토크롬 C(cytochrome c)의 방출을 막음으로써 세포사멸을 억제합니다. 따라서 BCL2 기능이 항진되면(예: 여포성 림프종에서의 t(14;18) 전좌), 세포사멸이 억제되어 암이 발생합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"종양 발생에서는 세포사멸을 회피하는 것이 중요하므로, 내인성 경로(intrinsic pathway)의 이상이 더 중요하게 관여하는 경우가 많습니다.\",\n                        \"2번\": \"대부분의 종양에서는 세포사멸 기전에 결함이 생겨 세포사멸이 억제됩니다.\",\n                        \"3번\": \"사이토크롬 C(Cytochrome C)는 미토콘드리아(Mitochondria) 내막에 존재하다가, 세포사멸 신호를 받으면 세포질로 방출됩니다.\",\n                        \"4번\": \"세포사멸은 염증 반응을 유발하지 않고 조용히 세포가 제거되는 과정입니다. 괴사(necrosis)가 염증을 동반합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 16,\n            \"questions\": [\n                {\n                    \"question_number\": 39,\n                    \"question_text\": \"다음 그림에 대한 설명으로 옳은 것은?\",\n                    \"answer\": \"2) mutant-IDH는 oncogene이므로 치료제의 개발이 tumor suppressor gene보다는 용이할 것으로 판단된다.\",\n                    \"explanation\": \"그림은 IDH 유전자 돌연변이(mutant IDH)가 대사산물인 2-HG(oncometabolite)를 생성하여 후성유전학적 변화를 통해 암을 유발하는 과정을 보여줍니다. 돌연변이 IDH는 정상 기능 소실이 아닌 새로운 기능 획득(gain-of-function)을 통해 암을 유발하므로 종양유전자(oncogene)로 작용합니다. 종양유전자는 비정상적인 활성을 억제하는 표적치료제 개발이 용이한 반면, 기능이 소실된 종양억제유전자는 기능을 복구하는 약물 개발이 훨씬 어렵습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"캘빈 회로(Calvin cycle)는 식물의 광합성 과정입니다. IDH는 세포 호흡의 TCA 회로에 관여하는 효소입니다.\",\n                        \"3번\": \"Mutant IDH는 대사 효소(metabolic enzyme)이며, non-receptor tyrosine kinase가 아닙니다.\",\n                        \"4번\": \"암세포의 대사 변화(metabolic alteration)는 최근에 중요한 '암의 특징(cancer hallmark)' 중 하나로 인식되고 있습니다.\",\n                        \"5번\": \"Mutant IDH는 특히 교모세포종(glioblastoma)과 같은 뇌종양과 급성 골수성 백혈병(AML)의 발생에 중요하게 관여하는 것으로 알려져 있습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 40,\n                    \"question_text\": \"Epithelial-mesenchymal transition (EMT)에 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"2) SNAIL, TWIST가 EMT 과정에 중요하게 관여한다.\",\n                    \"explanation\": \"상피-중간엽 이행(Epithelial-mesenchymal transition, EMT)은 상피세포가 세포 간 부착을 잃고 이동성을 갖는 중간엽세포의 특성을 획득하는 과정으로, 암의 침윤과 전이에 핵심적인 역할을 합니다. SNAIL과 TWIST는 E-cadherin과 같은 상피세포 표지자의 발현을 억제하고 중간엽세포 표지자의 발현을 촉진하는 핵심적인 전사조절인자(transcription factor)입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"EMT는 상피세포로 구성된 암종(carcinoma)이 침윤하고 전이할 때 일어나는 현상입니다. 육종(sarcoma)은 이미 중간엽세포에서 기원한 암입니다.\",\n                        \"3번\": \"Receptor tyrosine kinase(예: TGF-β 수용체) 신호가 EMT를 유발할 수 있지만, EMT 과정 자체의 핵심 조절자는 SNAIL, TWIST와 같은 전사조절인자입니다.\",\n                        \"4번\": \"MYC은 세포 증식을 조절하는 전사인자이며, EMT의 핵심 조절자는 아닙니다.\",\n                        \"5번\": \"RAS는 세포 내 신호전달 단백질이며, EMT 과정에 직접적으로 관여하는 핵심 분자는 아닙니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 17,\n            \"questions\": [\n                {\n                    \"question_number\": 41,\n                    \"question_text\": \"종의 진화와 종양의 진행 과정을 비교한 그림이다. 설명 중 옳은 것은?\",\n                    \"answer\": \"3) 종양의 진행이 종의 진화 모형을 따른다는 위의 가설은, multi-region sequencing (next-generation sequencing)을 통해 검증할 수 있다.\",\n                    \"explanation\": \"그림은 다윈의 진화론(종의 분화)과 암의 진화(아클론의 분화)가 유사한 패턴을 보인다는 것을 나타냅니다. 이러한 종양 내 이질성(intratumor heterogeneity)과 아클론 진화 가설은 종양의 여러 부위에서 조직을 채취하여 차세대 염기서열 분석(NGS)을 시행하는 다부위 시퀀싱(multi-region sequencing)을 통해 각 부위의 유전적 차이를 확인함으로써 검증할 수 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"폐암을 포함한 대부분의 고형암은 이러한 유전적 진화 과정을 통해 발생하고 진행합니다.\",\n                        \"2번\": \"종의 진화는 수백만 년이 걸리지만, 종양의 진화는 한 개체 내에서 수년에서 수십 년에 걸쳐 일어납니다. 소요되는 시간의 규모가 다릅니다.\",\n                        \"4번\": \"종양의 진행 과정이 진화론적 모델을 따른다는 가설은 피터 노웰(Peter Nowell)이 1976년에 제시했습니다. 찰스 다윈은 종의 진화를 설명했습니다.\",\n                        \"5번\": \"그림에서 보이듯, 종양의 아클론들은 최초의 돌연변이(initiating mutation, ubiquitous)를 공통적으로 공유하며, 이후 추가적인 변이를 각자 획득하며 분화합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 42,\n                    \"question_text\": \"다음은 흑색종 환자의 치료 이전 (A), 치료 (B), 치료하며 시간이 어느 정도 경과한 후 재발한 (C) 사진이다. 설명 중 옳은 것은?\",\n                    \"answer\": \"3) 흑색종에 관여한 주요한 driver mutation으로 BRAF 유전자의 돌연변이가 있었을 것으로 판단된다.\",\n                    \"explanation\": \"사진은 치료에 초기에 뛰어난 반응(B)을 보이다가 결국 저항성을 획득하여 재발(C)하는 과정을 보여줍니다. 이는 표적 치료의 전형적인 반응 양상입니다. 흑색종(melanoma)에서 가장 흔한 운전자 돌연변이(driver mutation)는 BRAF 유전자의 V600E 돌연변이이며, 이에 대한 표적치료제(BRAF 억제제)가 초기에 매우 효과적입니다. 따라서 이 환자는 BRAF 돌연변이가 있었고 BRAF 억제제 치료를 받았을 가능성이 높습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"사진 (B)에서 종양이 현저히 줄어든 것으로 보아, 치료에 대한 반응성이 초기에 매우 좋았음을 알 수 있습니다.\",\n                        \"2번\": \"고식적인 항암치료제는 이처럼 빠르고 극적인 반응을 보이는 경우가 드뭅니다. 이는 BRAF 억제제와 같은 표적 치료에 대한 반응일 가능성이 높습니다.\",\n                        \"4번\": \"표적 치료에 대한 획득 저항성(acquired resistance)은 흑색종을 포함한 많은 암에서 흔하게 관찰되는 문제입니다.\",\n                        \"5번\": \"치료 저항성은 치료 과정에서 새로운 돌연변이가 발생하거나 기존에 소수로 존재하던 저항성 클론이 선택적으로 증식하여 발생하는 획득 저항성이 주된 원인이며, 생식세포 돌연변이(germline mutation)와는 관련이 적습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 18,\n            \"questions\": [\n                {\n                    \"question_number\": 43,\n                    \"question_text\": \"다음 중 tumor suppressor gene은?\",\n                    \"answer\": \"3) STK11\",\n                    \"explanation\": \"종양억제유전자(Tumor suppressor gene)는 세포 성장을 억제하거나 DNA 손상을 복구하는 등의 기능을 통해 암 발생을 막는 유전자입니다. STK11 (LKB1)은 세포 대사와 성장을 조절하는 종양억제유전자로, 이 유전자의 기능 소실은 폐암이나 포이츠-예거 증후군(Peutz-Jeghers syndrome)과 관련이 있습니다. 나머지 보기들은 모두 종양유전자(oncogene)입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"ERBB1 (EGFR)은 receptor tyrosine kinase로, 돌연변이를 통해 활성화되어 종양유전자로 작용합니다.\",\n                        \"2번\": \"ERBB2 (HER2)는 receptor tyrosine kinase로, 유전자 증폭을 통해 활성화되어 종양유전자로 작용합니다.\",\n                        \"4번\": \"JAK2는 non-receptor tyrosine kinase로, 점돌연변이를 통해 활성화되어 골수증식성종양에서 종양유전자로 작용합니다.\",\n                        \"5번\": \"BRAF는 MAP kinase 경로의 일원으로, 점돌연변이를 통해 활성화되어 흑색종 등에서 종양유전자로 작용합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 44,\n                    \"question_text\": \"다음은 미생물의 체내 침입 경로와 방어기전에 대한 설명이다. 옳은 것을 한 개 고르시오\",\n                    \"answer\": \"3) S. aureus 감염은 주로 손상된 피부상피를 통해 이루어진다.\",\n                    \"explanation\": \"황색포도알균(Staphylococcus aureus)은 정상 피부에 상재하는 균이지만, 피부 장벽이 손상된 부위(상처, 화상 등)를 통해 침입하여 감염을 일으키는 경우가 많습니다. 건강한 피부는 효과적인 방어 장벽 역할을 합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"말라리아는 모기를 매개로 원충이 혈액으로 직접 침입하는 감염병이며, 호흡기 경로와는 관련이 없습니다.\",\n                        \"2번\": \"인플루엔자 바이러스는 호흡기 상피세포에 부착하고 침투하여 감염을 일으키며, 폐포 대식세포의 탐식 기능 저항과는 직접적인 관련이 적습니다.\",\n                        \"4번\": \"광범위 항생제 사용으로 장내 세균총이 파괴되면 클로스트리듐 디피실리(Clostridium difficile)와 같은 항생제 내성균이 과증식하여 위막성 대장염을 유발할 수 있습니다. 로타바이러스는 항생제 사용과 무관한 바이러스성 장염의 원인입니다.\",\n                        \"5번\": \"비브리오 콜레라균은 장상피에 부착하여 콜레라 독소를 분비함으로써 심한 설사를 유발하지만, 상피를 침윤하지는 않습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 45,\n                    \"question_text\": \"다음 중 수직 감염에 대한 설명 중 옳은 것을 한 개 고르시오.\",\n                    \"answer\": \"4) Postnatal transmission in maternal milk can transmit cytomegalovirus (CMV), human immunodeficiency virus (HIV), and hepatitis C virus (HCV).\",\n                    \"explanation\": \"수직 감염은 임신 중(태반 통과), 분만 중, 또는 출생 후 모유 수유를 통해 일어날 수 있습니다. 모유를 통한 출생 후 감염(postnatal transmission)의 대표적인 병원체로 거대세포바이러스(CMV), 인간면역결핍바이러스(HIV), C형 간염 바이러스(HCV) 등이 있습니다. 이 설명은 정확합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"태반-태아 전파(Placental-fetal transmission)는 임신 기간 중 언제든지 일어날 수 있으며, 특히 임신 초기에 감염될 경우 태아에 더 심각한 손상을 줄 수 있습니다. 분만 중 감염과는 다릅니다.\",\n                        \"2번\": \"풍진 바이러스(Rubella virus) 감염은 임신 첫 삼분기(first trimester)에 가장 위험하며, 선천성 심장 기형, 백내장, 난청 등을 유발합니다. 세번째 삼분기(third trimester) 감염은 위험도가 훨씬 낮습니다.\",\n                        \"3번\": \"분만 중 전파(Transmission during birth)는 감염된 산도(birth canal)를 통과하면서 태아가 병원체에 노출되어 발생합니다. 혈관 노출이 주된 기전은 아닙니다.\",\n                        \"5번\": \"보기 5번은 OCR에서 잘렸으나, 일반적으로 수직감염의 결과는 감염 시점의 태아 연령에 따라 손상의 정도와 종류가 달라진다는 내용일 것으로 추정되며, 이는 옳은 설명입니다. 하지만 4번이 명확하게 옳은 설명이므로 4번을 정답으로 선택합니다. (주어진 문제에서는 옳은 것을 '한 개' 고르라고 되어 있습니다.)\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 23,\n                            \"relevance_reason\": \"강의자료 23페이지에서 급성 염증의 결과 중 하나로 만성 염증으로의 진행(persistent injury resulting in chronic inflammation)을 언급하고 있으며, 이는 감염이 지속되는 상황과 관련될 수 있습니다. (간접적 연관성)\"\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 19,\n            \"questions\": [\n                {\n                    \"question_number\": 46,\n                    \"question_text\": \"다음 중 위장관 독성 세균이 위장관 질환을 일으키는 기전의 연결이 옳은 것을 한 개 고르시오\",\n                    \"answer\": \"2) 외독소 분비-콜레라균\",\n                    \"explanation\": \"콜레라균(Vibrio cholerae)은 장 점막을 침범하지 않고, 장 내에서 강력한 외독소(exotoxin)인 콜레라 독소를 분비합니다. 이 독소가 장 상피세포의 이온 채널을 비가역적으로 활성화시켜 다량의 수분과 전해질을 장 내로 분비하게 함으로써 심한 수양성 설사를 유발합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"독성 대장균(예: EHEC)은 장독소(Shiga-like toxin)를 분비하지만, 이를 외독소의 한 종류로 볼 수 있습니다. 그러나 콜레라균의 기전이 더 명확하게 '외독소 분비'로 설명됩니다.\",\n                        \"3번\": \"콜레라균은 장점막을 침입하지 않습니다.\",\n                        \"4번\": \"이질균(Shigella)은 장점막 상피세포를 직접 침입하고 파괴하여 혈성 설사를 유발하며, 장간막 림프절 침입은 주된 기전이 아닙니다.\",\n                        \"5번\": \"장티푸스균(Salmonella Typhi)은 장점막을 침입하여 장간막 림프절을 거쳐 전신으로 퍼지는 전신 감염을 일으킵니다. 장점막 파괴는 이질균에서 더 현저합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 47,\n                    \"question_text\": \"50세 남자 환자가 한 달 간의 발열과 기침을 주소로 내원하였다. 환자의 흉부 X-ray사진에서 저음영의 결절이 발견되어 조직검사를 시행하여 아래와 같은 소견을 보였다. 이 병을 가장 정확하게 진단할 수 있는 검사법을 보기에서 고르시오.\",\n                    \"answer\": \"3) 균배양을 통한 균동정\",\n                    \"explanation\": \"사진은 중심부의 건락성 괴사(caseous necrosis)와 주변을 둘러싼 유상피세포, 림프구, 랑한스 거대세포로 구성된 전형적인 육아종(granuloma) 소견을 보여줍니다. 이는 결핵(tuberculosis)을 강력히 시사하는 병리 소견입니다. 결핵의 확진은 조직이나 객담 등에서 결핵균(Mycobacterium tuberculosis)을 배양하여 동정하는 것입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"특수염색 중 acid-fast stain(항산균 염색)은 결핵균을 확인하는 데 도움이 되지만, 민감도가 낮아 음성이라고 해서 결핵을 배제할 수는 없습니다. Gram, silver, mucicarmine은 다른 종류의 미생물을 염색하는 데 사용됩니다.\",\n                        \"2번\": \"면역염색은 특정 단백질 항원을 검출하는 방법으로, 결핵균 자체를 진단하는 데는 사용되지 않습니다.\",\n                        \"4번\": \"PCR은 결핵균의 DNA를 검출하여 신속하게 진단할 수 있는 유용한 방법이지만, 살아있는 균의 존재를 증명하는 배양검사가 확진(gold standard) 방법입니다.\",\n                        \"5번\": \"전자현미경은 바이러스나 세포 소기관을 관찰하는 데 사용되며, 세균인 결핵균 진단에는 사용되지 않습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 21,\n            \"questions\": [\n                {\n                    \"question_number\": 48,\n                    \"question_text\": \"65세 여자가 한 달 간의 간헐적 질출혈을 호소하며 병원에 내원하였다. 환자의 자궁 경부에 대한 세포 조직검사 결과는 다음과 같다. 이 환자의 세포 이상 소견을 초래하는 원인으로 가장 가능성이 높은 것을 한 개 고르시오.\",\n                    \"answer\": \"4) Human Papillomavirus\",\n                    \"explanation\": \"사진은 자궁경부 세포진 검사(Pap smear) 소견으로, 핵이 크고 불규칙하며 농축되어 있고 핵 주변에 밝은 테(perinuclear halo)가 보이는 코일로사이트(koilocyte)가 관찰됩니다. 이는 인유두종바이러스(Human Papillomavirus, HPV) 감염의 특징적인 세포학적 소견입니다. HPV는 자궁경부 이형성증 및 자궁경부암의 가장 중요한 원인입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"단순포진바이러스(Herpes Simplex Virus) 감염은 다핵 거대세포와 핵 내 '간유리' 모양 변화를 보입니다.\",\n                        \"2번\": \"C형 간염 바이러스(Hepatitis C virus)는 간에 감염되며 자궁경부 세포 이상과는 관련이 없습니다.\",\n                        \"3번\": \"거대세포바이러스(Cytomegalovirus) 감염은 '부엉이 눈' 모양의 큰 핵내 봉입체를 특징으로 합니다.\",\n                        \"5번\": \"인간 T세포 림프친화성 바이러스(HTLV-1)는 성인 T세포 백혈병/림프종을 유발합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 49,\n                    \"question_text\": \"다음은 45세 남자의 폐병변에 대한 조직 검사 소견이다. 병변의 원인균을 알아보기 위해 적절한 염색법과 염색결과의 올바른 조합을 하나 고르시오,\",\n                    \"answer\": \"5) 5\",\n                    \"explanation\": \"주 조직 사진은 폐포 내에 호중구와 세포 파편들이 가득 차 있는 급성 폐렴, 특히 세균성 폐렴의 소견을 보여줍니다. 이러한 세균을 관찰하기 위한 가장 기본적인 특수 염색은 그람 염색(Gram stain)입니다. 보기 5번의 그람 염색 사진은 조직 내에서 보라색으로 염색된 그람 양성 구균(Gram-positive cocci)들을 보여주고 있어, 주 조직 사진의 원인균을 확인하는 데 적절한 검사 및 결과 조합입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Silver stain은 주로 진균(fungi)이나 특정 세균(예: Legionella)을 검게 염색합니다.\",\n                        \"2번\": \"AFB stain(항산균 염색)은 결핵균과 같은 항산균을 붉게 염색합니다.\",\n                        \"3번\": \"AFB stain(항산균 염색)에 대한 설명은 2번과 동일합니다.\",\n                        \"4번\": \"Mucicarmine stain은 점액(mucin)을 붉게 염색하며, 협막을 가진 크립토코쿠스(Cryptococcus) 등을 염색하는 데 사용됩니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 131,\n                            \"relevance_reason\": \"강의자료 131페이지(p.94)는 화농성 염증(Purulent inflammation)의 예시로 세균성 농양(bacterial abscesses) 사진을 보여줍니다. 이는 다수의 호중구 침윤을 특징으로 하며, 문제의 조직 소견과 일치합니다.\"\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 22,\n            \"questions\": [\n                {\n                    \"question_number\": 50,\n                    \"question_text\": \"39세 당뇨 환자가 기침, 발열, 두통, 코막힘등을 주소로 내원하였다. 신체 검사에서 검은 괴사성 딱지가 코 안에 있었고, 조직 검사에서 다음과 같은 소견을 보였다. 진단으로 적당한 것을 고르시오.\",\n                    \"answer\": \"1) Mucormycosis\",\n                    \"explanation\": \"당뇨병 환자, 특히 케톤산증이 있는 환자에서 발생하는 급성 부비동염과 코의 검은 괴사성 병변은 털곰팡이증(Mucormycosis)의 전형적인 임상 양상입니다. 조직 검사 사진에서 보이는 넓고, 격벽이 없으며, 직각으로 분지하는 특징을 가진 곰팡이 균사(broad, non-septate, right-angle branching hyphae)는 털곰팡이증의 특징적인 소견입니다. 화살표가 가리키는 혈관 침범(angioinvasion) 소견 또한 이 질환의 특징입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"아스페르길루스증(Aspergillosis)은 균사가 가늘고, 격벽이 있으며, 예각으로 분지하는 특징을 보입니다.\",\n                        \"3번\": \"방선균증(Actinomycosis)은 그람 양성 사상균으로, 유황 과립(sulfur granule)을 형성합니다.\",\n                        \"4번\": \"칸디다증(Candida albicans)은 효모와 가성균사(pseudohyphae) 형태를 보입니다.\",\n                        \"5번\": \"크립토코쿠스증(Cryptococcosis)은 협막을 가진 효모 형태로 관찰됩니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 23,\n            \"questions\": [\n                {\n                    \"question_number\": 51,\n                    \"question_text\": \"다음은 미생물의 체내 침입과 숙주의 방어체계에 관련한 설명이다. 옳은 것을 한 개 고르시오.\",\n                    \"answer\": \"2) Postnatal transmission in maternal milk can transmit cytomegalovirus (CMV), human immunodeficiency virus (HIV), and hepatitis B virus (HBV).\",\n                    \"explanation\": \"모유 수유를 통한 출생 후 감염(Postnatal transmission)은 수직 감염의 한 경로입니다. 거대세포바이러스(CMV), 인간면역결핍바이러스(HIV), B형 간염 바이러스(HBV) 등은 모유를 통해 신생아에게 전파될 수 있는 대표적인 병원체들입니다. (참고: HCV도 전파 가능)\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"대부분의 피부 감염은 물리적 손상(physical injury)으로 인해 피부 장벽이 파괴되었을 때 시작됩니다. 화학적 손상(chemical injury)은 일반적인 경로가 아닙니다.\",\n                        \"3번\": \"위장관계(GI system)의 방어기전에는 낮은 위산도(low gastric pH), 점액, 효소, 담즙, 디펜신, IgA, 정상 세균총 등이 포함됩니다. 높은 위산도(high gastric pH, 즉 낮은 산도)가 방어기전입니다.\",\n                        \"4번\": \"비뇨생식기계(Urogenital tract)는 반복적인 소변 배출(flushing)과 정상 세균총이 만드는 산성 환경(acidic environment)에 의해 방어됩니다. 중성 환경(neutral environment)은 방어에 불리합니다.\",\n                        \"5번\": \"5마이크론보다 작은 입자가 폐포까지 도달하여 대식세포에 의해 탐식될 수 있습니다. 15마이크론보다 작은 입자라는 표현은 너무 광범위합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 52,\n                    \"question_text\": \"46세 남자 환자가 미열과 2주 이상 지속되는 기침을 주소로 내원하여 시행한 조직 검사 소견은 다음과 같다. 병변을 진단하기 위한 염색법과 원인균이 올바르게 연결된 것을 고르시오.\",\n                    \"answer\": \"3) 3\",\n                    \"explanation\": \"주 조직 사진은 중심부의 건락성 괴사와 주변의 육아종성 염증을 보여주며, 이는 결핵(tuberculosis)의 전형적인 소견입니다. 결핵의 원인균인 결핵균(Mycobacterium tuberculosis)은 세포벽에 미콜산(mycolic acid)이 많아 일반적인 그람 염색에 염색되지 않고, 항산성(acid-fastness)을 띠므로 항산균 염색(Acid-Fast Bacilli, AFB stain)으로 검출해야 합니다. 보기 3번은 항산균 염색에서 붉게 염색된 막대균(결핵균)을 보여주므로, 올바른 조합입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Silver stain은 진균을 염색하는 데 주로 사용됩니다.\",\n                        \"2번\": \"AFB stain은 맞지만, 사진 2번은 진균(아마도 크립토코쿠스)을 염색한 것으로 보입니다.\",\n                        \"4번\": \"Mucicarmine stain은 점액이나 크립토코쿠스의 협막을 염색합니다.\",\n                        \"5번\": \"Gram stain은 일반 세균을 염색하는 데 사용되며, 결핵균은 잘 염색되지 않습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 24,\n            \"questions\": [\n                {\n                    \"question_number\": 53,\n                    \"question_text\": \"45세 남자가 피곤하면 자주 입술 주위의 물집이 생겨서 내원하였다. 환자의 조직에서 관찰 할 수 있는 소견을 고르시오.\",\n                    \"answer\": \"1) 1\",\n                    \"explanation\": \"피곤할 때마다 입술 주위에 재발하는 물집은 단순포진바이러스(Herpes Simplex Virus, HSV) 감염의 전형적인 임상 양상입니다. HSV 감염의 특징적인 병리 소견은 (1) 상피세포의 풍선양 변성(ballooning degeneration), (2) 다핵 거대세포(multinucleated giant cells) 형성, (3) 핵 내에 '간유리' 모양의 봉입체(ground-glass intranuclear inclusion, Cowdry A type)입니다. 보기 1번 사진은 이러한 특징들을 모두 잘 보여주고 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"이 사진은 샘(gland) 구조의 이상을 보여주며, 바이러스 감염 소견과는 다릅니다.\",\n                        \"3번\": \"이 사진은 핵이 크고 농축된 이형성 세포를 보여주며, HPV 감염에서 보이는 코일로사이트와 유사할 수 있으나 전형적인 헤르페스 감염 소견은 아닙니다.\",\n                        \"4번\": \"왼쪽은 세포진 검사, 오른쪽은 폐포 내 삼출물로, 각각 다른 병변을 보여줍니다.\",\n                        \"5번\": \"이 사진은 피부의 수포(blister)를 보여주지만, 세포 수준의 특징적인 바이러스 감염 소견은 보이지 않습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 27,\n            \"questions\": [\n                {\n                    \"question_number\": 54,\n                    \"question_text\": \"MSI(Microsatellite instability)에 대한 설명이다. 틀린 것은?\",\n                    \"answer\": \"3) Bloom syndrome과 관련이 있다.\",\n                    \"explanation\": \"현미부수체 불안정성(Microsatellite instability, MSI)은 DNA 부정합 수리(Mismatch repair, MMR) 유전자의 기능 소실로 인해 발생합니다. 블룸 증후군(Bloom syndrome)은 DNA helicase 유전자인 BLM의 돌연변이로 인해 염색체 불안정성(chromosomal instability)을 보이는 질환으로, MSI와는 다른 기전의 DNA 수리 결함 질환입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"MSI는 DNA 복제 시 발생하는 오류를 수정하는 MMR 시스템의 결함으로 인해 발생합니다.\",\n                        \"2번\": \"현미부수체(Microsatellite)는 짧은 염기서열이 반복되는 DNA 영역을 말합니다.\",\n                        \"4번\": \"MutS 단백질(예: MSH2, MSH6)은 DNA 복제 오류(mismatch)를 인식하는 역할을 하며, MMR 시스템의 핵심 요소입니다.\",\n                        \"5번\": \"정상 세포에서는 MMR 시스템이 잘 작동하여 현미부수체의 반복 횟수(길이)가 일정하게 유지됩니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 55,\n                    \"question_text\": \"HNPCC(Hereditary nonpolyposis colon cancer syndrome)에 대한 설명이다. 틀린 것은?\",\n                    \"answer\": \"4) 가장 흔히 침범되는 유전자는 MSH6와 PMS2 이다.\",\n                    \"explanation\": \"유전성 비용종성 대장암(HNPCC, 또는 린치 증후군)은 DNA 부정합 수리(MMR) 유전자의 생식세포 돌연변이로 인해 발생합니다. 원인이 되는 유전자 중 가장 흔하게 돌연변이가 발견되는 것은 MSH2(약 60%)와 MLH1(약 30%)입니다. MSH6와 PMS2 유전자의 돌연변이는 상대적으로 드뭅니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"HNPCC는 상염색체 우성(Autosomal dominant)으로 유전됩니다.\",\n                        \"2번\": \"HNPCC는 MMR 유전자인 MSH2, MLH1, MSH6, PMS2 등의 기능 소실과 연관됩니다.\",\n                        \"3번\": \"HNPCC 선별 검사로 현미부수체 불안정성(MSI) 검사를 시행하며, 그 결과에 따라 MSI-High, MSI-Low, MSS로 분류합니다.\",\n                        \"5번\": \"산발성 대장암 중 MSI 양성을 보이는 경우, 주로 MLH1 프로모터의 과메틸화(hypermethylation)로 인해 MLH1 단백질 발현이 소실되며, 이는 종종 BRAF 유전자 돌연변이와 동반됩니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 56,\n                    \"question_text\": \"자외선으로 인해 이웃한 pyrimidine 염기들끼리 공유결합하여 DNA 복제가 억제되었을 때, DNA 복구는 어떤 기전을 통해 이루어지는지 고르시오.\",\n                    \"answer\": \"1) Nucleotide excision repair system\",\n                    \"explanation\": \"자외선(UV)에 의해 생성되는 피리미딘 이합체(pyrimidine dimer)와 같이 DNA 나선 구조를 크게 왜곡시키는 부피가 큰 손상(bulky lesion)은 뉴클레오티드 절제 수리(Nucleotide Excision Repair, NER) 시스템에 의해 제거되고 복구됩니다. 이 기전에 결함이 생기면 색소성 건피증(Xeroderma pigmentosum)이 발생합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"부정합 수리(Mismatch repair)는 DNA 복제 과정에서 발생한 염기쌍 오류를 교정합니다.\",\n                        \"3번\": \"염기 절제 수리(Base excision repair)는 탈아미노화 등으로 인한 단일 염기의 작은 손상을 복구합니다.\",\n                        \"4번\": \"상동 재조합(Homologous recombination)은 DNA 이중나선 절단(double-strand break)을 자매 염색분체를 주형으로 사용하여 오류 없이 복구하는 기전입니다.\",\n                        \"5번\": \"비상동 말단 연결(Non-homologous end joining)은 DNA 이중나선 절단을 주형 없이 직접 연결하는 방식으로, 오류가 발생하기 쉽습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 57,\n                    \"question_text\": \"DNA 이중나선이 모두 절단 되었을 때, 유전정보의 손실 없이 복구하는 기전은 무엇인가?\",\n                    \"answer\": \"4) Homologous recombination\",\n                    \"explanation\": \"DNA 이중나선 절단(Double-Strand Break, DSB)은 세포에 매우 치명적인 손상입니다. 이를 복구하는 기전은 두 가지가 있는데, 그 중 상동 재조합(Homologous Recombination, HR)은 손상되지 않은 자매 염색분체(sister chromatid)를 주형(template)으로 사용하여 손상된 부위를 정확하게 복구하므로 유전정보의 손실이 없습니다. BRCA1, BRCA2 유전자가 이 과정에 중요하게 관여합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"뉴클레오티드 절제 수리(NER)는 부피가 큰 단일 가닥 손상을 복구합니다.\",\n                        \"2번\": \"부정합 수리(Mismatch repair)는 복제 오류를 교정합니다.\",\n                        \"3번\": \"염기 절제 수리(Base excision repair)는 단일 염기 손상을 복구합니다.\",\n                        \"5번\": \"비상동 말단 연결(Non-homologous end joining)은 주형 없이 절단된 끝을 바로 이어 붙이는 방식으로, 염기 서열의 삽입이나 삭제(indel)가 발생하기 쉬워 오류가 많은(error-prone) 복구 기전입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 28,\n            \"questions\": [\n                {\n                    \"question_number\": 58,\n                    \"question_text\": \"다음 중 chronic myeloid leukemia의 translocation과 연관된 유전자를 고르시오.\",\n                    \"answer\": \"1) ABL 9q34, BCR 22q11\",\n                    \"explanation\": \"만성 골수성 백혈병(Chronic Myeloid Leukemia, CML)은 9번 염색체 장완(9q34)에 위치한 ABL 유전자와 22번 염색체 장완(22q11)에 위치한 BCR 유전자 사이의 상호 전좌, 즉 t(9;22)(q34;q11)에 의해 BCR-ABL 융합 유전자가 형성되어 발생합니다. 이로 인해 생성된 염색체를 필라델피아 염색체라고 합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"t(8;14)(q24;q32)는 MYC과 IGH 유전자의 전좌로, 버킷 림프종(Burkitt lymphoma)에서 관찰됩니다.\",\n                        \"3번\": \"t(11;14)(q13;q32)는 CCND1(Cyclin D1)과 IGH 유전자의 전좌로, 외투세포 림프종(Mantle cell lymphoma)에서 관찰됩니다.\",\n                        \"4번\": \"t(8;21)(q22;q22)는 AML1(RUNX1)과 ETO(RUNX1T1) 유전자의 전좌로, 급성 골수성 백혈병(AML)의 한 유형에서 관찰됩니다.\",\n                        \"5번\": \"t(11;22)(q24;q12)는 FLI1과 EWSR1 유전자의 전좌로, 유잉 육종(Ewing sarcoma)에서 관찰됩니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 59,\n                    \"question_text\": \"염색체 변화로 인한 종양 중 다음과 관련이 있는 종양은 무엇인지 고르시오. gene amplification, double minutes, homogenous staining regions, NMYC gene\",\n                    \"answer\": \"2) Neuroblastoma\",\n                    \"explanation\": \"유전자 증폭(Gene amplification)은 특정 종양유전자의 복제 수가 수십에서 수백 배로 증가하는 현상입니다. 이는 염색체 외부에 작은 쌍으로 존재하는 double minutes(DMs) 또는 염색체 내에 길게 염색되는 homogenous staining regions(HSRs)의 형태로 관찰됩니다. NMYC 유전자의 증폭은 신경모세포종(Neuroblastoma)의 대표적인 유전적 이상이며, 나쁜 예후와 관련이 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"유잉 육종(Ewing sarcoma)은 EWSR1 유전자 관련 전좌가 특징입니다.\",\n                        \"3번\": \"망막모세포종(Retinoblastoma)은 RB1 종양억제유전자의 불활성화가 특징입니다.\",\n                        \"4번\": \"신세포암(Renal cell carcinoma)은 VHL 유전자 이상 등과 관련이 있습니다.\",\n                        \"5번\": \"유방암(Breast cancer)에서는 HER2(ERBB2) 유전자의 증폭이 중요하게 관여합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 60,\n                    \"question_text\": \"epigenetic change에 대한 설명이다. 틀린 것은?\",\n                    \"answer\": \"5) NOTCH1 유전자는 T-cell acute lymphoblastic leukemia에서는 mutated tumor suppressor genes으로서 역할을 한다.\",\n                    \"explanation\": \"NOTCH1 유전자는 T세포 급성 림프모구성 백혈병(T-ALL)에서 기능 획득 돌연변이(gain-of-function mutation)를 통해 지속적으로 활성화되어 암 발생을 유발하는 종양유전자(oncogene)로 작용합니다. 기능이 소실되는 종양억제유전자(tumor suppressor gene)가 아닙니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"후성유전학적 변화(Epigenetic change)는 DNA 염기서열의 변화 없이 DNA 메틸화, 히스톤 변형 등을 통해 유전자 발현에 영향을 미치는 변화를 말합니다.\",\n                        \"2번\": \"암세포 핵의 형태학적 변화(예: 염색질 응축)는 후성유전학적 상태와 관련이 있습니다.\",\n                        \"3번\": \"RB, VHL, APC와 같은 종양억제유전자는 프로모터 부위의 과메틸화(hypermethylation)와 같은 후성유전학적 변화에 의해 발현이 억제되어 기능이 소실될 수 있습니다.\",\n                        \"4번\": \"후성유전학적 변화는 DNA 메틸전이효소, 히스톤 변형 효소 등에 의해 일어나며, 원칙적으로 가역적(reversible)입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 29,\n            \"questions\": [\n                {\n                    \"question_number\": 61,\n                    \"question_text\": \"Chemical carcinogenesis에 대한 설명이다. 틀린 것은?\",\n                    \"answer\": \"4) promoter는 그 자체로 종양발생을 유도한다.\",\n                    \"explanation\": \"화학적 발암 과정에서 촉진제(promoter)는 그 자체만으로는 돌연변이를 유발하지 않으며 종양을 발생시키지 못합니다. 촉진제는 개시제(initiator)에 의해 DNA 손상을 입은 세포의 증식을 촉진하는 역할을 합니다. 따라서 개시제에 노출된 후에만 발암 효과를 나타낼 수 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"개시(Initiation)는 발암물질에 노출되어 세포에 비가역적인 DNA 손상, 즉 돌연변이가 발생하는 단계를 말합니다.\",\n                        \"2번\": \"개시 단계에서 영구적인 DNA 손상이 발생합니다.\",\n                        \"3번\": \"직접 작용 발암물질(direct-acting carcinogen)이나 간접 발암물질의 활성 대사체는 전자를 좋아하는(electrophilic) 특성을 띠어 DNA, RNA, 단백질과 같은 친핵성 분자들과 반응하여 손상을 줍니다.\",\n                        \"5번\": \"대부분의 화학 발암물질은 그 자체로는 비활성인 간접 발암물질(indirect carcinogen)이며, 체내에서 주로 간의 시토크롬 P-450 효소계에 의해 대사되어 활성 형태로 전환됩니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 62,\n                    \"question_text\": \"Radiation carcinogenesis에 대한 설명이다. 틀린 것은?\",\n                    \"answer\": \"1) 심한 이온화방사선(Ionizing radiation)에 노출되면 초기에는 주로 고형암이 발생한다.\",\n                    \"explanation\": \"고선량의 전리 방사선(ionizing radiation)에 전신이 노출되었을 때, 가장 먼저 위험이 증가하고 잠복기가 짧은 종양은 백혈병(leukemia), 특히 급성 및 만성 골수성 백혈병입니다. 갑상선암, 유방암, 폐암과 같은 고형암(solid tumor)은 백혈병보다 더 긴 잠복기를 거쳐 발생 위험이 증가합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"자외선(UV radiation)은 피부암, 특히 편평세포암, 기저세포암, 악성 흑색종의 주요 원인입니다.\",\n                        \"3번\": \"자외선에 의한 암 발생 위험도는 자외선의 종류(UVA, UVB, UVC), 노출 강도 및 시간, 그리고 피부의 멜라닌 색소 침착 정도(피부색)에 따라 달라집니다.\",\n                        \"4번\": \"오존층은 해로운 자외선을 차단하는 역할을 하므로, 오존층 파괴는 지표면에 도달하는 자외선 양을 증가시켜 피부암 발생 위험을 높입니다.\",\n                        \"5번\": \"피부, 뼈, 위장관계는 세포 분열이 비교적 활발하여 방사선에 의한 암 발생에 상대적으로 민감한 편입니다. (이 보기는 논란의 여지가 있으나, 1번이 명백히 틀린 설명입니다.)\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 63,\n                    \"question_text\": \"Human Papillomavirus(HPV)에 대한 설명이다. 틀린 것 두 가지를 고르시오. (답 두 개)\",\n                    \"answer\": \"2) genital wart는 주로 HPV type 18과 연관이 있다., 4) HPV 감염 후 RAS 유전자의 돌연변이로 암이 발생한다.\",\n                    \"explanation\": \"틀린 설명 1(정답 2번): 생식기 사마귀(genital wart)와 같은 양성 병변은 주로 저위험군(low-risk) HPV인 type 6, 11에 의해 발생합니다. HPV type 18은 type 16과 함께 자궁경부암을 유발하는 대표적인 고위험군(high-risk) HPV입니다.\\n틀린 설명 2(정답 4번): HPV에 의한 발암 기전은 바이러스 단백질인 E6와 E7이 숙주세포의 종양억제단백질인 p53과 RB를 각각 분해하고 불활성화시키는 것입니다. RAS 유전자 돌연변이와는 직접적인 관련이 없습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"HPV type 16은 자궁경부암의 가장 흔한 원인인 대표적인 고위험군 HPV입니다.\",\n                        \"3번\": \"양성 병변인 사마귀(wart)에서는 HPV 유전체가 숙주 염색체에 삽입되지 않고 독립적인 원형(episomal form)으로 존재합니다. 악성 종양에서는 숙주 염색체로 삽입되는 경우가 많습니다.\",\n                        \"5번\": \"고위험군 HPV의 E6 단백질은 p53의 분해를 촉진하고, E7 단백질은 RB 단백질을 불활성화시킵니다. 따라서 E6이 RB를 분해한다는 설명은 틀렸습니다. (문제에서 틀린 것을 2개 고르라고 했으므로 5번도 틀린 설명에 해당할 수 있으나, 2번과 4번이 더 명확하게 틀렸습니다.)\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 64,\n                    \"question_text\": \"Epstein-Barr Virus(EBV)에 대한 설명이다. 틀린 것 2개를 고르시오. (답 두 개)\",\n                    \"answer\": \"2) EBV-transformed B-cell과 Burkitt lymphoma cells의 바이러스 유전자의 발현패턴은 동일하다., 3) EBV는 B cell 포면의 CD3와 결합하여 B cell을 감염시킨다.\",\n                    \"explanation\": \"틀린 설명 1(정답 2번): EBV에 의해 잠복 감염된 B세포(EBV-transformed B-cell)는 여러 잠복기 유전자(LMP-1, EBNA-2 등)를 발현하여 증식합니다. 반면, 버킷 림프종(Burkitt lymphoma) 세포에서는 대부분의 잠복기 유전자 발현이 억제되고 EBNA-1만 발현되어 면역 감시를 회피합니다. 따라서 발현 패턴이 다릅니다.\\n틀린 설명 2(정답 3번): EBV는 B세포 표면의 CD21(보체 수용체 CR2)을 수용체로 사용하여 B세포를 감염시킵니다. CD3는 T세포 표면에 있는 분자입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"EBV는 아프리카의 버킷 림프종, 비인두암, 특정 위암, 호지킨 림프종 등 다양한 악성 종양의 발생과 깊은 관련이 있습니다.\",\n                        \"4번\": \"말라리아 유행 지역에서는 말라리아 감염이 만성적인 B세포 증식을 유발하여, EBV 감염된 B세포에서 MYC 전좌와 같은 추가적인 유전적 변이가 일어날 확률을 높여 버킷 림프종 발생에 기여하는 것으로 알려져 있습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 30,\n            \"questions\": [\n                {\n                    \"question_number\": 65,\n                    \"question_text\": \"Helicobacter pylori(H. pylori)에 대한 설명 중 틀린 것을 고르시오.\",\n                    \"answer\": \"5) 감염 단계와는 관계없이 제균치료는 효과적이다.\",\n                    \"explanation\": \"헬리코박터 파일로리(H. pylori) 감염에 대한 제균 치료는 만성 위염이나 소화성 궤양 단계에서는 위암 발생 위험을 낮추는 데 효과적입니다. 그러나 이미 위축성 위염이나 장상피화생, 이형성증과 같은 전암병변으로 진행된 후에는 제균 치료를 하더라도 암 발생을 완전히 막지 못할 수 있습니다. 따라서 감염 단계와 관계없이 효과적이라는 설명은 틀렸습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"H. pylori는 국제암연구소(IARC)에서 1급 발암물질(Group 1 carcinogen)로 분류한 최초의 박테리아입니다.\",\n                        \"2번\": \"H. pylori 감염은 위 선암(gastric adenocarcinoma)과 위 MALT 림프종(gastric lymphoma)의 가장 중요한 원인입니다.\",\n                        \"3번\": \"H. pylori 감염은 만성 위염 → 위축성 위염 → 장상피화생 → 이형성증 → 위암으로 이어지는 다단계 발암 과정(Correa pathway)을 유발합니다.\",\n                        \"4번\": \"H. pylori 균주 중 종양 발생과 직접적으로 관련된 독성 단백질인 CagA를 생성하는 균주가 위암 발생 위험이 더 높습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 66,\n                    \"question_text\": \"종양에 의한 반응에 대한 설명이다. 틀린 것을 고르시오.\",\n                    \"answer\": \"3) 악액질(cancer cachexia)은 음식섭취량과 관련된 근육량감소를 말한다.\",\n                    \"explanation\": \"암 악액질(cancer cachexia)은 음식 섭취량 감소만으로는 설명할 수 없는 전신적인 소모 상태를 말합니다. 이는 종양에서 분비되는 사이토카인(TNF-α 등)에 의한 전신적인 염증 반응과 대사 이상으로 인해 지방과 근육이 모두 현저하게 소실되는 것을 특징으로 합니다. 단순히 음식 섭취량과 관련된 것이 아니라, 복합적인 병태생리를 가집니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"종양의 위치에 따라 압박 증상, 폐쇄, 호르몬 분비 등 다양한 임상 증상이 나타날 수 있습니다.\",\n                        \"2번\": \"일반적으로 양성 내분비 종양은 분화도가 좋아 악성 종양보다 더 많은 호르몬을 기능적으로 활발하게 분비하는 경향이 있습니다.\",\n                        \"4번\": \"악액질이 심해지면 호흡 근육을 포함한 전신 근육이 위축되어, 결국 폐렴 등 감염으로 사망하는 경우가 많습니다.\",\n                        \"5번\": \"악액질 상태에서는 지방분해를 촉진하는 인자(lipid mobilizing factor) 등이 분비되어 지방 조직이 소실됩니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 67,\n                    \"question_text\": \"paraneoplastic syndrome에 대한 설명이다. 틀린 것을 고르시오.\",\n                    \"answer\": \"3) 암에 의해 뼈가 침범되는 경우에 발생하는 hypercalcemia는 paraneoplastic syndrome의 대표적인 예이다.\",\n                    \"explanation\": \"부종양 증후군(Paraneoplastic syndrome)은 종양 자체나 전이에 의한 직접적인 영향이 아니라, 종양에서 분비하는 호르몬이나 사이토카인 등에 의해 발생하는 전신적인 증상들을 말합니다. 암이 뼈로 전이되어 뼈를 파괴함으로써 발생하는 고칼슘혈증(hypercalcemia)은 종양의 직접적인 영향에 의한 것이므로 부종양 증후군에 해당하지 않습니다. 부종양 증후군으로서의 고칼슘혈증은 종양이 PTHrP와 같은 물질을 이소성으로 분비하여 발생하는 경우를 말합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"쿠싱 증후군은 폐의 소세포암(small cell carcinoma)이 ACTH를 이소성으로 분비하여 발생하는 대표적인 부종양 증후군입니다.\",\n                        \"2번\": \"부종양 증후군 중 가장 흔한 것은 고칼슘혈증(hypercalcemia)입니다.\",\n                        \"4번\": \"부갑상선 호르몬 관련 단백질(PTHrP)은 정상적으로는 각질형성세포(keratinocytes) 등에서 분비되지만, 폐 편평세포암 등에서 이소성으로 분비되어 고칼슘혈증을 유발합니다.\",\n                        \"5번\": \"비후성 골관절병증(Hypertrophic osteoarthropathy)은 주로 폐암과 동반되는 부종양 증후군입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": 68,\n                    \"question_text\": \"Stage and grade에 대한 설명이다. 틀린 것은?\",\n                    \"answer\": \"5) Staging에는 분자병리결과는 포함되지 않는다.\",\n                    \"explanation\": \"전통적으로 병기(Staging)는 TNM 시스템(종양 크기, 림프절 전이, 원격 전이)을 기반으로 결정되었습니다. 그러나 최근에는 예후 예측과 치료 방침 결정에 중요한 분자병리학적 표지자(예: 유전자 돌연변이, 증폭, 단백질 발현)들이 병기 결정 시스템에 통합되고 있습니다. 예를 들어, 최신 AJCC 병기 매뉴얼에는 특정 암에서 분자 표지자가 병기 분류에 포함됩니다. 따라서 분자병리결과가 포함되지 않는다는 설명은 현대 암 진단 경향과 맞지 않아 틀렸습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"조직학적 등급(Grading)은 종양세포가 정상세포와 얼마나 닮았는지를 나타내는 분화도(differentiation)를 평가하는 것입니다.\",\n                        \"2번\": \"등급 결정에는 암의 종류에 따라 핵의 다형성, 유사분열(mitoses) 횟수, 샘 구조 형성 정도 등 다양한 조직학적 소견이 사용됩니다.\",\n                        \"3번\": \"병기(Staging)는 암이 해부학적으로 얼마나 퍼져 있는지를 평가하는 것으로, 원발 종양의 크기(T), 주변 림프절 전이 여부(N), 원격 전이 여부(M)를 종합하여 결정합니다.\",\n                        \"4번\": \"병기는 TNM 시스템으로 결정하는 것이 표준입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        }\n    ],\n    \"summary\": {\n        \"total_jokbo_pages\": 31,\n        \"total_questions\": 68,\n        \"total_related_slides\": 6\n    }\n}",
+  "response_length": 76063,
+  "parsed_successfully": true,
+  "parsed_data": {
+    "jokbo_pages": [
+      {
+        "jokbo_page": 1,
+        "questions": [
+          {
+            "question_number": 1,
+            "question_text": "위 내시경 검사에서 채취한 생검 조직에서 관찰되는 다음 소견 중 악성종양을 나타내는 가장 중요한 소견은?",
+            "answer": "5) Invasion",
+            "explanation": "악성종양을 양성종양과 구별하는 가장 결정적인 기준은 침윤(Invasion)입니다. 침윤은 종양세포가 기저막을 뚫고 주변 조직으로 파고드는 현상을 말하며, 이는 악성세포만이 보이는 특징입니다. 다른 소견들(다형성, 이형성, 괴사, 핵/세포질 비율 증가)은 악성종양에서 흔히 관찰되지만, 침윤만큼 절대적인 기준은 아닙니다.",
+            "wrong_answer_explanations": {
+              "1번": "Pleomorphism(다형성)은 세포의 크기와 모양이 다양함을 의미하며, 악성종양의 특징 중 하나이지만 반응성 변화에서도 보일 수 있습니다.",
+              "2번": "Atypia(이형성)는 세포의 비정상적인 형태를 의미하며, 악성으로 진행할 수 있는 전암병변에서도 관찰되나 그 자체로 악성을 확진하지는 않습니다.",
+              "3번": "Necrosis(괴사)는 종양이 너무 빨리 자라 혈액 공급이 부족할 때 발생할 수 있으나, 염증 등 다른 조건에서도 발생할 수 있습니다.",
+              "4번": "Increased nuclear/cytoplasmic ratio(핵/세포질 비율 증가)는 악성세포의 특징이지만, 이 역시 침윤만큼 결정적인 소견은 아닙니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 2,
+            "question_text": "종양의 특성에 관한 기술 중 옳은 것은?",
+            "answer": "4) 악성도가 높은 종양은 poorly differentiation을 보인다.",
+            "explanation": "악성도가 높은 종양일수록 정상 세포의 형태와 기능을 잃어버리는 분화도(differentiation)가 나쁜(poorly differentiated) 양상을 보입니다. 이는 악성종양의 중요한 특징 중 하나입니다.",
+            "wrong_answer_explanations": {
+              "1번": "악성종양의 growth fraction(성장분율)은 초기에는 높지만 종양이 커지면서 혈액 공급 부족 등으로 감소하는 경향을 보입니다.",
+              "2번": "종양이 임상적으로 발견될 때는 대부분의 세포가 비증식 상태(non-proliferating pool)에 있습니다.",
+              "3번": "양성종양은 팽창성 성장을 하며, 침윤성 성장은 악성종양의 특징입니다.",
+              "5번": "빨리 성장하는 종양(growth fraction이 높은 종양)은 세포분열이 활발하므로, 세포분열 주기에 작용하는 항암약제에 더 잘 반응하는 경향이 있습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 3,
+            "question_text": "다음 중 암과 관련된 질환의 조합으로 옳은 것은?",
+            "answer": "1) Familial adenomatous polyposis / adenocarcinoma of colon",
+            "explanation": "가족성 선종성 용종증(Familial adenomatous polyposis, FAP)은 APC 유전자의 생식세포 돌연변이로 인해 발생하며, 치료하지 않을 경우 거의 100% 대장 선암(adenocarcinoma of colon)으로 진행하는 대표적인 유전성 암 증후군입니다.",
+            "wrong_answer_explanations": {
+              "2번": "기관지 편평상피화생(Bronchial squamous metaplasia)은 주로 편평세포암(squamous cell carcinoma)의 전구 병변이며, 소세포암(small cell carcinoma)과는 직접적인 관련성이 적습니다.",
+              "3번": "HPV 감염은 자궁경부암, 구인두암 등과 관련이 있으며, MALT 림프종은 주로 Helicobacter pylori 감염과 관련이 있습니다.",
+              "4번": "Helicobacter pylori 감염은 위선암 및 MALT 림프종과 관련이 있으며, 간세포암(Hepatocellular carcinoma)은 주로 B형/C형 간염 바이러스, 알코올성 간질환 등과 관련이 있습니다.",
+              "5번": "바렛 식도(Barrett esophagus)는 식도 선암(adenocarcinoma of esophagus)의 전구 병변이며, 편평세포암(squamous cell carcinoma)과는 관련이 적습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 4,
+            "question_text": "50세 여성이 정기 건강검진에서 실시한 자궁경부도말검사에서 이상소견이 있어 산부인과를 방문하였다. 자궁경부 생검 조직의 현미경 소견에서 상피의 전층에 걸쳐 atypical tumor cell세포이 관찰되었다. 그러나 상피의 기저막은 잘 유지되어 있었다. 진단은?",
+            "answer": "3) Carcinoma in situ",
+            "explanation": "상피세포층 전체에 걸쳐 이형성(dysplasia)이 심한 악성 세포가 관찰되지만, 기저막(basement membrane)을 침범하지 않은 상태를 상피내암(Carcinoma in situ, CIS)이라고 합니다. 이는 침윤암의 바로 전 단계에 해당합니다.",
+            "wrong_answer_explanations": {
+              "1번": "화생(Metaplasia)은 한 종류의 성숙한 세포가 다른 종류의 성숙한 세포로 바뀌는 것으로, 악성 변화는 아닙니다.",
+              "2번": "이형성(Dysplasia)은 상피 내 세포의 이형성을 의미하지만, 전층을 침범하지 않은 경우를 포함하는 더 넓은 개념입니다. 문제에서는 '전층에 걸쳐' 관찰되므로 상피내암이 더 정확한 진단입니다.",
+              "4": "미세침윤암(Microinvasive carcinoma)은 기저막을 뚫고 아주 약간의 침윤이 시작된 단계입니다.",
+              "5번": "침윤암(Invasive carcinoma)은 종양세포가 기저막을 명확히 뚫고 기질로 침범한 상태를 의미합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 2,
+        "questions": [
+          {
+            "question_number": 5,
+            "question_text": "70-year-old man who has a 50 pack year history of cigarette smoking has had a chronic cough for the past 20 years. He has begun to lose weight during the past year. He has a chest radiograph that reveals a right hilar mass. A sputum cytology shows atypical, hyperchromatic cells. What is the most common initial pathway for metastases from this lesion?",
+            "answer": "2) Lymphatics",
+            "explanation": "암종(Carcinoma)의 가장 흔한 초기 전이 경로는 림프관(Lymphatics)을 통한 림프절 전이입니다. 폐암, 특히 폐문부(hilar)에 발생한 암의 경우, 기관지 주변 및 종격동 림프절로 먼저 전이되는 것이 일반적입니다. 혈행성 전이도 일어나지만 림프관 전이가 더 흔한 초기 경로입니다.",
+            "wrong_answer_explanations": {
+              "1번": "흉막강(Pleural cavity)으로의 전이는 직접 파종(seeding)에 의한 것이며, 초기 전이 경로로는 덜 일반적입니다.",
+              "3번": "혈류(Bloodstream)를 통한 전이는 특히 육종(sarcoma)에서 흔하며, 암종에서도 일어나지만 림프관 전이 이후 또는 동시에 일어나는 경우가 많습니다.",
+              "4번": "기관지(Bronchi)를 통한 전파는 암의 성장 방식이지 전이(metastasis)의 일반적인 경로는 아닙니다.",
+              "5번": "흉벽(Chest wall)으로의 전이는 직접 침윤(direct invasion)에 해당합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 6,
+            "question_text": "40세 여성의 신체검사에서 우측 유방에 1.5cm 크기의 결절이 발견되었다. 결절은 경계가 불분명하며 주변 조직과 단단하게 유착되어있고 통증을 동반하고 있다. 주위 림프절은 정상이었다. 다음 중 가장 가능성이 높은 진단은?",
+            "answer": "5) Invasive ductal carcinoma",
+            "explanation": "경계가 불분명하고, 주변 조직에 단단하게 유착된 유방 결절은 악성종양, 특히 침윤성 유관암(Invasive ductal carcinoma)의 전형적인 임상 소견입니다. 양성 종양은 보통 경계가 명확하고 유동성이 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "섬유선종(Fibroadenoma)은 경계가 명확하고 유동성이 있는 양성 종양입니다.",
+              "2번": "혈관종(Hemangioma)은 유방에서 드물며, 보통 부드러운 종괴로 나타납니다.",
+              "3번": "관내유두종(Intraductal papilloma)은 보통 유두 분비물을 동반하는 작은 양성 종양입니다.",
+              "4번": "악성 림프종(Malignant lymphoma)이 유방에 원발성으로 생기는 경우는 매우 드뭅니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 7,
+            "question_text": "20세 여자 환자가 우측 난소에 5cm 크기의 낭성 종양이 발견되어 수술로 제거하였다. 종양의 현미경 검사에서 epithelial cell, cartilage 등이 관찰되었다. 이 종양의 진단은?",
+            "answer": "3) Mature cystic teratoma",
+            "explanation": "여러 배엽(외배엽, 중배엽, 내배엽)에서 유래한 다양한 종류의 성숙한 조직(상피세포, 연골, 신경조직, 지방 등)을 포함하는 종양을 기형종(teratoma)이라고 합니다. 난소에서 발견된 낭성 종양에 상피세포와 연골이 함께 관찰되는 것은 성숙 낭성 기형종(Mature cystic teratoma)의 특징적인 소견입니다.",
+            "wrong_answer_explanations": {
+              "1번": "다형성 선종(Pleomorphic adenoma)은 주로 침샘에 발생하는 혼합 종양입니다.",
+              "2번": "유두종(Papilloma)은 상피세포가 유두상으로 증식하는 양성 종양입니다.",
+              "4번": "과오종(Hamartoma)은 해당 장기에 정상적으로 존재하는 조직이 비정상적으로 혼합, 배열된 양성 병변입니다.",
+              "5번": "분리종(Choristoma)은 정상적인 조직이 비정상적인 위치에 존재하는 것을 말합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 3,
+        "questions": [
+          {
+            "question_number": 8,
+            "question_text": "다음 중 allergic reaction에서 late phase reaction의 증상을 초래하는 원인이 되는 세포는?",
+            "answer": "2) eosinophil",
+            "explanation": "알레르기 반응은 비만세포(mast cell)에 의해 매개되는 즉시형 반응(immediate reaction)과, 수 시간 후 호산구(eosinophil) 및 다른 백혈구들이 몰려와 염증을 지속시키는 후기 반응(late phase reaction)으로 나뉩니다. 따라서 후기 반응의 주된 원인 세포는 호산구입니다.",
+            "wrong_answer_explanations": {
+              "1번": "비만세포(Mast cell)는 알레르기 반응의 즉시형/초기 반응을 유발합니다.",
+              "3번": "대식세포(Macrophage)는 주로 만성 염증 및 식균 작용에 관여합니다.",
+              "4번": "호중구(Neutrophil)는 주로 급성 세균 감염에 대한 초기 방어에 중요합니다.",
+              "5번": "림프구(Lymphocyte)는 항원 특이적 면역 반응을 담당하지만, 알레르기 후기 반응의 주된 효과 세포는 호산구입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 56,
+                "relevance_reason": "강의자료 56페이지(p.79)에서 알레르기 반응(allergic reactions)에서 호산구(eosinophils)가 주요 세포 유형(main cell type)일 수 있다고 명시하고 있어, 문제와 직접적으로 관련됩니다."
+              }
+            ]
+          },
+          {
+            "question_number": 9,
+            "question_text": "systemic immune complex disease의 주된 형태학적 변화는?",
+            "answer": "1) acute vasculitis",
+            "explanation": "전신성 면역 복합체 질환(systemic immune complex disease)은 항원-항체 면역 복합체가 혈관벽에 침착되어 보체계를 활성화시키고, 이로 인해 호중구가 모여들어 혈관벽에 염증을 일으키는 급성 혈관염(acute vasculitis)이 주된 형태학적 특징입니다. 대표적인 예로 전신홍반루푸스(SLE)가 있습니다.",
+            "wrong_answer_explanations": {
+              "2번": "호산구성 침윤(eosinophilic infiltration)은 주로 알레르기 반응이나 기생충 감염에서 관찰됩니다.",
+              "3번": "괴사(necrosis)는 혈관염의 결과로 나타날 수 있지만, 혈관염 자체가 더 주된 변화입니다.",
+              "4번": "혈관주위 형질세포 집적(perivascular cuffing of plasma cells)은 주로 만성 염증에서 관찰됩니다.",
+              "5번": "육아종성 반응(granulomatous reaction)은 결핵이나 특정 자가면역질환에서 보이는 만성 염증의 한 형태입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 8,
+                "relevance_reason": "강의자료 8페이지 표에서 사구체신염(Glomerulonephritis)과 같은 면역 복합체 질환에서 항체, 보체, 호중구(neutrophils)가 관여한다고 설명합니다. 이는 혈관염(vasculitis)의 병태생리와 일치합니다."
+              },
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 15,
+                "relevance_reason": "강의자료 15페이지(p.74)에서 염증의 원인으로 면역 반응(Immune reactions)을 언급하고 있어, 면역 복합체 질환이 염증 반응을 유발함을 알 수 있습니다."
+              }
+            ]
+          },
+          {
+            "question_number": 10,
+            "question_text": "45세 여자 환자가 서서히 진행되는 근무력증으로 병원에 왔다. 신체검사에서 arthralgia 또는 myalgia는 없었으며 흉부단층촬영에서 mediastinal mass가 관찰되었다. 이 질환의 기전으로 가장 적당한 것은?",
+            "answer": "4) Antibody Mediated Cellular Dysfunction",
+            "explanation": "중증 근무력증(Myasthenia Gravis)은 아세틸콜린 수용체에 대한 자가항체가 생성되어 신경근 접합부의 신호 전달을 방해하는 대표적인 제2형 과민반응 질환입니다. 이는 항체가 세포 표면 수용체에 결합하여 세포의 기능을 저해하거나 비정상적으로 활성화시키는 '항체 매개 세포 기능장애(Antibody-Mediated Cellular Dysfunction)'에 해당합니다. 흉선종(mediastinal mass)이 동반되는 경우가 많습니다.",
+            "wrong_answer_explanations": {
+              "1번": "아르투스 반응(Arthus reaction)은 국소적인 면역 복합체 매개 혈관염입니다.",
+              "2번": "아나필락시스(Anaphylaxis)는 IgE 매개의 전신적인 제1형 과민반응입니다.",
+              "3번": "보체 매개 염증(Complement mediated Inflammation)은 항체가 세포에 결합 후 보체가 활성화되어 세포를 파괴하는 기전입니다.",
+              "5번": "옵소닌화 및 포식작용(Opsonization and Phagocytosis)은 항체나 보체가 병원체에 붙어 포식세포의 탐식을 돕는 과정입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 11,
+            "question_text": "만성 기침 환자의 폐 생검 조직에서 epithelioid cell과 Langhans giant cells로 구성된 작은 결절이 관찰되었다. 이 병소의 형성에 가장 중요한 역할을 하는 것은?",
+            "answer": "3) IFN-γ",
+            "explanation": "유상피세포(epithelioid cell)와 랑한스 거대세포(Langhans giant cells)로 구성된 결절은 육아종(granuloma)을 의미합니다. 육아종 형성의 핵심적인 사이토카인은 대식세포를 활성화시켜 유상피세포로 분화시키는 인터페론 감마(IFN-γ)입니다. 이는 주로 Th1 세포에서 분비됩니다.",
+            "wrong_answer_explanations": {
+              "1번": "C5a는 강력한 주화성 인자(chemoattractant) 및 아나필라톡신으로, 백혈구를 염증 부위로 유인합니다.",
+              "2번": "IL-5는 호산구의 분화와 활성화를 촉진합니다.",
+              "4번": "PAF(혈소판 활성 인자)는 혈관 확장, 혈관 투과성 증가 등 다양한 염증 반응에 관여합니다.",
+              "5번": "TNF(종양괴사인자)는 육아종 형성에 관여하지만, 대식세포를 직접적으로 활성화시키는 가장 핵심적인 사이토카인은 IFN-γ입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 73,
+                "relevance_reason": "강의자료 73페이지(p.83)에서 대식세포(macrophage)와 호중구(neutrophil)가 IFN-γ와 같은 사이토카인에 의해 활성화되어 미생물 사멸에 관여한다고 설명합니다. 대식세포의 활성화는 육아종 형성의 핵심 과정입니다."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 4,
+        "questions": [
+          {
+            "question_number": 12,
+            "question_text": "29세 여성이 잦은 피로감과 관절의 통증으로 내과 외래를 찾았다. 환자의 신체검사에서 얼굴에 나비모양의 erythematous malar rash가 있고 햇볕에 노출되면 증상이 더욱 심해진다고 한다. 이 환자의 진단에 가장 specific한 autoantibody는?",
+            "answer": "5) Ab to Double stranded DNA",
+            "explanation": "나비모양 발진(malar rash)과 광과민성(photosensitivity)은 전신홍반루푸스(Systemic Lupus Erythematosus, SLE)의 특징적인 임상 소견입니다. SLE 진단에 가장 특이적인(specific) 자가항체는 항 이중나선 DNA 항체(Ab to dsDNA)와 항 Sm 항체(Ab to Sm Ag)입니다. 보기 중에서는 Ab to dsDNA가 해당됩니다.",
+            "wrong_answer_explanations": {
+              "1번": "항 중심절 항체(Ab to Anti centromere)는 CREST 증후군(제한성 전신경화증)에 특이적입니다.",
+              "2번": "항 SS-A 항체(Anti-Ro)는 쇼그렌 증후군과 신생아 루푸스에서 주로 발견됩니다.",
+              "3번": "항 DNA Topoisomerase I 항체(Anti-Scl-70)는 미만성 전신경화증에 특이적입니다.",
+              "4번": "항 핵 RNP 항체(Ab to nuclear RNP)는 혼합 결합조직병(MCTD)에서 높게 나타납니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 13,
+            "question_text": "45세 여자환자가 다음의 증상을 호소하였다. 음식물은 삼키기 힘들고, 손가락이 굳어져서 컴퓨터 자판을 두드리기 어려운데 관절에 통증이나 변형은 없다. 또 얼굴이 땅기며 주름살이 없어졌다. 병원을 방문하여 피부 생검 조직에서 심한 섬유화가 관찰되었다. 이 환자의 진단에 가장 specific한 autoantibody는?",
+            "answer": "5) Ab to DNA Topoisomerase I",
+            "explanation": "피부 경화, 손가락 굳음(sclerodactyly), 식도 운동 장애로 인한 연하곤란 등은 전신경화증(Systemic Sclerosis, Scleroderma)의 특징적인 증상입니다. 특히 광범위한 피부 침범과 내부 장기 침범을 보이는 미만성 전신경화증(diffuse systemic sclerosis)에서 항 DNA Topoisomerase I (anti-Scl-70) 항체가 특이적으로 발견됩니다.",
+            "wrong_answer_explanations": {
+              "1번": "항 Sm 항체(Ab to Sm Ag)는 전신홍반루푸스(SLE)에 특이적입니다.",
+              "2번": "항 dsDNA 항체(Ab to Ds DNA)는 전신홍반루푸스(SLE)에 특이적입니다.",
+              "3번": "항 핵 RNP 항체(Ab to nuclear RNP)는 혼합 결합조직병(MCTD)에서 높게 나타납니다.",
+              "4번": "항 SS-A 항체(Anti-Ro)는 쇼그렌 증후군에서 주로 발견됩니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 14,
+            "question_text": "50세 여자환자가 눈의 심한 염증으로 병원을 방문하였다. 진찰 결과 keratoconjunctivitis와 xerostomia의 소견을 보였다. 환자의 혈액검사에서 antinuclear antibody (ANA) titer가 높게 검출되었다. 이 환자의 합병증 중 가장 예후가 나쁠 것으로 생각되는 소견은?",
+            "answer": "3) Malignant lymphoma",
+            "explanation": "안구 건조(keratoconjunctivitis sicca)와 구강 건조(xerostomia)는 쇼그렌 증후군(Sjogren syndrome)의 주 증상입니다. 쇼그렌 증후군 환자는 일반인에 비해 B세포 림프종, 특히 MALT 림프종과 같은 악성 림프종(Malignant lymphoma)의 발생 위험이 현저히 높으며, 이는 예후에 가장 큰 영향을 미치는 심각한 합병증입니다.",
+            "wrong_answer_explanations": {
+              "1번": "Pneumocystis carinii pneumonia는 주로 세포매개면역이 저하된 환자(예: AIDS)에서 발생하는 기회감염입니다.",
+              "2번": "흡수장애 증후군(Malabsorption syndrome)은 쇼그렌 증후군의 합병증으로 나타나기 어렵습니다.",
+              "4번": "미만성 폐 간질 섬유화(Diffuse pulmonary interstitial fibrosis)는 전신경화증 등 다른 자가면역질환에서 더 흔한 합병증입니다.",
+              "5번": "카포시 육종(Kaposi sarcoma)은 HHV-8 바이러스와 관련이 있으며 면역저하자에서 발생합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 5,
+        "questions": [
+          {
+            "question_number": 15,
+            "question_text": "다음 중 가장 심각한 면역결핍에 의한 증상을 보이는 질환은?",
+            "answer": "1) ADA deficiency",
+            "explanation": "아데노신 데아미나제(Adenosine Deaminase, ADA) 결핍증은 중증복합면역결핍증(Severe Combined Immunodeficiency, SCID)의 한 원인입니다. SCID는 T세포와 B세포의 기능이 모두 심각하게 저하되어 체액성 면역과 세포성 면역이 모두 손상되는 가장 심각한 형태의 선천성 면역결핍 질환입니다.",
+            "wrong_answer_explanations": {
+              "2번": "저감마글로불린혈증(hypogammaglobulinemia)은 항체 생성에만 문제가 있는 질환입니다.",
+              "3번": "디조지 증후군(DiGeorge Syndrome)은 주로 T세포 기능에 문제가 있는 질환입니다.",
+              "4번": "단독 IgA 결핍증(Isolated IgA Deficiency)은 가장 흔한 면역결핍이지만 대부분 증상이 없거나 경미합니다.",
+              "5번": "브루톤 X연관 무감마글로불린혈증(X-Linked Agammaglobulinemia of Bruton)은 B세포 발달 장애로 항체 생성이 결핍되지만, T세포 기능은 정상입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 16,
+            "question_text": "선천성 기형 없이 full-term으로 태어난 신생아가 생후 6개월 후 잦은 감기증상으로 소아과에 입원하였다. 신생아는 심한 폐렴의 소견을 보였고 가래검사에서 Hemophilus influenzae와 Streptococcus pneumoniae가 배양되었다. 진단으로 가장 가능성이 높은 것은?",
+            "answer": "5) X-Linked Agammaglobulinemia of Bruton",
+            "explanation": "생후 6개월까지는 모체로부터 받은 IgG 항체 덕분에 건강하다가, 이 항체가 소실되는 시점부터 반복적인 세균 감염(특히 피막을 가진 H. influenzae, S. pneumoniae)을 보이는 것은 B세포 기능 부전의 전형적인 양상입니다. 이는 B세포 발달에 장애가 있는 브루톤 X연관 무감마글로불린혈증(X-Linked Agammaglobulinemia of Bruton)을 강력히 시사합니다.",
+            "wrong_answer_explanations": {
+              "1번": "X연관 SCID는 T세포와 B세포 기능이 모두 없어 생후 초반부터 심각한 감염을 보입니다.",
+              "2번": "HIV 감염은 후천성 면역결핍으로, 신생아에서 이런 양상을 보이는 것은 일반적이지 않습니다.",
+              "3번": "디조지 증후군은 T세포 결핍으로 바이러스, 진균 감염에 더 취약합니다.",
+              "4": "단독 IgA 결핍증은 대부분 증상이 없거나 경미한 호흡기 감염을 보입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 17,
+            "question_text": "다음 세포 중 HIV의 주요 감염 표적이 되는 세포는?",
+            "answer": "4) Helper T-cell",
+            "explanation": "인간면역결핍바이러스(HIV)는 세포 표면의 CD4 분자를 주요 수용체로 사용하여 세포를 감염시킵니다. 보조 T세포(Helper T-cell)는 CD4를 발현하는 대표적인 세포로, HIV의 주된 감염 표적이 됩니다. 이 세포의 파괴가 후천성면역결핍증후군(AIDS)의 핵심 병태생리입니다.",
+            "wrong_answer_explanations": {
+              "1번": "호산구(Eosinophil)는 CD4를 발현하지 않습니다.",
+              "2번": "B세포(B-cell)는 CD4를 발현하지 않습니다.",
+              "3번": "세포독성 T세포(Cytotoxic T-cell)는 CD8을 발현하며, HIV의 표적이 아닙니다.",
+              "5번": "NK세포(NK cell)는 CD4를 발현하지 않습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 18,
+            "question_text": "40세 남자 환자가 심한 고열을 주소로 내원하였다. 병원에서 시행한 검사에서 HIV 양성 소견을 보였다. 이 환자는 심한 전신 감염 소견을 보이며 사망하여 부검을 시행하였고 폐조직에서 폐렴의 소견과 함께 폐포내에 거품 모양의 삼출액이 관찰되었다. 가장 가능성이 높은 진단은?",
+            "answer": "1) pneumocystis pneumonia",
+            "explanation": "HIV 감염으로 인해 세포매개면역이 심각하게 저하된 환자에서 발생하는 대표적인 기회감염 폐렴이 주폐포자충 폐렴(Pneumocystis jirovecii pneumonia, PCP)입니다. 병리조직학적으로 폐포 내에 거품 모양 또는 솜사탕 같은 호산성의 삼출물(foamy or cotton-candy like eosinophilic exudates)이 관찰되는 것이 특징입니다.",
+            "wrong_answer_explanations": {
+              "2번": "결핵(tuberculosis)은 건락성 괴사를 동반한 육아종을 형성하는 것이 특징입니다.",
+              "3번": "세균성 폐렴(bacterial pneumonia)은 주로 폐포 내에 호중구 삼출물이 차는 양상을 보입니다.",
+              "4번": "CMV 폐렴(CMV pneumonia)은 '부엉이 눈' 모양의 핵내 봉입체(owl's eye inclusion)를 보이는 것이 특징입니다.",
+              "5번": "크립토코쿠스 폐렴(cryptococcal pneumonia)은 협막이 뚜렷한 효모균이 관찰됩니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 6,
+        "questions": [
+          {
+            "question_number": 19,
+            "question_text": "50세 남자 환자가 수년간 서서히 진행된 신부전의 소견으로 신장 조직검사를 시행하였다. 현미경 소견에서 신사구체와 혈관에 많은 양의 pink amorphous material deposition이 관찰되었고 면역염색에서 lambda light chains 양성이었다. 이 질환의 선행 원인은?",
+            "answer": "2) Plasma cell myeloma",
+            "explanation": "신사구체와 혈관에 침착된 분홍색의 무정형 물질(pink amorphous material)은 아밀로이드(amyloid) 또는 경쇄(light chain) 침착을 시사합니다. 면역염색에서 람다 경쇄(lambda light chains)가 양성인 것은 형질세포(plasma cell)의 클론성 증식으로 인해 특정 경쇄가 과도하게 생산되고 있음을 의미합니다. 이러한 소견은 형질세포 골수종(Plasma cell myeloma) 또는 그와 관련된 질환에서 나타나는 AL 아밀로이드증 또는 경쇄 침착 질환(light chain deposition disease)을 강력히 시사합니다.",
+            "wrong_answer_explanations": {
+              "1번": "전신홍반루푸스(SLE)는 면역 복합체 침착에 의한 사구체신염을 유발합니다.",
+              "3번": "류마티스 관절염(Rheumatoid arthritis)은 만성 염증으로 인한 AA 아밀로이드증을 유발할 수 있습니다.",
+              "4번": "전신경화증(Systemic sclerosis)은 주로 혈관 변화와 섬유화를 특징으로 합니다.",
+              "5번": "알츠하이머병(Alzheimer disease)은 뇌에 Aβ 아밀로이드가 침착되는 질환입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 20,
+            "question_text": "rheumatoid arthritis 환자의 rectal biopsy에서 submucosal region에 pink amorphous material의 침착이 보이고 Congo red stain에서 green birefringence가 관찰된다. 이 물질의 성분은?",
+            "answer": "3) amyloid-associated protein",
+            "explanation": "Congo red 염색에서 편광 현미경 하에 사과녹색 복굴절(apple-green birefringence)을 보이는 것은 아밀로이드(amyloid) 침착의 확진 소견입니다. 류마티스 관절염과 같은 만성 염증성 질환에 동반되는 전신성 아밀로이드증은 혈청 아밀로이드 A (serum amyloid A, SAA)라는 급성기 반응 단백질로부터 유래한 아밀로이드 연관 단백질(amyloid-associated protein, AA protein)이 침착되어 발생합니다. 이를 AA 아밀로이드증이라고 합니다.",
+            "wrong_answer_explanations": {
+              "1번": "경쇄(Light chains)는 형질세포 질환에서 유래하며 AL 아밀로이드증을 일으킵니다.",
+              "2번": "트랜스티레틴(Transthyretin)은 노인성 전신 아밀로이드증이나 가족성 아밀로이드 다발신경병증의 원인 물질입니다.",
+              "4번": "베타-2-마이크로글로불린(Beta-2-microglobulin)은 장기간 혈액투석을 받는 환자에서 관절에 침착되어 아밀로이드증을 유발합니다.",
+              "5번": "베타-아밀로이드 단백질(Beta-amyloid protein)은 알츠하이머병에서 뇌에 침착됩니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 21,
+            "question_text": "Xenobiotic metabolism 중 그 특성이 다른 하나는?",
+            "answer": "2) Oxidation",
+            "explanation": "생체이물(Xenobiotics) 대사는 1단계(Phase I)와 2단계(Phase II) 반응으로 나뉩니다. 1단계 반응은 주로 시토크롬 P-450(cytochrome P-450) 효소계에 의해 산화(oxidation), 환원, 가수분해 등을 통해 극성 작용기를 도입하는 과정입니다. 2단계 반응은 1단계 반응의 산물에 내인성 물질(글루쿠론산, 황산 등)을 결합(conjugation)시켜 수용성을 높여 배설을 용이하게 하는 과정입니다. 산화(Oxidation)는 1단계 반응이며, 글루쿠론산화(Glucuronidation), 메틸화(Methylation), 황산화(Sulfation), 포합(Conjugation)은 모두 2단계 반응에 해당합니다.",
+            "wrong_answer_explanations": {
+              "1번": "글루쿠론산화(Glucuronidation)는 2단계 포합 반응입니다.",
+              "3번": "메틸화(Methylation)는 2단계 포합 반응입니다.",
+              "4번": "황산화(Sulfation)는 2단계 포합 반응입니다.",
+              "5번": "포합(Conjugation)은 2단계 반응을 총칭하는 용어입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 22,
+            "question_text": "Ionizing radiation에 sensitive organ이 아닌 것은?",
+            "answer": "5) Uterus",
+            "explanation": "전리 방사선(ionizing radiation)은 세포 분열이 활발한 조직에 더 큰 손상을 줍니다. 고환(Testis), 골수(Bone marrow), 림프 조직(Lymphoid tissue), 위장관 점막(Mucosa of gastrointestinal tract) 등은 세포 교체가 매우 빠른 조직으로 방사선에 매우 민감합니다. 반면, 자궁(Uterus)은 주로 분열하지 않는 근육세포로 구성되어 있어 상대적으로 방사선에 대한 민감도가 낮습니다.",
+            "wrong_answer_explanations": {
+              "1번": "고환(Testis)의 생식세포는 분열이 매우 활발하여 방사선에 매우 민감합니다.",
+              "2번": "골수(Bone marrow)는 지속적으로 혈액세포를 만들어내는 곳으로 방사선에 매우 민감합니다.",
+              "3번": "림프 조직(Lymphoid tissue)의 림프구는 분열하지 않는 상태에서도 방사선에 매우 민감한 세포입니다.",
+              "4번": "위장관 점막(Mucosa of gastrointestinal tract)은 세포 교체가 빨라 방사선에 민감합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 7,
+        "questions": [
+          {
+            "question_number": 23,
+            "question_text": "다음 사진과 관련된 설명과 관련이 적은 것은?",
+            "answer": "3) Albumin deprivation으로 인한 증상이 가장 늦게 나타난다",
+            "explanation": "사진은 복부 팽만(부종)과 피부 병변을 보이는 아이로, 단백질 결핍이 주된 원인인 콰시오커(Kwashiorkor)를 나타냅니다. 콰시오커의 핵심 병태생리는 단백질 결핍으로 인한 알부민(albumin) 합성 저하이며, 이로 인한 저알부민혈증은 혈장 삼투압을 감소시켜 전신 부종(generalized edema)을 유발합니다. 이 부종은 콰시오커의 가장 특징적이고 초기에 나타나는 증상 중 하나이므로, 가장 늦게 나타난다는 설명은 틀렸습니다.",
+            "wrong_answer_explanations": {
+              "1번": "콰시오커는 심각한 영양실조(severe malnutrition)의 한 형태입니다.",
+              "2번": "칼로리 섭취는 비교적 유지되면서 단백질 섭취가 극심하게 부족할 때 발생합니다.",
+              "4번": "단백소실성 장병증이나 광범위한 화상 등 체내 단백질이 대량으로 소실되는 경우에도 유사한 상태가 발생할 수 있습니다.",
+              "5번": "피부의 색소 변화(과다/저하), 탈모, 모발 색 변화 등의 피부 및 모발 이상이 흔하게 동반됩니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 8,
+        "questions": [
+          {
+            "question_number": 24,
+            "question_text": "65세 남자가 4개월 전부터 시작한 기침 및 쇠약감을 주소로 내원하였다. 폐 CT에서 main bronchus 근처에서 생긴 종양이 발견되었다. 폐절제술을 통해 확인된 육안 및 조직소견이다. 가장 관련성이 높은 위험인자는?",
+            "answer": "2) Smoking",
+            "explanation": "사진은 폐 중심부(main bronchus 근처)에 발생한 종괴와 현미경적으로 각질(keratin)을 형성하는 편평세포암(squamous cell carcinoma) 소견을 보입니다. 폐의 중심부에 발생하는 편평세포암과 소세포암은 흡연(Smoking)과 가장 강력한 인과관계가 있는 폐암 종류입니다.",
+            "wrong_answer_explanations": {
+              "1번": "석면(Asbestos)은 주로 악성 중피종(malignant mesothelioma) 및 폐 선암의 위험을 높입니다.",
+              "3번": "알코올(Alcohol)은 폐암의 직접적인 주요 위험인자는 아닙니다.",
+              "4번": "라돈(Radon)은 폐암의 위험인자이지만, 흡연만큼 강력하고 흔한 원인은 아닙니다.",
+              "5번": "니코틴(Nicotine)은 담배의 중독성 물질이지만, 발암 자체는 담배 연기 속의 다른 여러 발암물질에 의해 일어납니다. 따라서 흡연이 더 포괄적이고 정확한 위험인자입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 25,
+            "question_text": "Xenobiotics에 관련된 설명으로 틀린 것은?",
+            "answer": "5) Therapeutic drugs의 xenobiotic metabolism은 주로 phase I reaction을 통해 이루어지며, 특히catalase의 활성도가 중요하다",
+            "explanation": "치료 약물의 대사는 주로 1단계(phase I) 반응을 통해 이루어지는 것은 맞지만, 1단계 반응의 핵심 효소는 시토크롬 P-450(cytochrome P-450)입니다. 카탈라아제(Catalase)는 과산화수소를 분해하는 효소로, 생체이물 대사와는 직접적인 관련이 적습니다.",
+            "wrong_answer_explanations": {
+              "1번": "시토크롬 P-450은 1단계 생체이물 대사의 핵심 효소이며, 주로 간세포의 소포체에 존재합니다.",
+              "2번": "생체이물 대사 과정에서 생성되는 반응성 대사산물(reactive metabolites)은 DNA, 단백질 등에 손상을 주어 세포 독성이나 발암성을 나타낼 수 있습니다.",
+              "3번": "영양 상태나 호르몬 상태는 생체이물 대사 효소의 발현 및 활성도에 영향을 줄 수 있습니다.",
+              "4": "생체이물 대사 효소의 활성도는 유전적 다형성(인종), 성별, 연령에 따라 개인차가 큽니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 26,
+            "question_text": "소아의 lead poisoning에 대한 설명으로 틀린 것은?",
+            "answer": "1) 성인에 비해 흡수율은 낮지만, intestine mucosa를 통한 흡수율은 훨씬 높다",
+            "explanation": "소아는 성인에 비해 납(lead)의 위장관 흡수율이 훨씬 높습니다 (성인 ~15%, 소아 ~50%). 이로 인해 같은 양에 노출되더라도 소아에서 더 심각한 독성을 나타낼 수 있습니다. 따라서 흡수율이 낮다는 설명은 틀렸습니다.",
+            "wrong_answer_explanations": {
+              "2번": "납은 단백질의 sulfhydryl group에 강하게 결합하여 효소 기능을 저해하고, 2가 양이온이므로 칼슘 대사를 방해하여 뼈에 축적되고 신경계 독성을 유발합니다.",
+              "3번": "소아는 혈액-뇌 장벽(Blood-Brain Barrier)이 미성숙하여 납이 뇌로 쉽게 통과하여 심각한 신경 독성을 일으킵니다.",
+              "4번": "뇌병증(Encephalopathy), 정신 지체 등 중추신경계 손상은 성인보다 소아에서 훨씬 흔하고 심각하게 발생합니다.",
+              "5번": "납 중독은 용혈성 빈혈(hemolytic anemia)과 같은 혈액학적 이상을 흔히 동반합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 9,
+        "questions": [
+          {
+            "question_number": 27,
+            "question_text": "다음 사진에 해당하는 설명과 관련이 적은 것은?",
+            "answer": "4) Oral contraceptive 복용하는 환자에서 더 흔하게 발생한다",
+            "explanation": "사진은 알코올성 간질환의 진행 과정을 보여줍니다 (지방간 → 알코올성 간염 → 간경변). 경구 피임약(Oral contraceptive) 복용은 알코올성 간질환과 직접적인 관련이 없으며, 드물게 간선종(hepatic adenoma)이나 혈전증과 같은 다른 간 문제를 유발할 수 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "알코올은 간세포에 직접적인 독성을 나타내어 지방 대사 이상 등을 유발합니다.",
+              "2번": "초기 변화는 간세포 내에 지방이 축적되는 지방간(Fatty liver)입니다.",
+              "3번": "지방간이 지속되고 염증이 동반되면 간세포 괴사(hepatocyte necrosis)와 간 기능 저하를 특징으로 하는 알코올성 간염으로 진행할 수 있습니다.",
+              "5번": "만성적인 염증과 간세포의 재생이 반복되면서 섬유화가 진행되어 비가역적인 간경변(cirrhosis)으로 이어집니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 28,
+            "question_text": "그림과 같은 소견과 관련된 중금속은?",
+            "answer": "1) Lead",
+            "explanation": "그림은 납 중독의 특징적인 소견들을 보여줍니다. 잇몸의 푸른 선(Burton's line), 뼈의 성장판에 납이 침착되어 보이는 방사선 소견(lead lines), 그리고 적혈구의 호염기성 반점(basophilic stippling)은 모두 납 중독에서 관찰될 수 있는 대표적인 징후입니다.",
+            "wrong_answer_explanations": {
+              "2번": "니켈(Nickel)은 주로 접촉성 피부염이나 흡입 시 폐암을 유발할 수 있습니다.",
+              "3번": "수은(Mercury)은 주로 신경계 독성(미나마타병)과 신장 독성을 유발합니다.",
+              "4번": "비소(Arsenic)는 피부의 색소침착 및 각화증, 여러 장기의 암을 유발할 수 있습니다.",
+              "5번": "카드뮴(Cadmium)은 주로 폐질환과 신장 손상, 골연화증(이타이이타이병)을 유발합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 29,
+            "question_text": "다음은 종양 발생에 관여하는 한 pathway의 그림과, 그리고 대장에 발생한 병변에 대한 사진이다. 설명 중 옳은 것은?",
+            "answer": "4) 오른쪽 대장 내시경 소견은 APC 유전자의 germline mutation과 깊은 연관이 있다",
+            "explanation": "왼쪽 그림은 Wnt 신호전달경로를 보여주며, 이 경로의 핵심 조절인자가 APC(Adenomatous Polyposis Coli)라는 종양억제유전자입니다. 오른쪽 사진은 대장에 수많은 용종이 발생한 가족성 선종성 용종증(Familial Adenomatous Polyposis, FAP)의 내시경 소견으로, 이는 APC 유전자의 생식세포 돌연변이(germline mutation)에 의해 발생합니다.",
+            "wrong_answer_explanations": {
+              "1번": "해당 pathway에는 종양억제유전자(APC)와 종양유전자(β-catenin)가 모두 관여합니다.",
+              "2번": "Wnt/APC 경로는 대장암 발생에 가장 중요하게 관여하며, 폐암과는 관련성이 적습니다.",
+              "3번": "오른쪽 소견은 APC 유전자의 germline mutation에 의한 것이며, β-catenin의 체세포 돌연변이(somatic mutation)는 산발성 대장암의 일부에서 발견됩니다.",
+              "5번": "β-catenin의 germline mutation은 매우 드물며, FAP의 원인이 아닙니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 10,
+        "questions": [
+          {
+            "question_number": 30,
+            "question_text": "다음 중 oncogene은?",
+            "answer": "5) ALK",
+            "explanation": "종양유전자(Oncogene)는 정상 세포의 성장과 분화를 촉진하는 유전자(proto-oncogene)가 돌연변이나 과발현으로 인해 비정상적으로 활성화된 것입니다. ALK(Anaplastic Lymphoma Kinase)는 receptor tyrosine kinase로, 유전자 재배열(rearrangement)을 통해 지속적으로 활성화되어 폐암, 림프종 등에서 종양유전자로 작용합니다. 나머지 보기들은 모두 종양억제유전자(tumor suppressor gene)입니다.",
+            "wrong_answer_explanations": {
+              "1번": "PTEN은 PI3K/AKT 신호전달을 억제하는 종양억제유전자입니다.",
+              "2번": "RB는 세포주기 G1/S 이행을 조절하는 대표적인 종양억제유전자입니다.",
+              "3번": "CDKN2A는 p16과 p14ARF 단백질을 코딩하여 세포주기를 억제하는 종양억제유전자입니다.",
+              "4번": "APC는 Wnt 신호전달을 억제하는 종양억제유전자입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 31,
+            "question_text": "다음 그림에 대한 설명 중 옳은 것은?",
+            "answer": "1) 해당 fusion gene에 의해서 발생한 chronic myeloid leukemia는 tyrosine kinase inhibitor를 표적 치료제로 사용하며, 이는 oncogene addiction을 설명할 수 있는 좋은 예시이다.",
+            "explanation": "그림은 9번과 22번 염색체의 전좌(translocation)로 인해 BCR-ABL 융합 유전자(fusion gene)가 생성되어 만성 골수성 백혈병(Chronic Myeloid Leukemia, CML)이 발생하는 과정을 보여줍니다. BCR-ABL은 비정상적인 티로신 키나아제(tyrosine kinase) 활성을 가져 세포를 무한 증식시킵니다. 이마티닙(Imatinib)과 같은 티로신 키나아제 억제제(TKI)는 이 비정상 단백질만 선택적으로 억제하여 탁월한 치료 효과를 보입니다. 이는 암세포가 특정 종양유전자의 활성에 중독(addiction)되어 생존하는 'oncogene addiction' 현상과 이를 표적하는 치료의 대표적인 예입니다.",
+            "wrong_answer_explanations": {
+              "2번": "ABL은 non-receptor tyrosine kinase입니다.",
+              "3번": "BCR은 receptor tyrosine kinase가 아닙니다.",
+              "4번": "유전자 융합은 일반적으로 각 유전자의 특정 부위(예: BCR의 특정 exon과 ABL의 tyrosine kinase domain)가 연결되어 일어납니다. 텔로미어(telomere) 부분과는 관련이 없습니다.",
+              "5번": "CML에서 TKI를 이용한 표적 치료는 매우 효과적이어서 대부분의 환자가 장기적인 관해를 유지하며 예후가 매우 좋습니다. 재발이 흔하고 예후가 불량하다는 설명은 틀렸습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 12,
+        "questions": [
+          {
+            "question_number": 32,
+            "question_text": "Cell cycle regulation에 관한 그림이다. 옳은 것은?",
+            "answer": "5) 2에 관여하는 중요한 CDK inhibitor가 p16이다.",
+            "explanation": "그림에서 2번은 Cyclin D-CDK4/6 복합체의 활성을 억제하는 CDK 억제제(inhibitor)들을 가리킵니다. 이 복합체는 세포주기의 G1기 진행에 중요하며, 이를 억제하는 대표적인 억제제는 INK4 family(p16, p15, p18, p19)입니다. 따라서 p16(CDKN2A)이 2번에 관여하는 중요한 CDK inhibitor라는 설명이 맞습니다.",
+            "wrong_answer_explanations": {
+              "1번": "세포주기에서 G1/S 확인점(checkpoint)은 DNA 복제를 시작할지 결정하는 매우 중요한 지점으로, G2/M 확인점보다 일반적으로 더 중요하게 여겨집니다.",
+              "2번": "DNA 복제(replication)는 S기(S phase)에 일어납니다. G2기는 복제가 끝난 후 세포 분열을 준비하는 시기입니다.",
+              "3번": "그림에서 1번은 Cyclin D-CDK4/6 복합체에 의해 RB 단백질이 인산화되어 E2F가 활성화되는 과정을 나타냅니다. 이 과정에 관여하는 중요한 유전자는 RB(TP53)이며, SMAD4는 TGF-β 신호 전달에 관여합니다.",
+              "4번": "1번에 관여하는 중요한 유전자는 RB입니다. TP53은 DNA 손상 시 p21을 활성화하여 세포주기를 멈추는 역할을 합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 33,
+            "question_text": "다음 그림은 receptor tyrosine kinase와 downstream components에 대한 그림이다. 설명 중 옳은 것은?",
+            "answer": "4) RAS family gene의 하나인 KRAS와 receptor tyrosine kinase의 하나인 EGFR 유전자의 동시 돌연변이 (co-mutation)은 폐암에서 매우 드물게 관찰된다.",
+            "explanation": "그림은 성장인자 수용체(receptor tyrosine kinase, RTK) 신호가 RAS-MAPK 경로와 PI3K-AKT 경로를 통해 세포 성장으로 이어지는 과정을 보여줍니다. EGFR(RTK)과 KRAS는 동일한 신호전달경로의 상하위에 위치합니다. 둘 중 하나에 활성 돌연변이가 생기면 경로 전체가 활성화되므로, 암세포가 두 유전자에 동시에 돌연변이를 가질 필요가 없습니다. 따라서 EGFR과 KRAS의 동시 돌연변이는 상호 배타적(mutually exclusive)이며 매우 드물게 관찰됩니다.",
+            "wrong_answer_explanations": {
+              "1번": "폐암 발생의 가장 흔한 원인은 흡연이며, EGFR 증폭은 폐 선암의 일부, 특히 비흡연 여성에서 발견되는 중요한 돌연변이지만 가장 흔한 원인은 아닙니다.",
+              "2번": "HER2 (ERBB2)는 EGFR family에 속하는 대표적인 receptor tyrosine kinase입니다.",
+              "3번": "PTEN은 PI3K 신호전달을 억제하는 종양억제유전자(tumor suppressor gene)입니다. PTEN 기능이 소실되면 신호가 과도하게 활성화됩니다.",
+              "5번": "성장인자가 수용체에 결합하면 수용체들이 서로 이합체화(dimerization)를 형성하는 것이 신호 전달의 첫 단계이며, 이는 매우 흔하고 중요한 과정입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 13,
+        "questions": [
+          {
+            "question_number": 34,
+            "question_text": "다음은 종양의 발생과 진행 과정을 나타낸 모식도이다. 이 그림에 대한 옳은 해석은?",
+            "answer": "5) 종양의 발생과 진행과정을 거쳐 획득된 genetically heterogeneous subclone은 치료 저항성의 기전에 관여한다.",
+            "explanation": "그림은 단일 세포에서 시작된 종양이 유전적 변이를 축적하면서 다양한 유전적 특성을 가진 아클론(subclone)들로 구성된 이질적인(heterogeneous) 집단으로 진화하는 과정을 보여줍니다. 이러한 종양 내 이질성은 특정 치료에 반응하지 않는 저항성 아클론이 존재하게 하여, 치료 후 재발이나 치료 실패의 중요한 원인이 됩니다.",
+            "wrong_answer_explanations": {
+              "1번": "종양 발생은 발암물질 등에 의한 유전적 변이(initiating mutation)의 축적이 핵심적인 역할을 합니다.",
+              "2번": "종양 발생의 초기 단계 세포에서 모든 유전적 변이가 이미 발생한 상태가 아니라, 시간이 지나면서 점진적으로 변이가 축적됩니다.",
+              "3번": "종양의 성장에 직접적으로 기여하는 변이를 운전자 돌연변이(driver mutation)라고 하며, 성장에 직접 기여하지 않는 변이를 동승자 돌연변이(passenger mutation)라고 합니다. 동승자 돌연변이는 종양 획득에는 큰 기여를 하지 않습니다.",
+              "4번": "최초의 돌연변이(Initiating mutation)는 대부분 운전자 돌연변이(driver mutation)입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 14,
+        "questions": [
+          {
+            "question_number": 35,
+            "question_text": "다음은 immune checkpoint와 immune checkpoint blockade에 관한 그림이다. 설명 중 옳은 것은?",
+            "answer": "2) Antigen cross presentation이 dendritic cell과 cytotoxic T cell interaction에 관여한다.",
+            "explanation": "항원제시세포(dendritic cell)가 외부 항원(예: 종양 항원)을 섭취하여 MHC class I을 통해 세포독성 T세포(CTL, CD8+ T cell)에게 제시하는 과정을 항원 교차제시(antigen cross-presentation)라고 합니다. 이는 CTL이 종양세포를 인식하고 공격하는 데 필수적인 과정으로, 그림 A의 림프절에서 일어나는 초기 활성화 단계에 해당합니다.",
+            "wrong_answer_explanations": {
+              "1번": "면역관문억제제(immune checkpoint blockade)는 T세포의 기능을 활성화시키는 것이 핵심 기전이며, B세포나 항체는 직접적인 작용 대상이 아닙니다.",
+              "3번": "세포독성 T세포(CTL)는 MHC class I 분자와 결합된 항원을 인식합니다. MHC class II는 보조 T세포(helper T cell)가 인식합니다.",
+              "4번": "PD-1/PD-L1 억제제와 같은 면역관문억제제는 일부 암에서 장기적인 치료 반응을 유도하여 획기적인 치료법으로 평가받고 있습니다.",
+              "5번": "DNA 부정합 수리 결핍(DNA mismatch repair deficiency)이 있는 종양은 돌연변이가 많아 새로운 항원(neoantigen)을 많이 생성하므로, 면역관문억제제에 대한 반응성이 매우 좋은 것으로 알려져 있습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 36,
+            "question_text": "TP53 유전자에 대한 설명 중 옳은 것은?",
+            "answer": "4) Germline mutation이 있는 경우 Li-Fraumeni syndrome (LFS) 이라 불린다.",
+            "explanation": "TP53 유전자의 생식세포 돌연변이(germline mutation)를 가지고 태어나는 경우, 젊은 나이에 다양한 종류의 암(육종, 유방암, 뇌종양 등)이 발생하는 유전성 암 증후군인 리-프라우메니 증후군(Li-Fraumeni syndrome)이 발생합니다.",
+            "wrong_answer_explanations": {
+              "1번": "TP53은 '게놈의 수호자'라 불리는 가장 중요한 종양억제유전자 중 하나로, 대부분의 인간 악성 종양에서 돌연변이가 발견됩니다.",
+              "2번": "MYC은 세포 증식을 촉진하는 대표적인 종양유전자(oncogene)로, TP53과는 반대 역할을 합니다.",
+              "3번": "TP53 기능의 소실은 세포사멸(apoptosis)을 회피하게 만들어 항암 치료에 대한 저항성을 유발하는 중요한 기전입니다.",
+              "5번": "TP53은 DNA 손상을 감지하여 세포주기 조절(cell cycle regulation), DNA 수리(DNA repair), 세포사멸(apoptosis)을 유도하는 핵심적인 역할을 모두 수행합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 15,
+        "questions": [
+          {
+            "question_number": 37,
+            "question_text": "다음은 종양 조직과, 종양 조직에서 관찰된 혈관을 보여주는 병리 사진이다. 이제 대한 설명 중 옳은 것은?",
+            "answer": "1) VEGF가 혈관생성 (angiogenesis)에 관여하였을 것이다.",
+            "explanation": "종양이 일정 크기 이상으로 자라기 위해서는 산소와 영양분을 공급받기 위한 새로운 혈관 생성이 필수적입니다. 이 과정을 혈관신생(angiogenesis)이라고 하며, 종양세포가 분비하는 혈관내피성장인자(Vascular Endothelial Growth Factor, VEGF)가 가장 중요한 역할을 합니다. 사진의 종양 내 혈관들은 이러한 과정에 의해 생성된 것입니다.",
+            "wrong_answer_explanations": {
+              "2번": "종양 혈관은 구조적으로 비정상적이고, 누출이 심하며(leaky), 구불구불한 형태를 보여 정상 혈관과 조직학적, 기능적으로 다릅니다.",
+              "3번": "혈관생성은 종양세포와 주변 기질세포 간의 상호작용에 의해 일어나지만, 이를 유도하는 신호는 RAS, MYC과 같은 운전자 돌연변이(driver mutation)에 의해 활성화되는 경우가 많습니다.",
+              "4번": "VEGF 억제제(bevacizumab)는 혈관생성을 억제하여 종양 성장을 늦추는 효과적인 표적치료제이지만, 단독 사용으로 완치에 이르는 경우는 드물며 주로 다른 항암제와 병용하여 생존 기간을 연장하는 데 사용됩니다.",
+              "5번": "HIF1α(Hypoxia-inducible factor 1-alpha)는 저산소 상태에서 안정화되어 VEGF의 전사를 촉진하는 핵심 인자입니다. 따라서 VEGF 생성에 관여합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 38,
+            "question_text": "Apoptosis에 관한 그림이다. 옳은 것은?",
+            "answer": "5) BCL2 유전자의 기능이 항진되는 경우, apoptosis를 방해하는 (inhibition) 역할을 한다.",
+            "explanation": "그림은 세포사멸(Apoptosis)의 내인성 경로(Mitochondrial pathway)와 외인성 경로(Death receptor pathway)를 보여줍니다. 내인성 경로에서 BCL2는 대표적인 항세포사멸(anti-apoptotic) 단백질로, 미토콘드리아 막을 안정화시켜 사이토크롬 C(cytochrome c)의 방출을 막음으로써 세포사멸을 억제합니다. 따라서 BCL2 기능이 항진되면(예: 여포성 림프종에서의 t(14;18) 전좌), 세포사멸이 억제되어 암이 발생합니다.",
+            "wrong_answer_explanations": {
+              "1번": "종양 발생에서는 세포사멸을 회피하는 것이 중요하므로, 내인성 경로(intrinsic pathway)의 이상이 더 중요하게 관여하는 경우가 많습니다.",
+              "2번": "대부분의 종양에서는 세포사멸 기전에 결함이 생겨 세포사멸이 억제됩니다.",
+              "3번": "사이토크롬 C(Cytochrome C)는 미토콘드리아(Mitochondria) 내막에 존재하다가, 세포사멸 신호를 받으면 세포질로 방출됩니다.",
+              "4번": "세포사멸은 염증 반응을 유발하지 않고 조용히 세포가 제거되는 과정입니다. 괴사(necrosis)가 염증을 동반합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 16,
+        "questions": [
+          {
+            "question_number": 39,
+            "question_text": "다음 그림에 대한 설명으로 옳은 것은?",
+            "answer": "2) mutant-IDH는 oncogene이므로 치료제의 개발이 tumor suppressor gene보다는 용이할 것으로 판단된다.",
+            "explanation": "그림은 IDH 유전자 돌연변이(mutant IDH)가 대사산물인 2-HG(oncometabolite)를 생성하여 후성유전학적 변화를 통해 암을 유발하는 과정을 보여줍니다. 돌연변이 IDH는 정상 기능 소실이 아닌 새로운 기능 획득(gain-of-function)을 통해 암을 유발하므로 종양유전자(oncogene)로 작용합니다. 종양유전자는 비정상적인 활성을 억제하는 표적치료제 개발이 용이한 반면, 기능이 소실된 종양억제유전자는 기능을 복구하는 약물 개발이 훨씬 어렵습니다.",
+            "wrong_answer_explanations": {
+              "1번": "캘빈 회로(Calvin cycle)는 식물의 광합성 과정입니다. IDH는 세포 호흡의 TCA 회로에 관여하는 효소입니다.",
+              "3번": "Mutant IDH는 대사 효소(metabolic enzyme)이며, non-receptor tyrosine kinase가 아닙니다.",
+              "4번": "암세포의 대사 변화(metabolic alteration)는 최근에 중요한 '암의 특징(cancer hallmark)' 중 하나로 인식되고 있습니다.",
+              "5번": "Mutant IDH는 특히 교모세포종(glioblastoma)과 같은 뇌종양과 급성 골수성 백혈병(AML)의 발생에 중요하게 관여하는 것으로 알려져 있습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 40,
+            "question_text": "Epithelial-mesenchymal transition (EMT)에 대한 설명 중 옳은 것은?",
+            "answer": "2) SNAIL, TWIST가 EMT 과정에 중요하게 관여한다.",
+            "explanation": "상피-중간엽 이행(Epithelial-mesenchymal transition, EMT)은 상피세포가 세포 간 부착을 잃고 이동성을 갖는 중간엽세포의 특성을 획득하는 과정으로, 암의 침윤과 전이에 핵심적인 역할을 합니다. SNAIL과 TWIST는 E-cadherin과 같은 상피세포 표지자의 발현을 억제하고 중간엽세포 표지자의 발현을 촉진하는 핵심적인 전사조절인자(transcription factor)입니다.",
+            "wrong_answer_explanations": {
+              "1번": "EMT는 상피세포로 구성된 암종(carcinoma)이 침윤하고 전이할 때 일어나는 현상입니다. 육종(sarcoma)은 이미 중간엽세포에서 기원한 암입니다.",
+              "3번": "Receptor tyrosine kinase(예: TGF-β 수용체) 신호가 EMT를 유발할 수 있지만, EMT 과정 자체의 핵심 조절자는 SNAIL, TWIST와 같은 전사조절인자입니다.",
+              "4번": "MYC은 세포 증식을 조절하는 전사인자이며, EMT의 핵심 조절자는 아닙니다.",
+              "5번": "RAS는 세포 내 신호전달 단백질이며, EMT 과정에 직접적으로 관여하는 핵심 분자는 아닙니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 17,
+        "questions": [
+          {
+            "question_number": 41,
+            "question_text": "종의 진화와 종양의 진행 과정을 비교한 그림이다. 설명 중 옳은 것은?",
+            "answer": "3) 종양의 진행이 종의 진화 모형을 따른다는 위의 가설은, multi-region sequencing (next-generation sequencing)을 통해 검증할 수 있다.",
+            "explanation": "그림은 다윈의 진화론(종의 분화)과 암의 진화(아클론의 분화)가 유사한 패턴을 보인다는 것을 나타냅니다. 이러한 종양 내 이질성(intratumor heterogeneity)과 아클론 진화 가설은 종양의 여러 부위에서 조직을 채취하여 차세대 염기서열 분석(NGS)을 시행하는 다부위 시퀀싱(multi-region sequencing)을 통해 각 부위의 유전적 차이를 확인함으로써 검증할 수 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "폐암을 포함한 대부분의 고형암은 이러한 유전적 진화 과정을 통해 발생하고 진행합니다.",
+              "2번": "종의 진화는 수백만 년이 걸리지만, 종양의 진화는 한 개체 내에서 수년에서 수십 년에 걸쳐 일어납니다. 소요되는 시간의 규모가 다릅니다.",
+              "4번": "종양의 진행 과정이 진화론적 모델을 따른다는 가설은 피터 노웰(Peter Nowell)이 1976년에 제시했습니다. 찰스 다윈은 종의 진화를 설명했습니다.",
+              "5번": "그림에서 보이듯, 종양의 아클론들은 최초의 돌연변이(initiating mutation, ubiquitous)를 공통적으로 공유하며, 이후 추가적인 변이를 각자 획득하며 분화합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 42,
+            "question_text": "다음은 흑색종 환자의 치료 이전 (A), 치료 (B), 치료하며 시간이 어느 정도 경과한 후 재발한 (C) 사진이다. 설명 중 옳은 것은?",
+            "answer": "3) 흑색종에 관여한 주요한 driver mutation으로 BRAF 유전자의 돌연변이가 있었을 것으로 판단된다.",
+            "explanation": "사진은 치료에 초기에 뛰어난 반응(B)을 보이다가 결국 저항성을 획득하여 재발(C)하는 과정을 보여줍니다. 이는 표적 치료의 전형적인 반응 양상입니다. 흑색종(melanoma)에서 가장 흔한 운전자 돌연변이(driver mutation)는 BRAF 유전자의 V600E 돌연변이이며, 이에 대한 표적치료제(BRAF 억제제)가 초기에 매우 효과적입니다. 따라서 이 환자는 BRAF 돌연변이가 있었고 BRAF 억제제 치료를 받았을 가능성이 높습니다.",
+            "wrong_answer_explanations": {
+              "1번": "사진 (B)에서 종양이 현저히 줄어든 것으로 보아, 치료에 대한 반응성이 초기에 매우 좋았음을 알 수 있습니다.",
+              "2번": "고식적인 항암치료제는 이처럼 빠르고 극적인 반응을 보이는 경우가 드뭅니다. 이는 BRAF 억제제와 같은 표적 치료에 대한 반응일 가능성이 높습니다.",
+              "4번": "표적 치료에 대한 획득 저항성(acquired resistance)은 흑색종을 포함한 많은 암에서 흔하게 관찰되는 문제입니다.",
+              "5번": "치료 저항성은 치료 과정에서 새로운 돌연변이가 발생하거나 기존에 소수로 존재하던 저항성 클론이 선택적으로 증식하여 발생하는 획득 저항성이 주된 원인이며, 생식세포 돌연변이(germline mutation)와는 관련이 적습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 18,
+        "questions": [
+          {
+            "question_number": 43,
+            "question_text": "다음 중 tumor suppressor gene은?",
+            "answer": "3) STK11",
+            "explanation": "종양억제유전자(Tumor suppressor gene)는 세포 성장을 억제하거나 DNA 손상을 복구하는 등의 기능을 통해 암 발생을 막는 유전자입니다. STK11 (LKB1)은 세포 대사와 성장을 조절하는 종양억제유전자로, 이 유전자의 기능 소실은 폐암이나 포이츠-예거 증후군(Peutz-Jeghers syndrome)과 관련이 있습니다. 나머지 보기들은 모두 종양유전자(oncogene)입니다.",
+            "wrong_answer_explanations": {
+              "1번": "ERBB1 (EGFR)은 receptor tyrosine kinase로, 돌연변이를 통해 활성화되어 종양유전자로 작용합니다.",
+              "2번": "ERBB2 (HER2)는 receptor tyrosine kinase로, 유전자 증폭을 통해 활성화되어 종양유전자로 작용합니다.",
+              "4번": "JAK2는 non-receptor tyrosine kinase로, 점돌연변이를 통해 활성화되어 골수증식성종양에서 종양유전자로 작용합니다.",
+              "5번": "BRAF는 MAP kinase 경로의 일원으로, 점돌연변이를 통해 활성화되어 흑색종 등에서 종양유전자로 작용합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 44,
+            "question_text": "다음은 미생물의 체내 침입 경로와 방어기전에 대한 설명이다. 옳은 것을 한 개 고르시오",
+            "answer": "3) S. aureus 감염은 주로 손상된 피부상피를 통해 이루어진다.",
+            "explanation": "황색포도알균(Staphylococcus aureus)은 정상 피부에 상재하는 균이지만, 피부 장벽이 손상된 부위(상처, 화상 등)를 통해 침입하여 감염을 일으키는 경우가 많습니다. 건강한 피부는 효과적인 방어 장벽 역할을 합니다.",
+            "wrong_answer_explanations": {
+              "1번": "말라리아는 모기를 매개로 원충이 혈액으로 직접 침입하는 감염병이며, 호흡기 경로와는 관련이 없습니다.",
+              "2번": "인플루엔자 바이러스는 호흡기 상피세포에 부착하고 침투하여 감염을 일으키며, 폐포 대식세포의 탐식 기능 저항과는 직접적인 관련이 적습니다.",
+              "4번": "광범위 항생제 사용으로 장내 세균총이 파괴되면 클로스트리듐 디피실리(Clostridium difficile)와 같은 항생제 내성균이 과증식하여 위막성 대장염을 유발할 수 있습니다. 로타바이러스는 항생제 사용과 무관한 바이러스성 장염의 원인입니다.",
+              "5번": "비브리오 콜레라균은 장상피에 부착하여 콜레라 독소를 분비함으로써 심한 설사를 유발하지만, 상피를 침윤하지는 않습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 45,
+            "question_text": "다음 중 수직 감염에 대한 설명 중 옳은 것을 한 개 고르시오.",
+            "answer": "4) Postnatal transmission in maternal milk can transmit cytomegalovirus (CMV), human immunodeficiency virus (HIV), and hepatitis C virus (HCV).",
+            "explanation": "수직 감염은 임신 중(태반 통과), 분만 중, 또는 출생 후 모유 수유를 통해 일어날 수 있습니다. 모유를 통한 출생 후 감염(postnatal transmission)의 대표적인 병원체로 거대세포바이러스(CMV), 인간면역결핍바이러스(HIV), C형 간염 바이러스(HCV) 등이 있습니다. 이 설명은 정확합니다.",
+            "wrong_answer_explanations": {
+              "1번": "태반-태아 전파(Placental-fetal transmission)는 임신 기간 중 언제든지 일어날 수 있으며, 특히 임신 초기에 감염될 경우 태아에 더 심각한 손상을 줄 수 있습니다. 분만 중 감염과는 다릅니다.",
+              "2번": "풍진 바이러스(Rubella virus) 감염은 임신 첫 삼분기(first trimester)에 가장 위험하며, 선천성 심장 기형, 백내장, 난청 등을 유발합니다. 세번째 삼분기(third trimester) 감염은 위험도가 훨씬 낮습니다.",
+              "3번": "분만 중 전파(Transmission during birth)는 감염된 산도(birth canal)를 통과하면서 태아가 병원체에 노출되어 발생합니다. 혈관 노출이 주된 기전은 아닙니다.",
+              "5번": "보기 5번은 OCR에서 잘렸으나, 일반적으로 수직감염의 결과는 감염 시점의 태아 연령에 따라 손상의 정도와 종류가 달라진다는 내용일 것으로 추정되며, 이는 옳은 설명입니다. 하지만 4번이 명확하게 옳은 설명이므로 4번을 정답으로 선택합니다. (주어진 문제에서는 옳은 것을 '한 개' 고르라고 되어 있습니다.)"
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 23,
+                "relevance_reason": "강의자료 23페이지에서 급성 염증의 결과 중 하나로 만성 염증으로의 진행(persistent injury resulting in chronic inflammation)을 언급하고 있으며, 이는 감염이 지속되는 상황과 관련될 수 있습니다. (간접적 연관성)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 19,
+        "questions": [
+          {
+            "question_number": 46,
+            "question_text": "다음 중 위장관 독성 세균이 위장관 질환을 일으키는 기전의 연결이 옳은 것을 한 개 고르시오",
+            "answer": "2) 외독소 분비-콜레라균",
+            "explanation": "콜레라균(Vibrio cholerae)은 장 점막을 침범하지 않고, 장 내에서 강력한 외독소(exotoxin)인 콜레라 독소를 분비합니다. 이 독소가 장 상피세포의 이온 채널을 비가역적으로 활성화시켜 다량의 수분과 전해질을 장 내로 분비하게 함으로써 심한 수양성 설사를 유발합니다.",
+            "wrong_answer_explanations": {
+              "1번": "독성 대장균(예: EHEC)은 장독소(Shiga-like toxin)를 분비하지만, 이를 외독소의 한 종류로 볼 수 있습니다. 그러나 콜레라균의 기전이 더 명확하게 '외독소 분비'로 설명됩니다.",
+              "3번": "콜레라균은 장점막을 침입하지 않습니다.",
+              "4번": "이질균(Shigella)은 장점막 상피세포를 직접 침입하고 파괴하여 혈성 설사를 유발하며, 장간막 림프절 침입은 주된 기전이 아닙니다.",
+              "5번": "장티푸스균(Salmonella Typhi)은 장점막을 침입하여 장간막 림프절을 거쳐 전신으로 퍼지는 전신 감염을 일으킵니다. 장점막 파괴는 이질균에서 더 현저합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 47,
+            "question_text": "50세 남자 환자가 한 달 간의 발열과 기침을 주소로 내원하였다. 환자의 흉부 X-ray사진에서 저음영의 결절이 발견되어 조직검사를 시행하여 아래와 같은 소견을 보였다. 이 병을 가장 정확하게 진단할 수 있는 검사법을 보기에서 고르시오.",
+            "answer": "3) 균배양을 통한 균동정",
+            "explanation": "사진은 중심부의 건락성 괴사(caseous necrosis)와 주변을 둘러싼 유상피세포, 림프구, 랑한스 거대세포로 구성된 전형적인 육아종(granuloma) 소견을 보여줍니다. 이는 결핵(tuberculosis)을 강력히 시사하는 병리 소견입니다. 결핵의 확진은 조직이나 객담 등에서 결핵균(Mycobacterium tuberculosis)을 배양하여 동정하는 것입니다.",
+            "wrong_answer_explanations": {
+              "1번": "특수염색 중 acid-fast stain(항산균 염색)은 결핵균을 확인하는 데 도움이 되지만, 민감도가 낮아 음성이라고 해서 결핵을 배제할 수는 없습니다. Gram, silver, mucicarmine은 다른 종류의 미생물을 염색하는 데 사용됩니다.",
+              "2번": "면역염색은 특정 단백질 항원을 검출하는 방법으로, 결핵균 자체를 진단하는 데는 사용되지 않습니다.",
+              "4번": "PCR은 결핵균의 DNA를 검출하여 신속하게 진단할 수 있는 유용한 방법이지만, 살아있는 균의 존재를 증명하는 배양검사가 확진(gold standard) 방법입니다.",
+              "5번": "전자현미경은 바이러스나 세포 소기관을 관찰하는 데 사용되며, 세균인 결핵균 진단에는 사용되지 않습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 21,
+        "questions": [
+          {
+            "question_number": 48,
+            "question_text": "65세 여자가 한 달 간의 간헐적 질출혈을 호소하며 병원에 내원하였다. 환자의 자궁 경부에 대한 세포 조직검사 결과는 다음과 같다. 이 환자의 세포 이상 소견을 초래하는 원인으로 가장 가능성이 높은 것을 한 개 고르시오.",
+            "answer": "4) Human Papillomavirus",
+            "explanation": "사진은 자궁경부 세포진 검사(Pap smear) 소견으로, 핵이 크고 불규칙하며 농축되어 있고 핵 주변에 밝은 테(perinuclear halo)가 보이는 코일로사이트(koilocyte)가 관찰됩니다. 이는 인유두종바이러스(Human Papillomavirus, HPV) 감염의 특징적인 세포학적 소견입니다. HPV는 자궁경부 이형성증 및 자궁경부암의 가장 중요한 원인입니다.",
+            "wrong_answer_explanations": {
+              "1번": "단순포진바이러스(Herpes Simplex Virus) 감염은 다핵 거대세포와 핵 내 '간유리' 모양 변화를 보입니다.",
+              "2번": "C형 간염 바이러스(Hepatitis C virus)는 간에 감염되며 자궁경부 세포 이상과는 관련이 없습니다.",
+              "3번": "거대세포바이러스(Cytomegalovirus) 감염은 '부엉이 눈' 모양의 큰 핵내 봉입체를 특징으로 합니다.",
+              "5번": "인간 T세포 림프친화성 바이러스(HTLV-1)는 성인 T세포 백혈병/림프종을 유발합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 49,
+            "question_text": "다음은 45세 남자의 폐병변에 대한 조직 검사 소견이다. 병변의 원인균을 알아보기 위해 적절한 염색법과 염색결과의 올바른 조합을 하나 고르시오,",
+            "answer": "5) 5",
+            "explanation": "주 조직 사진은 폐포 내에 호중구와 세포 파편들이 가득 차 있는 급성 폐렴, 특히 세균성 폐렴의 소견을 보여줍니다. 이러한 세균을 관찰하기 위한 가장 기본적인 특수 염색은 그람 염색(Gram stain)입니다. 보기 5번의 그람 염색 사진은 조직 내에서 보라색으로 염색된 그람 양성 구균(Gram-positive cocci)들을 보여주고 있어, 주 조직 사진의 원인균을 확인하는 데 적절한 검사 및 결과 조합입니다.",
+            "wrong_answer_explanations": {
+              "1번": "Silver stain은 주로 진균(fungi)이나 특정 세균(예: Legionella)을 검게 염색합니다.",
+              "2번": "AFB stain(항산균 염색)은 결핵균과 같은 항산균을 붉게 염색합니다.",
+              "3번": "AFB stain(항산균 염색)에 대한 설명은 2번과 동일합니다.",
+              "4번": "Mucicarmine stain은 점액(mucin)을 붉게 염색하며, 협막을 가진 크립토코쿠스(Cryptococcus) 등을 염색하는 데 사용됩니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 131,
+                "relevance_reason": "강의자료 131페이지(p.94)는 화농성 염증(Purulent inflammation)의 예시로 세균성 농양(bacterial abscesses) 사진을 보여줍니다. 이는 다수의 호중구 침윤을 특징으로 하며, 문제의 조직 소견과 일치합니다."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 22,
+        "questions": [
+          {
+            "question_number": 50,
+            "question_text": "39세 당뇨 환자가 기침, 발열, 두통, 코막힘등을 주소로 내원하였다. 신체 검사에서 검은 괴사성 딱지가 코 안에 있었고, 조직 검사에서 다음과 같은 소견을 보였다. 진단으로 적당한 것을 고르시오.",
+            "answer": "1) Mucormycosis",
+            "explanation": "당뇨병 환자, 특히 케톤산증이 있는 환자에서 발생하는 급성 부비동염과 코의 검은 괴사성 병변은 털곰팡이증(Mucormycosis)의 전형적인 임상 양상입니다. 조직 검사 사진에서 보이는 넓고, 격벽이 없으며, 직각으로 분지하는 특징을 가진 곰팡이 균사(broad, non-septate, right-angle branching hyphae)는 털곰팡이증의 특징적인 소견입니다. 화살표가 가리키는 혈관 침범(angioinvasion) 소견 또한 이 질환의 특징입니다.",
+            "wrong_answer_explanations": {
+              "2번": "아스페르길루스증(Aspergillosis)은 균사가 가늘고, 격벽이 있으며, 예각으로 분지하는 특징을 보입니다.",
+              "3번": "방선균증(Actinomycosis)은 그람 양성 사상균으로, 유황 과립(sulfur granule)을 형성합니다.",
+              "4번": "칸디다증(Candida albicans)은 효모와 가성균사(pseudohyphae) 형태를 보입니다.",
+              "5번": "크립토코쿠스증(Cryptococcosis)은 협막을 가진 효모 형태로 관찰됩니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 23,
+        "questions": [
+          {
+            "question_number": 51,
+            "question_text": "다음은 미생물의 체내 침입과 숙주의 방어체계에 관련한 설명이다. 옳은 것을 한 개 고르시오.",
+            "answer": "2) Postnatal transmission in maternal milk can transmit cytomegalovirus (CMV), human immunodeficiency virus (HIV), and hepatitis B virus (HBV).",
+            "explanation": "모유 수유를 통한 출생 후 감염(Postnatal transmission)은 수직 감염의 한 경로입니다. 거대세포바이러스(CMV), 인간면역결핍바이러스(HIV), B형 간염 바이러스(HBV) 등은 모유를 통해 신생아에게 전파될 수 있는 대표적인 병원체들입니다. (참고: HCV도 전파 가능)",
+            "wrong_answer_explanations": {
+              "1번": "대부분의 피부 감염은 물리적 손상(physical injury)으로 인해 피부 장벽이 파괴되었을 때 시작됩니다. 화학적 손상(chemical injury)은 일반적인 경로가 아닙니다.",
+              "3번": "위장관계(GI system)의 방어기전에는 낮은 위산도(low gastric pH), 점액, 효소, 담즙, 디펜신, IgA, 정상 세균총 등이 포함됩니다. 높은 위산도(high gastric pH, 즉 낮은 산도)가 방어기전입니다.",
+              "4번": "비뇨생식기계(Urogenital tract)는 반복적인 소변 배출(flushing)과 정상 세균총이 만드는 산성 환경(acidic environment)에 의해 방어됩니다. 중성 환경(neutral environment)은 방어에 불리합니다.",
+              "5번": "5마이크론보다 작은 입자가 폐포까지 도달하여 대식세포에 의해 탐식될 수 있습니다. 15마이크론보다 작은 입자라는 표현은 너무 광범위합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 52,
+            "question_text": "46세 남자 환자가 미열과 2주 이상 지속되는 기침을 주소로 내원하여 시행한 조직 검사 소견은 다음과 같다. 병변을 진단하기 위한 염색법과 원인균이 올바르게 연결된 것을 고르시오.",
+            "answer": "3) 3",
+            "explanation": "주 조직 사진은 중심부의 건락성 괴사와 주변의 육아종성 염증을 보여주며, 이는 결핵(tuberculosis)의 전형적인 소견입니다. 결핵의 원인균인 결핵균(Mycobacterium tuberculosis)은 세포벽에 미콜산(mycolic acid)이 많아 일반적인 그람 염색에 염색되지 않고, 항산성(acid-fastness)을 띠므로 항산균 염색(Acid-Fast Bacilli, AFB stain)으로 검출해야 합니다. 보기 3번은 항산균 염색에서 붉게 염색된 막대균(결핵균)을 보여주므로, 올바른 조합입니다.",
+            "wrong_answer_explanations": {
+              "1번": "Silver stain은 진균을 염색하는 데 주로 사용됩니다.",
+              "2번": "AFB stain은 맞지만, 사진 2번은 진균(아마도 크립토코쿠스)을 염색한 것으로 보입니다.",
+              "4번": "Mucicarmine stain은 점액이나 크립토코쿠스의 협막을 염색합니다.",
+              "5번": "Gram stain은 일반 세균을 염색하는 데 사용되며, 결핵균은 잘 염색되지 않습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 24,
+        "questions": [
+          {
+            "question_number": 53,
+            "question_text": "45세 남자가 피곤하면 자주 입술 주위의 물집이 생겨서 내원하였다. 환자의 조직에서 관찰 할 수 있는 소견을 고르시오.",
+            "answer": "1) 1",
+            "explanation": "피곤할 때마다 입술 주위에 재발하는 물집은 단순포진바이러스(Herpes Simplex Virus, HSV) 감염의 전형적인 임상 양상입니다. HSV 감염의 특징적인 병리 소견은 (1) 상피세포의 풍선양 변성(ballooning degeneration), (2) 다핵 거대세포(multinucleated giant cells) 형성, (3) 핵 내에 '간유리' 모양의 봉입체(ground-glass intranuclear inclusion, Cowdry A type)입니다. 보기 1번 사진은 이러한 특징들을 모두 잘 보여주고 있습니다.",
+            "wrong_answer_explanations": {
+              "2번": "이 사진은 샘(gland) 구조의 이상을 보여주며, 바이러스 감염 소견과는 다릅니다.",
+              "3번": "이 사진은 핵이 크고 농축된 이형성 세포를 보여주며, HPV 감염에서 보이는 코일로사이트와 유사할 수 있으나 전형적인 헤르페스 감염 소견은 아닙니다.",
+              "4번": "왼쪽은 세포진 검사, 오른쪽은 폐포 내 삼출물로, 각각 다른 병변을 보여줍니다.",
+              "5번": "이 사진은 피부의 수포(blister)를 보여주지만, 세포 수준의 특징적인 바이러스 감염 소견은 보이지 않습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 27,
+        "questions": [
+          {
+            "question_number": 54,
+            "question_text": "MSI(Microsatellite instability)에 대한 설명이다. 틀린 것은?",
+            "answer": "3) Bloom syndrome과 관련이 있다.",
+            "explanation": "현미부수체 불안정성(Microsatellite instability, MSI)은 DNA 부정합 수리(Mismatch repair, MMR) 유전자의 기능 소실로 인해 발생합니다. 블룸 증후군(Bloom syndrome)은 DNA helicase 유전자인 BLM의 돌연변이로 인해 염색체 불안정성(chromosomal instability)을 보이는 질환으로, MSI와는 다른 기전의 DNA 수리 결함 질환입니다.",
+            "wrong_answer_explanations": {
+              "1번": "MSI는 DNA 복제 시 발생하는 오류를 수정하는 MMR 시스템의 결함으로 인해 발생합니다.",
+              "2번": "현미부수체(Microsatellite)는 짧은 염기서열이 반복되는 DNA 영역을 말합니다.",
+              "4번": "MutS 단백질(예: MSH2, MSH6)은 DNA 복제 오류(mismatch)를 인식하는 역할을 하며, MMR 시스템의 핵심 요소입니다.",
+              "5번": "정상 세포에서는 MMR 시스템이 잘 작동하여 현미부수체의 반복 횟수(길이)가 일정하게 유지됩니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 55,
+            "question_text": "HNPCC(Hereditary nonpolyposis colon cancer syndrome)에 대한 설명이다. 틀린 것은?",
+            "answer": "4) 가장 흔히 침범되는 유전자는 MSH6와 PMS2 이다.",
+            "explanation": "유전성 비용종성 대장암(HNPCC, 또는 린치 증후군)은 DNA 부정합 수리(MMR) 유전자의 생식세포 돌연변이로 인해 발생합니다. 원인이 되는 유전자 중 가장 흔하게 돌연변이가 발견되는 것은 MSH2(약 60%)와 MLH1(약 30%)입니다. MSH6와 PMS2 유전자의 돌연변이는 상대적으로 드뭅니다.",
+            "wrong_answer_explanations": {
+              "1번": "HNPCC는 상염색체 우성(Autosomal dominant)으로 유전됩니다.",
+              "2번": "HNPCC는 MMR 유전자인 MSH2, MLH1, MSH6, PMS2 등의 기능 소실과 연관됩니다.",
+              "3번": "HNPCC 선별 검사로 현미부수체 불안정성(MSI) 검사를 시행하며, 그 결과에 따라 MSI-High, MSI-Low, MSS로 분류합니다.",
+              "5번": "산발성 대장암 중 MSI 양성을 보이는 경우, 주로 MLH1 프로모터의 과메틸화(hypermethylation)로 인해 MLH1 단백질 발현이 소실되며, 이는 종종 BRAF 유전자 돌연변이와 동반됩니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 56,
+            "question_text": "자외선으로 인해 이웃한 pyrimidine 염기들끼리 공유결합하여 DNA 복제가 억제되었을 때, DNA 복구는 어떤 기전을 통해 이루어지는지 고르시오.",
+            "answer": "1) Nucleotide excision repair system",
+            "explanation": "자외선(UV)에 의해 생성되는 피리미딘 이합체(pyrimidine dimer)와 같이 DNA 나선 구조를 크게 왜곡시키는 부피가 큰 손상(bulky lesion)은 뉴클레오티드 절제 수리(Nucleotide Excision Repair, NER) 시스템에 의해 제거되고 복구됩니다. 이 기전에 결함이 생기면 색소성 건피증(Xeroderma pigmentosum)이 발생합니다.",
+            "wrong_answer_explanations": {
+              "2번": "부정합 수리(Mismatch repair)는 DNA 복제 과정에서 발생한 염기쌍 오류를 교정합니다.",
+              "3번": "염기 절제 수리(Base excision repair)는 탈아미노화 등으로 인한 단일 염기의 작은 손상을 복구합니다.",
+              "4번": "상동 재조합(Homologous recombination)은 DNA 이중나선 절단(double-strand break)을 자매 염색분체를 주형으로 사용하여 오류 없이 복구하는 기전입니다.",
+              "5번": "비상동 말단 연결(Non-homologous end joining)은 DNA 이중나선 절단을 주형 없이 직접 연결하는 방식으로, 오류가 발생하기 쉽습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 57,
+            "question_text": "DNA 이중나선이 모두 절단 되었을 때, 유전정보의 손실 없이 복구하는 기전은 무엇인가?",
+            "answer": "4) Homologous recombination",
+            "explanation": "DNA 이중나선 절단(Double-Strand Break, DSB)은 세포에 매우 치명적인 손상입니다. 이를 복구하는 기전은 두 가지가 있는데, 그 중 상동 재조합(Homologous Recombination, HR)은 손상되지 않은 자매 염색분체(sister chromatid)를 주형(template)으로 사용하여 손상된 부위를 정확하게 복구하므로 유전정보의 손실이 없습니다. BRCA1, BRCA2 유전자가 이 과정에 중요하게 관여합니다.",
+            "wrong_answer_explanations": {
+              "1번": "뉴클레오티드 절제 수리(NER)는 부피가 큰 단일 가닥 손상을 복구합니다.",
+              "2번": "부정합 수리(Mismatch repair)는 복제 오류를 교정합니다.",
+              "3번": "염기 절제 수리(Base excision repair)는 단일 염기 손상을 복구합니다.",
+              "5번": "비상동 말단 연결(Non-homologous end joining)은 주형 없이 절단된 끝을 바로 이어 붙이는 방식으로, 염기 서열의 삽입이나 삭제(indel)가 발생하기 쉬워 오류가 많은(error-prone) 복구 기전입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 28,
+        "questions": [
+          {
+            "question_number": 58,
+            "question_text": "다음 중 chronic myeloid leukemia의 translocation과 연관된 유전자를 고르시오.",
+            "answer": "1) ABL 9q34, BCR 22q11",
+            "explanation": "만성 골수성 백혈병(Chronic Myeloid Leukemia, CML)은 9번 염색체 장완(9q34)에 위치한 ABL 유전자와 22번 염색체 장완(22q11)에 위치한 BCR 유전자 사이의 상호 전좌, 즉 t(9;22)(q34;q11)에 의해 BCR-ABL 융합 유전자가 형성되어 발생합니다. 이로 인해 생성된 염색체를 필라델피아 염색체라고 합니다.",
+            "wrong_answer_explanations": {
+              "2번": "t(8;14)(q24;q32)는 MYC과 IGH 유전자의 전좌로, 버킷 림프종(Burkitt lymphoma)에서 관찰됩니다.",
+              "3번": "t(11;14)(q13;q32)는 CCND1(Cyclin D1)과 IGH 유전자의 전좌로, 외투세포 림프종(Mantle cell lymphoma)에서 관찰됩니다.",
+              "4번": "t(8;21)(q22;q22)는 AML1(RUNX1)과 ETO(RUNX1T1) 유전자의 전좌로, 급성 골수성 백혈병(AML)의 한 유형에서 관찰됩니다.",
+              "5번": "t(11;22)(q24;q12)는 FLI1과 EWSR1 유전자의 전좌로, 유잉 육종(Ewing sarcoma)에서 관찰됩니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 59,
+            "question_text": "염색체 변화로 인한 종양 중 다음과 관련이 있는 종양은 무엇인지 고르시오. gene amplification, double minutes, homogenous staining regions, NMYC gene",
+            "answer": "2) Neuroblastoma",
+            "explanation": "유전자 증폭(Gene amplification)은 특정 종양유전자의 복제 수가 수십에서 수백 배로 증가하는 현상입니다. 이는 염색체 외부에 작은 쌍으로 존재하는 double minutes(DMs) 또는 염색체 내에 길게 염색되는 homogenous staining regions(HSRs)의 형태로 관찰됩니다. NMYC 유전자의 증폭은 신경모세포종(Neuroblastoma)의 대표적인 유전적 이상이며, 나쁜 예후와 관련이 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "유잉 육종(Ewing sarcoma)은 EWSR1 유전자 관련 전좌가 특징입니다.",
+              "3번": "망막모세포종(Retinoblastoma)은 RB1 종양억제유전자의 불활성화가 특징입니다.",
+              "4번": "신세포암(Renal cell carcinoma)은 VHL 유전자 이상 등과 관련이 있습니다.",
+              "5번": "유방암(Breast cancer)에서는 HER2(ERBB2) 유전자의 증폭이 중요하게 관여합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 60,
+            "question_text": "epigenetic change에 대한 설명이다. 틀린 것은?",
+            "answer": "5) NOTCH1 유전자는 T-cell acute lymphoblastic leukemia에서는 mutated tumor suppressor genes으로서 역할을 한다.",
+            "explanation": "NOTCH1 유전자는 T세포 급성 림프모구성 백혈병(T-ALL)에서 기능 획득 돌연변이(gain-of-function mutation)를 통해 지속적으로 활성화되어 암 발생을 유발하는 종양유전자(oncogene)로 작용합니다. 기능이 소실되는 종양억제유전자(tumor suppressor gene)가 아닙니다.",
+            "wrong_answer_explanations": {
+              "1번": "후성유전학적 변화(Epigenetic change)는 DNA 염기서열의 변화 없이 DNA 메틸화, 히스톤 변형 등을 통해 유전자 발현에 영향을 미치는 변화를 말합니다.",
+              "2번": "암세포 핵의 형태학적 변화(예: 염색질 응축)는 후성유전학적 상태와 관련이 있습니다.",
+              "3번": "RB, VHL, APC와 같은 종양억제유전자는 프로모터 부위의 과메틸화(hypermethylation)와 같은 후성유전학적 변화에 의해 발현이 억제되어 기능이 소실될 수 있습니다.",
+              "4번": "후성유전학적 변화는 DNA 메틸전이효소, 히스톤 변형 효소 등에 의해 일어나며, 원칙적으로 가역적(reversible)입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 29,
+        "questions": [
+          {
+            "question_number": 61,
+            "question_text": "Chemical carcinogenesis에 대한 설명이다. 틀린 것은?",
+            "answer": "4) promoter는 그 자체로 종양발생을 유도한다.",
+            "explanation": "화학적 발암 과정에서 촉진제(promoter)는 그 자체만으로는 돌연변이를 유발하지 않으며 종양을 발생시키지 못합니다. 촉진제는 개시제(initiator)에 의해 DNA 손상을 입은 세포의 증식을 촉진하는 역할을 합니다. 따라서 개시제에 노출된 후에만 발암 효과를 나타낼 수 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "개시(Initiation)는 발암물질에 노출되어 세포에 비가역적인 DNA 손상, 즉 돌연변이가 발생하는 단계를 말합니다.",
+              "2번": "개시 단계에서 영구적인 DNA 손상이 발생합니다.",
+              "3번": "직접 작용 발암물질(direct-acting carcinogen)이나 간접 발암물질의 활성 대사체는 전자를 좋아하는(electrophilic) 특성을 띠어 DNA, RNA, 단백질과 같은 친핵성 분자들과 반응하여 손상을 줍니다.",
+              "5번": "대부분의 화학 발암물질은 그 자체로는 비활성인 간접 발암물질(indirect carcinogen)이며, 체내에서 주로 간의 시토크롬 P-450 효소계에 의해 대사되어 활성 형태로 전환됩니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 62,
+            "question_text": "Radiation carcinogenesis에 대한 설명이다. 틀린 것은?",
+            "answer": "1) 심한 이온화방사선(Ionizing radiation)에 노출되면 초기에는 주로 고형암이 발생한다.",
+            "explanation": "고선량의 전리 방사선(ionizing radiation)에 전신이 노출되었을 때, 가장 먼저 위험이 증가하고 잠복기가 짧은 종양은 백혈병(leukemia), 특히 급성 및 만성 골수성 백혈병입니다. 갑상선암, 유방암, 폐암과 같은 고형암(solid tumor)은 백혈병보다 더 긴 잠복기를 거쳐 발생 위험이 증가합니다.",
+            "wrong_answer_explanations": {
+              "2번": "자외선(UV radiation)은 피부암, 특히 편평세포암, 기저세포암, 악성 흑색종의 주요 원인입니다.",
+              "3번": "자외선에 의한 암 발생 위험도는 자외선의 종류(UVA, UVB, UVC), 노출 강도 및 시간, 그리고 피부의 멜라닌 색소 침착 정도(피부색)에 따라 달라집니다.",
+              "4번": "오존층은 해로운 자외선을 차단하는 역할을 하므로, 오존층 파괴는 지표면에 도달하는 자외선 양을 증가시켜 피부암 발생 위험을 높입니다.",
+              "5번": "피부, 뼈, 위장관계는 세포 분열이 비교적 활발하여 방사선에 의한 암 발생에 상대적으로 민감한 편입니다. (이 보기는 논란의 여지가 있으나, 1번이 명백히 틀린 설명입니다.)"
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 63,
+            "question_text": "Human Papillomavirus(HPV)에 대한 설명이다. 틀린 것 두 가지를 고르시오. (답 두 개)",
+            "answer": "2) genital wart는 주로 HPV type 18과 연관이 있다., 4) HPV 감염 후 RAS 유전자의 돌연변이로 암이 발생한다.",
+            "explanation": "틀린 설명 1(정답 2번): 생식기 사마귀(genital wart)와 같은 양성 병변은 주로 저위험군(low-risk) HPV인 type 6, 11에 의해 발생합니다. HPV type 18은 type 16과 함께 자궁경부암을 유발하는 대표적인 고위험군(high-risk) HPV입니다.\n틀린 설명 2(정답 4번): HPV에 의한 발암 기전은 바이러스 단백질인 E6와 E7이 숙주세포의 종양억제단백질인 p53과 RB를 각각 분해하고 불활성화시키는 것입니다. RAS 유전자 돌연변이와는 직접적인 관련이 없습니다.",
+            "wrong_answer_explanations": {
+              "1번": "HPV type 16은 자궁경부암의 가장 흔한 원인인 대표적인 고위험군 HPV입니다.",
+              "3번": "양성 병변인 사마귀(wart)에서는 HPV 유전체가 숙주 염색체에 삽입되지 않고 독립적인 원형(episomal form)으로 존재합니다. 악성 종양에서는 숙주 염색체로 삽입되는 경우가 많습니다.",
+              "5번": "고위험군 HPV의 E6 단백질은 p53의 분해를 촉진하고, E7 단백질은 RB 단백질을 불활성화시킵니다. 따라서 E6이 RB를 분해한다는 설명은 틀렸습니다. (문제에서 틀린 것을 2개 고르라고 했으므로 5번도 틀린 설명에 해당할 수 있으나, 2번과 4번이 더 명확하게 틀렸습니다.)"
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 64,
+            "question_text": "Epstein-Barr Virus(EBV)에 대한 설명이다. 틀린 것 2개를 고르시오. (답 두 개)",
+            "answer": "2) EBV-transformed B-cell과 Burkitt lymphoma cells의 바이러스 유전자의 발현패턴은 동일하다., 3) EBV는 B cell 포면의 CD3와 결합하여 B cell을 감염시킨다.",
+            "explanation": "틀린 설명 1(정답 2번): EBV에 의해 잠복 감염된 B세포(EBV-transformed B-cell)는 여러 잠복기 유전자(LMP-1, EBNA-2 등)를 발현하여 증식합니다. 반면, 버킷 림프종(Burkitt lymphoma) 세포에서는 대부분의 잠복기 유전자 발현이 억제되고 EBNA-1만 발현되어 면역 감시를 회피합니다. 따라서 발현 패턴이 다릅니다.\n틀린 설명 2(정답 3번): EBV는 B세포 표면의 CD21(보체 수용체 CR2)을 수용체로 사용하여 B세포를 감염시킵니다. CD3는 T세포 표면에 있는 분자입니다.",
+            "wrong_answer_explanations": {
+              "1번": "EBV는 아프리카의 버킷 림프종, 비인두암, 특정 위암, 호지킨 림프종 등 다양한 악성 종양의 발생과 깊은 관련이 있습니다.",
+              "4번": "말라리아 유행 지역에서는 말라리아 감염이 만성적인 B세포 증식을 유발하여, EBV 감염된 B세포에서 MYC 전좌와 같은 추가적인 유전적 변이가 일어날 확률을 높여 버킷 림프종 발생에 기여하는 것으로 알려져 있습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 30,
+        "questions": [
+          {
+            "question_number": 65,
+            "question_text": "Helicobacter pylori(H. pylori)에 대한 설명 중 틀린 것을 고르시오.",
+            "answer": "5) 감염 단계와는 관계없이 제균치료는 효과적이다.",
+            "explanation": "헬리코박터 파일로리(H. pylori) 감염에 대한 제균 치료는 만성 위염이나 소화성 궤양 단계에서는 위암 발생 위험을 낮추는 데 효과적입니다. 그러나 이미 위축성 위염이나 장상피화생, 이형성증과 같은 전암병변으로 진행된 후에는 제균 치료를 하더라도 암 발생을 완전히 막지 못할 수 있습니다. 따라서 감염 단계와 관계없이 효과적이라는 설명은 틀렸습니다.",
+            "wrong_answer_explanations": {
+              "1번": "H. pylori는 국제암연구소(IARC)에서 1급 발암물질(Group 1 carcinogen)로 분류한 최초의 박테리아입니다.",
+              "2번": "H. pylori 감염은 위 선암(gastric adenocarcinoma)과 위 MALT 림프종(gastric lymphoma)의 가장 중요한 원인입니다.",
+              "3번": "H. pylori 감염은 만성 위염 → 위축성 위염 → 장상피화생 → 이형성증 → 위암으로 이어지는 다단계 발암 과정(Correa pathway)을 유발합니다.",
+              "4번": "H. pylori 균주 중 종양 발생과 직접적으로 관련된 독성 단백질인 CagA를 생성하는 균주가 위암 발생 위험이 더 높습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 66,
+            "question_text": "종양에 의한 반응에 대한 설명이다. 틀린 것을 고르시오.",
+            "answer": "3) 악액질(cancer cachexia)은 음식섭취량과 관련된 근육량감소를 말한다.",
+            "explanation": "암 악액질(cancer cachexia)은 음식 섭취량 감소만으로는 설명할 수 없는 전신적인 소모 상태를 말합니다. 이는 종양에서 분비되는 사이토카인(TNF-α 등)에 의한 전신적인 염증 반응과 대사 이상으로 인해 지방과 근육이 모두 현저하게 소실되는 것을 특징으로 합니다. 단순히 음식 섭취량과 관련된 것이 아니라, 복합적인 병태생리를 가집니다.",
+            "wrong_answer_explanations": {
+              "1번": "종양의 위치에 따라 압박 증상, 폐쇄, 호르몬 분비 등 다양한 임상 증상이 나타날 수 있습니다.",
+              "2번": "일반적으로 양성 내분비 종양은 분화도가 좋아 악성 종양보다 더 많은 호르몬을 기능적으로 활발하게 분비하는 경향이 있습니다.",
+              "4번": "악액질이 심해지면 호흡 근육을 포함한 전신 근육이 위축되어, 결국 폐렴 등 감염으로 사망하는 경우가 많습니다.",
+              "5번": "악액질 상태에서는 지방분해를 촉진하는 인자(lipid mobilizing factor) 등이 분비되어 지방 조직이 소실됩니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 67,
+            "question_text": "paraneoplastic syndrome에 대한 설명이다. 틀린 것을 고르시오.",
+            "answer": "3) 암에 의해 뼈가 침범되는 경우에 발생하는 hypercalcemia는 paraneoplastic syndrome의 대표적인 예이다.",
+            "explanation": "부종양 증후군(Paraneoplastic syndrome)은 종양 자체나 전이에 의한 직접적인 영향이 아니라, 종양에서 분비하는 호르몬이나 사이토카인 등에 의해 발생하는 전신적인 증상들을 말합니다. 암이 뼈로 전이되어 뼈를 파괴함으로써 발생하는 고칼슘혈증(hypercalcemia)은 종양의 직접적인 영향에 의한 것이므로 부종양 증후군에 해당하지 않습니다. 부종양 증후군으로서의 고칼슘혈증은 종양이 PTHrP와 같은 물질을 이소성으로 분비하여 발생하는 경우를 말합니다.",
+            "wrong_answer_explanations": {
+              "1번": "쿠싱 증후군은 폐의 소세포암(small cell carcinoma)이 ACTH를 이소성으로 분비하여 발생하는 대표적인 부종양 증후군입니다.",
+              "2번": "부종양 증후군 중 가장 흔한 것은 고칼슘혈증(hypercalcemia)입니다.",
+              "4번": "부갑상선 호르몬 관련 단백질(PTHrP)은 정상적으로는 각질형성세포(keratinocytes) 등에서 분비되지만, 폐 편평세포암 등에서 이소성으로 분비되어 고칼슘혈증을 유발합니다.",
+              "5번": "비후성 골관절병증(Hypertrophic osteoarthropathy)은 주로 폐암과 동반되는 부종양 증후군입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": 68,
+            "question_text": "Stage and grade에 대한 설명이다. 틀린 것은?",
+            "answer": "5) Staging에는 분자병리결과는 포함되지 않는다.",
+            "explanation": "전통적으로 병기(Staging)는 TNM 시스템(종양 크기, 림프절 전이, 원격 전이)을 기반으로 결정되었습니다. 그러나 최근에는 예후 예측과 치료 방침 결정에 중요한 분자병리학적 표지자(예: 유전자 돌연변이, 증폭, 단백질 발현)들이 병기 결정 시스템에 통합되고 있습니다. 예를 들어, 최신 AJCC 병기 매뉴얼에는 특정 암에서 분자 표지자가 병기 분류에 포함됩니다. 따라서 분자병리결과가 포함되지 않는다는 설명은 현대 암 진단 경향과 맞지 않아 틀렸습니다.",
+            "wrong_answer_explanations": {
+              "1번": "조직학적 등급(Grading)은 종양세포가 정상세포와 얼마나 닮았는지를 나타내는 분화도(differentiation)를 평가하는 것입니다.",
+              "2번": "등급 결정에는 암의 종류에 따라 핵의 다형성, 유사분열(mitoses) 횟수, 샘 구조 형성 정도 등 다양한 조직학적 소견이 사용됩니다.",
+              "3번": "병기(Staging)는 암이 해부학적으로 얼마나 퍼져 있는지를 평가하는 것으로, 원발 종양의 크기(T), 주변 림프절 전이 여부(N), 원격 전이 여부(M)를 종합하여 결정합니다.",
+              "4번": "병기는 TNM 시스템으로 결정하는 것이 표준입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      }
+    ],
+    "summary": {
+      "total_jokbo_pages": 31,
+      "total_questions": 68,
+      "total_related_slides": 6
+    }
+  }
+}

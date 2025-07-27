@@ -1,0 +1,779 @@
+{
+  "timestamp": "20250727_033020",
+  "mode": "jokbo-centric",
+  "jokbo_file": "240527 본1 인체병리학총론_정답.pdf",
+  "lesson_file": "20250418_1_2교시_염증과 수복_파트1.pdf",
+  "response_text": "{\n    \"jokbo_pages\": [\n        {\n            \"jokbo_page\": 1,\n            \"questions\": [\n                {\n                    \"question_number\": \"1\",\n                    \"question_text\": \"<다음문장>의 (A)에 알맞은 용어를 하나 적으시오.(영어로 답할 것)\\n<다음문장>\\nNormal fluid (A) encompasses maintenance of vessel wall integrity as well as intravascular pressure and osmolarity within certain physiologic ranges.\",\n                    \"answer\": \"Homeostasis\",\n                    \"explanation\": \"제시된 문장은 혈관벽의 온전성, 혈관 내 압력 및 삼투압을 생리적 범위 내에서 유지하는 정상적인 체액 균형 상태를 설명하고 있으며, 이는 항상성(Homeostasis)의 정의에 해당합니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"2\",\n                    \"question_text\": \"다음은 Pulmonary edema 에 대한 설명이다. 옳지 않은 것을 하나 고르시오.\\n1) left ventricular failure, renal failure, acute respiratory distress syndrome 에 의해서 pulmonary edema가 생길 수 있다.\\n2) acute respiratory distress syndrome 에 의해서 pulmonary edema가 생길 수 있다.\\n3) pulmonary infections, & hypersensitivity reactions에 의해서 pulmonary edema 에 의해서도 pulmonary edema가 생길 수 있다.\\n4) pulmonary edema가 있는 lung 은 lung normal weight 보다 가벼워진다.\\n5) frothy, blood-tinged fluid w/ a mixture of air, edema fluid, and extravasated RBCs 가 관찰된다.\",\n                    \"answer\": \"4\",\n                    \"explanation\": \"폐부종(Pulmonary edema)은 폐에 체액이 축적되는 상태로, 폐의 무게가 정상보다 증가합니다. 따라서 폐가 더 가벼워진다는 설명은 옳지 않습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"좌심실 부전, 신부전, 급성 호흡곤란 증후군(ARDS)은 모두 폐부종을 유발하는 주요 원인입니다.\",\n                        \"2번\": \"ARDS는 폐포-모세혈관 막의 손상으로 인해 직접적으로 폐부종을 일으킬 수 있습니다.\",\n                        \"3번\": \"폐 감염 및 과민반응은 염증과 혈관 투과성 증가를 유발하여 폐부종을 일으킬 수 있습니다.\",\n                        \"5번\": \"폐부종 시 관찰되는 체액은 공기, 부종액, 혈관 밖으로 나온 적혈구가 섞여 거품이 있고 혈액이 섞인 양상을 보일 수 있습니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 10,\n                            \"relevance_reason\": \"급성 염증의 특징으로 'Exudation of fluid and plasma proteins (edema)'를 언급하여 부종이 염증의 주요 구성 요소임을 설명합니다.\"\n                        },\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 30,\n                            \"relevance_reason\": \"급성 염증의 특징인 혈관 투과성 증가로 인해 부종(edema)이 발생함을 설명하고 있습니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"3\",\n                    \"question_text\": \"다음은 Hyperemia에 대한 설명이다. 옳지 않은 것을 하나 고르시오.\\n1) an active process resulting from augmented tissue inflow because of arteriolar dilation,\\n2) skeletal muscle during exercise 에서 생긴다.\\n3) inflammation sites 에서 생긴다.\\n4) redder because of the engorgement of vessels with oxygenated blood.\\n5) a passive process resulting from impaired outflow from a tissue.\",\n                    \"answer\": \"5\",\n                    \"explanation\": \"5번 보기는 조직으로부터의 혈류 유출 장애로 인한 수동적 과정을 설명하며, 이는 충혈(Hyperemia)이 아닌 울혈(Congestion)의 정의입니다. 충혈은 세동맥 확장으로 인한 능동적인 혈류 유입 증가 과정입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"충혈은 세동맥 확장으로 인한 능동적인 조직 혈류 유입 증가 과정이라는 정확한 설명입니다.\",\n                        \"2번\": \"운동 중인 골격근은 충혈의 대표적인 생리적 예시입니다.\",\n                        \"3번\": \"염증 부위에서는 혈관 확장으로 인해 충혈이 발생합니다.\",\n                        \"4번\": \"산소가 풍부한 혈액의 유입 증가로 조직이 붉게 보이는 것은 충혈의 특징입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 29,\n                            \"relevance_reason\": \"급성 염증에서의 혈관 변화를 설명하며 'Vasodilation of arterioles → increased blood flow → heat and the redness (erythema)'라고 기술하여 충혈의 기전과 증상을 설명합니다.\"\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 2,\n            \"questions\": [\n                {\n                    \"question_number\": \"4\",\n                    \"question_text\": \"다음 사진의 병리소견으로 옳은 것을 하나 고르시오. (Image B: 뇌 실질 내 출혈 소견)\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"제시된 사진은 뇌 실질 내에 혈액이 고여있는 소견을 보여주므로, 뇌내출혈(intracerebral hemorrhage)에 해당합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"점상출혈(petechial hemorrhage)은 작은 점 모양의 출혈이며, 사진은 큰 혈종을 보입니다. 또한 장기는 대장 점막이 아닌 뇌입니다.\",\n                        \"3번\": \"뇌부종(intracerebral edema)은 출혈에 동반될 수 있으나, 사진의 주된 소견은 출혈 자체입니다.\",\n                        \"4번\": \"폐울혈(pulmonary congestion)은 폐에서 발생하는 소견입니다.\",\n                        \"5번\": \"만성 수동 간울혈(chronic passive congestion of liver)은 특징적인 '육두구 간(nutmeg liver)' 모양을 보이며, 사진과 다릅니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 3,\n            \"questions\": [\n                {\n                    \"question_number\": \"5\",\n                    \"question_text\": \"다음 그림의 장기와 진단으로 알맞은 것을 하나 고르시오. (Image B: 비장의 창백한 쐐기 모양 경색 소견)\",\n                    \"answer\": \"4\",\n                    \"explanation\": \"사진은 비장(spleen)의 전형적인 모양을 보여주며, 쐐기 모양의 창백한 병변은 비장과 같이 단일 종말 동맥 순환을 갖는 고형 장기에서 흔히 발생하는 빈혈성 경색(white infarct) 소견입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"출혈성 경색(red infarct)은 주로 폐와 같이 이중 순환을 갖는 조직에서 발생하며, 병변이 붉은색을 띕니다.\",\n                        \"2번\": \"장기는 폐가 아니며, 경색은 창백한(white) 형태입니다.\",\n                        \"3번\": \"장기는 신장이 아닌 비장입니다.\",\n                        \"5번\": \"경색은 창백한(white) 형태로, 출혈성(red)이 아닙니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 14,\n                            \"relevance_reason\": \"염증의 원인으로 'Tissue necrosis'와 허혈(ischemia)을 언급하고 있어, 경색(infarction)이 조직 괴사의 한 형태로서 염증을 유발할 수 있음을 연결 지을 수 있습니다.\"\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 4,\n            \"questions\": [\n                {\n                    \"question_number\": \"6\",\n                    \"question_text\": \"다음 그림은 major pathogenic pathways in septic shock 에 대한 것이다. “A” 에 알맞은 용어를 하나 적으시오.(영어로 답할 것) (Image: 패혈성 쇼크 기전 도표)\",\n                    \"answer\": \"Immunosuppression\",\n                    \"explanation\": \"패혈성 쇼크의 병태생리에서, 초기의 과도한 전신성 염증 반응(SIRS) 이후에 보상적인 항염증 반응 증후군(CARS)이 나타나 면역억제(immunosuppression) 상태로 이어질 수 있습니다. 그림에서 이차 항염증 매개체들이 'A' 상자로 이어지며, 이는 면역억제를 나타냅니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 8,\n                            \"relevance_reason\": \"염증 반응에 의한 질병 표(TABLE 3.1)에서 'Septic shock'을 사이토카인(Cytokines)에 의해 매개되는 질환으로 명시하고 있습니다.\"\n                        },\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 9,\n                            \"relevance_reason\": \"전신 염증에 대한 설명에서 파종성 세균 감염(Disseminated bacterial infections)이 패혈증(sepsis)을 야기할 수 있다고 기술합니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"7\",\n                    \"question_text\": \"다음 그림의 장기와 진단으로 알맞은 것을 하나 고르시오. (Image A: 폐의 출혈성 쐐기 모양 경색 소견)\",\n                    \"answer\": \"1\",\n                    \"explanation\": \"사진은 폐(lung)에서 발생한 출혈성(red) 경색을 보여줍니다. 폐는 폐동맥과 기관지동맥의 이중 혈액 공급을 받기 때문에 출혈성 경색이 특징적으로 나타납니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"경색 부위가 창백하지 않고 붉은 출혈성이므로 white infarct가 아닙니다.\",\n                        \"3번\": \"장기는 신장이 아닙니다.\",\n                        \"4번\": \"장기는 비장이 아닙니다.\",\n                        \"5번\": \"장기는 비장이 아니며, 경색은 red infarct입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 14,\n                            \"relevance_reason\": \"염증의 원인 중 하나로 조직 괴사(Tissue necrosis)를 언급하고 있으며, 경색은 조직 괴사의 주요 원인 중 하나입니다.\"\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 5,\n            \"questions\": [\n                {\n                    \"question_number\": \"8\",\n                    \"question_text\": \"다음 문장에서 (A) 안에 알맞은 용어을 하나 적으시오.(영어로 답할 것)\\n( A ) shoxk is caused by the host response to bacterial, viral or fungal infections; it is a systemic inflammatory condition characterized by endothelial cell activation, tissue edema, disseminated intravascular coagulation, and metabolic derangements that often lead to organ failure and death.\",\n                    \"answer\": \"Septic\",\n                    \"explanation\": \"제시된 문장은 감염에 대한 숙주 반응으로 발생하는 전신성 염증 상태를 설명하고 있으며, 이는 패혈성 쇼크(Septic shock)의 정의입니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 9,\n                            \"relevance_reason\": \"전신 염증에 대한 설명에서 파종성 세균 감염이 패혈증(sepsis)을 야기할 수 있다고 직접적으로 언급합니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"9\",\n                    \"question_text\": \"<다음 문장>을 읽고 가장 알맞은 용어를 하나 적으시오.(영어로 답할 것)\\na detached intravascular solid, liquid, or gaseous mass that is carried by the blood to a site distant from its point of origin\",\n                    \"answer\": \"Embolism\",\n                    \"explanation\": \"제시된 문장은 혈관 내 고체, 액체, 또는 기체 덩어리가 혈류를 따라 이동하여 원발 부위에서 떨어진 곳의 혈관을 막는 현상인 색전증(Embolism)의 고전적인 정의입니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"10\",\n                    \"question_text\": \"다음 문장에서 (A) 안에 알맞은 용어를 하나 적으시오. (영어로만 답할 것)\\nCentral nervous system infarction results in ( A ) necrosis.\",\n                    \"answer\": \"Liquefactive\",\n                    \"explanation\": \"중추신경계의 저산소성 손상은 특징적으로 액화 괴사(Liquefactive necrosis)를 유발합니다. 이는 죽은 조직이 효소에 의해 소화되어 액상의 점성 물질로 변하는 괴사 형태입니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 14,\n                            \"relevance_reason\": \"염증의 원인으로 조직 괴사(Tissue necrosis)를 언급하고 있어, 괴사의 한 종류인 액화 괴사와 관련이 있습니다. 다만, 특정 괴사 유형에 대한 상세 설명은 강의자료에 없습니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"11\",\n                    \"question_text\": \"다음은 Factors That Influence Development of an Infarct 를 설명한 것이다. 알맞지 않는 것을 하나 고르시오.\\n1) the nature of the vascular supply\\n2) the rate of development of the occlusion\\n3) the consistency of a given tissue\\n4) the blood oxygen content\\n5) the vulnerability of a given tissue to hypoxia\",\n                    \"answer\": \"3\",\n                    \"explanation\": \"경색의 발생은 혈관 공급의 특성(예: 이중 순환 vs. 단일 종말 동맥), 폐색 속도, 조직의 저산소증 취약성, 혈액의 산소 함량 등에 의해 영향을 받습니다. 조직의 물리적 '단단함(consistency)'은 경색 발생의 주요 결정 요인이 아닙니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"혈관 공급의 해부학적 구조는 경색 발생에 매우 중요한 요소입니다.\",\n                        \"2번\": \"폐색이 천천히 진행되면 측부 순환이 발달할 시간을 주어 경색을 막을 수 있습니다.\",\n                        \"4번\": \"혈액의 산소 함량이 낮으면(예: 빈혈) 폐색 시 경색이 더 쉽게 발생합니다.\",\n                        \"5번\": \"조직마다 저산소증에 대한 민감도가 다르며(예: 뉴런 > 심근), 이는 경색 발생에 영향을 줍니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 6,\n            \"questions\": [\n                {\n                    \"question_number\": \"12\",\n                    \"question_text\": \"다음 사진의 병리소견으로 옳은 것을 하나 고르시오. (Image A: 대장 점막의 작은 점상 출혈 소견)\",\n                    \"answer\": \"1\",\n                    \"explanation\": \"사진은 대장 점막 표면에 다수의 작은(1-2mm) 출혈 반점을 보여주며, 이는 점상출혈(petechiae)의 특징적인 소견입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"장기는 뇌가 아니며, 출혈 양상이 뇌내출혈과 다릅니다.\",\n                        \"3번\": \"주된 소견은 부종이 아닌 출혈입니다.\",\n                        \"4번\": \"장기는 폐가 아닙니다.\",\n                        \"5번\": \"장기는 간이 아닙니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"13\",\n                    \"question_text\": \"<다음 설명>을 읽고 (A)에 가장 알맞은 것을 하나 고르시오.\\n<다음 설명>\\n( A ) % of spontaneous abortuses during the early months of gestation have a demonstrable chromosomal abnormality.\",\n                    \"answer\": \"5\",\n                    \"explanation\": \"초기 자연 유산의 약 50%에서 염색체 이상이 발견된다는 것은 유전학 및 병리학에서 잘 알려진 사실입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"10%는 너무 낮은 수치입니다.\",\n                        \"2번\": \"20%는 너무 낮은 수치입니다.\",\n                        \"3번\": \"30%는 너무 낮은 수치입니다.\",\n                        \"4번\": \"40%는 너무 낮은 수치입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 7,\n            \"questions\": [\n                {\n                    \"question_number\": \"14\",\n                    \"question_text\": \"다음 그림의 장기와 진단으로 알맞은 것을 하나 고르시오. (Image: 혈관 내 지방세포와 조혈세포를 포함한 색전 소견)\",\n                    \"answer\": \"1\",\n                    \"explanation\": \"조직 사진은 폐 혈관 내에 지방 방울과 조혈모세포를 포함하는 색전을 보여줍니다. 이는 장골 골절과 같은 심한 외상 후 합병증으로 발생하는 골수 색전(bone marrow embolus)의 특징적인 소견입니다. 이러한 색전은 주로 폐에서 발견됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"장기는 간이 아닌 폐입니다.\",\n                        \"3번\": \"색전의 내용물은 양수가 아닌 골수 성분입니다.\",\n                        \"4번\": \"장기는 간이 아니며, 색전 내용물도 양수가 아닙니다.\",\n                        \"5번\": \"이는 색전증(embolism)이며, 경색(infarction)은 그 결과로 발생할 수 있으나 이 사진의 직접적인 진단은 아닙니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"15\",\n                    \"question_text\": \"다음설명은 Mendelian Disorders 에 대한 설명이다. (D) 에 알맞은 것을 하나 고르시오.\\n* Although gene expression is usually described as dominant or recessive, in some cases, both of the alleles of a gene pair may be fully expressed in the heterozygote-a condition called ( A ).\\n* A single mutant gene may lead to many end effects, termed ( B ); conversely, mutations at several genetic loci may produce the same trait ( C ).\\n* It should be noted that not all nucleotide changes produce genes that cause disease. When such a DNA change occurs in at least 1% of the population, it is called a ( D ).\",\n                    \"answer\": \"4\",\n                    \"explanation\": \"집단 내에서 1% 이상의 빈도로 나타나는 DNA 서열 변이를 유전적 다형성(polymorphism)이라고 정의합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"공동우성(Codominance)은 이형접합자에서 두 대립유전자가 모두 발현되는 현상입니다.\",\n                        \"2번\": \"다발성 표현형(Pleiotropism)은 하나의 유전자가 여러 표현형에 영향을 미치는 현상입니다.\",\n                        \"3번\": \"유전적 이질성(Genetic heterogeneity)은 여러 다른 유전자의 돌연변이가 동일한 표현형을 유발하는 현상입니다.\",\n                        \"5번\": \"유전체 각인(Genomic imprinting)은 부모로부터 물려받은 대립유전자가 선택적으로 발현되는 현상입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 8,\n            \"questions\": [\n                {\n                    \"question_number\": \"16\",\n                    \"question_text\": \"다음 <그림>을 읽고, 가장 알맞은 진단명(A)을 하나 고르시오.\\nFigure 5-27 Pedigree of A , a disorder caused by mutation in mitochondrial DNA. Note that all progeny of an affected male (shaded squares) are normal, but all children, male and female, of the affected female (shaded circles) manifest disease to a variable degree as discussed in the text.\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"제시된 가계도는 모계 유전(maternal inheritance)의 전형적인 패턴을 보여줍니다. 이환된 남성의 자녀는 모두 정상이지만, 이환된 여성의 모든 자녀는 질병을 나타냅니다. 이는 미토콘드리아 DNA 돌연변이에 의해 발생하는 질환의 특징이며, 보기 중 레버 유전성 시신경병증(Leber Hereditary Optic Neuropathy)이 대표적인 미토콘드리아 유전 질환입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"근긴장성 이영양증은 상염색체 우성 유전입니다.\",\n                        \"3번\": \"취약 X 증후군은 X-연관 유전입니다.\",\n                        \"4번\": \"프라더-윌리 증후군은 유전체 각인 관련 질환입니다.\",\n                        \"5번\": \"골형성 부전증은 주로 상염색체 우성 유전입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"17\",\n                    \"question_text\": \"다음의 핵형(karyotype)을 나타내는 질환과 핵형을 바르게 적은것을 하나 고르시오. (Image: 21번 염색체가 3개인 남성 핵형)\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"제시된 핵형 분석 사진은 21번 염색체가 3개(삼염색체성)이며, 성염색체는 XY인 남성의 핵형을 보여줍니다. 이는 다운 증후군(Down syndrome)의 가장 흔한 형태로, 핵형은 47,XY,+21로 표기합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"클라인펠터 증후군의 핵형은 47,XXY입니다. +21이 아닙니다.\",\n                        \"3번\": \"터너 증후군의 핵형은 45,X입니다. 또한 다운 증후군이라도 핵형 표기가 47,XX,21로 틀렸습니다.\",\n                        \"4번\": \"취약 X 증후군은 염색체 수의 이상이 아닌 FMR1 유전자의 반복 서열 확장으로 발생합니다.\",\n                        \"5번\": \"전위형 다운 증후군의 핵형 표기 예시이지만, 제시된 핵형은 표준형 삼염색체성입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 9,\n            \"questions\": [\n                {\n                    \"question_number\": \"18\",\n                    \"question_text\": \"다음 <그림>을 보고, (A)에 알맞은 진단기법을 하나 고르시오. (Image: 염색체에 형광 표지를 붙인 사진)\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"사진은 특정 염색체 부위(22q11.2)에 결실이 있는지 확인하기 위해 형광 물질이 부착된 DNA 탐침(probe)을 사용한 것을 보여줍니다. 이처럼 염색체나 세포에 형광 탐침을 결합시켜 특정 유전자의 위치나 수적 이상을 확인하는 기법을 형광동소보합법(Fluorescence in situ hybridization, FISH)이라고 합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Southern hybridization은 DNA를 분석하는 다른 기법입니다.\",\n                        \"3번\": \"G-banding은 염색체의 밴드 패턴을 관찰하는 핵형 분석의 기본 기법입니다.\",\n                        \"4번\": \"Western blot은 단백질을 분석하는 기법입니다.\",\n                        \"5번\": \"Northern hybridization은 RNA를 분석하는 기법입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"19\",\n                    \"question_text\": \"다음 설명을 읽고 알맞은 진단명(A)을 하나 고르시오.\\n■ (A) is caused by a mutation in the FBN1 gene encoding fibrillin, which is required for structural integrity of connective tissues and regulation of TGF-β signaling.\\n■ The major tissues affected are the skeleton, eyes, and cardiovascular system.\\n■ Clinical features may include tall stature, long fingers, bilateral subluxation of lens, mitral valve prolapse, aortic aneurysm, and aortic dissection.\",\n                    \"answer\": \"4\",\n                    \"explanation\": \"제시된 설명은 FBN1 유전자 돌연변이로 인해 발생하는 결합조직 질환의 특징을 기술하고 있습니다. 피브릴린(fibrillin) 생성 장애로 골격계, 안구, 심혈관계에 이상이 나타나는 것은 마르팡 증후군(Marfan syndrome)의 전형적인 특징입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"다운 증후군은 21번 염색체 삼염색체성입니다.\",\n                        \"2번\": \"엘러스-단로스 증후군은 콜라겐 합성 장애와 관련됩니다.\",\n                        \"3번\": \"프라더-윌리 증후군은 15번 염색체 각인 관련 질환입니다.\",\n                        \"5번\": \"테이-삭스병은 리소좀 축적 질환입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"20\",\n                    \"question_text\": \"다음 설명은 Ehlers-Danlos Syndromes 에 대한 것이다 (A)에 알맞은 용어를 하나 적으시오. (영어로 답할 것)\\nEhlers-Danlos Syndromes\\n• There are six variants of Ehlers-Danlos syndromes, all characterized by defects in ( A ) synthesis or assembly.\",\n                    \"answer\": \"collagen\",\n                    \"explanation\": \"엘러스-단로스 증후군(Ehlers-Danlos Syndromes)은 콜라겐(collagen)의 합성 또는 조립 과정의 결함으로 인해 발생하는 유전성 결합조직 질환군입니다. 이로 인해 피부 과신전, 관절 과가동성 등의 증상이 나타납니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 10,\n            \"questions\": [\n                {\n                    \"question_number\": \"21\",\n                    \"question_text\": \"<다음 보기>을 읽고, Common forms of alteration in chromosome structure에 대한 서술로서 가장 알맞은 것을 하나 고르시오.\\n<다음 보기>\\n46,XY,r(14)\",\n                    \"answer\": \"1\",\n                    \"explanation\": \"핵형 표기 '46,XY,r(14)'는 전체 염색체 수는 46개, 성염색체는 XY이며, 14번 염색체 하나가 고리 모양(ring chromosome)을 형성했음을 의미합니다. 'r'은 ring을 나타내는 기호입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"결실(deletion)은 'del'로 표기합니다.\",\n                        \"3번\": \"역위(inversion)는 'inv'로 표기합니다.\",\n                        \"4번\": \"등완 염색체(isochromosome)는 'i'로 표기합니다.\",\n                        \"5번\": \"전위(translocation)는 't'로 표기합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"22\",\n                    \"question_text\": \"다음은 Familial Hypercholesterolemia 에 대한 설명이다. 알맞지 않은 것을 하나 고르시오.\\n1) a \\\"receptor disease\\\"\\n2) a mutation in the gene encoding the receptor for high density lipoprotein (HDL), which is involved in the transport and metabolism of cholesterol.\\n3) premature atherosclerosis\\n4) myocardial infarction.\\n5) possibly the most frequent mendelian disorder.\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"가족성 고콜레스테롤혈증(Familial Hypercholesterolemia)은 저밀도 지단백(LDL) 수용체 유전자의 돌연변이로 인해 발생합니다. 고밀도 지단백(HDL) 수용체가 아닌 LDL 수용체의 결함이 원인입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"LDL 수용체의 기능 장애로 발생하므로 '수용체 질환'으로 분류됩니다.\",\n                        \"3번\": \"혈중 LDL 콜레스테롤 수치가 높아 조기에 죽상경화증이 발생합니다.\",\n                        \"4번\": \"죽상경화증의 합병증으로 심근경색의 위험이 높습니다.\",\n                        \"5번\": \"가장 흔한 멘델 유전 질환 중 하나로 알려져 있습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"23\",\n                    \"question_text\": \"다음설명을 읽고 알맞은 진단명 (A) 을 하나 고르시오.\\n■ ( A ) is caused by an inability to metabolize GM2gangliosidesduetolackof the α subunit of lysosom... GM2gangliosidesaccumulateinthecentralnervoussystemandcauseseverementalretardation,blindne...\",\n                    \"answer\": \"3\",\n                    \"explanation\": \"설명은 리소좀 효소인 헥소사미니다제 A의 알파 소단위 결핍으로 인해 GM2 강글리오시드가 중추신경계에 축적되어 심각한 정신 지체와 실명을 유발하는 질환을 기술하고 있습니다. 이는 테이-삭스병(Tay-Sachs disease)의 특징입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"고셔병은 글루코세레브로시드 축적이 원인입니다.\",\n                        \"2번\": \"니만-피크병은 스핑고미엘린 축적이 원인입니다.\",\n                        \"4번\": \"뮤코다당체증은 뮤코다당류(글리코사미노글리칸) 축적이 원인입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 11,\n            \"questions\": [\n                {\n                    \"question_number\": \"24\",\n                    \"question_text\": \"다음 설명을 읽고 알맞은 진단명 (A)을 하나 고르시오.\\n■ ( A ) types A and B are caused by a deficiency of sphingomyelinase. In the more severe type A variant, accumulation of sphingomyelin in the nervous system results in neuronal damage.\",\n                    \"answer\": \"4\",\n                    \"explanation\": \"스핑고미엘린분해효소(sphingomyelinase) 결핍으로 인해 스핑고미엘린이 축적되는 질환은 니만-피크병(Niemann-Pick disease) A형과 B형입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"테이-삭스병은 헥소사미니다제 A 결핍이 원인입니다.\",\n                        \"2번\": \"헐러 증후군은 알파-L-이두로니다제 결핍이 원인입니다.\",\n                        \"3번\": \"고셔병은 글루코세레브로시다제 결핍이 원인입니다.\",\n                        \"5번\": \"헌터 증후군은 이두로네이트 설파타제 결핍이 원인입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"25\",\n                    \"question_text\": \"다음 그림은 Gaucher disease in bone marrow 에 대한 것이다. Gaucher cell cytoplasm 에 축적된 물질을 하나 적으시오.(영어로 답할 것) (Image B: 주름진 종이 모양의 세포질을 가진 대식세포)\",\n                    \"answer\": \"Glucocerebroside\",\n                    \"explanation\": \"고셔병(Gaucher disease)은 글루코세레브로시다제(glucocerebrosidase) 효소의 결핍으로 인해 기질인 글루코세레브로시드(glucocerebroside)가 대식세포에 축적되어 발생합니다. 이로 인해 대식세포는 주름진 휴지 모양의 특징적인 '고셔 세포'로 변합니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"26\",\n                    \"question_text\": \"다음의 Virchow Triad in thrombosis 를 구성하는 factors 중에서 thrombosis 를 일으키는 가장 중요한 factor를 하나 고르시오.\",\n                    \"answer\": \"1\",\n                    \"explanation\": \"버코우 삼요소(Virchow's triad)는 혈전증의 세 가지 주요 원인인 내피 손상(endothelial injury), 비정상적 혈류(stasis or turbulence), 그리고 혈액 과응고성(hypercoagulability)을 말합니다. 이 중에서 내피 손상이 혈전 형성의 가장 중요하고 주된 유발 요인으로 간주됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"혈류 정체는 중요한 요인이지만 내피 손상만큼 결정적이지는 않습니다.\",\n                        \"3번\": \"난류는 내피 손상을 유발할 수 있는 요인입니다.\",\n                        \"4번\": \"혈액 과응고성은 중요한 요인이지만, 보통 내피 손상이 동반될 때 혈전증으로 이어집니다.\",\n                        \"5번\": \"혈액 저응고성은 출혈 경향을 높이며 혈전증의 원인이 아닙니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 12,\n            \"questions\": [\n                {\n                    \"question_number\": \"27\",\n                    \"question_text\": \"다음 설명문항중에서 알맞지 않은 것을 하나 고르시오.\\n1) Geneticsex - determined by the presence or absence of Y chromosome\\n2) Gonadalsex - histologic characteristics of gonads\\n3) Phenotypic sex - presence of derivatives of the Mullerian or wolffian ducts\\n4) Genital sex - appearance of external genitalia\\n5) Pseudohermaphroditism 의 정의는disagreement between phenotype & gonadal sex 이다.\",\n                    \"answer\": \"3\",\n                    \"explanation\": \"표현형 성(Phenotypic sex)은 외부 생식기의 모양과 이차 성징을 포함한 전반적인 외형에 의해 결정됩니다. 뮐러관 또는 볼프관 유도체의 존재 여부는 내부 생식기의 발달 상태를 나타내며, 표현형 성의 일부이지만 전체 정의는 아닙니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"유전적 성은 Y 염색체의 유무로 결정됩니다.\",\n                        \"2번\": \"생식샘 성은 고환 또는 난소의 조직학적 특징으로 결정됩니다.\",\n                        \"4번\": \"생식기 성은 외부 생식기의 모양으로 결정됩니다.\",\n                        \"5번\": \"가성반음양(Pseudohermaphroditism)은 생식샘 성과 표현형 성이 불일치하는 상태를 정의합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"28\",\n                    \"question_text\": \"<다음 설명>을 읽고 가장 알맞은 진단명을 하나 고르시오.\\n<다음 설명>\\n“menopause occurs before menarche”\",\n                    \"answer\": \"3\",\n                    \"explanation\": \"“초경 전에 폐경이 온다”는 표현은 난소의 기능이 조기에 소실되어 생식 능력을 갖기 전에 상실되는 상태를 비유적으로 나타냅니다. 이는 터너 증후군(Turner syndrome)에서 나타나는 생식샘 형성 장애(gonadal dysgenesis)와 조기 난소 부전의 특징적인 설명입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"클라인펠터 증후군은 남성에서 발생하는 성염색체 이상입니다.\",\n                        \"2번\": \"다운 증후군은 21번 삼염색체성입니다.\",\n                        \"4번\": \"취약 X 증후군은 주로 남성 지적 장애의 원인입니다.\",\n                        \"5번\": \"엔젤만 증후군은 신경발달 장애입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"29\",\n                    \"question_text\": \"다음 설명을 읽고 알맞은 것(A)을 하나 고르시오.\\n■ ( A ) involves transcriptional silencing of the paternal or maternal copies of certain genes during gametogenesis. For such genes, only one functional copy exists in the individual. Loss of the functional (not imprinted) allele by deletion gives rise to diseases.\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"제시된 설명은 생식세포 형성 과정에서 특정 유전자의 부계 또는 모계 대립유전자가 전사적으로 침묵되는 현상을 기술하고 있습니다. 이로 인해 개체는 단 하나의 기능적 유전자 사본만을 갖게 되며, 이 기능적 대립유전자의 소실은 질병을 유발합니다. 이는 유전체 각인(genomic imprinting)의 정의입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"기능획득 돌연변이(gain-of-function mutations)는 유전자 산물의 기능이 비정상적으로 활성화되는 것입니다.\",\n                        \"3번\": \"전돌연변이(premutation)는 불안정한 반복 서열이 완전 돌연변이로 확장될 수 있는 상태를 말합니다.\",\n                        \"4\" : \"결실(deletion)은 유전체의 일부가 소실되는 것입니다.\",\n                        \"5번\": \"복합 다유전자 질환(Complex multigenic disorders)은 여러 유전자와 환경 요인이 복합적으로 작용하는 질환입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 23,\n            \"questions\": [\n                {\n                    \"question_number\": \"51\",\n                    \"question_text\": \"급성염증 반응에 의해 야기된 질환과 손상에 연관된 세포와 분자들 조합이 아닌것은?\\n1) 파혈쇼크 (Septic shock) - Cytokines\\n2) 천식 (Asthma) – Eosinophils; IgE antibodies\\n3) 관절염 (Arthritis) - Macrophages; Fibroblasts\\n4) 사구체염 (Glomerulonephritis) – Antibodies and complement; neutrophils, monocytes\\n5) 급성호흡곤란증후군 (Acute respiratory distress syndrome) – Neutrophils\",\n                    \"answer\": \"3\",\n                    \"explanation\": \"관절염(Arthritis), 특히 류마티스 관절염은 주로 림프구와 대식세포가 관여하는 만성 염증성 질환입니다. 섬유아세포(Fibroblasts)는 만성 염증과 치유 과정에서의 섬유화에 관여하므로, 급성 염증의 대표적인 조합으로 보기 어렵습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"패혈성 쇼크는 사이토카인 폭풍에 의해 매개되는 전형적인 전신성 급성 염증 반응입니다.\",\n                        \"2번\": \"알레르기성 천식은 IgE 항체와 호산구(Eosinophils)가 주도하는 급성 과민 반응입니다.\",\n                        \"4번\": \"급성 사구체신염은 항체, 보체, 호중구 등이 관여하는 급성 염증 반응입니다.\",\n                        \"5번\": \"급성 호흡곤란 증후군은 호중구에 의한 폐 손상이 특징적인 급성 염증 질환입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 8,\n                            \"relevance_reason\": \"강의자료의 'TABLE 3.1 Diseases Caused by Inflammatory Reactions' 표에 문제의 보기들이 대부분 포함되어 있습니다. 이 표에서 관절염(Arthritis)은 만성(Chronic) 염증으로 분류되어 있어 답을 찾는 데 결정적인 근거를 제공합니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"52\",\n                    \"question_text\": \"급성염증반응에서 혈관 투과성의 증가, 백혈구 (leukocyte)의 부착 (adhesion)과 활성 (activation)에 모두 관여하는 화학매개체는?\",\n                    \"answer\": \"5\",\n                    \"explanation\": \"혈소판활성인자(Platelet-activating factor, PAF)는 혈관 확장, 혈관 투과성 증가, 백혈구 부착, 화학주성, 활성화 등 매우 광범위하고 강력한 염증 매개 작용을 나타내어 문제에서 언급된 모든 기능에 관여합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"케모카인은 주로 백혈구의 부착과 이동(화학주성)에 관여합니다.\",\n                        \"2번\": \"히스타민은 주로 혈관 확장과 투과성 증가에 관여합니다.\",\n                        \"3번\": \"류코트리엔은 종류에 따라 혈관 수축, 투과성 증가(LTC4, D4, E4) 또는 화학주성(LTB4)에 관여합니다.\",\n                        \"4번\": \"종양괴사인자(TNF)는 백혈구 부착과 활성화를 유도하는 중요한 사이토카인이지만, PAF처럼 직접적으로 모든 기능에 관여하지는 않습니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 90,\n                            \"relevance_reason\": \"강의자료의 'TABLE 3.5 Principal Mediators of Inflammation' 표에서 혈소판활성인자(Platelet-activating factor)의 작용(Action)으로 'Vasodilation, increased vascular permeability, leukocyte adhesion, chemotaxis, degranulation, oxidative burst'가 명시되어 있어, 문제에서 요구하는 모든 기능에 관여함을 확인할 수 있습니다.\"\n                        },\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 119,\n                            \"relevance_reason\": \"기타 염증 매개체(Other Mediators of Inflammation) 슬라이드에서 혈소판활성인자(PAF)를 언급하고 있습니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"53\",\n                    \"question_text\": \"급성 염증에 중심적인 역할을 하며, 아래 H&E 그림에서 주로 관찰되며, () 안에 들어갈 세포는? (Image C: 염증 반응 시간 경과에 따른 세포 침윤 그래프)\",\n                    \"answer\": \"1\",\n                    \"explanation\": \"급성 염증 반응의 초기 단계(6-24시간)에는 호중구(Neutrophils)가 가장 먼저, 그리고 가장 많이 염증 부위로 동원됩니다. 제시된 그래프는 시간에 따른 세포 침윤을 보여주며, 가장 먼저 최고치에 도달하는 세포는 호중구입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"호산구는 알레르기나 기생충 감염 시 주로 나타납니다.\",\n                        \"3번\": \"비만세포는 조직에 상주하며 초기 반응에 관여하지만, 침윤하는 주된 세포는 아닙니다.\",\n                        \"4번\": \"대식세포는 호중구 다음, 즉 염증의 후기 단계(24-48시간 이후)에 주된 세포로 나타납니다.\",\n                        \"5번\": \"형질세포는 만성 염증에서 주로 관찰됩니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 54,\n                            \"relevance_reason\": \"슬라이드에서 '대부분의 acute inflammation에서 neutrophils은 처음 6~24시간 동안 염증성 침윤에서 우세하고 24~48시간 내에는 monocytes로 대체됨'이라고 명확하게 설명하고 있습니다.\"\n                        },\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 55,\n                            \"relevance_reason\": \"문제에 제시된 것과 동일한 그래프(Figure 3.6 C)와 관련 조직 사진을 보여주며, 초기 침윤 세포가 호중구(neutrophilic infiltrates)임을 시각적으로 확인시켜 줍니다.\"\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 24,\n            \"questions\": [\n                {\n                    \"question_number\": \"54\",\n                    \"question_text\": \"급성염증의 형태학적 양상 중에 하나로세포의 손상에 의해 형성된 공간 또는 복막 (peritoneum), 흉막 (pleura), 심막 (pericardium)에 의해 둘러싸인 체강 (body cavities)으로 세포수가 적은 체액의 삼출이 뚜렷한 것을 설명하는 것은? (Image: 피부의 물집 사진)\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"장액성 염증(Serous inflammation)은 세포 성분이 거의 없는 묽은 체액(장액)의 삼출이 특징입니다. 이러한 삼출액은 피부의 물집(skin blister)처럼 세포 손상으로 생긴 공간이나 체강에 고입니다. 사진의 물집은 장액성 염증의 전형적인 예입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"궤양(Ulcer)은 조직 표면의 국소적 결손입니다.\",\n                        \"3번\": \"화농성 염증(Purulent inflammation)은 고름(주로 호중구)이 생성되는 것이 특징입니다.\",\n                        \"4번\": \"완전 용해(Complete resolution)는 염증의 결과 중 하나이지, 형태학적 양상이 아닙니다.\",\n                        \"5번\": \"섬유소성 염증(Fibrinous inflammation)은 섬유소(fibrin)가 풍부한 삼출물이 특징입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 126,\n                            \"relevance_reason\": \"'Serous Inflammation' 슬라이드에서 'exudation of cell-poor fluid into spaces'라고 정의하여 문제의 설명과 정확히 일치합니다.\"\n                        },\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 127,\n                            \"relevance_reason\": \"문제에 제시된 피부 물집 사진(fig 3.13)과 동일한 사진을 보여주며 장액성 염증의 예시로 설명하고 있습니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"55\",\n                    \"question_text\": \"아래 H&E 소견을 보일 수 있는 대표적인 질환은? (Image: 건락성 괴사를 동반한 육아종 사진)\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"사진은 중심부의 무정형 호산성 물질로 구성된 건락성 괴사(caseous necrosis)와 다핵의 랑한스 거대세포(Langhans giant cell)를 포함하는 육아종(granuloma)을 보여줍니다. 이는 결핵(Tuberculosis)의 가장 특징적인 조직학적 소견입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"나병(leprosy)은 종류에 따라 비건락성 육아종을 형성합니다.\",\n                        \"3번\": \"이물질(Foreign body) 육아종은 이물질을 둘러싸는 형태로 나타납니다.\",\n                        \"4번\": \"크론병(Crohn disease)은 비건락성 육아종이 특징입니다.\",\n                        \"5번\": \"사르코이드증(sarcoidosis)은 경계가 명확한 비건락성 육아종이 특징입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 25,\n            \"questions\": [\n                {\n                    \"question_number\": \"56\",\n                    \"question_text\": \"만성 염증의 형태학적 소견에 대한 설명 중 틀린 것은?\\n1) 대식세포(Macrophage)에 의한 육아종성 염증 (Granulomatous inflammation)\\n2) 세정맥의 울혈 (Congestion)과 부종 (Edema)\\n3) 신생혈관의 증식과 섬유화 (Fibrosis)로 대체되는 치유반응\\n4) 지속적 손상인자나 염증세포에 의해 유발되는 조직 손상\\n5) 림프구 (Lymphocytes), 형질세포 (Plasma cells), 대식세포 (Macrophage)와 같은 단핵세포 (Mononuclear cells) 침윤\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"세정맥의 울혈(Congestion)과 부종(Edema)은 혈관 확장 및 투과성 증가로 인해 발생하는 급성 염증의 특징적인 소견입니다. 만성 염증의 주된 형태학적 특징은 단핵세포 침윤, 조직 파괴, 그리고 섬유화 및 혈관신생을 통한 치유 시도입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"육아종성 염증은 만성 염증의 한 형태입니다.\",\n                        \"3번\": \"혈관신생과 섬유화는 만성 염증에서 조직 손상과 복구가 동시에 일어나는 것을 보여주는 특징입니다.\",\n                        \"4번\": \"만성 염증은 지속적인 자극에 의한 조직 손상을 동반합니다.\",\n                        \"5번\": \"림프구, 형질세포, 대식세포와 같은 단핵구의 침윤은 만성 염증의 정의에 해당하는 소견입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 10,\n                            \"relevance_reason\": \"'Acute and Chronic inflammation' 슬라이드에서 급성 염증의 특징으로 'Exudation of fluid and plasma proteins (edema)'를, 만성 염증의 특징으로 'Lymphocytes and macrophages, Proliferation of blood vessels, fibrosis, and tissue necrosis'를 명시하여 둘을 명확히 구분하고 있습니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"57\",\n                    \"question_text\": \"그림에서 까만색 동그라미로 표시한 세포를 적으시오 (주관식) (Image: 두 개의 엽으로 나뉜 핵과 호산성 과립을 가진 세포)\",\n                    \"answer\": \"호산구; Eosinophils; Eosinophil\",\n                    \"explanation\": \"사진에서 동그라미로 표시된 세포는 두 개의 엽으로 나뉜 핵과 세포질을 가득 채운 크고 붉은(호산성) 과립을 가지고 있습니다. 이는 호산구(Eosinophil)의 전형적인 형태학적 특징입니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 56,\n                            \"relevance_reason\": \"슬라이드에서 'In helminthic infections & allergic reactions: eosinophils may be the main cell type'이라고 설명하여 호산구가 특정 염증 반응의 주요 세포임을 언급합니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"58\",\n                    \"question_text\": \"해당 설명에 부합하는 세포를 적으시오 (주관식)\\n- 결합조직 (Connective tissues)에 광범위하게 분포\\n- 급성과 만성염증에 모두 관여\\n- IgE 항체 (Antibody)에 Fc 부분과 결합하는 수용체FcεRI을 발현함\\n- 탈과립되면서 히스타민 (Histamine)과 프로스타글란딘 (Prostaglandins) 같은 매개체를 분비함\\n- 아나필락시스 쇼크 (Anaphylactic shock)를 일으킬 수 있음\",\n                    \"answer\": \"비만세포; Mast cells; Mast cell\",\n                    \"explanation\": \"제시된 설명은 비만세포(Mast cell)의 특징과 정확히 일치합니다. 비만세포는 결합조직에 상주하며, 표면에 IgE 수용체를 가지고 있어 알레르겐과 반응 시 히스타민 등을 분비하여 제1형 과민반응(아나필락시스 포함)을 일으키는 핵심적인 세포입니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 94,\n                            \"relevance_reason\": \"'Vasoactive Amines: Histamine' 슬라이드에서 히스타민의 주요 공급원(Source)으로 'mast cells'을, 분비 자극(Stimuli)으로 'Binding of antigen to IgE antibodies'를 명시하여 문제의 설명과 직접적으로 연결됩니다.\"\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 26,\n            \"questions\": [\n                {\n                    \"question_number\": \"59\",\n                    \"question_text\": \"다음 설명에 해당하는 세포는?\\n- 염증반응을 증폭하거나 제한할 수 있는 Cytokine, 내피세포 및 섬유아세포의 증식 및 콜라겐 합성을 자극하는 growth factors, 결합조직을 리모델링하는 효소를 생성함.\\n- 염증이 가라앉은 후 만성 염증 및 조직 복구의 중요한 세포\\n- 골수의 hematopoietic stem cell 에서 유래\",\n                    \"answer\": \"4\",\n                    \"explanation\": \"제시된 설명은 대식세포(Macrophage)의 다재다능한 역할을 기술하고 있습니다. 대식세포는 골수 유래 단핵구로부터 분화하며, 다양한 사이토카인과 성장인자를 분비하여 염증을 조절하고, 만성 염증과 조직 복구 과정 모두에서 중심적인 역할을 수행합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"호산구는 주로 알레르기/기생충 반응에 관여합니다.\",\n                        \"2번\": \"호중구는 급성 염증의 초기 반응을 주도합니다.\",\n                        \"3번\": \"단핵구는 대식세포의 전구세포입니다.\",\n                        \"5번\": \"형질세포는 항체 생산을 담당합니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 82,\n                            \"relevance_reason\": \"'Other Functional Responses of Activated Leukocytes' 슬라이드에서 대식세포가 염증 반응을 증폭/제한하고, 성장인자를 통해 섬유아세포 증식과 콜라겐 합성을 자극하며, 만성 염증과 조직 복구의 중요한 세포라고 설명하여 문제의 내용과 정확히 일치합니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"60\",\n                    \"question_text\": \"조직 손상 후 완전한 수복이 되는데 가장 중요한 사항은?\",\n                    \"answer\": \"5\",\n                    \"explanation\": \"손상된 조직이 흉터 없이 완전하게 원래 구조로 복구(재생, regeneration)되기 위해서는, 세포들이 증식하여 제자리를 찾아갈 수 있도록 지지해주는 기존의 구조적 틀(결합조직 기질, structural framework)이 보존되어 있어야 합니다. 이 구조적 틀이 파괴되면 재생이 불가능하고 흉터(섬유화)가 형성됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"실질세포의 증식은 중요하지만, 구조적 틀이 없으면 무질서하게 증식합니다.\",\n                        \"2번\": \"평활근세포는 특정 조직의 구성 요소입니다.\",\n                        \"3번\": \"근섬유모세포는 상처 수축과 흉터 형성에 관여합니다.\",\n                        \"4번\": \"혈관내피세포는 혈관신생에 중요합니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 13,\n                            \"relevance_reason\": \"'Tissue repair' 슬라이드에서 조직 복구가 '재생(regeneration)' 또는 '결손 부위가 connective tissue (scarring)으로 채워지는 과정'으로 나뉨을 설명합니다. 이 둘을 결정하는 가장 중요한 요인이 바로 구조적 틀의 보존 여부입니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"61\",\n                    \"question_text\": \"산화질소 (Nitric oxide)는 자극에 의해 혈관이 확장되고 ()의 유도에 의해 기존 혈관의 투과성이 증가된다. ( ) 는?\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"산화질소(NO)는 강력한 혈관 확장 물질입니다. 혈관 투과성을 증가시키는 가장 중요한 매개체 중 하나는 혈관내피성장인자(VEGF, vascular endothelial growth factor)입니다. VEGF는 염증 및 조직 복구 과정에서 혈관 투과성을 높이고 혈관신생을 유도합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"FGFR은 섬유아세포 성장인자 수용체입니다.\",\n                        \"3번\": \"EGFR은 상피세포 성장인자 수용체입니다.\",\n                        \"4번\": \"TGF-β는 주로 섬유화와 염증 억제에 관여하는 사이토카인입니다.\",\n                        \"5번\": \"PDGF는 혈소판 유래 성장인자로, 세포 증식에 관여합니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 29,\n                            \"relevance_reason\": \"'Changes in Vascular Flow and Caliber' 슬라이드에서 혈관 확장을 유발하는 화학 매개체로 'histamine and nitric oxide'를 명시하고 있습니다.\"\n                        },\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 72,\n                            \"relevance_reason\": \"'Nitric Oxide' 슬라이드에서 NO가 혈관 긴장도(vascular tone)를 유지한다고 설명하여 혈관 확장에 관여함을 보여줍니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"62\",\n                    \"question_text\": \"피부창상의 치유에서 일차유합 (First Intention) 과 달리 이차유합 (Second Intention)에 의한 치유과정에서의 중요한 특징은?\",\n                    \"answer\": \"5\",\n                    \"explanation\": \"이차유합은 조직 결손이 큰 상처에서 일어나며, 일차유합에 비해 더 많은 육아조직 형성과 더 강한 염증 반응이 특징입니다. 하지만 가장 구별되는 특징은 근섬유모세포(myofibroblast)에 의해 상처의 크기가 줄어드는 상처수축(Wound contraction) 현상입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"염증반응은 일차유합에서도 일어나며, 이차유합에서 더 강할 뿐입니다.\",\n                        \"2번\": \"혈전형성은 모든 상처 치유의 시작입니다.\",\n                        \"3번\": \"신생혈관 형성은 육아조직의 일부로 두 유합 과정 모두에서 일어납니다.\",\n                        \"4번\": \"육아조직 형성은 두 유합 과정 모두에서 일어나며, 이차유합에서 더 많을 뿐입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 27,\n            \"questions\": [\n                {\n                    \"question_number\": \"63\",\n                    \"question_text\": \"그림에서 가장 많이 관찰되는 세포는? (Image: 핵이 한쪽으로 치우쳐 있고 세포질이 풍부한 세포들의 침윤)\",\n                    \"answer\": \"5\",\n                    \"explanation\": \"사진에 보이는 세포들은 핵이 한쪽으로 치우쳐 있고(eccentric nucleus), 핵 주변에 밝은 부위(perinuclear hof)가 있으며, 세포질이 풍부하고 호염기성인 특징을 가집니다. 이는 항체를 활발히 생산하는 형질세포(Plasma cells)의 전형적인 모습입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"호중구는 다엽핵을 가집니다.\",\n                        \"2번\": \"호산구는 이엽핵과 붉은 과립을 가집니다.\",\n                        \"3번\": \"비만세포는 크고 짙은 과립으로 핵이 잘 보이지 않습니다.\",\n                        \"4번\": \"대식세포는 핵 모양이 더 불규칙하고 세포질에 포식한 물질이 보일 수 있습니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 56,\n                            \"relevance_reason\": \"슬라이드에서 특정 과민반응에서 'activated lymphocytes, macrophages, and plasma cells'가 나타난다고 언급하여, 형질세포가 염증 반응에 관여하는 세포임을 설명합니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"64\",\n                    \"question_text\": \"염증반응에서 백혈구 (leukocyte)의 상피세포에 부착과 혈관을 통한 이주를 촉진함으로써 백혈구 동원에 핵심적인 역할을 하며, 발열 (Fever)와 관련있는 매개체는?\",\n                    \"answer\": \"3\",\n                    \"explanation\": \"종양괴사인자(TNF)와 인터루킨-1(IL-1)은 내피세포를 활성화시켜 백혈구 부착 분자의 발현을 증가시킴으로써 백혈구 동원에 핵심적인 역할을 합니다. 또한 이들은 시상하부에 작용하여 프로스타글란딘 생성을 유도하고 발열을 일으키는 주요 내인성 발열원입니다. IL-6 역시 발열을 포함한 전신성 급성기 반응의 주요 매개체입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"ROS는 살균 작용을 하지만 백혈구 동원이나 발열의 주 매개체는 아닙니다.\",\n                        \"2번\": \"C3 & C5는 보체 성분으로 백혈구 동원에는 관여하지만 발열의 주 원인은 아닙니다.\",\n                        \"4번\": \"브라디키닌은 혈관 투과성 증가와 통증에 주로 관여합니다.\",\n                        \"5번\": \"프로스타글란딘은 발열과 통증의 최종 매개체이지만, 백혈구 동원의 핵심 역할은 TNF/IL-1이 수행합니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 108,\n                            \"relevance_reason\": \"'Tumor Necrosis Factor and Interleukin-1' 슬라이드에서 TNF와 IL-1이 'critical roles in leukocyte recruitment'를 수행한다고 명시합니다.\"\n                        },\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 110,\n                            \"relevance_reason\": \"TNF, IL-1, IL-6의 전신 효과를 보여주는 그림에서 이들이 뇌에 작용하여 'Fever'를 유발한다고 명확히 보여줍니다.\"\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"65\",\n                    \"question_text\": \"The main phases of cutaneous wound healing are (), formation of granulation tissue, and extracellular matrix (ECM) remodeling. () 안에 들어갈 말을 적어라\",\n                    \"answer\": \"염증; Inflammation\",\n                    \"explanation\": \"피부 상처 치유 과정은 크게 세 단계로 나뉩니다. 첫 번째 단계는 지혈과 감염 방어를 위한 염증(Inflammation) 단계, 두 번째는 육아조직 형성과 상피화가 일어나는 증식(Proliferation) 단계, 마지막은 조직이 재구성되는 성숙 및 재형성(Remodeling) 단계입니다. 따라서 빈칸에 들어갈 말은 염증입니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"20250418_1_2교시_염증과 수복_파트1.pdf\",\n                            \"lesson_page\": 135,\n                            \"relevance_reason\": \"'Outcomes of acute inflammation' 그림에서 손상(INJURY)이 급성 염증(ACUTE INFLAMMATION)을 유발하고, 이것이 치유(Healing)로 이어지는 과정을 보여주어, 염증이 치유의 선행 단계임을 알 수 있습니다.\"\n                        }\n                    ]\n                }\n            ]\n        }\n    ],\n    \"summary\": {\n        \"total_jokbo_pages\": 39,\n        \"total_questions\": 85,\n        \"total_related_slides\": 26\n    }\n}",
+  "response_length": 48903,
+  "parsed_successfully": true,
+  "parsed_data": {
+    "jokbo_pages": [
+      {
+        "jokbo_page": 1,
+        "questions": [
+          {
+            "question_number": "1",
+            "question_text": "<다음문장>의 (A)에 알맞은 용어를 하나 적으시오.(영어로 답할 것)\n<다음문장>\nNormal fluid (A) encompasses maintenance of vessel wall integrity as well as intravascular pressure and osmolarity within certain physiologic ranges.",
+            "answer": "Homeostasis",
+            "explanation": "제시된 문장은 혈관벽의 온전성, 혈관 내 압력 및 삼투압을 생리적 범위 내에서 유지하는 정상적인 체액 균형 상태를 설명하고 있으며, 이는 항상성(Homeostasis)의 정의에 해당합니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "2",
+            "question_text": "다음은 Pulmonary edema 에 대한 설명이다. 옳지 않은 것을 하나 고르시오.\n1) left ventricular failure, renal failure, acute respiratory distress syndrome 에 의해서 pulmonary edema가 생길 수 있다.\n2) acute respiratory distress syndrome 에 의해서 pulmonary edema가 생길 수 있다.\n3) pulmonary infections, & hypersensitivity reactions에 의해서 pulmonary edema 에 의해서도 pulmonary edema가 생길 수 있다.\n4) pulmonary edema가 있는 lung 은 lung normal weight 보다 가벼워진다.\n5) frothy, blood-tinged fluid w/ a mixture of air, edema fluid, and extravasated RBCs 가 관찰된다.",
+            "answer": "4",
+            "explanation": "폐부종(Pulmonary edema)은 폐에 체액이 축적되는 상태로, 폐의 무게가 정상보다 증가합니다. 따라서 폐가 더 가벼워진다는 설명은 옳지 않습니다.",
+            "wrong_answer_explanations": {
+              "1번": "좌심실 부전, 신부전, 급성 호흡곤란 증후군(ARDS)은 모두 폐부종을 유발하는 주요 원인입니다.",
+              "2번": "ARDS는 폐포-모세혈관 막의 손상으로 인해 직접적으로 폐부종을 일으킬 수 있습니다.",
+              "3번": "폐 감염 및 과민반응은 염증과 혈관 투과성 증가를 유발하여 폐부종을 일으킬 수 있습니다.",
+              "5번": "폐부종 시 관찰되는 체액은 공기, 부종액, 혈관 밖으로 나온 적혈구가 섞여 거품이 있고 혈액이 섞인 양상을 보일 수 있습니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 10,
+                "relevance_reason": "급성 염증의 특징으로 'Exudation of fluid and plasma proteins (edema)'를 언급하여 부종이 염증의 주요 구성 요소임을 설명합니다."
+              },
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 30,
+                "relevance_reason": "급성 염증의 특징인 혈관 투과성 증가로 인해 부종(edema)이 발생함을 설명하고 있습니다."
+              }
+            ]
+          },
+          {
+            "question_number": "3",
+            "question_text": "다음은 Hyperemia에 대한 설명이다. 옳지 않은 것을 하나 고르시오.\n1) an active process resulting from augmented tissue inflow because of arteriolar dilation,\n2) skeletal muscle during exercise 에서 생긴다.\n3) inflammation sites 에서 생긴다.\n4) redder because of the engorgement of vessels with oxygenated blood.\n5) a passive process resulting from impaired outflow from a tissue.",
+            "answer": "5",
+            "explanation": "5번 보기는 조직으로부터의 혈류 유출 장애로 인한 수동적 과정을 설명하며, 이는 충혈(Hyperemia)이 아닌 울혈(Congestion)의 정의입니다. 충혈은 세동맥 확장으로 인한 능동적인 혈류 유입 증가 과정입니다.",
+            "wrong_answer_explanations": {
+              "1번": "충혈은 세동맥 확장으로 인한 능동적인 조직 혈류 유입 증가 과정이라는 정확한 설명입니다.",
+              "2번": "운동 중인 골격근은 충혈의 대표적인 생리적 예시입니다.",
+              "3번": "염증 부위에서는 혈관 확장으로 인해 충혈이 발생합니다.",
+              "4번": "산소가 풍부한 혈액의 유입 증가로 조직이 붉게 보이는 것은 충혈의 특징입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 29,
+                "relevance_reason": "급성 염증에서의 혈관 변화를 설명하며 'Vasodilation of arterioles → increased blood flow → heat and the redness (erythema)'라고 기술하여 충혈의 기전과 증상을 설명합니다."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 2,
+        "questions": [
+          {
+            "question_number": "4",
+            "question_text": "다음 사진의 병리소견으로 옳은 것을 하나 고르시오. (Image B: 뇌 실질 내 출혈 소견)",
+            "answer": "2",
+            "explanation": "제시된 사진은 뇌 실질 내에 혈액이 고여있는 소견을 보여주므로, 뇌내출혈(intracerebral hemorrhage)에 해당합니다.",
+            "wrong_answer_explanations": {
+              "1번": "점상출혈(petechial hemorrhage)은 작은 점 모양의 출혈이며, 사진은 큰 혈종을 보입니다. 또한 장기는 대장 점막이 아닌 뇌입니다.",
+              "3번": "뇌부종(intracerebral edema)은 출혈에 동반될 수 있으나, 사진의 주된 소견은 출혈 자체입니다.",
+              "4번": "폐울혈(pulmonary congestion)은 폐에서 발생하는 소견입니다.",
+              "5번": "만성 수동 간울혈(chronic passive congestion of liver)은 특징적인 '육두구 간(nutmeg liver)' 모양을 보이며, 사진과 다릅니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 3,
+        "questions": [
+          {
+            "question_number": "5",
+            "question_text": "다음 그림의 장기와 진단으로 알맞은 것을 하나 고르시오. (Image B: 비장의 창백한 쐐기 모양 경색 소견)",
+            "answer": "4",
+            "explanation": "사진은 비장(spleen)의 전형적인 모양을 보여주며, 쐐기 모양의 창백한 병변은 비장과 같이 단일 종말 동맥 순환을 갖는 고형 장기에서 흔히 발생하는 빈혈성 경색(white infarct) 소견입니다.",
+            "wrong_answer_explanations": {
+              "1번": "출혈성 경색(red infarct)은 주로 폐와 같이 이중 순환을 갖는 조직에서 발생하며, 병변이 붉은색을 띕니다.",
+              "2번": "장기는 폐가 아니며, 경색은 창백한(white) 형태입니다.",
+              "3번": "장기는 신장이 아닌 비장입니다.",
+              "5번": "경색은 창백한(white) 형태로, 출혈성(red)이 아닙니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 14,
+                "relevance_reason": "염증의 원인으로 'Tissue necrosis'와 허혈(ischemia)을 언급하고 있어, 경색(infarction)이 조직 괴사의 한 형태로서 염증을 유발할 수 있음을 연결 지을 수 있습니다."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 4,
+        "questions": [
+          {
+            "question_number": "6",
+            "question_text": "다음 그림은 major pathogenic pathways in septic shock 에 대한 것이다. “A” 에 알맞은 용어를 하나 적으시오.(영어로 답할 것) (Image: 패혈성 쇼크 기전 도표)",
+            "answer": "Immunosuppression",
+            "explanation": "패혈성 쇼크의 병태생리에서, 초기의 과도한 전신성 염증 반응(SIRS) 이후에 보상적인 항염증 반응 증후군(CARS)이 나타나 면역억제(immunosuppression) 상태로 이어질 수 있습니다. 그림에서 이차 항염증 매개체들이 'A' 상자로 이어지며, 이는 면역억제를 나타냅니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 8,
+                "relevance_reason": "염증 반응에 의한 질병 표(TABLE 3.1)에서 'Septic shock'을 사이토카인(Cytokines)에 의해 매개되는 질환으로 명시하고 있습니다."
+              },
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 9,
+                "relevance_reason": "전신 염증에 대한 설명에서 파종성 세균 감염(Disseminated bacterial infections)이 패혈증(sepsis)을 야기할 수 있다고 기술합니다."
+              }
+            ]
+          },
+          {
+            "question_number": "7",
+            "question_text": "다음 그림의 장기와 진단으로 알맞은 것을 하나 고르시오. (Image A: 폐의 출혈성 쐐기 모양 경색 소견)",
+            "answer": "1",
+            "explanation": "사진은 폐(lung)에서 발생한 출혈성(red) 경색을 보여줍니다. 폐는 폐동맥과 기관지동맥의 이중 혈액 공급을 받기 때문에 출혈성 경색이 특징적으로 나타납니다.",
+            "wrong_answer_explanations": {
+              "2번": "경색 부위가 창백하지 않고 붉은 출혈성이므로 white infarct가 아닙니다.",
+              "3번": "장기는 신장이 아닙니다.",
+              "4번": "장기는 비장이 아닙니다.",
+              "5번": "장기는 비장이 아니며, 경색은 red infarct입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 14,
+                "relevance_reason": "염증의 원인 중 하나로 조직 괴사(Tissue necrosis)를 언급하고 있으며, 경색은 조직 괴사의 주요 원인 중 하나입니다."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 5,
+        "questions": [
+          {
+            "question_number": "8",
+            "question_text": "다음 문장에서 (A) 안에 알맞은 용어을 하나 적으시오.(영어로 답할 것)\n( A ) shoxk is caused by the host response to bacterial, viral or fungal infections; it is a systemic inflammatory condition characterized by endothelial cell activation, tissue edema, disseminated intravascular coagulation, and metabolic derangements that often lead to organ failure and death.",
+            "answer": "Septic",
+            "explanation": "제시된 문장은 감염에 대한 숙주 반응으로 발생하는 전신성 염증 상태를 설명하고 있으며, 이는 패혈성 쇼크(Septic shock)의 정의입니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 9,
+                "relevance_reason": "전신 염증에 대한 설명에서 파종성 세균 감염이 패혈증(sepsis)을 야기할 수 있다고 직접적으로 언급합니다."
+              }
+            ]
+          },
+          {
+            "question_number": "9",
+            "question_text": "<다음 문장>을 읽고 가장 알맞은 용어를 하나 적으시오.(영어로 답할 것)\na detached intravascular solid, liquid, or gaseous mass that is carried by the blood to a site distant from its point of origin",
+            "answer": "Embolism",
+            "explanation": "제시된 문장은 혈관 내 고체, 액체, 또는 기체 덩어리가 혈류를 따라 이동하여 원발 부위에서 떨어진 곳의 혈관을 막는 현상인 색전증(Embolism)의 고전적인 정의입니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "10",
+            "question_text": "다음 문장에서 (A) 안에 알맞은 용어를 하나 적으시오. (영어로만 답할 것)\nCentral nervous system infarction results in ( A ) necrosis.",
+            "answer": "Liquefactive",
+            "explanation": "중추신경계의 저산소성 손상은 특징적으로 액화 괴사(Liquefactive necrosis)를 유발합니다. 이는 죽은 조직이 효소에 의해 소화되어 액상의 점성 물질로 변하는 괴사 형태입니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 14,
+                "relevance_reason": "염증의 원인으로 조직 괴사(Tissue necrosis)를 언급하고 있어, 괴사의 한 종류인 액화 괴사와 관련이 있습니다. 다만, 특정 괴사 유형에 대한 상세 설명은 강의자료에 없습니다."
+              }
+            ]
+          },
+          {
+            "question_number": "11",
+            "question_text": "다음은 Factors That Influence Development of an Infarct 를 설명한 것이다. 알맞지 않는 것을 하나 고르시오.\n1) the nature of the vascular supply\n2) the rate of development of the occlusion\n3) the consistency of a given tissue\n4) the blood oxygen content\n5) the vulnerability of a given tissue to hypoxia",
+            "answer": "3",
+            "explanation": "경색의 발생은 혈관 공급의 특성(예: 이중 순환 vs. 단일 종말 동맥), 폐색 속도, 조직의 저산소증 취약성, 혈액의 산소 함량 등에 의해 영향을 받습니다. 조직의 물리적 '단단함(consistency)'은 경색 발생의 주요 결정 요인이 아닙니다.",
+            "wrong_answer_explanations": {
+              "1번": "혈관 공급의 해부학적 구조는 경색 발생에 매우 중요한 요소입니다.",
+              "2번": "폐색이 천천히 진행되면 측부 순환이 발달할 시간을 주어 경색을 막을 수 있습니다.",
+              "4번": "혈액의 산소 함량이 낮으면(예: 빈혈) 폐색 시 경색이 더 쉽게 발생합니다.",
+              "5번": "조직마다 저산소증에 대한 민감도가 다르며(예: 뉴런 > 심근), 이는 경색 발생에 영향을 줍니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 6,
+        "questions": [
+          {
+            "question_number": "12",
+            "question_text": "다음 사진의 병리소견으로 옳은 것을 하나 고르시오. (Image A: 대장 점막의 작은 점상 출혈 소견)",
+            "answer": "1",
+            "explanation": "사진은 대장 점막 표면에 다수의 작은(1-2mm) 출혈 반점을 보여주며, 이는 점상출혈(petechiae)의 특징적인 소견입니다.",
+            "wrong_answer_explanations": {
+              "2번": "장기는 뇌가 아니며, 출혈 양상이 뇌내출혈과 다릅니다.",
+              "3번": "주된 소견은 부종이 아닌 출혈입니다.",
+              "4번": "장기는 폐가 아닙니다.",
+              "5번": "장기는 간이 아닙니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "13",
+            "question_text": "<다음 설명>을 읽고 (A)에 가장 알맞은 것을 하나 고르시오.\n<다음 설명>\n( A ) % of spontaneous abortuses during the early months of gestation have a demonstrable chromosomal abnormality.",
+            "answer": "5",
+            "explanation": "초기 자연 유산의 약 50%에서 염색체 이상이 발견된다는 것은 유전학 및 병리학에서 잘 알려진 사실입니다.",
+            "wrong_answer_explanations": {
+              "1번": "10%는 너무 낮은 수치입니다.",
+              "2번": "20%는 너무 낮은 수치입니다.",
+              "3번": "30%는 너무 낮은 수치입니다.",
+              "4번": "40%는 너무 낮은 수치입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 7,
+        "questions": [
+          {
+            "question_number": "14",
+            "question_text": "다음 그림의 장기와 진단으로 알맞은 것을 하나 고르시오. (Image: 혈관 내 지방세포와 조혈세포를 포함한 색전 소견)",
+            "answer": "1",
+            "explanation": "조직 사진은 폐 혈관 내에 지방 방울과 조혈모세포를 포함하는 색전을 보여줍니다. 이는 장골 골절과 같은 심한 외상 후 합병증으로 발생하는 골수 색전(bone marrow embolus)의 특징적인 소견입니다. 이러한 색전은 주로 폐에서 발견됩니다.",
+            "wrong_answer_explanations": {
+              "2번": "장기는 간이 아닌 폐입니다.",
+              "3번": "색전의 내용물은 양수가 아닌 골수 성분입니다.",
+              "4번": "장기는 간이 아니며, 색전 내용물도 양수가 아닙니다.",
+              "5번": "이는 색전증(embolism)이며, 경색(infarction)은 그 결과로 발생할 수 있으나 이 사진의 직접적인 진단은 아닙니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "15",
+            "question_text": "다음설명은 Mendelian Disorders 에 대한 설명이다. (D) 에 알맞은 것을 하나 고르시오.\n* Although gene expression is usually described as dominant or recessive, in some cases, both of the alleles of a gene pair may be fully expressed in the heterozygote-a condition called ( A ).\n* A single mutant gene may lead to many end effects, termed ( B ); conversely, mutations at several genetic loci may produce the same trait ( C ).\n* It should be noted that not all nucleotide changes produce genes that cause disease. When such a DNA change occurs in at least 1% of the population, it is called a ( D ).",
+            "answer": "4",
+            "explanation": "집단 내에서 1% 이상의 빈도로 나타나는 DNA 서열 변이를 유전적 다형성(polymorphism)이라고 정의합니다.",
+            "wrong_answer_explanations": {
+              "1번": "공동우성(Codominance)은 이형접합자에서 두 대립유전자가 모두 발현되는 현상입니다.",
+              "2번": "다발성 표현형(Pleiotropism)은 하나의 유전자가 여러 표현형에 영향을 미치는 현상입니다.",
+              "3번": "유전적 이질성(Genetic heterogeneity)은 여러 다른 유전자의 돌연변이가 동일한 표현형을 유발하는 현상입니다.",
+              "5번": "유전체 각인(Genomic imprinting)은 부모로부터 물려받은 대립유전자가 선택적으로 발현되는 현상입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 8,
+        "questions": [
+          {
+            "question_number": "16",
+            "question_text": "다음 <그림>을 읽고, 가장 알맞은 진단명(A)을 하나 고르시오.\nFigure 5-27 Pedigree of A , a disorder caused by mutation in mitochondrial DNA. Note that all progeny of an affected male (shaded squares) are normal, but all children, male and female, of the affected female (shaded circles) manifest disease to a variable degree as discussed in the text.",
+            "answer": "2",
+            "explanation": "제시된 가계도는 모계 유전(maternal inheritance)의 전형적인 패턴을 보여줍니다. 이환된 남성의 자녀는 모두 정상이지만, 이환된 여성의 모든 자녀는 질병을 나타냅니다. 이는 미토콘드리아 DNA 돌연변이에 의해 발생하는 질환의 특징이며, 보기 중 레버 유전성 시신경병증(Leber Hereditary Optic Neuropathy)이 대표적인 미토콘드리아 유전 질환입니다.",
+            "wrong_answer_explanations": {
+              "1번": "근긴장성 이영양증은 상염색체 우성 유전입니다.",
+              "3번": "취약 X 증후군은 X-연관 유전입니다.",
+              "4번": "프라더-윌리 증후군은 유전체 각인 관련 질환입니다.",
+              "5번": "골형성 부전증은 주로 상염색체 우성 유전입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "17",
+            "question_text": "다음의 핵형(karyotype)을 나타내는 질환과 핵형을 바르게 적은것을 하나 고르시오. (Image: 21번 염색체가 3개인 남성 핵형)",
+            "answer": "2",
+            "explanation": "제시된 핵형 분석 사진은 21번 염색체가 3개(삼염색체성)이며, 성염색체는 XY인 남성의 핵형을 보여줍니다. 이는 다운 증후군(Down syndrome)의 가장 흔한 형태로, 핵형은 47,XY,+21로 표기합니다.",
+            "wrong_answer_explanations": {
+              "1번": "클라인펠터 증후군의 핵형은 47,XXY입니다. +21이 아닙니다.",
+              "3번": "터너 증후군의 핵형은 45,X입니다. 또한 다운 증후군이라도 핵형 표기가 47,XX,21로 틀렸습니다.",
+              "4번": "취약 X 증후군은 염색체 수의 이상이 아닌 FMR1 유전자의 반복 서열 확장으로 발생합니다.",
+              "5번": "전위형 다운 증후군의 핵형 표기 예시이지만, 제시된 핵형은 표준형 삼염색체성입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 9,
+        "questions": [
+          {
+            "question_number": "18",
+            "question_text": "다음 <그림>을 보고, (A)에 알맞은 진단기법을 하나 고르시오. (Image: 염색체에 형광 표지를 붙인 사진)",
+            "answer": "2",
+            "explanation": "사진은 특정 염색체 부위(22q11.2)에 결실이 있는지 확인하기 위해 형광 물질이 부착된 DNA 탐침(probe)을 사용한 것을 보여줍니다. 이처럼 염색체나 세포에 형광 탐침을 결합시켜 특정 유전자의 위치나 수적 이상을 확인하는 기법을 형광동소보합법(Fluorescence in situ hybridization, FISH)이라고 합니다.",
+            "wrong_answer_explanations": {
+              "1번": "Southern hybridization은 DNA를 분석하는 다른 기법입니다.",
+              "3번": "G-banding은 염색체의 밴드 패턴을 관찰하는 핵형 분석의 기본 기법입니다.",
+              "4번": "Western blot은 단백질을 분석하는 기법입니다.",
+              "5번": "Northern hybridization은 RNA를 분석하는 기법입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "19",
+            "question_text": "다음 설명을 읽고 알맞은 진단명(A)을 하나 고르시오.\n■ (A) is caused by a mutation in the FBN1 gene encoding fibrillin, which is required for structural integrity of connective tissues and regulation of TGF-β signaling.\n■ The major tissues affected are the skeleton, eyes, and cardiovascular system.\n■ Clinical features may include tall stature, long fingers, bilateral subluxation of lens, mitral valve prolapse, aortic aneurysm, and aortic dissection.",
+            "answer": "4",
+            "explanation": "제시된 설명은 FBN1 유전자 돌연변이로 인해 발생하는 결합조직 질환의 특징을 기술하고 있습니다. 피브릴린(fibrillin) 생성 장애로 골격계, 안구, 심혈관계에 이상이 나타나는 것은 마르팡 증후군(Marfan syndrome)의 전형적인 특징입니다.",
+            "wrong_answer_explanations": {
+              "1번": "다운 증후군은 21번 염색체 삼염색체성입니다.",
+              "2번": "엘러스-단로스 증후군은 콜라겐 합성 장애와 관련됩니다.",
+              "3번": "프라더-윌리 증후군은 15번 염색체 각인 관련 질환입니다.",
+              "5번": "테이-삭스병은 리소좀 축적 질환입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "20",
+            "question_text": "다음 설명은 Ehlers-Danlos Syndromes 에 대한 것이다 (A)에 알맞은 용어를 하나 적으시오. (영어로 답할 것)\nEhlers-Danlos Syndromes\n• There are six variants of Ehlers-Danlos syndromes, all characterized by defects in ( A ) synthesis or assembly.",
+            "answer": "collagen",
+            "explanation": "엘러스-단로스 증후군(Ehlers-Danlos Syndromes)은 콜라겐(collagen)의 합성 또는 조립 과정의 결함으로 인해 발생하는 유전성 결합조직 질환군입니다. 이로 인해 피부 과신전, 관절 과가동성 등의 증상이 나타납니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 10,
+        "questions": [
+          {
+            "question_number": "21",
+            "question_text": "<다음 보기>을 읽고, Common forms of alteration in chromosome structure에 대한 서술로서 가장 알맞은 것을 하나 고르시오.\n<다음 보기>\n46,XY,r(14)",
+            "answer": "1",
+            "explanation": "핵형 표기 '46,XY,r(14)'는 전체 염색체 수는 46개, 성염색체는 XY이며, 14번 염색체 하나가 고리 모양(ring chromosome)을 형성했음을 의미합니다. 'r'은 ring을 나타내는 기호입니다.",
+            "wrong_answer_explanations": {
+              "2번": "결실(deletion)은 'del'로 표기합니다.",
+              "3번": "역위(inversion)는 'inv'로 표기합니다.",
+              "4번": "등완 염색체(isochromosome)는 'i'로 표기합니다.",
+              "5번": "전위(translocation)는 't'로 표기합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "22",
+            "question_text": "다음은 Familial Hypercholesterolemia 에 대한 설명이다. 알맞지 않은 것을 하나 고르시오.\n1) a \"receptor disease\"\n2) a mutation in the gene encoding the receptor for high density lipoprotein (HDL), which is involved in the transport and metabolism of cholesterol.\n3) premature atherosclerosis\n4) myocardial infarction.\n5) possibly the most frequent mendelian disorder.",
+            "answer": "2",
+            "explanation": "가족성 고콜레스테롤혈증(Familial Hypercholesterolemia)은 저밀도 지단백(LDL) 수용체 유전자의 돌연변이로 인해 발생합니다. 고밀도 지단백(HDL) 수용체가 아닌 LDL 수용체의 결함이 원인입니다.",
+            "wrong_answer_explanations": {
+              "1번": "LDL 수용체의 기능 장애로 발생하므로 '수용체 질환'으로 분류됩니다.",
+              "3번": "혈중 LDL 콜레스테롤 수치가 높아 조기에 죽상경화증이 발생합니다.",
+              "4번": "죽상경화증의 합병증으로 심근경색의 위험이 높습니다.",
+              "5번": "가장 흔한 멘델 유전 질환 중 하나로 알려져 있습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "23",
+            "question_text": "다음설명을 읽고 알맞은 진단명 (A) 을 하나 고르시오.\n■ ( A ) is caused by an inability to metabolize GM2gangliosidesduetolackof the α subunit of lysosom... GM2gangliosidesaccumulateinthecentralnervoussystemandcauseseverementalretardation,blindne...",
+            "answer": "3",
+            "explanation": "설명은 리소좀 효소인 헥소사미니다제 A의 알파 소단위 결핍으로 인해 GM2 강글리오시드가 중추신경계에 축적되어 심각한 정신 지체와 실명을 유발하는 질환을 기술하고 있습니다. 이는 테이-삭스병(Tay-Sachs disease)의 특징입니다.",
+            "wrong_answer_explanations": {
+              "1번": "고셔병은 글루코세레브로시드 축적이 원인입니다.",
+              "2번": "니만-피크병은 스핑고미엘린 축적이 원인입니다.",
+              "4번": "뮤코다당체증은 뮤코다당류(글리코사미노글리칸) 축적이 원인입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 11,
+        "questions": [
+          {
+            "question_number": "24",
+            "question_text": "다음 설명을 읽고 알맞은 진단명 (A)을 하나 고르시오.\n■ ( A ) types A and B are caused by a deficiency of sphingomyelinase. In the more severe type A variant, accumulation of sphingomyelin in the nervous system results in neuronal damage.",
+            "answer": "4",
+            "explanation": "스핑고미엘린분해효소(sphingomyelinase) 결핍으로 인해 스핑고미엘린이 축적되는 질환은 니만-피크병(Niemann-Pick disease) A형과 B형입니다.",
+            "wrong_answer_explanations": {
+              "1번": "테이-삭스병은 헥소사미니다제 A 결핍이 원인입니다.",
+              "2번": "헐러 증후군은 알파-L-이두로니다제 결핍이 원인입니다.",
+              "3번": "고셔병은 글루코세레브로시다제 결핍이 원인입니다.",
+              "5번": "헌터 증후군은 이두로네이트 설파타제 결핍이 원인입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "25",
+            "question_text": "다음 그림은 Gaucher disease in bone marrow 에 대한 것이다. Gaucher cell cytoplasm 에 축적된 물질을 하나 적으시오.(영어로 답할 것) (Image B: 주름진 종이 모양의 세포질을 가진 대식세포)",
+            "answer": "Glucocerebroside",
+            "explanation": "고셔병(Gaucher disease)은 글루코세레브로시다제(glucocerebrosidase) 효소의 결핍으로 인해 기질인 글루코세레브로시드(glucocerebroside)가 대식세포에 축적되어 발생합니다. 이로 인해 대식세포는 주름진 휴지 모양의 특징적인 '고셔 세포'로 변합니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "26",
+            "question_text": "다음의 Virchow Triad in thrombosis 를 구성하는 factors 중에서 thrombosis 를 일으키는 가장 중요한 factor를 하나 고르시오.",
+            "answer": "1",
+            "explanation": "버코우 삼요소(Virchow's triad)는 혈전증의 세 가지 주요 원인인 내피 손상(endothelial injury), 비정상적 혈류(stasis or turbulence), 그리고 혈액 과응고성(hypercoagulability)을 말합니다. 이 중에서 내피 손상이 혈전 형성의 가장 중요하고 주된 유발 요인으로 간주됩니다.",
+            "wrong_answer_explanations": {
+              "2번": "혈류 정체는 중요한 요인이지만 내피 손상만큼 결정적이지는 않습니다.",
+              "3번": "난류는 내피 손상을 유발할 수 있는 요인입니다.",
+              "4번": "혈액 과응고성은 중요한 요인이지만, 보통 내피 손상이 동반될 때 혈전증으로 이어집니다.",
+              "5번": "혈액 저응고성은 출혈 경향을 높이며 혈전증의 원인이 아닙니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 12,
+        "questions": [
+          {
+            "question_number": "27",
+            "question_text": "다음 설명문항중에서 알맞지 않은 것을 하나 고르시오.\n1) Geneticsex - determined by the presence or absence of Y chromosome\n2) Gonadalsex - histologic characteristics of gonads\n3) Phenotypic sex - presence of derivatives of the Mullerian or wolffian ducts\n4) Genital sex - appearance of external genitalia\n5) Pseudohermaphroditism 의 정의는disagreement between phenotype & gonadal sex 이다.",
+            "answer": "3",
+            "explanation": "표현형 성(Phenotypic sex)은 외부 생식기의 모양과 이차 성징을 포함한 전반적인 외형에 의해 결정됩니다. 뮐러관 또는 볼프관 유도체의 존재 여부는 내부 생식기의 발달 상태를 나타내며, 표현형 성의 일부이지만 전체 정의는 아닙니다.",
+            "wrong_answer_explanations": {
+              "1번": "유전적 성은 Y 염색체의 유무로 결정됩니다.",
+              "2번": "생식샘 성은 고환 또는 난소의 조직학적 특징으로 결정됩니다.",
+              "4번": "생식기 성은 외부 생식기의 모양으로 결정됩니다.",
+              "5번": "가성반음양(Pseudohermaphroditism)은 생식샘 성과 표현형 성이 불일치하는 상태를 정의합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "28",
+            "question_text": "<다음 설명>을 읽고 가장 알맞은 진단명을 하나 고르시오.\n<다음 설명>\n“menopause occurs before menarche”",
+            "answer": "3",
+            "explanation": "“초경 전에 폐경이 온다”는 표현은 난소의 기능이 조기에 소실되어 생식 능력을 갖기 전에 상실되는 상태를 비유적으로 나타냅니다. 이는 터너 증후군(Turner syndrome)에서 나타나는 생식샘 형성 장애(gonadal dysgenesis)와 조기 난소 부전의 특징적인 설명입니다.",
+            "wrong_answer_explanations": {
+              "1번": "클라인펠터 증후군은 남성에서 발생하는 성염색체 이상입니다.",
+              "2번": "다운 증후군은 21번 삼염색체성입니다.",
+              "4번": "취약 X 증후군은 주로 남성 지적 장애의 원인입니다.",
+              "5번": "엔젤만 증후군은 신경발달 장애입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "29",
+            "question_text": "다음 설명을 읽고 알맞은 것(A)을 하나 고르시오.\n■ ( A ) involves transcriptional silencing of the paternal or maternal copies of certain genes during gametogenesis. For such genes, only one functional copy exists in the individual. Loss of the functional (not imprinted) allele by deletion gives rise to diseases.",
+            "answer": "2",
+            "explanation": "제시된 설명은 생식세포 형성 과정에서 특정 유전자의 부계 또는 모계 대립유전자가 전사적으로 침묵되는 현상을 기술하고 있습니다. 이로 인해 개체는 단 하나의 기능적 유전자 사본만을 갖게 되며, 이 기능적 대립유전자의 소실은 질병을 유발합니다. 이는 유전체 각인(genomic imprinting)의 정의입니다.",
+            "wrong_answer_explanations": {
+              "1번": "기능획득 돌연변이(gain-of-function mutations)는 유전자 산물의 기능이 비정상적으로 활성화되는 것입니다.",
+              "3번": "전돌연변이(premutation)는 불안정한 반복 서열이 완전 돌연변이로 확장될 수 있는 상태를 말합니다.",
+              "4": "결실(deletion)은 유전체의 일부가 소실되는 것입니다.",
+              "5번": "복합 다유전자 질환(Complex multigenic disorders)은 여러 유전자와 환경 요인이 복합적으로 작용하는 질환입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 23,
+        "questions": [
+          {
+            "question_number": "51",
+            "question_text": "급성염증 반응에 의해 야기된 질환과 손상에 연관된 세포와 분자들 조합이 아닌것은?\n1) 파혈쇼크 (Septic shock) - Cytokines\n2) 천식 (Asthma) – Eosinophils; IgE antibodies\n3) 관절염 (Arthritis) - Macrophages; Fibroblasts\n4) 사구체염 (Glomerulonephritis) – Antibodies and complement; neutrophils, monocytes\n5) 급성호흡곤란증후군 (Acute respiratory distress syndrome) – Neutrophils",
+            "answer": "3",
+            "explanation": "관절염(Arthritis), 특히 류마티스 관절염은 주로 림프구와 대식세포가 관여하는 만성 염증성 질환입니다. 섬유아세포(Fibroblasts)는 만성 염증과 치유 과정에서의 섬유화에 관여하므로, 급성 염증의 대표적인 조합으로 보기 어렵습니다.",
+            "wrong_answer_explanations": {
+              "1번": "패혈성 쇼크는 사이토카인 폭풍에 의해 매개되는 전형적인 전신성 급성 염증 반응입니다.",
+              "2번": "알레르기성 천식은 IgE 항체와 호산구(Eosinophils)가 주도하는 급성 과민 반응입니다.",
+              "4번": "급성 사구체신염은 항체, 보체, 호중구 등이 관여하는 급성 염증 반응입니다.",
+              "5번": "급성 호흡곤란 증후군은 호중구에 의한 폐 손상이 특징적인 급성 염증 질환입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 8,
+                "relevance_reason": "강의자료의 'TABLE 3.1 Diseases Caused by Inflammatory Reactions' 표에 문제의 보기들이 대부분 포함되어 있습니다. 이 표에서 관절염(Arthritis)은 만성(Chronic) 염증으로 분류되어 있어 답을 찾는 데 결정적인 근거를 제공합니다."
+              }
+            ]
+          },
+          {
+            "question_number": "52",
+            "question_text": "급성염증반응에서 혈관 투과성의 증가, 백혈구 (leukocyte)의 부착 (adhesion)과 활성 (activation)에 모두 관여하는 화학매개체는?",
+            "answer": "5",
+            "explanation": "혈소판활성인자(Platelet-activating factor, PAF)는 혈관 확장, 혈관 투과성 증가, 백혈구 부착, 화학주성, 활성화 등 매우 광범위하고 강력한 염증 매개 작용을 나타내어 문제에서 언급된 모든 기능에 관여합니다.",
+            "wrong_answer_explanations": {
+              "1번": "케모카인은 주로 백혈구의 부착과 이동(화학주성)에 관여합니다.",
+              "2번": "히스타민은 주로 혈관 확장과 투과성 증가에 관여합니다.",
+              "3번": "류코트리엔은 종류에 따라 혈관 수축, 투과성 증가(LTC4, D4, E4) 또는 화학주성(LTB4)에 관여합니다.",
+              "4번": "종양괴사인자(TNF)는 백혈구 부착과 활성화를 유도하는 중요한 사이토카인이지만, PAF처럼 직접적으로 모든 기능에 관여하지는 않습니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 90,
+                "relevance_reason": "강의자료의 'TABLE 3.5 Principal Mediators of Inflammation' 표에서 혈소판활성인자(Platelet-activating factor)의 작용(Action)으로 'Vasodilation, increased vascular permeability, leukocyte adhesion, chemotaxis, degranulation, oxidative burst'가 명시되어 있어, 문제에서 요구하는 모든 기능에 관여함을 확인할 수 있습니다."
+              },
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 119,
+                "relevance_reason": "기타 염증 매개체(Other Mediators of Inflammation) 슬라이드에서 혈소판활성인자(PAF)를 언급하고 있습니다."
+              }
+            ]
+          },
+          {
+            "question_number": "53",
+            "question_text": "급성 염증에 중심적인 역할을 하며, 아래 H&E 그림에서 주로 관찰되며, () 안에 들어갈 세포는? (Image C: 염증 반응 시간 경과에 따른 세포 침윤 그래프)",
+            "answer": "1",
+            "explanation": "급성 염증 반응의 초기 단계(6-24시간)에는 호중구(Neutrophils)가 가장 먼저, 그리고 가장 많이 염증 부위로 동원됩니다. 제시된 그래프는 시간에 따른 세포 침윤을 보여주며, 가장 먼저 최고치에 도달하는 세포는 호중구입니다.",
+            "wrong_answer_explanations": {
+              "2번": "호산구는 알레르기나 기생충 감염 시 주로 나타납니다.",
+              "3번": "비만세포는 조직에 상주하며 초기 반응에 관여하지만, 침윤하는 주된 세포는 아닙니다.",
+              "4번": "대식세포는 호중구 다음, 즉 염증의 후기 단계(24-48시간 이후)에 주된 세포로 나타납니다.",
+              "5번": "형질세포는 만성 염증에서 주로 관찰됩니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 54,
+                "relevance_reason": "슬라이드에서 '대부분의 acute inflammation에서 neutrophils은 처음 6~24시간 동안 염증성 침윤에서 우세하고 24~48시간 내에는 monocytes로 대체됨'이라고 명확하게 설명하고 있습니다."
+              },
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 55,
+                "relevance_reason": "문제에 제시된 것과 동일한 그래프(Figure 3.6 C)와 관련 조직 사진을 보여주며, 초기 침윤 세포가 호중구(neutrophilic infiltrates)임을 시각적으로 확인시켜 줍니다."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 24,
+        "questions": [
+          {
+            "question_number": "54",
+            "question_text": "급성염증의 형태학적 양상 중에 하나로세포의 손상에 의해 형성된 공간 또는 복막 (peritoneum), 흉막 (pleura), 심막 (pericardium)에 의해 둘러싸인 체강 (body cavities)으로 세포수가 적은 체액의 삼출이 뚜렷한 것을 설명하는 것은? (Image: 피부의 물집 사진)",
+            "answer": "2",
+            "explanation": "장액성 염증(Serous inflammation)은 세포 성분이 거의 없는 묽은 체액(장액)의 삼출이 특징입니다. 이러한 삼출액은 피부의 물집(skin blister)처럼 세포 손상으로 생긴 공간이나 체강에 고입니다. 사진의 물집은 장액성 염증의 전형적인 예입니다.",
+            "wrong_answer_explanations": {
+              "1번": "궤양(Ulcer)은 조직 표면의 국소적 결손입니다.",
+              "3번": "화농성 염증(Purulent inflammation)은 고름(주로 호중구)이 생성되는 것이 특징입니다.",
+              "4번": "완전 용해(Complete resolution)는 염증의 결과 중 하나이지, 형태학적 양상이 아닙니다.",
+              "5번": "섬유소성 염증(Fibrinous inflammation)은 섬유소(fibrin)가 풍부한 삼출물이 특징입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 126,
+                "relevance_reason": "'Serous Inflammation' 슬라이드에서 'exudation of cell-poor fluid into spaces'라고 정의하여 문제의 설명과 정확히 일치합니다."
+              },
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 127,
+                "relevance_reason": "문제에 제시된 피부 물집 사진(fig 3.13)과 동일한 사진을 보여주며 장액성 염증의 예시로 설명하고 있습니다."
+              }
+            ]
+          },
+          {
+            "question_number": "55",
+            "question_text": "아래 H&E 소견을 보일 수 있는 대표적인 질환은? (Image: 건락성 괴사를 동반한 육아종 사진)",
+            "answer": "2",
+            "explanation": "사진은 중심부의 무정형 호산성 물질로 구성된 건락성 괴사(caseous necrosis)와 다핵의 랑한스 거대세포(Langhans giant cell)를 포함하는 육아종(granuloma)을 보여줍니다. 이는 결핵(Tuberculosis)의 가장 특징적인 조직학적 소견입니다.",
+            "wrong_answer_explanations": {
+              "1번": "나병(leprosy)은 종류에 따라 비건락성 육아종을 형성합니다.",
+              "3번": "이물질(Foreign body) 육아종은 이물질을 둘러싸는 형태로 나타납니다.",
+              "4번": "크론병(Crohn disease)은 비건락성 육아종이 특징입니다.",
+              "5번": "사르코이드증(sarcoidosis)은 경계가 명확한 비건락성 육아종이 특징입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 25,
+        "questions": [
+          {
+            "question_number": "56",
+            "question_text": "만성 염증의 형태학적 소견에 대한 설명 중 틀린 것은?\n1) 대식세포(Macrophage)에 의한 육아종성 염증 (Granulomatous inflammation)\n2) 세정맥의 울혈 (Congestion)과 부종 (Edema)\n3) 신생혈관의 증식과 섬유화 (Fibrosis)로 대체되는 치유반응\n4) 지속적 손상인자나 염증세포에 의해 유발되는 조직 손상\n5) 림프구 (Lymphocytes), 형질세포 (Plasma cells), 대식세포 (Macrophage)와 같은 단핵세포 (Mononuclear cells) 침윤",
+            "answer": "2",
+            "explanation": "세정맥의 울혈(Congestion)과 부종(Edema)은 혈관 확장 및 투과성 증가로 인해 발생하는 급성 염증의 특징적인 소견입니다. 만성 염증의 주된 형태학적 특징은 단핵세포 침윤, 조직 파괴, 그리고 섬유화 및 혈관신생을 통한 치유 시도입니다.",
+            "wrong_answer_explanations": {
+              "1번": "육아종성 염증은 만성 염증의 한 형태입니다.",
+              "3번": "혈관신생과 섬유화는 만성 염증에서 조직 손상과 복구가 동시에 일어나는 것을 보여주는 특징입니다.",
+              "4번": "만성 염증은 지속적인 자극에 의한 조직 손상을 동반합니다.",
+              "5번": "림프구, 형질세포, 대식세포와 같은 단핵구의 침윤은 만성 염증의 정의에 해당하는 소견입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 10,
+                "relevance_reason": "'Acute and Chronic inflammation' 슬라이드에서 급성 염증의 특징으로 'Exudation of fluid and plasma proteins (edema)'를, 만성 염증의 특징으로 'Lymphocytes and macrophages, Proliferation of blood vessels, fibrosis, and tissue necrosis'를 명시하여 둘을 명확히 구분하고 있습니다."
+              }
+            ]
+          },
+          {
+            "question_number": "57",
+            "question_text": "그림에서 까만색 동그라미로 표시한 세포를 적으시오 (주관식) (Image: 두 개의 엽으로 나뉜 핵과 호산성 과립을 가진 세포)",
+            "answer": "호산구; Eosinophils; Eosinophil",
+            "explanation": "사진에서 동그라미로 표시된 세포는 두 개의 엽으로 나뉜 핵과 세포질을 가득 채운 크고 붉은(호산성) 과립을 가지고 있습니다. 이는 호산구(Eosinophil)의 전형적인 형태학적 특징입니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 56,
+                "relevance_reason": "슬라이드에서 'In helminthic infections & allergic reactions: eosinophils may be the main cell type'이라고 설명하여 호산구가 특정 염증 반응의 주요 세포임을 언급합니다."
+              }
+            ]
+          },
+          {
+            "question_number": "58",
+            "question_text": "해당 설명에 부합하는 세포를 적으시오 (주관식)\n- 결합조직 (Connective tissues)에 광범위하게 분포\n- 급성과 만성염증에 모두 관여\n- IgE 항체 (Antibody)에 Fc 부분과 결합하는 수용체FcεRI을 발현함\n- 탈과립되면서 히스타민 (Histamine)과 프로스타글란딘 (Prostaglandins) 같은 매개체를 분비함\n- 아나필락시스 쇼크 (Anaphylactic shock)를 일으킬 수 있음",
+            "answer": "비만세포; Mast cells; Mast cell",
+            "explanation": "제시된 설명은 비만세포(Mast cell)의 특징과 정확히 일치합니다. 비만세포는 결합조직에 상주하며, 표면에 IgE 수용체를 가지고 있어 알레르겐과 반응 시 히스타민 등을 분비하여 제1형 과민반응(아나필락시스 포함)을 일으키는 핵심적인 세포입니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 94,
+                "relevance_reason": "'Vasoactive Amines: Histamine' 슬라이드에서 히스타민의 주요 공급원(Source)으로 'mast cells'을, 분비 자극(Stimuli)으로 'Binding of antigen to IgE antibodies'를 명시하여 문제의 설명과 직접적으로 연결됩니다."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 26,
+        "questions": [
+          {
+            "question_number": "59",
+            "question_text": "다음 설명에 해당하는 세포는?\n- 염증반응을 증폭하거나 제한할 수 있는 Cytokine, 내피세포 및 섬유아세포의 증식 및 콜라겐 합성을 자극하는 growth factors, 결합조직을 리모델링하는 효소를 생성함.\n- 염증이 가라앉은 후 만성 염증 및 조직 복구의 중요한 세포\n- 골수의 hematopoietic stem cell 에서 유래",
+            "answer": "4",
+            "explanation": "제시된 설명은 대식세포(Macrophage)의 다재다능한 역할을 기술하고 있습니다. 대식세포는 골수 유래 단핵구로부터 분화하며, 다양한 사이토카인과 성장인자를 분비하여 염증을 조절하고, 만성 염증과 조직 복구 과정 모두에서 중심적인 역할을 수행합니다.",
+            "wrong_answer_explanations": {
+              "1번": "호산구는 주로 알레르기/기생충 반응에 관여합니다.",
+              "2번": "호중구는 급성 염증의 초기 반응을 주도합니다.",
+              "3번": "단핵구는 대식세포의 전구세포입니다.",
+              "5번": "형질세포는 항체 생산을 담당합니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 82,
+                "relevance_reason": "'Other Functional Responses of Activated Leukocytes' 슬라이드에서 대식세포가 염증 반응을 증폭/제한하고, 성장인자를 통해 섬유아세포 증식과 콜라겐 합성을 자극하며, 만성 염증과 조직 복구의 중요한 세포라고 설명하여 문제의 내용과 정확히 일치합니다."
+              }
+            ]
+          },
+          {
+            "question_number": "60",
+            "question_text": "조직 손상 후 완전한 수복이 되는데 가장 중요한 사항은?",
+            "answer": "5",
+            "explanation": "손상된 조직이 흉터 없이 완전하게 원래 구조로 복구(재생, regeneration)되기 위해서는, 세포들이 증식하여 제자리를 찾아갈 수 있도록 지지해주는 기존의 구조적 틀(결합조직 기질, structural framework)이 보존되어 있어야 합니다. 이 구조적 틀이 파괴되면 재생이 불가능하고 흉터(섬유화)가 형성됩니다.",
+            "wrong_answer_explanations": {
+              "1번": "실질세포의 증식은 중요하지만, 구조적 틀이 없으면 무질서하게 증식합니다.",
+              "2번": "평활근세포는 특정 조직의 구성 요소입니다.",
+              "3번": "근섬유모세포는 상처 수축과 흉터 형성에 관여합니다.",
+              "4번": "혈관내피세포는 혈관신생에 중요합니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 13,
+                "relevance_reason": "'Tissue repair' 슬라이드에서 조직 복구가 '재생(regeneration)' 또는 '결손 부위가 connective tissue (scarring)으로 채워지는 과정'으로 나뉨을 설명합니다. 이 둘을 결정하는 가장 중요한 요인이 바로 구조적 틀의 보존 여부입니다."
+              }
+            ]
+          },
+          {
+            "question_number": "61",
+            "question_text": "산화질소 (Nitric oxide)는 자극에 의해 혈관이 확장되고 ()의 유도에 의해 기존 혈관의 투과성이 증가된다. ( ) 는?",
+            "answer": "2",
+            "explanation": "산화질소(NO)는 강력한 혈관 확장 물질입니다. 혈관 투과성을 증가시키는 가장 중요한 매개체 중 하나는 혈관내피성장인자(VEGF, vascular endothelial growth factor)입니다. VEGF는 염증 및 조직 복구 과정에서 혈관 투과성을 높이고 혈관신생을 유도합니다.",
+            "wrong_answer_explanations": {
+              "1번": "FGFR은 섬유아세포 성장인자 수용체입니다.",
+              "3번": "EGFR은 상피세포 성장인자 수용체입니다.",
+              "4번": "TGF-β는 주로 섬유화와 염증 억제에 관여하는 사이토카인입니다.",
+              "5번": "PDGF는 혈소판 유래 성장인자로, 세포 증식에 관여합니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 29,
+                "relevance_reason": "'Changes in Vascular Flow and Caliber' 슬라이드에서 혈관 확장을 유발하는 화학 매개체로 'histamine and nitric oxide'를 명시하고 있습니다."
+              },
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 72,
+                "relevance_reason": "'Nitric Oxide' 슬라이드에서 NO가 혈관 긴장도(vascular tone)를 유지한다고 설명하여 혈관 확장에 관여함을 보여줍니다."
+              }
+            ]
+          },
+          {
+            "question_number": "62",
+            "question_text": "피부창상의 치유에서 일차유합 (First Intention) 과 달리 이차유합 (Second Intention)에 의한 치유과정에서의 중요한 특징은?",
+            "answer": "5",
+            "explanation": "이차유합은 조직 결손이 큰 상처에서 일어나며, 일차유합에 비해 더 많은 육아조직 형성과 더 강한 염증 반응이 특징입니다. 하지만 가장 구별되는 특징은 근섬유모세포(myofibroblast)에 의해 상처의 크기가 줄어드는 상처수축(Wound contraction) 현상입니다.",
+            "wrong_answer_explanations": {
+              "1번": "염증반응은 일차유합에서도 일어나며, 이차유합에서 더 강할 뿐입니다.",
+              "2번": "혈전형성은 모든 상처 치유의 시작입니다.",
+              "3번": "신생혈관 형성은 육아조직의 일부로 두 유합 과정 모두에서 일어납니다.",
+              "4번": "육아조직 형성은 두 유합 과정 모두에서 일어나며, 이차유합에서 더 많을 뿐입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 27,
+        "questions": [
+          {
+            "question_number": "63",
+            "question_text": "그림에서 가장 많이 관찰되는 세포는? (Image: 핵이 한쪽으로 치우쳐 있고 세포질이 풍부한 세포들의 침윤)",
+            "answer": "5",
+            "explanation": "사진에 보이는 세포들은 핵이 한쪽으로 치우쳐 있고(eccentric nucleus), 핵 주변에 밝은 부위(perinuclear hof)가 있으며, 세포질이 풍부하고 호염기성인 특징을 가집니다. 이는 항체를 활발히 생산하는 형질세포(Plasma cells)의 전형적인 모습입니다.",
+            "wrong_answer_explanations": {
+              "1번": "호중구는 다엽핵을 가집니다.",
+              "2번": "호산구는 이엽핵과 붉은 과립을 가집니다.",
+              "3번": "비만세포는 크고 짙은 과립으로 핵이 잘 보이지 않습니다.",
+              "4번": "대식세포는 핵 모양이 더 불규칙하고 세포질에 포식한 물질이 보일 수 있습니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 56,
+                "relevance_reason": "슬라이드에서 특정 과민반응에서 'activated lymphocytes, macrophages, and plasma cells'가 나타난다고 언급하여, 형질세포가 염증 반응에 관여하는 세포임을 설명합니다."
+              }
+            ]
+          },
+          {
+            "question_number": "64",
+            "question_text": "염증반응에서 백혈구 (leukocyte)의 상피세포에 부착과 혈관을 통한 이주를 촉진함으로써 백혈구 동원에 핵심적인 역할을 하며, 발열 (Fever)와 관련있는 매개체는?",
+            "answer": "3",
+            "explanation": "종양괴사인자(TNF)와 인터루킨-1(IL-1)은 내피세포를 활성화시켜 백혈구 부착 분자의 발현을 증가시킴으로써 백혈구 동원에 핵심적인 역할을 합니다. 또한 이들은 시상하부에 작용하여 프로스타글란딘 생성을 유도하고 발열을 일으키는 주요 내인성 발열원입니다. IL-6 역시 발열을 포함한 전신성 급성기 반응의 주요 매개체입니다.",
+            "wrong_answer_explanations": {
+              "1번": "ROS는 살균 작용을 하지만 백혈구 동원이나 발열의 주 매개체는 아닙니다.",
+              "2번": "C3 & C5는 보체 성분으로 백혈구 동원에는 관여하지만 발열의 주 원인은 아닙니다.",
+              "4번": "브라디키닌은 혈관 투과성 증가와 통증에 주로 관여합니다.",
+              "5번": "프로스타글란딘은 발열과 통증의 최종 매개체이지만, 백혈구 동원의 핵심 역할은 TNF/IL-1이 수행합니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 108,
+                "relevance_reason": "'Tumor Necrosis Factor and Interleukin-1' 슬라이드에서 TNF와 IL-1이 'critical roles in leukocyte recruitment'를 수행한다고 명시합니다."
+              },
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 110,
+                "relevance_reason": "TNF, IL-1, IL-6의 전신 효과를 보여주는 그림에서 이들이 뇌에 작용하여 'Fever'를 유발한다고 명확히 보여줍니다."
+              }
+            ]
+          },
+          {
+            "question_number": "65",
+            "question_text": "The main phases of cutaneous wound healing are (), formation of granulation tissue, and extracellular matrix (ECM) remodeling. () 안에 들어갈 말을 적어라",
+            "answer": "염증; Inflammation",
+            "explanation": "피부 상처 치유 과정은 크게 세 단계로 나뉩니다. 첫 번째 단계는 지혈과 감염 방어를 위한 염증(Inflammation) 단계, 두 번째는 육아조직 형성과 상피화가 일어나는 증식(Proliferation) 단계, 마지막은 조직이 재구성되는 성숙 및 재형성(Remodeling) 단계입니다. 따라서 빈칸에 들어갈 말은 염증입니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "20250418_1_2교시_염증과 수복_파트1.pdf",
+                "lesson_page": 135,
+                "relevance_reason": "'Outcomes of acute inflammation' 그림에서 손상(INJURY)이 급성 염증(ACUTE INFLAMMATION)을 유발하고, 이것이 치유(Healing)로 이어지는 과정을 보여주어, 염증이 치유의 선행 단계임을 알 수 있습니다."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": {
+      "total_jokbo_pages": 39,
+      "total_questions": 85,
+      "total_related_slides": 26
+    }
+  }
+}
