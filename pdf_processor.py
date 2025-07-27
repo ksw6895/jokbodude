@@ -1013,10 +1013,14 @@ class PDFProcessor:
                 temp_files.append(temp_pdf)
                 
                 # Analyze this chunk
-                chunk_result = self._analyze_jokbo_with_lesson_chunk_preloaded(
+                chunk_result, uploaded_file = self._analyze_jokbo_with_lesson_chunk_preloaded(
                     jokbo_file, temp_pdf, jokbo_filename, lesson_filename,
                     start_page, end_page
                 )
+                
+                # Don't need to track uploaded_file here since it's in the same thread
+                # and will be deleted by this thread
+                self.delete_file_safe(uploaded_file)
                 
                 if "error" not in chunk_result:
                     all_results.append(chunk_result)
@@ -1037,8 +1041,12 @@ class PDFProcessor:
     
     def _analyze_jokbo_with_lesson_chunk_preloaded(self, jokbo_file, lesson_chunk_path: str, 
                                                    jokbo_filename: str, lesson_filename: str,
-                                                   start_page: int, end_page: int) -> Dict[str, Any]:
-        """Analyze pre-uploaded jokbo with a chunk of lesson PDF in parallel mode"""
+                                                   start_page: int, end_page: int) -> Tuple[Dict[str, Any], Any]:
+        """Analyze pre-uploaded jokbo with a chunk of lesson PDF in parallel mode
+        
+        Returns:
+            Tuple of (result_dict, uploaded_file_to_delete)
+        """
         
         # Upload lesson chunk
         chunk_display_name = f"강의자료_{lesson_filename}_p{start_page}-{end_page}"
@@ -1075,8 +1083,8 @@ class PDFProcessor:
         debug_filename = f"gemini_response_{timestamp}_chunk_p{start_page}-{end_page}_{lesson_filename}.json"
         self.save_api_response(response.text, jokbo_filename, lesson_filename, f"chunk_p{start_page}-{end_page}")
         
-        # Delete lesson chunk file immediately
-        self.delete_file_safe(lesson_chunk_file)
+        # Don't delete here - return file reference for main thread to delete
+        # self.delete_file_safe(lesson_chunk_file)
         
         try:
             # Clean up common JSON errors from Gemini
@@ -1099,7 +1107,7 @@ class PDFProcessor:
                                     print(f"DEBUG: Adjusted chunk-relative page {page_num} to absolute page {slide['lesson_page']} for chunk p{start_page}-{end_page}")
                                 else:
                                     print(f"DEBUG: Page {page_num} appears to be absolute (exceeds chunk size {chunk_page_count}), keeping as-is for chunk p{start_page}-{end_page}")
-            return result
+            return result, lesson_chunk_file
         except json.JSONDecodeError as e:
             print(f"  JSON 파싱 실패 (청크 p{start_page}-{end_page}): {str(e)}")
             # Try partial parsing
@@ -1116,12 +1124,12 @@ class PDFProcessor:
                                     chunk_page_count = end_page - start_page + 1
                                     if page_num <= chunk_page_count:
                                         slide["lesson_page"] = page_num + (start_page - 1)
-                return partial_result
+                return partial_result, lesson_chunk_file
             else:
                 debug_file = self.debug_dir / f"failed_json_chunk_p{start_page}-{end_page}.txt"
                 with open(debug_file, 'w', encoding='utf-8') as f:
                     f.write(response.text)
-                return {"error": "Failed to parse response"}
+                return {"error": "Failed to parse response"}, lesson_chunk_file
     
     def analyze_lessons_for_jokbo_parallel(self, lesson_paths: List[str], jokbo_path: str, max_workers: int = 3) -> Dict[str, Any]:
         """Analyze multiple lesson PDFs against one jokbo PDF using parallel processing (jokbo-centric)"""
@@ -1185,7 +1193,7 @@ class PDFProcessor:
                     temp_pdf = chunk_info['chunk_path']
                 
                 # Analyze this chunk
-                result = thread_processor._analyze_jokbo_with_lesson_chunk_preloaded(
+                result, uploaded_file = thread_processor._analyze_jokbo_with_lesson_chunk_preloaded(
                     jokbo_file, temp_pdf, 
                     jokbo_file.display_name.replace("족보_", ""),
                     lesson_filename,
@@ -1199,10 +1207,10 @@ class PDFProcessor:
                     except:
                         pass
                 
-                return (lesson_path, result)
+                return (lesson_path, result, uploaded_file)
             except Exception as e:
                 print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 오류 발생 - {str(e)}")
-                return (lesson_path, {"error": str(e)})
+                return (lesson_path, {"error": str(e)}, None)
             finally:
                 # Ensure cleanup happens
                 try:
@@ -1212,6 +1220,9 @@ class PDFProcessor:
         
         # Process all chunks in parallel
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] {len(all_chunks)}개 청크 병렬 처리 시작 (max_workers={max_workers})")
+        
+        # List to store uploaded files for cleanup
+        uploaded_files_to_delete = []
         
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             # Submit all chunk tasks at once
@@ -1229,7 +1240,12 @@ class PDFProcessor:
             for future in as_completed(future_to_chunk):
                 chunk_info = future_to_chunk[future]
                 try:
-                    lesson_path, result = future.result()
+                    lesson_path, result, uploaded_file = future.result()
+                    
+                    # Collect uploaded file for cleanup
+                    if uploaded_file:
+                        with lock:
+                            uploaded_files_to_delete.append(uploaded_file)
                     
                     if "error" in result:
                         print(f"    [{datetime.now().strftime('%H:%M:%S')}] 오류 발생: {result['error']}")
@@ -1329,6 +1345,14 @@ class PDFProcessor:
         # Convert dict to list and sort by page number
         final_pages_list = list(final_pages.values())
         final_pages_list.sort(key=lambda x: x["jokbo_page"])
+        
+        # 모든 업로드된 청크 파일 삭제
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 업로드된 청크 파일 삭제 중...")
+        for uploaded_file in uploaded_files_to_delete:
+            try:
+                self.delete_file_safe(uploaded_file)
+            except Exception as e:
+                print(f"  청크 파일 삭제 실패: {str(e)}")
         
         # 족보 파일 삭제 (중심 파일이므로 모든 처리가 끝난 후 한 번만 삭제)
         try:
