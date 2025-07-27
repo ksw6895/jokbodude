@@ -291,9 +291,22 @@ class PDFCreator:
                         
                         # Add related lesson slides for this specific question
                         for slide_info in related_slides:
+                            lesson_page = slide_info["lesson_page"]
+                            lesson_filename = slide_info["lesson_filename"]
+                            
+                            # Validate page number
+                            lesson_path = Path(lesson_dir) / lesson_filename
+                            if lesson_path.exists():
+                                with fitz.open(str(lesson_path)) as temp_pdf:
+                                    max_pages = len(temp_pdf)
+                                    if lesson_page > max_pages:
+                                        print(f"Warning: Page {lesson_page} does not exist in {lesson_filename} (max: {max_pages})")
+                                        self.log_debug(f"  WARNING: Page {lesson_page} > max {max_pages} in {lesson_filename}")
+                                        continue
+                            
                             slide_doc = self.extract_lesson_slide(
-                                slide_info["lesson_filename"],
-                                slide_info["lesson_page"],
+                                lesson_filename,
+                                lesson_page,
                                 lesson_dir
                             )
                             if slide_doc:
