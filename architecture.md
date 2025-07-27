@@ -214,7 +214,15 @@ GENERATION_CONFIG = {
     "response_mime_type": "application/json"  # Force JSON response
 }
 
-Model: gemini-2.5-pro
+# Available Models:
+- gemini-2.5-pro (default) - Highest quality
+- gemini-2.5-flash - Faster, cheaper
+- gemini-2.5-flash-lite - Fastest, cheapest
+
+# Thinking Budget (Flash/Flash-lite only):
+- 0: Disable thinking (fastest)
+- 1-24576: Manual budget
+- -1: Automatic (model decides)
 ```
 
 ### 안전 설정 (Safety Settings)
@@ -356,8 +364,24 @@ Model: gemini-2.5-pro
 
 ## Recent Updates (최근 업데이트)
 
+### 2025-07-28
+1. **PDF 객체 일관성 버그 수정**
+   - `create_jokbo_centric_pdf`에서 캐시된 PDF 메커니즘 사용
+   - 페이지 경계 문제 해결 (마지막 문제의 다음 페이지 포함)
+   - 디버그 로깅 추가로 페이지 포함 로직 추적 가능
+
+2. **문서 개선**
+   - README.md 사용법을 표 형식으로 재구성
+   - 시나리오별 최적 설정 추가
+   - 명령어 옵션 가독성 향상
+
 ### 2025-07-27
-1. **PyMuPDF Story API 오류 수정**
+1. **Gemini 모델 선택 기능**
+   - Pro, Flash, Flash-lite 모델 지원
+   - Thinking Budget 설정 옵션 추가
+   - 비용/속도 최적화 가능
+
+2. **PyMuPDF Story API 오류 수정**
    - Story.draw() 메서드 TypeError 해결
    - Story 클래스 대신 insert_textbox() 사용
    - PyMuPDF 버전 호환성 문제 해결

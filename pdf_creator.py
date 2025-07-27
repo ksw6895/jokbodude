@@ -32,7 +32,7 @@ class PDFCreator:
             self.jokbo_pdfs[jokbo_path] = fitz.open(jokbo_path)
         return self.jokbo_pdfs[jokbo_path]
     
-    def extract_jokbo_question(self, jokbo_filename: str, jokbo_page: int, question_number: int, question_text: str, jokbo_dir: str = "jokbo", jokbo_end_page: int = None) -> fitz.Document:
+    def extract_jokbo_question(self, jokbo_filename: str, jokbo_page: int, question_number, question_text: str, jokbo_dir: str = "jokbo", jokbo_end_page: int = None, is_last_question_on_page: bool = False, question_numbers_on_page = None):
         """Extract full page containing the question from jokbo PDF"""
         jokbo_path = Path(jokbo_dir) / jokbo_filename
         if not jokbo_path.exists():
@@ -47,7 +47,27 @@ class PDFCreator:
         
         # Determine the end page
         if jokbo_end_page is None:
-            jokbo_end_page = jokbo_page
+            # Convert question_number to string for consistent comparison
+            question_num_str = str(question_number)
+            
+            # First, try to use question_numbers_on_page for more accurate detection
+            if question_numbers_on_page and question_num_str in question_numbers_on_page:
+                # Check if current question is the last one on the page
+                if question_num_str == question_numbers_on_page[-1] and jokbo_page < len(jokbo_pdf):
+                    # This is the last question on the page, include next page
+                    jokbo_end_page = jokbo_page + 1
+                    print(f"  DEBUG: Question {question_number} is last in {question_numbers_on_page} on page {jokbo_page}")
+                    print(f"  DEBUG: Including next page {jokbo_end_page} (PDF has {len(jokbo_pdf)} pages)")
+                else:
+                    jokbo_end_page = jokbo_page
+                    print(f"  DEBUG: Question {question_number} on page {jokbo_page}, not last or no next page")
+            # Fallback to is_last_question_on_page flag
+            elif is_last_question_on_page and jokbo_page < len(jokbo_pdf):
+                # Automatically include the next page
+                jokbo_end_page = jokbo_page + 1
+                print(f"  Question {question_number} is last on page {jokbo_page}, including next page")
+            else:
+                jokbo_end_page = jokbo_page
         
         # Validate end page
         if jokbo_end_page > len(jokbo_pdf) or jokbo_end_page < jokbo_page:
@@ -81,6 +101,12 @@ class PDFCreator:
                     
                     # Create a page for each question with its explanation
                     for question in slide_info["related_jokbo_questions"]:
+                        # Determine if this is the last question on the page
+                        is_last_question = False
+                        question_numbers = question.get("question_numbers_on_page", [])
+                        if question_numbers and str(question["question_number"]) == question_numbers[-1]:
+                            is_last_question = True
+                        
                         # Extract and insert the question from jokbo
                         question_doc = self.extract_jokbo_question(
                             question["jokbo_filename"], 
@@ -88,7 +114,9 @@ class PDFCreator:
                             question["question_number"],
                             question.get("question_text", ""),
                             jokbo_dir,
-                            question.get("jokbo_end_page")  # Pass end page if available
+                            question.get("jokbo_end_page"),  # Pass end page if available
+                            is_last_question,  # Calculated flag
+                            question_numbers  # Pass question numbers on page
                         )
                         if question_doc:
                             doc.insert_pdf(question_doc)
@@ -193,11 +221,12 @@ class PDFCreator:
             return
         
         doc = fitz.open()
-        jokbo_pdf = fitz.open(jokbo_path)
+        # Use the cached PDF mechanism to ensure consistency
+        jokbo_pdf = self.get_jokbo_pdf(jokbo_path)
         jokbo_filename = Path(jokbo_path).name
         
-        # Track which jokbo pages have been inserted to avoid duplicates
-        inserted_jokbo_pages = set()
+        # Track which questions have been processed to avoid duplicates
+        processed_questions = set()
         
         for page_info in analysis_result.get("jokbo_pages", []):
             jokbo_page_num = page_info["jokbo_page"]
@@ -206,13 +235,33 @@ class PDFCreator:
                 # Process each question on this page
                 for question in page_info.get("questions", []):
                     related_slides = question.get("related_lesson_slides", [])
+                    question_num = question.get("question_number", "Unknown")
                     
-                    # Only process questions that have related lesson slides
-                    if related_slides:
-                        # Insert the jokbo page if not already inserted
-                        if jokbo_page_num not in inserted_jokbo_pages:
-                            doc.insert_pdf(jokbo_pdf, from_page=jokbo_page_num-1, to_page=jokbo_page_num-1)
-                            inserted_jokbo_pages.add(jokbo_page_num)
+                    # Only process questions that have related lesson slides and haven't been processed
+                    if related_slides and question_num not in processed_questions:
+                        processed_questions.add(question_num)
+                        
+                        # Determine if this is the last question on the page
+                        is_last_question = False
+                        question_numbers = question.get("question_numbers_on_page", [])
+                        if question_numbers and str(question_num) == question_numbers[-1]:
+                            is_last_question = True
+                            print(f"DEBUG: Question {question_num} is last on page {jokbo_page_num}, questions: {question_numbers}")
+                        
+                        # Extract the question pages (handles multi-page questions)
+                        question_doc = self.extract_jokbo_question(
+                            jokbo_filename,
+                            jokbo_page_num,
+                            question_num,
+                            question.get("question_text", ""),
+                            str(Path(jokbo_path).parent),
+                            None,  # jokbo_end_page not available in jokbo-centric mode yet
+                            is_last_question,
+                            question_numbers
+                        )
+                        if question_doc:
+                            doc.insert_pdf(question_doc)
+                            question_doc.close()
                         
                         # Add related lesson slides for this specific question
                         for slide_info in related_slides:
@@ -244,12 +293,21 @@ class PDFCreator:
                             text_content += "\n"
                         
                         text_content += "관련 강의 슬라이드:\n"
-                        for slide_info in related_slides:
-                            text_content += f"• {slide_info['lesson_filename']} - {slide_info['lesson_page']}페이지\n"
-                            text_content += f"  관련성: {slide_info['relevance_reason']}\n"
+                        for i, slide_info in enumerate(related_slides, 1):
+                            score = slide_info.get('relevance_score', 0)
+                            if score == 11:
+                                score_text = "11/10 ⭐ 동일한 그림/도표"
+                            else:
+                                score_text = f"{score}/10"
+                            text_content += f"{i}. {slide_info['lesson_filename']} - {slide_info['lesson_page']}페이지 (관련성 점수: {score_text})\n"
+                            text_content += f"   관련성 이유: {slide_info['relevance_reason']}\n"
                         text_content += "\n"
                         
-                        text_content += "💡 이 문제는 위의 강의자료들과 관련이 있습니다."
+                        # 선택된 연결 개수에 따른 메시지
+                        if len(related_slides) == 1:
+                            text_content += "💡 이 문제와 가장 관련성이 높은 강의자료입니다."
+                        else:
+                            text_content += "💡 이 문제와 가장 관련성이 높은 상위 2개의 강의자료입니다."
                         
                         # Use CJK font for Korean text
                         font = fitz.Font("cjk")
@@ -292,6 +350,6 @@ class PDFCreator:
         
         doc.save(output_path)
         doc.close()
-        jokbo_pdf.close()
+        # Don't close jokbo_pdf since it's cached
         
         print(f"Filtered PDF created: {output_path}")

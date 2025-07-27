@@ -8,6 +8,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 from datetime import datetime
 import os
+from constants import (
+    COMMON_PROMPT_INTRO, COMMON_WARNINGS, RELEVANCE_CRITERIA,
+    LESSON_CENTRIC_TASK, LESSON_CENTRIC_OUTPUT_FORMAT,
+    JOKBO_CENTRIC_TASK, JOKBO_CENTRIC_OUTPUT_FORMAT,
+    MAX_CONNECTIONS_PER_QUESTION, RELEVANCE_SCORE_THRESHOLD
+)
 
 if TYPE_CHECKING:
     from google.generativeai.types import file_types
@@ -74,16 +80,33 @@ class PDFProcessor:
                     time.sleep(2)
                 else:
                     print(f"  Failed to delete file {file.display_name} after {max_retries} attempts: {e}")
-                    # Try listing files and deleting jokbo files
-                    files = self.list_uploaded_files()
-                    for f in files:
-                        if f.display_name.startswith("족보_"):
-                            try:
-                                genai.delete_file(f.name)
-                                print(f"  Cleanup: Deleted {f.display_name}")
-                            except:
-                                pass
                     return False
+    
+    def cleanup_except_center_file(self, center_file_display_name: str):
+        """중심 파일을 제외한 모든 파일 삭제"""
+        files = self.list_uploaded_files()
+        deleted_count = 0
+        failed_count = 0
+        
+        for file in files:
+            # 중심 파일이 아닌 경우만 삭제
+            if file.display_name != center_file_display_name:
+                try:
+                    genai.delete_file(file.name)
+                    deleted_count += 1
+                    print(f"  Deleted non-center file: {file.display_name}")
+                except Exception as e:
+                    failed_count += 1
+                    print(f"  Failed to delete non-center file {file.display_name}: {e}")
+            else:
+                print(f"  Keeping center file: {file.display_name}")
+        
+        if deleted_count > 0:
+            print(f"  Cleaned up {deleted_count} files (kept center file)")
+        if failed_count > 0:
+            print(f"  Failed to clean up {failed_count} files")
+        
+        return deleted_count, failed_count
     
     def save_api_response(self, response_text: str, jokbo_filename: str, lesson_filename: str = None, mode: str = "lesson-centric"):
         """Save Gemini API response to a file for debugging"""
@@ -153,77 +176,23 @@ class PDFProcessor:
         print("  기존 업로드 파일 정리 중...")
         self.delete_all_uploaded_files()
         
-        prompt = f"""당신은 병리학 교수입니다. 두 개의 PDF 파일을 받았습니다:
-        - 첫 번째 파일: 강의자료 PDF (참고용)
-        - 두 번째 파일: 족보 PDF "{jokbo_filename}" (분석 대상)
+        # 프롬프트 구성
+        intro = COMMON_PROMPT_INTRO.format(
+            first_file_desc="강의자료 PDF (참고용)",
+            second_file_desc=f'족보 PDF "{jokbo_filename}" (분석 대상)'
+        )
+        
+        output_format = LESSON_CENTRIC_OUTPUT_FORMAT.format(jokbo_filename=jokbo_filename)
+        
+        prompt = f"""{intro}
 
-        ⚠️ 매우 중요: 문제는 오직 두 번째 파일(족보 PDF)에서만 추출하세요!
-        강의자료에 있는 예제 문제는 절대 추출하지 마세요!
-
-        작업:
-        1. 족보 PDF의 모든 문제를 분석하세요
-        2. 각 족보 문제와 직접적으로 관련된 강의자료 페이지를 찾으세요
-        3. 강의자료의 각 페이지별로 관련된 족보 문제들을 그룹화하세요
-        4. 각 문제의 정답과 함께 모든 선택지가 왜 오답인지도 설명하세요
-        5. 문제가 여러 페이지에 걸쳐있으면 jokbo_end_page에 끝 페이지 번호를 표시하세요
+{LESSON_CENTRIC_TASK}
         
-        **매우 중요한 주의사항**:
-        - question_number는 반드시 족보 PDF에 표시된 실제 문제 번호를 사용하세요 (예: 21번, 42번 등)
-        - 족보 페이지 내에서의 순서(1번째, 2번째)가 아닌, 실제 문제 번호를 확인하세요
-        - 만약 문제 번호가 명확하지 않으면 "번호없음"이라고 표시하세요
-        - jokbo_page는 반드시 해당 문제가 실제로 있는 PDF의 페이지 번호를 정확히 기입하세요
+{COMMON_WARNINGS}
         
-        **절대적 주의사항 - 강의자료 내 문제 제외**:
-        - 강의자료 PDF 내에 포함된 예제 문제나 연습 문제는 절대 추출하지 마세요
-        - 오직 족보 PDF 파일("{jokbo_filename}")에 있는 문제만을 대상으로 분석하세요
-        - jokbo_page는 반드시 족보 PDF의 페이지 번호여야 하며, 강의자료의 페이지 번호를 사용하면 안 됩니다
-        - 강의자료는 오직 참고 자료로만 사용하고, 문제는 족보에서만 추출하세요
+{RELEVANCE_CRITERIA}
         
-        판단 기준 (엄격하게 적용):
-        - 족보 문제가 직접적으로 다루는 개념이 해당 강의 슬라이드에 명시되어 있는가?
-        - 해당 슬라이드가 실제로 "출제 슬라이드"일 가능성이 높은가?
-        - 문제의 정답을 찾기 위해 반드시 필요한 핵심 정보가 포함되어 있는가?
-        - 단순히 관련 주제가 아닌, 문제 해결에 직접적으로 필요한 내용인가?
-        
-        주의사항:
-        - 너무 포괄적이거나 일반적인 연관성은 제외하세요
-        - 문제와 직접적인 연관이 없는 배경 설명 슬라이드는 제외하세요
-        - importance_score는 직접적 연관성이 높을수록 높게 (8-10), 간접적이면 낮게 (1-5) 책정하세요
-        
-        출력 형식:
-        {{
-            "related_slides": [
-                {{
-                    "lesson_page": 페이지번호,
-                    "related_jokbo_questions": [
-                        {{
-                            "jokbo_filename": "{jokbo_filename}",
-                            "jokbo_page": 족보페이지번호,
-                            "jokbo_end_page": 족보끝페이지번호,  // 문제가 여러 페이지에 걸쳐있을 경우
-                            "question_number": 문제번호,
-                            "question_text": "문제 내용",
-                            "answer": "정답",
-                            "explanation": "해설",
-                            "wrong_answer_explanations": {{
-                                "1번": "왜 1번이 오답인지 설명",
-                                "2번": "왜 2번이 오답인지 설명",
-                                "3번": "왜 3번이 오답인지 설명",
-                                "4번": "왜 4번이 오답인지 설명"
-                            }},
-                            "relevance_reason": "관련성 이유"
-                        }}
-                    ],
-                    "importance_score": 1-10,
-                    "key_concepts": ["핵심개념1", "핵심개념2"]
-                }}
-            ],
-            "summary": {{
-                "total_related_slides": 관련된슬라이드수,
-                "total_questions": 총관련문제수,
-                "key_topics": ["주요주제1", "주요주제2"],
-                "study_recommendations": "학습 권장사항"
-            }}
-        }}
+{output_format}
         """
         
         # Upload lesson PDF
@@ -242,6 +211,9 @@ class PDFProcessor:
         
         # Delete jokbo file immediately after analysis
         self.delete_file_safe(jokbo_file)
+        
+        # 오류 발생 시 중심 파일을 제외한 모든 파일 정리
+        self.cleanup_except_center_file(lesson_file.display_name)
         
         try:
             result = json.loads(response.text)
@@ -286,77 +258,23 @@ class PDFProcessor:
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 족보 업로드 시작 - {jokbo_filename}")
         jokbo_file = self.upload_pdf(jokbo_path, f"족보_{jokbo_filename}")
         
-        prompt = f"""당신은 병리학 교수입니다. 두 개의 PDF 파일을 받았습니다:
-        - 첫 번째 파일: 강의자료 PDF (참고용)
-        - 두 번째 파일: 족보 PDF "{jokbo_filename}" (분석 대상)
+        # 프롬프트 구성
+        intro = COMMON_PROMPT_INTRO.format(
+            first_file_desc="강의자료 PDF (참고용)",
+            second_file_desc=f'족보 PDF "{jokbo_filename}" (분석 대상)'
+        )
+        
+        output_format = LESSON_CENTRIC_OUTPUT_FORMAT.format(jokbo_filename=jokbo_filename)
+        
+        prompt = f"""{intro}
 
-        ⚠️ 매우 중요: 문제는 오직 두 번째 파일(족보 PDF)에서만 추출하세요!
-        강의자료에 있는 예제 문제는 절대 추출하지 마세요!
-
-        작업:
-        1. 족보 PDF의 모든 문제를 분석하세요
-        2. 각 족보 문제와 직접적으로 관련된 강의자료 페이지를 찾으세요
-        3. 강의자료의 각 페이지별로 관련된 족보 문제들을 그룹화하세요
-        4. 각 문제의 정답과 함께 모든 선택지가 왜 오답인지도 설명하세요
-        5. 문제가 여러 페이지에 걸쳐있으면 jokbo_end_page에 끝 페이지 번호를 표시하세요
+{LESSON_CENTRIC_TASK}
         
-        **매우 중요한 주의사항**:
-        - question_number는 반드시 족보 PDF에 표시된 실제 문제 번호를 사용하세요 (예: 21번, 42번 등)
-        - 족보 페이지 내에서의 순서(1번째, 2번째)가 아닌, 실제 문제 번호를 확인하세요
-        - 만약 문제 번호가 명확하지 않으면 "번호없음"이라고 표시하세요
-        - jokbo_page는 반드시 해당 문제가 실제로 있는 PDF의 페이지 번호를 정확히 기입하세요
+{COMMON_WARNINGS}
         
-        **절대적 주의사항 - 강의자료 내 문제 제외**:
-        - 강의자료 PDF 내에 포함된 예제 문제나 연습 문제는 절대 추출하지 마세요
-        - 오직 족보 PDF 파일("{jokbo_filename}")에 있는 문제만을 대상으로 분석하세요
-        - jokbo_page는 반드시 족보 PDF의 페이지 번호여야 하며, 강의자료의 페이지 번호를 사용하면 안 됩니다
-        - 강의자료는 오직 참고 자료로만 사용하고, 문제는 족보에서만 추출하세요
+{RELEVANCE_CRITERIA}
         
-        판단 기준 (엄격하게 적용):
-        - 족보 문제가 직접적으로 다루는 개념이 해당 강의 슬라이드에 명시되어 있는가?
-        - 해당 슬라이드가 실제로 "출제 슬라이드"일 가능성이 높은가?
-        - 문제의 정답을 찾기 위해 반드시 필요한 핵심 정보가 포함되어 있는가?
-        - 단순히 관련 주제가 아닌, 문제 해결에 직접적으로 필요한 내용인가?
-        
-        주의사항:
-        - 너무 포괄적이거나 일반적인 연관성은 제외하세요
-        - 문제와 직접적인 연관이 없는 배경 설명 슬라이드는 제외하세요
-        - importance_score는 직접적 연관성이 높을수록 높게 (8-10), 간접적이면 낮게 (1-5) 책정하세요
-        
-        출력 형식:
-        {{
-            "related_slides": [
-                {{
-                    "lesson_page": 페이지번호,
-                    "related_jokbo_questions": [
-                        {{
-                            "jokbo_filename": "{jokbo_filename}",
-                            "jokbo_page": 족보페이지번호,
-                            "jokbo_end_page": 족보끝페이지번호,  // 문제가 여러 페이지에 걸쳐있을 경우
-                            "question_number": 문제번호,
-                            "question_text": "문제 내용",
-                            "answer": "정답",
-                            "explanation": "해설",
-                            "wrong_answer_explanations": {{
-                                "1번": "왜 1번이 오답인지 설명",
-                                "2번": "왜 2번이 오답인지 설명",
-                                "3번": "왜 3번이 오답인지 설명",
-                                "4번": "왜 4번이 오답인지 설명"
-                            }},
-                            "relevance_reason": "관련성 이유"
-                        }}
-                    ],
-                    "importance_score": 1-10,
-                    "key_concepts": ["핵심개념1", "핵심개념2"]
-                }}
-            ],
-            "summary": {{
-                "total_related_slides": 관련된슬라이드수,
-                "total_questions": 총관련문제수,
-                "key_topics": ["주요주제1", "주요주제2"],
-                "study_recommendations": "학습 권장사항"
-            }}
-        }}
+{output_format}
         """
         
         # Prepare content with pre-uploaded lesson file
@@ -368,9 +286,11 @@ class PDFProcessor:
         # Save API response for debugging
         self.save_api_response(response.text, jokbo_filename, lesson_file.display_name.replace("강의자료_", ""), "lesson-centric")
         
-        # Delete jokbo file immediately after analysis
+        # Delete jokbo file immediately after analysis  
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 족보 파일 삭제 중 - {jokbo_filename}")
-        self.delete_file_safe(jokbo_file)
+        if not self.delete_file_safe(jokbo_file):
+            # 삭제 실패 시 중심 파일을 제외한 모든 파일 정리
+            self.cleanup_except_center_file(lesson_file.display_name)
         
         try:
             result = json.loads(response.text)
@@ -483,59 +403,24 @@ class PDFProcessor:
         print("  기존 업로드 파일 정리 중...")
         self.delete_all_uploaded_files()
         
-        prompt = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
+        # 프롬프트 구성
+        intro = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
 
-        중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
-        중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요.
+중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
+중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요."""
+        
+        output_format = JOKBO_CENTRIC_OUTPUT_FORMAT.format(
+            jokbo_filename=jokbo_filename,
+            lesson_filename=lesson_filename
+        )
+        
+        prompt = f"""{intro}
 
-        작업 (족보 중심 분석):
-        1. 족보 PDF의 모든 문제를 페이지 순서대로 분석하세요
-        2. 각 족보 문제와 관련된 강의자료 슬라이드를 찾으세요
-        3. 족보의 각 페이지별로 관련된 강의 슬라이드들을 그룹화하세요
+{JOKBO_CENTRIC_TASK}
         
-        **매우 중요한 주의사항**:
-        - question_number는 반드시 족보 PDF에 표시된 실제 문제 번호를 사용하세요
-        - jokbo_page는 반드시 해당 문제가 실제로 있는 PDF의 페이지 번호를 정확히 기입하세요
+{COMMON_WARNINGS}
         
-        **절대적 주의사항 - 강의자료 내 문제 제외**:
-        - 강의자료 PDF 내에 포함된 예제 문제나 연습 문제는 절대 분석하지 마세요
-        - 오직 족보 PDF 파일("{jokbo_filename}")에 있는 문제만을 대상으로 분석하세요
-        - 강의자료는 오직 참고 자료로만 사용하고, 문제는 족보에서만 추출하세요
-        
-        출력 형식:
-        {{
-            "jokbo_pages": [
-                {{
-                    "jokbo_page": 족보페이지번호,
-                    "questions": [
-                        {{
-                            "question_number": 문제번호,
-                            "question_text": "문제 내용",
-                            "answer": "정답",
-                            "explanation": "해설",
-                            "wrong_answer_explanations": {{
-                                "1번": "왜 1번이 오답인지 설명",
-                                "2번": "왜 2번이 오답인지 설명",
-                                "3번": "왜 3번이 오답인지 설명",
-                                "4번": "왜 4번이 오답인지 설명"
-                            }},
-                            "related_lesson_slides": [
-                                {{
-                                    "lesson_filename": "{lesson_filename}",
-                                    "lesson_page": 강의페이지번호,
-                                    "relevance_reason": "관련성 이유"
-                                }}
-                            ]
-                        }}
-                    ]
-                }}
-            ],
-            "summary": {{
-                "total_jokbo_pages": 총족보페이지수,
-                "total_questions": 총문제수,
-                "total_related_slides": 관련된강의슬라이드수
-            }}
-        }}
+{output_format}
         """
         
         # Upload jokbo PDF first
@@ -555,6 +440,9 @@ class PDFProcessor:
         # Delete lesson file immediately after analysis
         self.delete_file_safe(lesson_file)
         
+        # 오류 발생 시 중심 파일을 제외한 모든 파일 정리
+        self.cleanup_except_center_file(jokbo_file.display_name)
+        
         try:
             result = json.loads(response.text)
             return result
@@ -566,6 +454,7 @@ class PDFProcessor:
         """Analyze multiple lesson PDFs against one jokbo PDF (jokbo-centric)"""
         
         all_jokbo_pages = {}
+        all_connections = {}  # {question_id: [connections with scores]}
         total_related_slides = 0
         
         # Process each lesson file individually
@@ -588,37 +477,74 @@ class PDFProcessor:
                 
                 # Process each question on this page
                 for question in page_info.get("questions", []):
-                    # Find if this question already exists
-                    existing_question = None
-                    for q in all_jokbo_pages[jokbo_page]["questions"]:
-                        if q["question_number"] == question["question_number"]:
-                            existing_question = q
-                            break
+                    question_id = f"{jokbo_page}_{question['question_number']}"
                     
-                    if existing_question:
-                        # Add new related slides to existing question
-                        existing_question["related_lesson_slides"].extend(
-                            question.get("related_lesson_slides", [])
-                        )
-                    else:
-                        # Add new question
-                        all_jokbo_pages[jokbo_page]["questions"].append(question)
-                        total_related_slides += len(question.get("related_lesson_slides", []))
+                    # 문제가 처음 발견된 경우
+                    if question_id not in all_connections:
+                        all_connections[question_id] = {
+                            "question_data": {
+                                "jokbo_page": jokbo_page,
+                                "question_number": question["question_number"],
+                                "question_text": question["question_text"],
+                                "answer": question["answer"],
+                                "explanation": question["explanation"],
+                                "wrong_answer_explanations": question.get("wrong_answer_explanations", {})
+                            },
+                            "connections": []
+                        }
+                    
+                    # 관련 슬라이드 연결 추가 (점수 포함)
+                    for slide in question.get("related_lesson_slides", []):
+                        all_connections[question_id]["connections"].append(slide)
+        
+        # 각 문제에 대해 상위 2개 연결만 선택
+        final_pages = {}
+        total_questions = 0
+        filtered_total_slides = 0
+        
+        for question_id, data in all_connections.items():
+            question_data = data["question_data"]
+            connections = data["connections"]
+            
+            # relevance_score로 정렬하고 상위 2개만 선택
+            sorted_connections = sorted(
+                connections,
+                key=lambda x: x.get("relevance_score", 0),
+                reverse=True
+            )[:MAX_CONNECTIONS_PER_QUESTION]
+            
+            # 최소 점수 기준을 충족하는 연결만 유지
+            filtered_connections = [
+                conn for conn in sorted_connections
+                if conn.get("relevance_score", 0) >= RELEVANCE_SCORE_THRESHOLD
+            ]
+            
+            if filtered_connections:  # 관련 슬라이드가 있는 경우만 포함
+                jokbo_page = question_data["jokbo_page"]
+                if jokbo_page not in final_pages:
+                    final_pages[jokbo_page] = {
+                        "jokbo_page": jokbo_page,
+                        "questions": []
+                    }
+                
+                question_entry = question_data.copy()
+                question_entry["related_lesson_slides"] = filtered_connections
+                final_pages[jokbo_page]["questions"].append(question_entry)
+                
+                total_questions += 1
+                filtered_total_slides += len(filtered_connections)
         
         # Convert dict to list and sort by page number
-        final_pages = list(all_jokbo_pages.values())
-        final_pages.sort(key=lambda x: x["jokbo_page"])
-        
-        # Count total questions
-        total_questions = sum(len(page["questions"]) for page in final_pages)
+        final_pages_list = list(final_pages.values())
+        final_pages_list.sort(key=lambda x: x["jokbo_page"])
         
         return {
-            "jokbo_pages": final_pages,
+            "jokbo_pages": final_pages_list,
             "summary": {
-                "total_jokbo_pages": len(final_pages),
+                "total_jokbo_pages": len(final_pages_list),
                 "total_questions": total_questions,
-                "total_related_slides": total_related_slides,
-                "study_recommendations": "각 족보 문제별로 관련된 강의 슬라이드를 중점적으로 학습하세요."
+                "total_related_slides": filtered_total_slides,
+                "study_recommendations": "각 족보 문제별로 가장 관련성이 높은 강의 슬라이드를 중점적으로 학습하세요."
             }
         }
     
@@ -633,59 +559,24 @@ class PDFProcessor:
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 강의자료 업로드 시작 - {lesson_filename}")
         lesson_file = self.upload_pdf(lesson_path, f"강의자료_{lesson_filename}")
         
-        prompt = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
+        # 프롬프트 구성
+        intro = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
 
-        중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
-        중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요.
+중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
+중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요."""
+        
+        output_format = JOKBO_CENTRIC_OUTPUT_FORMAT.format(
+            jokbo_filename=jokbo_filename,
+            lesson_filename=lesson_filename
+        )
+        
+        prompt = f"""{intro}
 
-        작업 (족보 중심 분석):
-        1. 족보 PDF의 모든 문제를 페이지 순서대로 분석하세요
-        2. 각 족보 문제와 관련된 강의자료 슬라이드를 찾으세요
-        3. 족보의 각 페이지별로 관련된 강의 슬라이드들을 그룹화하세요
+{JOKBO_CENTRIC_TASK}
         
-        **매우 중요한 주의사항**:
-        - question_number는 반드시 족보 PDF에 표시된 실제 문제 번호를 사용하세요
-        - jokbo_page는 반드시 해당 문제가 실제로 있는 PDF의 페이지 번호를 정확히 기입하세요
+{COMMON_WARNINGS}
         
-        **절대적 주의사항 - 강의자료 내 문제 제외**:
-        - 강의자료 PDF 내에 포함된 예제 문제나 연습 문제는 절대 분석하지 마세요
-        - 오직 족보 PDF 파일("{jokbo_filename}")에 있는 문제만을 대상으로 분석하세요
-        - 강의자료는 오직 참고 자료로만 사용하고, 문제는 족보에서만 추출하세요
-        
-        출력 형식:
-        {{
-            "jokbo_pages": [
-                {{
-                    "jokbo_page": 족보페이지번호,
-                    "questions": [
-                        {{
-                            "question_number": 문제번호,
-                            "question_text": "문제 내용",
-                            "answer": "정답",
-                            "explanation": "해설",
-                            "wrong_answer_explanations": {{
-                                "1번": "왜 1번이 오답인지 설명",
-                                "2번": "왜 2번이 오답인지 설명",
-                                "3번": "왜 3번이 오답인지 설명",
-                                "4번": "왜 4번이 오답인지 설명"
-                            }},
-                            "related_lesson_slides": [
-                                {{
-                                    "lesson_filename": "{lesson_filename}",
-                                    "lesson_page": 강의페이지번호,
-                                    "relevance_reason": "관련성 이유"
-                                }}
-                            ]
-                        }}
-                    ]
-                }}
-            ],
-            "summary": {{
-                "total_jokbo_pages": 총족보페이지수,
-                "total_questions": 총문제수,
-                "total_related_slides": 관련된강의슬라이드수
-            }}
-        }}
+{output_format}
         """
         
         # Prepare content with pre-uploaded jokbo file
@@ -699,7 +590,9 @@ class PDFProcessor:
         
         # Delete lesson file immediately after analysis
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 강의자료 파일 삭제 중 - {lesson_filename}")
-        self.delete_file_safe(lesson_file)
+        if not self.delete_file_safe(lesson_file):
+            # 삭제 실패 시 중심 파일을 제외한 모든 파일 정리
+            self.cleanup_except_center_file(jokbo_file.display_name)
         
         try:
             result = json.loads(response.text)
@@ -775,40 +668,83 @@ class PDFProcessor:
                             
                             # Process each question on this page
                             for question in page_info.get("questions", []):
-                                # Find if this question already exists
-                                existing_question = None
-                                for q in all_jokbo_pages[jokbo_page]["questions"]:
-                                    if q["question_number"] == question["question_number"]:
-                                        existing_question = q
-                                        break
+                                question_id = f"{jokbo_page}_{question['question_number']}"
                                 
-                                if existing_question:
-                                    # Add new related slides to existing question
-                                    existing_question["related_lesson_slides"].extend(
-                                        question.get("related_lesson_slides", [])
-                                    )
-                                else:
-                                    # Add new question
-                                    all_jokbo_pages[jokbo_page]["questions"].append(question)
-                                    total_related_slides += len(question.get("related_lesson_slides", []))
+                                # 문제가 처음 발견된 경우
+                                if question_id not in all_connections:
+                                    all_connections[question_id] = {
+                                        "question_data": {
+                                            "jokbo_page": jokbo_page,
+                                            "question_number": question["question_number"],
+                                            "question_text": question["question_text"],
+                                            "answer": question["answer"],
+                                            "explanation": question["explanation"],
+                                            "wrong_answer_explanations": question.get("wrong_answer_explanations", {})
+                                        },
+                                        "connections": []
+                                    }
+                                
+                                # 관련 슬라이드 연결 추가 (점수 포함)
+                                for slide in question.get("related_lesson_slides", []):
+                                    all_connections[question_id]["connections"].append(slide)
                 
                 except Exception as e:
                     print(f"    [{datetime.now().strftime('%H:%M:%S')}] 처리 중 오류: {Path(lesson_path).name} - {str(e)}")
         
-        # Convert dict to list and sort by page number
-        final_pages = list(all_jokbo_pages.values())
-        final_pages.sort(key=lambda x: x["jokbo_page"])
+        # 각 문제에 대해 상위 2개 연결만 선택
+        final_pages = {}
+        total_questions = 0
+        filtered_total_slides = 0
         
-        # Count total questions
-        total_questions = sum(len(page["questions"]) for page in final_pages)
+        for question_id, data in all_connections.items():
+            question_data = data["question_data"]
+            connections = data["connections"]
+            
+            # relevance_score로 정렬하고 상위 2개만 선택
+            sorted_connections = sorted(
+                connections,
+                key=lambda x: x.get("relevance_score", 0),
+                reverse=True
+            )[:MAX_CONNECTIONS_PER_QUESTION]
+            
+            # 최소 점수 기준을 충족하는 연결만 유지
+            filtered_connections = [
+                conn for conn in sorted_connections
+                if conn.get("relevance_score", 0) >= RELEVANCE_SCORE_THRESHOLD
+            ]
+            
+            if filtered_connections:  # 관련 슬라이드가 있는 경우만 포함
+                jokbo_page = question_data["jokbo_page"]
+                if jokbo_page not in final_pages:
+                    final_pages[jokbo_page] = {
+                        "jokbo_page": jokbo_page,
+                        "questions": []
+                    }
+                
+                question_entry = question_data.copy()
+                question_entry["related_lesson_slides"] = filtered_connections
+                final_pages[jokbo_page]["questions"].append(question_entry)
+                
+                total_questions += 1
+                filtered_total_slides += len(filtered_connections)
+        
+        # Convert dict to list and sort by page number
+        final_pages_list = list(final_pages.values())
+        final_pages_list.sort(key=lambda x: x["jokbo_page"])
+        
+        # 족보 파일 삭제
+        try:
+            self.delete_file_safe(jokbo_file)
+        except:
+            pass
         
         return {
-            "jokbo_pages": final_pages,
+            "jokbo_pages": final_pages_list,
             "summary": {
-                "total_jokbo_pages": len(final_pages),
+                "total_jokbo_pages": len(final_pages_list),
                 "total_questions": total_questions,
-                "total_related_slides": total_related_slides,
-                "study_recommendations": "각 족보 문제별로 관련된 강의 슬라이드를 중점적으로 학습하세요."
+                "total_related_slides": filtered_total_slides,
+                "study_recommendations": "각 족보 문제별로 가장 관련성이 높은 강의 슬라이드를 중점적으로 학습하세요."
             }
         }
     

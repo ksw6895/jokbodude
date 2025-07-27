@@ -7,7 +7,7 @@ from datetime import datetime
 import argparse
 from typing import List, Tuple
 
-from config import model
+from config import create_model
 from pdf_processor import PDFProcessor
 from pdf_creator import PDFCreator
 
@@ -19,7 +19,7 @@ def find_pdf_files(directory: str, pattern: str = "*.pdf") -> List[Path]:
     return [f for f in pdf_files if not f.name.endswith('.Zone.Identifier')]
 
 
-def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], output_dir: Path, jokbo_dir: str, use_parallel: bool = False) -> bool:
+def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], output_dir: Path, jokbo_dir: str, model, use_parallel: bool = False) -> bool:
     """Process one lesson PDF with all jokbo PDFs"""
     try:
         print(f"\n처리 중...")
@@ -63,7 +63,7 @@ def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], o
         return False
 
 
-def process_jokbo_with_all_lessons(jokbo_path: Path, lesson_paths: List[Path], output_dir: Path, lesson_dir: str, use_parallel: bool = False) -> bool:
+def process_jokbo_with_all_lessons(jokbo_path: Path, lesson_paths: List[Path], output_dir: Path, lesson_dir: str, model, use_parallel: bool = False) -> bool:
     """Process one jokbo PDF with all lesson PDFs (jokbo-centric)"""
     try:
         print(f"\n처리 중...")
@@ -117,8 +117,27 @@ def main():
     parser.add_argument("--parallel", action="store_true", help="병렬 처리 모드 사용 (더 빠른 처리)")
     parser.add_argument("--mode", choices=["lesson-centric", "jokbo-centric"], default="lesson-centric", 
                        help="분석 모드 선택 (기본값: lesson-centric)")
+    parser.add_argument("--model", choices=["pro", "flash", "flash-lite"], default="pro",
+                       help="Gemini 모델 선택 (기본값: pro)")
+    parser.add_argument("--thinking-budget", type=int, default=None,
+                       help="Flash/Flash-lite 모델의 thinking budget (0-24576, -1은 자동)")
     
     args = parser.parse_args()
+    
+    # Create model with specified configuration
+    model = create_model(args.model, args.thinking_budget)
+    
+    if args.model != "pro":
+        print(f"사용 모델: Gemini 2.5 {args.model.upper()}")
+        if args.thinking_budget is not None:
+            if args.thinking_budget == 0:
+                print("  Thinking 비활성화 (최고 속도/최저 비용)")
+            elif args.thinking_budget == -1:
+                print("  Thinking 자동 설정")
+            else:
+                print(f"  Thinking budget: {args.thinking_budget}")
+    else:
+        print("사용 모델: Gemini 2.5 Pro")
     
     output_dir = Path(args.output_dir)
     output_dir.mkdir(exist_ok=True)
@@ -153,7 +172,7 @@ def main():
         
         # Process each lesson with all jokbos
         for lesson_file in lesson_files:
-            if process_lesson_with_all_jokbos(lesson_file, jokbo_files, output_dir, args.jokbo_dir, args.parallel):
+            if process_lesson_with_all_jokbos(lesson_file, jokbo_files, output_dir, args.jokbo_dir, model, args.parallel):
                 successful += 1
             else:
                 failed += 1
@@ -165,7 +184,7 @@ def main():
         
         # Process each jokbo with all lessons
         for jokbo_file in jokbo_files:
-            if process_jokbo_with_all_lessons(jokbo_file, lesson_files, output_dir, args.lesson_dir, args.parallel):
+            if process_jokbo_with_all_lessons(jokbo_file, lesson_files, output_dir, args.lesson_dir, model, args.parallel):
                 successful += 1
             else:
                 failed += 1
