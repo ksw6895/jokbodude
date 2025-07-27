@@ -13,11 +13,13 @@ from pathlib import Path
 import tempfile
 import os
 from datetime import datetime
+import threading
 
 class PDFCreator:
     def __init__(self):
         self.temp_files = []
         self.jokbo_pdfs = {}  # Cache for opened jokbo PDFs
+        self.pdf_lock = threading.Lock()  # Thread-safe lock for PDF cache
         self.debug_log_path = Path("output/debug/pdf_creator_debug.log")
         self.debug_log_path.parent.mkdir(parents=True, exist_ok=True)
         
@@ -37,10 +39,11 @@ class PDFCreator:
             f.flush()  # Ensure the message is written immediately
     
     def get_jokbo_pdf(self, jokbo_path: str) -> fitz.Document:
-        """Get or open a jokbo PDF (cached)"""
-        if jokbo_path not in self.jokbo_pdfs:
-            self.jokbo_pdfs[jokbo_path] = fitz.open(jokbo_path)
-        return self.jokbo_pdfs[jokbo_path]
+        """Get or open a jokbo PDF (thread-safe cached)"""
+        with self.pdf_lock:
+            if jokbo_path not in self.jokbo_pdfs:
+                self.jokbo_pdfs[jokbo_path] = fitz.open(jokbo_path)
+            return self.jokbo_pdfs[jokbo_path]
     
     def extract_jokbo_question(self, jokbo_filename: str, jokbo_page: int, question_number, question_text: str, jokbo_dir: str = "jokbo", jokbo_end_page: int = None, is_last_question_on_page: bool = False, question_numbers_on_page = None):
         """Extract full page containing the question from jokbo PDF"""

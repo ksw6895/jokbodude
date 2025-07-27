@@ -8,6 +8,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 from datetime import datetime
 import os
+try:
+    from tqdm import tqdm
+    TQDM_AVAILABLE = True
+except ImportError:
+    TQDM_AVAILABLE = False
 from constants import (
     COMMON_PROMPT_INTRO, COMMON_WARNINGS, RELEVANCE_CRITERIA,
     LESSON_CENTRIC_TASK, LESSON_CENTRIC_OUTPUT_FORMAT,
@@ -163,6 +168,19 @@ class PDFProcessor:
             print(f"  Failed to clean up {failed_count} files")
         
         return deleted_count, failed_count
+    
+    def generate_content_with_retry(self, content, max_retries=3, backoff_factor=2):
+        """Generate content with exponential backoff retry for parallel mode"""
+        for attempt in range(max_retries):
+            try:
+                response = self.model.generate_content(content)
+                return response
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    raise
+                wait_time = backoff_factor ** attempt
+                print(f"  Retry {attempt + 1}/{max_retries} after {wait_time}s: {str(e)[:50]}...")
+                time.sleep(wait_time)
     
     def save_api_response(self, response_text: str, jokbo_filename: str, lesson_filename: str = None, mode: str = "lesson-centric"):
         """Save Gemini API response to a file for debugging"""
@@ -337,7 +355,7 @@ class PDFProcessor:
         content = [prompt, lesson_file, jokbo_file]
         
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: AI 분석 시작 - {jokbo_filename}")
-        response = self.model.generate_content(content)
+        response = self.generate_content_with_retry(content)
         
         # Save API response for debugging
         self.save_api_response(response.text, jokbo_filename, lesson_file.display_name.replace("강의자료_", ""), "lesson-centric")
@@ -767,7 +785,8 @@ class PDFProcessor:
                                 "question_text": question["question_text"],
                                 "answer": question["answer"],
                                 "explanation": question["explanation"],
-                                "wrong_answer_explanations": question.get("wrong_answer_explanations", {})
+                                "wrong_answer_explanations": question.get("wrong_answer_explanations", {}),
+                                "question_numbers_on_page": question.get("question_numbers_on_page", [])
                             },
                             "connections": []
                         }
@@ -862,7 +881,7 @@ class PDFProcessor:
         content = [prompt, jokbo_file, lesson_file]
         
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: AI 분석 시작 - {lesson_filename}")
-        response = self.model.generate_content(content)
+        response = self.generate_content_with_retry(content)
         
         # Save API response for debugging
         self.save_api_response(response.text, jokbo_filename, lesson_filename, "jokbo-centric")
@@ -895,6 +914,7 @@ class PDFProcessor:
         jokbo_file = self.upload_pdf(jokbo_path, f"족보_{Path(jokbo_path).name}")
         
         all_jokbo_pages = {}
+        all_connections = {}  # Fix: Initialize all_connections
         total_related_slides = 0
         lock = threading.Lock()
         
@@ -912,6 +932,12 @@ class PDFProcessor:
             except Exception as e:
                 print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 오류 발생 - {str(e)}")
                 return {"error": str(e)}
+            finally:
+                # Ensure cleanup happens
+                try:
+                    thread_processor.__del__()
+                except:
+                    pass
         
         # Process lesson files in parallel
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] {len(lesson_paths)}개 강의자료 파일 병렬 처리 시작 (max_workers={max_workers})")
@@ -925,7 +951,10 @@ class PDFProcessor:
             
             print(f"  [{datetime.now().strftime('%H:%M:%S')}] 모든 작업 제출 완료 - 동시 처리 중...")
             
-            # Process completed tasks
+            # Process completed tasks with progress bar
+            if TQDM_AVAILABLE:
+                pbar = tqdm(total=len(future_to_lesson), desc="강의자료 파일 처리")
+            
             for future in as_completed(future_to_lesson):
                 lesson_path = future_to_lesson[future]
                 try:
@@ -958,7 +987,8 @@ class PDFProcessor:
                                             "question_text": question["question_text"],
                                             "answer": question["answer"],
                                             "explanation": question["explanation"],
-                                            "wrong_answer_explanations": question.get("wrong_answer_explanations", {})
+                                            "wrong_answer_explanations": question.get("wrong_answer_explanations", {}),
+                                            "question_numbers_on_page": question.get("question_numbers_on_page", [])
                                         },
                                         "connections": []
                                     }
@@ -969,6 +999,12 @@ class PDFProcessor:
                 
                 except Exception as e:
                     print(f"    [{datetime.now().strftime('%H:%M:%S')}] 처리 중 오류: {Path(lesson_path).name} - {str(e)}")
+                finally:
+                    if TQDM_AVAILABLE:
+                        pbar.update(1)
+            
+            if TQDM_AVAILABLE:
+                pbar.close()
         
         # 각 문제에 대해 상위 2개 연결만 선택
         final_pages = {}
@@ -1011,11 +1047,13 @@ class PDFProcessor:
         final_pages_list = list(final_pages.values())
         final_pages_list.sort(key=lambda x: x["jokbo_page"])
         
-        # 족보 파일 삭제
+        # 족보 파일 삭제 (중심 파일이므로 모든 처리가 끝난 후 한 번만 삭제)
         try:
             self.delete_file_safe(jokbo_file)
-        except:
-            pass
+        except Exception as e:
+            print(f"  족보 파일 삭제 실패: {str(e)}")
+            # 중심 파일 제외 정리 시도
+            self.cleanup_except_center_file(jokbo_file.display_name)
         
         return {
             "jokbo_pages": final_pages_list,
@@ -1059,6 +1097,12 @@ class PDFProcessor:
             except Exception as e:
                 print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 오류 발생 - {str(e)}")
                 return {"error": str(e)}
+            finally:
+                # Ensure cleanup happens
+                try:
+                    thread_processor.__del__()
+                except:
+                    pass
         
         # Process jokbo files in parallel
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] {len(jokbo_paths)}개 족보 파일 병렬 처리 시작 (max_workers={max_workers})")
@@ -1072,7 +1116,10 @@ class PDFProcessor:
             
             print(f"  [{datetime.now().strftime('%H:%M:%S')}] 모든 작업 제출 완료 - 동시 처리 중...")
             
-            # Process completed tasks
+            # Process completed tasks with progress bar
+            if TQDM_AVAILABLE:
+                pbar = tqdm(total=len(future_to_jokbo), desc="족보 파일 처리")
+            
             for future in as_completed(future_to_jokbo):
                 jokbo_path = future_to_jokbo[future]
                 try:
@@ -1117,6 +1164,12 @@ class PDFProcessor:
                 
                 except Exception as e:
                     print(f"    [{datetime.now().strftime('%H:%M:%S')}] 처리 중 오류: {Path(jokbo_path).name} - {str(e)}")
+                finally:
+                    if TQDM_AVAILABLE:
+                        pbar.update(1)
+            
+            if TQDM_AVAILABLE:
+                pbar.close()
         
         # Convert sets to lists and prepare final result
         final_slides = []
@@ -1126,6 +1179,14 @@ class PDFProcessor:
         
         # Sort by lesson page number
         final_slides.sort(key=lambda x: x["lesson_page"])
+        
+        # 강의자료 파일 삭제 (중심 파일이므로 모든 처리가 끝난 후 한 번만 삭제)
+        try:
+            self.delete_file_safe(lesson_file)
+        except Exception as e:
+            print(f"  강의자료 파일 삭제 실패: {str(e)}")
+            # 중심 파일 제외 정리 시도
+            self.cleanup_except_center_file(lesson_file.display_name)
         
         return {
             "related_slides": final_slides,
