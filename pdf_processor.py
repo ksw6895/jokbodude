@@ -621,7 +621,10 @@ class PDFProcessor:
                         for slide in question.get("related_lesson_slides", []):
                             # Adjust lesson page numbers by adding offset
                             if "lesson_page" in slide:
+                                # The page number in the response is relative to the chunk (1-based)
+                                # We need to convert it to absolute page number
                                 slide["lesson_page"] += (start_page - 1)
+                                print(f"DEBUG: Adjusted page {slide['lesson_page'] - (start_page - 1)} to {slide['lesson_page']} for chunk p{start_page}-{end_page}")
             return result
         except json.JSONDecodeError as e:
             print(f"Failed to parse JSON response for chunk p{start_page}-{end_page}: {e}")
@@ -637,11 +640,19 @@ class PDFProcessor:
         if not results:
             return {"error": "No valid results to merge"}
         
+        print(f"Merging {len(results)} chunk results...")
+        
         # Start with the first result as base
         merged = results[0].copy()
         
+        # Log initial state
+        initial_pages = len(merged.get("jokbo_pages", []))
+        initial_questions = sum(len(p.get("questions", [])) for p in merged.get("jokbo_pages", []))
+        print(f"Initial result has {initial_pages} pages with {initial_questions} questions")
+        
         # Merge additional results
-        for result in results[1:]:
+        for chunk_idx, result in enumerate(results[1:], 1):
+            print(f"\nMerging chunk {chunk_idx}...")
             if "jokbo_pages" in result:
                 for page_info in result["jokbo_pages"]:
                     page_num = page_info["jokbo_page"]
@@ -666,6 +677,10 @@ class PDFProcessor:
                                     break
                             
                             if merged_question:
+                                # Update fields that might have been empty in first chunk
+                                if not merged_question.get("question_numbers_on_page") and question.get("question_numbers_on_page"):
+                                    merged_question["question_numbers_on_page"] = question["question_numbers_on_page"]
+                                
                                 # Merge related_lesson_slides
                                 existing_slides = {s.get("lesson_page"): s for s in merged_question.get("related_lesson_slides", [])}
                                 
@@ -677,6 +692,14 @@ class PDFProcessor:
                                         # Update if new score is higher
                                         if slide.get("relevance_score", 0) > existing_slides[slide_page].get("relevance_score", 0):
                                             existing_slides[slide_page].update(slide)
+                            else:
+                                # Add new question that wasn't in the merged result
+                                print(f"  Adding new question {q_num} to page {page_num}")
+                                merged_page["questions"].append(question)
+                    else:
+                        # Add new page that wasn't in the merged result
+                        print(f"  Adding new page {page_num} with {len(page_info.get('questions', []))} questions")
+                        merged.setdefault("jokbo_pages", []).append(page_info)
         
         # Re-sort and filter slides by relevance score
         if "jokbo_pages" in merged:
@@ -691,6 +714,11 @@ class PDFProcessor:
                         if slide.get("relevance_score", 0) >= RELEVANCE_SCORE_THRESHOLD:
                             filtered_slides.append(slide)
                     question["related_lesson_slides"] = filtered_slides
+        
+        # Log final state
+        final_pages = len(merged.get("jokbo_pages", []))
+        final_questions = sum(len(p.get("questions", [])) for p in merged.get("jokbo_pages", []))
+        print(f"\nMerge complete: {final_pages} pages with {final_questions} questions (was {initial_pages} pages with {initial_questions} questions)")
         
         return merged
     

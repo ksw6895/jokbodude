@@ -34,6 +34,7 @@ class PDFCreator:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         with open(self.debug_log_path, 'a', encoding='utf-8') as f:
             f.write(f"[{timestamp}] {message}\n")
+            f.flush()  # Ensure the message is written immediately
     
     def get_jokbo_pdf(self, jokbo_path: str) -> fitz.Document:
         """Get or open a jokbo PDF (cached)"""
