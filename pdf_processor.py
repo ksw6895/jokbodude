@@ -847,21 +847,116 @@ class PDFProcessor:
         }
     
     def analyze_single_lesson_with_jokbo_preloaded(self, lesson_path: str, jokbo_file) -> Dict[str, Any]:
-        """Analyze one lesson PDF against pre-uploaded jokbo file (jokbo-centric)"""
+        """Analyze one lesson PDF against pre-uploaded jokbo file (jokbo-centric) with chunk splitting"""
         
         # Extract the actual filename
         lesson_filename = Path(lesson_path).name
         jokbo_filename = jokbo_file.display_name.replace("족보_", "")
         
-        # Upload only lesson PDF
-        print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 강의자료 업로드 시작 - {lesson_filename}")
-        lesson_file = self.upload_pdf(lesson_path, f"강의자료_{lesson_filename}")
+        # Split lesson PDF if it's too large
+        max_pages_per_chunk = int(os.environ.get('MAX_PAGES_PER_CHUNK', '40'))
+        lesson_chunks = self.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)
         
-        # 프롬프트 구성
-        intro = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
+        if len(lesson_chunks) == 1:
+            # Small file, process normally
+            print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 강의자료 업로드 시작 - {lesson_filename}")
+            lesson_file = self.upload_pdf(lesson_path, f"강의자료_{lesson_filename}")
+            
+            # 프롬프트 구성
+            intro = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
 
 중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
 중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요."""
+            
+            output_format = JOKBO_CENTRIC_OUTPUT_FORMAT.format(
+                jokbo_filename=jokbo_filename,
+                lesson_filename=lesson_filename
+            )
+            
+            prompt = f"""{intro}
+
+{JOKBO_CENTRIC_TASK}
+            
+{COMMON_WARNINGS}
+            
+{output_format}
+            """
+            
+            # Prepare content with pre-uploaded jokbo file
+            content = [prompt, jokbo_file, lesson_file]
+            
+            print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: AI 분석 시작 - {lesson_filename}")
+            response = self.generate_content_with_retry(content)
+            
+            # Save API response for debugging
+            self.save_api_response(response.text, jokbo_filename, lesson_filename, "jokbo-centric")
+            
+            # Delete lesson file immediately after analysis
+            print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 강의자료 파일 삭제 중 - {lesson_filename}")
+            if not self.delete_file_safe(lesson_file):
+                # 삭제 실패 시 중심 파일을 제외한 모든 파일 정리
+                self.cleanup_except_center_file(jokbo_file.display_name)
+            
+            try:
+                result = json.loads(response.text)
+                print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 분석 완료 - {lesson_filename}")
+                return result
+            except json.JSONDecodeError:
+                print(f"Failed to parse JSON response: {response.text}")
+                return {"error": "Failed to parse response"}
+        
+        # Large file, process in chunks
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 큰 강의자료를 {len(lesson_chunks)}개 조각으로 분할하여 처리합니다.")
+        
+        all_results = []
+        temp_files = []
+        
+        try:
+            for chunk_path, start_page, end_page in lesson_chunks:
+                print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 분석 중: {lesson_filename} (페이지 {start_page}-{end_page})")
+                
+                # Extract pages to temporary file
+                temp_pdf = self.extract_pdf_pages(chunk_path, start_page, end_page)
+                temp_files.append(temp_pdf)
+                
+                # Analyze this chunk
+                chunk_result = self._analyze_jokbo_with_lesson_chunk_preloaded(
+                    jokbo_file, temp_pdf, jokbo_filename, lesson_filename,
+                    start_page, end_page
+                )
+                
+                if "error" not in chunk_result:
+                    all_results.append(chunk_result)
+            
+            # Merge results from all chunks
+            merged_result = self._merge_jokbo_centric_results(all_results)
+            
+            print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 분석 완료 - {lesson_filename}")
+            return merged_result
+            
+        finally:
+            # Clean up temporary files
+            for temp_file in temp_files:
+                try:
+                    os.unlink(temp_file)
+                except:
+                    pass
+    
+    def _analyze_jokbo_with_lesson_chunk_preloaded(self, jokbo_file, lesson_chunk_path: str, 
+                                                   jokbo_filename: str, lesson_filename: str,
+                                                   start_page: int, end_page: int) -> Dict[str, Any]:
+        """Analyze pre-uploaded jokbo with a chunk of lesson PDF in parallel mode"""
+        
+        # Upload lesson chunk
+        chunk_display_name = f"강의자료_{lesson_filename}_p{start_page}-{end_page}"
+        lesson_chunk_file = self.upload_pdf(lesson_chunk_path, chunk_display_name)
+        
+        # 프롬프트 구성 (페이지 범위 명시)
+        intro = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF의 일부분을 비교 분석합니다.
+
+중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
+중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요.
+중요: 현재 분석하는 강의자료는 전체의 {start_page}-{end_page} 페이지 부분입니다."""
         
         output_format = JOKBO_CENTRIC_OUTPUT_FORMAT.format(
             jokbo_filename=jokbo_filename,
@@ -877,27 +972,46 @@ class PDFProcessor:
 {output_format}
         """
         
-        # Prepare content with pre-uploaded jokbo file
-        content = [prompt, jokbo_file, lesson_file]
+        # Prepare content for model
+        content = [prompt, jokbo_file, lesson_chunk_file]
         
-        print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: AI 분석 시작 - {lesson_filename}")
         response = self.generate_content_with_retry(content)
         
         # Save API response for debugging
-        self.save_api_response(response.text, jokbo_filename, lesson_filename, "jokbo-centric")
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        debug_filename = f"gemini_response_{timestamp}_chunk_p{start_page}-{end_page}_{lesson_filename}.json"
+        self.save_api_response(response.text, jokbo_filename, lesson_filename, f"chunk_p{start_page}-{end_page}")
         
-        # Delete lesson file immediately after analysis
-        print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 강의자료 파일 삭제 중 - {lesson_filename}")
-        if not self.delete_file_safe(lesson_file):
-            # 삭제 실패 시 중심 파일을 제외한 모든 파일 정리
-            self.cleanup_except_center_file(jokbo_file.display_name)
+        # Delete lesson chunk file immediately
+        self.delete_file_safe(lesson_chunk_file)
         
         try:
-            result = json.loads(response.text)
-            print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 분석 완료 - {lesson_filename}")
+            # Clean up common JSON errors from Gemini
+            cleaned_text = response.text
+            # Fix incorrectly quoted keys like "4"번" -> "4번"
+            import re
+            cleaned_text = re.sub(r'"(\d+)"번"', r'"\1번"', cleaned_text)
+            
+            result = json.loads(cleaned_text)
+            # Adjust page numbers to account for chunk offset
+            if "jokbo_pages" in result:
+                for page_info in result["jokbo_pages"]:
+                    for question in page_info.get("questions", []):
+                        for slide in question.get("related_lesson_slides", []):
+                            if "lesson_page" in slide:
+                                page_num = slide["lesson_page"]
+                                chunk_page_count = end_page - start_page + 1
+                                if page_num <= chunk_page_count:
+                                    slide["lesson_page"] = page_num + (start_page - 1)
+                                    print(f"DEBUG: Adjusted chunk-relative page {page_num} to absolute page {slide['lesson_page']} for chunk p{start_page}-{end_page}")
+                                else:
+                                    print(f"DEBUG: Page {page_num} appears to be absolute (exceeds chunk size {chunk_page_count}), keeping as-is for chunk p{start_page}-{end_page}")
             return result
-        except json.JSONDecodeError:
-            print(f"Failed to parse JSON response: {response.text}")
+        except json.JSONDecodeError as e:
+            print(f"Failed to parse JSON response for chunk p{start_page}-{end_page}: {e}")
+            debug_file = self.debug_dir / f"failed_json_chunk_p{start_page}-{end_page}.txt"
+            with open(debug_file, 'w', encoding='utf-8') as f:
+                f.write(response.text)
             return {"error": "Failed to parse response"}
     
     def analyze_lessons_for_jokbo_parallel(self, lesson_paths: List[str], jokbo_path: str, max_workers: int = 3) -> Dict[str, Any]:
