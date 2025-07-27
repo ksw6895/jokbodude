@@ -36,6 +36,15 @@ python main.py --mode jokbo-centric
 
 # Run in jokbo-centric mode with parallel processing
 python main.py --mode jokbo-centric --parallel
+
+# Run with Gemini 2.5 Flash model (faster, cheaper)
+python main.py --model flash
+
+# Run with Flash-lite model, no thinking (fastest, cheapest)
+python main.py --model flash-lite --thinking-budget 0
+
+# Run with Flash model, moderate thinking budget
+python main.py --model flash --thinking-budget 8192
 ```
 
 ### 환경 설정 (Environment Configuration)
@@ -124,7 +133,45 @@ Each output PDF contains:
 - 구조: 족보 페이지 → 관련 강의 슬라이드 → 해설
 - 사용법: `python main.py --mode jokbo-centric`
 
-## 최근 개선사항 (Recent Improvements - 2025-07-27)
+## 최근 개선사항 (Recent Improvements - 2025-07-28)
+
+### 1. PDF 객체 일관성 버그 수정
+- **문제**: 족보 중심 모드에서 마지막 문제가 있는 페이지의 다음 페이지가 포함되지 않는 버그
+- **원인**: `create_jokbo_centric_pdf`와 `extract_jokbo_question`에서 서로 다른 PDF 객체 사용
+- **해결**: 캐시된 PDF 메커니즘을 일관되게 사용하도록 수정
+- **영향**: 이제 페이지 경계의 문제들이 올바르게 다음 페이지까지 포함됨
+
+### 2. 사용법 문서 개선
+- **README.md**: 명령어 옵션을 표 형식으로 정리하여 가독성 향상
+- **시나리오별 사용법**: 중간고사, 기말고사 등 상황별 최적 설정 추가
+- **고급 사용법**: Thinking Budget 설정 등 세부 옵션 설명 추가
+
+## 이전 개선사항 (2025-07-27)
+
+### 1. Gemini 모델 선택 기능 추가
+- **3가지 모델 지원**: Pro, Flash, Flash-lite
+- **Thinking Budget 설정**: Flash/Flash-lite 모델에서 thinking budget 제어 가능
+  - 0: Thinking 비활성화 (최고 속도/최저 비용)
+  - 1-24576: 수동 budget 설정
+  - -1: 자동 budget 설정
+- **비용 최적화**: Flash-lite는 Pro 대비 훨씬 저렴 ($0.10/1M input vs 더 높은 가격)
+- **사용 예시**:
+  ```bash
+  python main.py --model flash                              # Flash 모델 사용
+  python main.py --model flash-lite --thinking-budget 0     # 최고 속도/최저 비용
+  python main.py --model flash --thinking-budget 8192       # 중간 thinking budget
+  ```
+
+### 2. 다중 페이지 문제 처리 개선
+- **문제 페이지 인식 개선**: 문제의 첫 부분이 나타나는 페이지를 정확히 인식
+- **페이지내 문제 번호 목록**: 각 페이지에 있는 모든 문제 번호를 추적
+- **자동 다음 페이지 포함**: 페이지의 마지막 문제인 경우 자동으로 다음 페이지 포함
+- **새로운 JSON 필드**:
+  - `question_numbers_on_page`: 해당 페이지의 모든 문제 번호 배열
+  - `is_last_question_on_page`: 페이지의 마지막 문제 여부
+- **하드코딩 방식**: 복잡한 판단 로직 없이 단순하게 처리
+
+### 3. 이전 개선사항들
 
 1. **PyMuPDF Story API 오류 수정**
    - Story.draw() 메서드 오류 해결
@@ -132,7 +179,20 @@ Each output PDF contains:
    - PyMuPDF 버전 호환성 문제 해결
    - 한글 텍스트 렌더링을 위한 CJK 폰트 사용
 
-## 이전 개선사항 (Previous Improvements - 2025-07-26)
+2. **족보 중심 모드 개선**
+   - 각 문제별 관련 강의 슬라이드에 relevance_score (1-11) 추가
+   - 특수 점수 11점: 족보와 강의자료에 동일한 그림/도표가 있는 경우 ⭐
+   - 관련성 점수 기반으로 상위 2개 연결만 선택하여 표시
+   - 최소 점수 기준(5점) 미만 연결은 자동 제외
+   - PDF 출력에 관련성 점수 표시 (11점은 특별 표시)
+
+3. **코드 구조 개선**
+   - constants.py 파일 추가하여 프롬프트 상수화
+   - 중복 코드 제거 및 유지보수성 향상
+   - 파일 업로드/삭제 최적화로 API 사용량 절감
+   - 오류 발생 시 중심 파일 제외한 자동 정리 기능
+
+### 4. 이전 개선사항 (2025-07-26)
 
 1. **파일 업로드 관리 개선**
    - 처리 전 기존 업로드 파일 자동 삭제
@@ -149,7 +209,7 @@ Each output PDF contains:
    - 시험 준비에 최적화된 학습 자료 생성
    - 병렬 처리 지원으로 빠른 분석
 
-## 이전 개선사항 (Previous Improvements - 2025-07-24)
+### 5. 이전 개선사항 (2025-07-24)
 
 1. **Enhanced Prompt for Better Accuracy**
    - More strict criteria for slide relevance

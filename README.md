@@ -47,6 +47,8 @@
 - **듀얼 모드**: 강의자료 중심 또는 족보 중심 학습 모드 지원
 - **병렬 처리**: 다중 파일 빠른 처리 지원
 - **효율적 학습**: 중요한 내용만 집중적으로 학습 가능
+- **모델 선택**: Gemini 2.5 Pro/Flash/Flash-lite 중 선택 가능
+- **비용 최적화**: Flash-lite 모델로 더 빠르고 저렴하게 처리
 
 
 ## 라이선스 📝
@@ -112,39 +114,84 @@ GEMINI_API_KEY=your_actual_api_key_here
 3. **결과 확인**
    - `output/` 폴더에서 생성된 PDF 확인!
 
-### 기본 사용법
+### 📋 명령어 옵션
 
+#### 기본 실행
 ```bash
 python main.py
 ```
+모든 족보와 강의자료를 분석합니다.
 
-이 명령어는 `jokbo/` 폴더의 모든 족보와 `lesson/` 폴더의 모든 강의자료를 분석합니다.
+#### 🎯 분석 모드
+| 모드 | 명령어 | 설명 |
+|------|--------|------|
+| 강의자료 중심 (기본) | `python main.py` | 각 강의자료에 대해 관련 족보 문제 매칭 |
+| 족보 중심 | `python main.py --mode jokbo-centric` | 각 족보 문제에 대해 관련 강의 슬라이드 매칭 |
 
-### 특정 강의자료만 처리
+#### 🤖 AI 모델 선택
+| 모델 | 명령어 | 특징 | 추천 사용 케이스 |
+|------|--------|------|-----------------|
+| Gemini 2.5 Pro | `python main.py` | 최고 품질 | 정확도가 중요한 경우 |
+| Gemini 2.5 Flash | `python main.py --model flash` | 빠른 속도, 적절한 품질 | 일반적인 사용 |
+| Gemini 2.5 Flash-lite | `python main.py --model flash-lite --thinking-budget 0` | 최고 속도, 최저 비용 | 대량 처리, 비용 절감 |
 
+#### ⚡ 성능 옵션
 ```bash
+# 병렬 처리로 더 빠르게
+python main.py --parallel
+
+# 특정 강의자료만 처리
 python main.py --single-lesson "lesson/특정강의.pdf"
 ```
 
-### 커스텀 디렉토리 사용
-
+#### 📁 파일 경로 설정
 ```bash
 python main.py --jokbo-dir "내족보폴더" --lesson-dir "내강의폴더" --output-dir "결과폴더"
 ```
 
-### 병렬 처리 모드 (더 빠른 속도)
+### 🎨 고급 사용법
 
+#### 1. 시나리오별 최적 설정
+
+**📚 중간고사 대비 (강의자료 전체 검토)**
 ```bash
-python main.py --parallel
+python main.py --parallel --model flash
 ```
 
-### 족보 중심 모드
-
+**📝 기말고사 직전 (족보 위주 학습)**
 ```bash
-python main.py --mode jokbo-centric
+python main.py --mode jokbo-centric --model flash-lite --thinking-budget 0
 ```
 
-각 족보를 기준으로 관련 강의자료를 매칭합니다. 시험 직전 족보 위주 학습에 유용합니다.
+**🎯 특정 과목만 집중 공부**
+```bash
+python main.py --single-lesson "lesson/병리학_3주차.pdf" --model pro
+```
+
+#### 2. Thinking Budget 설정 (Flash/Flash-lite 전용)
+```bash
+# Thinking 비활성화 (최고 속도)
+python main.py --model flash-lite --thinking-budget 0
+
+# 자동 설정 (모델이 알아서 조절)
+python main.py --model flash --thinking-budget -1
+
+# 수동 설정 (1-24576)
+python main.py --model flash --thinking-budget 8192
+```
+
+### 💡 사용 팁
+
+1. **처음 사용시**: 기본 설정으로 시작해보세요
+2. **비용이 걱정되면**: Flash-lite 모델 사용
+3. **속도가 중요하면**: `--parallel` 옵션 추가
+4. **품질이 중요하면**: Pro 모델 유지
+
+### ⚠️ 주의사항
+
+- PDF 파일명에 특수문자가 있으면 오류가 발생할 수 있습니다
+- 대용량 PDF(100페이지 이상)는 처리 시간이 오래 걸릴 수 있습니다
+- API 사용량 제한에 주의하세요
 
 ## 폴더 구조 📁
 
@@ -158,6 +205,7 @@ jokbodude/
 ├── config.py           # Gemini API 설정
 ├── pdf_processor.py    # PDF 분석 엔진
 ├── pdf_creator.py      # PDF 생성 엔진
+├── constants.py        # 프롬프트 및 설정 상수
 ├── cleanup_gemini_files.py  # Gemini 업로드 파일 정리 도구
 └── requirements.txt    # Python 패키지 목록
 ```
@@ -200,6 +248,11 @@ jokbodude/
 - 단, Google Gemini API 사용료는 별도 (무료 크레딧 제공)
 - 학생들을 위한 팁: Gemini API는 처음 가입 시 무료 크레딧을 제공합니다
 
+### 📊 모델별 비용 비교
+- **Gemini 2.5 Pro**: 고품질 분석 (표준 가격)
+- **Gemini 2.5 Flash**: 약 50% 저렴, 속도 2배
+- **Gemini 2.5 Flash-lite**: 약 90% 저렴, 속도 4배 (`--thinking-budget 0` 사용 시)
+
 ## 🤔 자주 묻는 질문
 
 **Q: 어떤 과목에 사용할 수 있나요?**  
@@ -210,6 +263,12 @@ A: Google의 최신 AI 모델을 사용하여 높은 정확도를 보입니다. 
 
 **Q: 족보가 없어도 사용할 수 있나요?**  
 A: 족보가 있어야 관련 내용을 추출할 수 있습니다. 선배들에게 족보를 구해보세요!
+
+**Q: 어떤 모델을 사용해야 하나요?**  
+A: 처음에는 기본 Pro 모델로 시작하고, 비용이 부담되면 Flash나 Flash-lite를 사용해보세요. 품질 차이가 크지 않다면 Flash-lite를 추천합니다.
+
+**Q: 여러 페이지에 걸친 문제가 잘려서 나옵니다**  
+A: 최신 버전에서는 페이지 마지막 문제를 자동으로 감지하여 다음 페이지까지 포함합니다!
 
 ## 🎓 개발 스토리
 
