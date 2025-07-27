@@ -615,16 +615,23 @@ class PDFProcessor:
             
             result = json.loads(cleaned_text)
             # Adjust page numbers to account for chunk offset
+            # NOTE: Gemini sometimes returns absolute page numbers even for chunks
             if "jokbo_pages" in result:
                 for page_info in result["jokbo_pages"]:
                     for question in page_info.get("questions", []):
                         for slide in question.get("related_lesson_slides", []):
-                            # Adjust lesson page numbers by adding offset
                             if "lesson_page" in slide:
-                                # The page number in the response is relative to the chunk (1-based)
-                                # We need to convert it to absolute page number
-                                slide["lesson_page"] += (start_page - 1)
-                                print(f"DEBUG: Adjusted page {slide['lesson_page'] - (start_page - 1)} to {slide['lesson_page']} for chunk p{start_page}-{end_page}")
+                                page_num = slide["lesson_page"]
+                                # Only apply offset if the page number seems to be chunk-relative
+                                # (i.e., it's within the chunk's page count)
+                                chunk_page_count = end_page - start_page + 1
+                                if page_num <= chunk_page_count:
+                                    # This looks like a chunk-relative page number
+                                    slide["lesson_page"] = page_num + (start_page - 1)
+                                    print(f"DEBUG: Adjusted chunk-relative page {page_num} to absolute page {slide['lesson_page']} for chunk p{start_page}-{end_page}")
+                                else:
+                                    # This is already an absolute page number
+                                    print(f"DEBUG: Page {page_num} appears to be absolute (exceeds chunk size {chunk_page_count}), keeping as-is for chunk p{start_page}-{end_page}")
             return result
         except json.JSONDecodeError as e:
             print(f"Failed to parse JSON response for chunk p{start_page}-{end_page}: {e}")
