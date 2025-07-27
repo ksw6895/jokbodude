@@ -1032,20 +1032,68 @@ class PDFProcessor:
         total_related_slides = 0
         lock = threading.Lock()
         
-        def process_single_lesson(lesson_path: str) -> Dict[str, Any]:
-            """Process a single lesson in a thread with independent PDFProcessor"""
+        # Prepare all chunks from all lesson files
+        all_chunks = []
+        max_pages_per_chunk = int(os.environ.get('MAX_PAGES_PER_CHUNK', '40'))
+        
+        print(f"  강의자료 청크 준비 중...")
+        for lesson_path in lesson_paths:
+            lesson_chunks = self.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)
+            for chunk_path, start_page, end_page in lesson_chunks:
+                all_chunks.append({
+                    'lesson_path': lesson_path,
+                    'lesson_filename': Path(lesson_path).name,
+                    'chunk_path': chunk_path,
+                    'start_page': start_page,
+                    'end_page': end_page
+                })
+        
+        print(f"  총 {len(all_chunks)}개 청크를 병렬 처리합니다.")
+        
+        # Dictionary to store results by lesson file
+        lesson_results = {}
+        for lesson_path in lesson_paths:
+            lesson_results[lesson_path] = []
+        
+        def process_single_chunk(chunk_info: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+            """Process a single chunk in a thread"""
             thread_id = threading.current_thread().ident
-            print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 처리 시작 - {Path(lesson_path).name}")
+            lesson_path = chunk_info['lesson_path']
+            lesson_filename = chunk_info['lesson_filename']
+            start_page = chunk_info['start_page']
+            end_page = chunk_info['end_page']
+            
+            print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 처리 시작 - {lesson_filename} (p{start_page}-{end_page})")
             
             # Create a new PDFProcessor instance for this thread
             thread_processor = PDFProcessor(self.model)
             
             try:
-                result = thread_processor.analyze_single_lesson_with_jokbo_preloaded(lesson_path, jokbo_file)
-                return result
+                # Extract pages to temporary file if needed
+                if len(self.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)) > 1:
+                    temp_pdf = thread_processor.extract_pdf_pages(chunk_info['chunk_path'], start_page, end_page)
+                else:
+                    temp_pdf = chunk_info['chunk_path']
+                
+                # Analyze this chunk
+                result = thread_processor._analyze_jokbo_with_lesson_chunk_preloaded(
+                    jokbo_file, temp_pdf, 
+                    jokbo_file.display_name.replace("족보_", ""),
+                    lesson_filename,
+                    start_page, end_page
+                )
+                
+                # Clean up temp file if created
+                if temp_pdf != chunk_info['chunk_path']:
+                    try:
+                        os.unlink(temp_pdf)
+                    except:
+                        pass
+                
+                return (lesson_path, result)
             except Exception as e:
                 print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 오류 발생 - {str(e)}")
-                return {"error": str(e)}
+                return (lesson_path, {"error": str(e)})
             finally:
                 # Ensure cleanup happens
                 try:
@@ -1053,72 +1101,84 @@ class PDFProcessor:
                 except:
                     pass
         
-        # Process lesson files in parallel
-        print(f"  [{datetime.now().strftime('%H:%M:%S')}] {len(lesson_paths)}개 강의자료 파일 병렬 처리 시작 (max_workers={max_workers})")
+        # Process all chunks in parallel
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] {len(all_chunks)}개 청크 병렬 처리 시작 (max_workers={max_workers})")
         
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # Submit all tasks at once
-            future_to_lesson = {
-                executor.submit(process_single_lesson, lesson_path): lesson_path 
-                for lesson_path in lesson_paths
+            # Submit all chunk tasks at once
+            future_to_chunk = {
+                executor.submit(process_single_chunk, chunk_info): chunk_info
+                for chunk_info in all_chunks
             }
             
             print(f"  [{datetime.now().strftime('%H:%M:%S')}] 모든 작업 제출 완료 - 동시 처리 중...")
             
             # Process completed tasks with progress bar
             if TQDM_AVAILABLE:
-                pbar = tqdm(total=len(future_to_lesson), desc="강의자료 파일 처리")
+                pbar = tqdm(total=len(future_to_chunk), desc="청크 처리")
             
-            for future in as_completed(future_to_lesson):
-                lesson_path = future_to_lesson[future]
+            for future in as_completed(future_to_chunk):
+                chunk_info = future_to_chunk[future]
                 try:
-                    result = future.result()
+                    lesson_path, result = future.result()
                     
                     if "error" in result:
                         print(f"    [{datetime.now().strftime('%H:%M:%S')}] 오류 발생: {result['error']}")
-                        continue
-                    
-                    # Merge results (thread-safe)
-                    with lock:
-                        for page_info in result.get("jokbo_pages", []):
-                            jokbo_page = page_info["jokbo_page"]
-                            if jokbo_page not in all_jokbo_pages:
-                                all_jokbo_pages[jokbo_page] = {
-                                    "jokbo_page": jokbo_page,
-                                    "questions": []
-                                }
-                            
-                            # Process each question on this page
-                            for question in page_info.get("questions", []):
-                                question_id = f"{jokbo_page}_{question['question_number']}"
-                                
-                                # 문제가 처음 발견된 경우
-                                if question_id not in all_connections:
-                                    all_connections[question_id] = {
-                                        "question_data": {
-                                            "jokbo_page": jokbo_page,
-                                            "question_number": question["question_number"],
-                                            "question_text": question["question_text"],
-                                            "answer": question["answer"],
-                                            "explanation": question["explanation"],
-                                            "wrong_answer_explanations": question.get("wrong_answer_explanations", {}),
-                                            "question_numbers_on_page": question.get("question_numbers_on_page", [])
-                                        },
-                                        "connections": []
-                                    }
-                                
-                                # 관련 슬라이드 연결 추가 (점수 포함)
-                                for slide in question.get("related_lesson_slides", []):
-                                    all_connections[question_id]["connections"].append(slide)
+                    else:
+                        # Store chunk results by lesson file
+                        with lock:
+                            lesson_results[lesson_path].append(result)
                 
                 except Exception as e:
-                    print(f"    [{datetime.now().strftime('%H:%M:%S')}] 처리 중 오류: {Path(lesson_path).name} - {str(e)}")
+                    lesson_filename = chunk_info['lesson_filename']
+                    print(f"    [{datetime.now().strftime('%H:%M:%S')}] 처리 중 오류: {lesson_filename} - {str(e)}")
                 finally:
                     if TQDM_AVAILABLE:
                         pbar.update(1)
             
             if TQDM_AVAILABLE:
                 pbar.close()
+        
+        # Now merge results from all chunks
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 청크 결과 병합 중...")
+        
+        # First merge chunks by lesson file
+        for lesson_path, chunk_results in lesson_results.items():
+            if chunk_results:
+                # Merge chunks for this lesson file
+                merged_lesson_result = self._merge_jokbo_centric_results(chunk_results)
+                
+                # Now merge into the overall results
+                for page_info in merged_lesson_result.get("jokbo_pages", []):
+                    jokbo_page = page_info["jokbo_page"]
+                    if jokbo_page not in all_jokbo_pages:
+                        all_jokbo_pages[jokbo_page] = {
+                            "jokbo_page": jokbo_page,
+                            "questions": []
+                        }
+                    
+                    # Process each question on this page
+                    for question in page_info.get("questions", []):
+                        question_id = f"{jokbo_page}_{question['question_number']}"
+                        
+                        # 문제가 처음 발견된 경우
+                        if question_id not in all_connections:
+                            all_connections[question_id] = {
+                                "question_data": {
+                                    "jokbo_page": jokbo_page,
+                                    "question_number": question["question_number"],
+                                    "question_text": question["question_text"],
+                                    "answer": question["answer"],
+                                    "explanation": question["explanation"],
+                                    "wrong_answer_explanations": question.get("wrong_answer_explanations", {}),
+                                    "question_numbers_on_page": question.get("question_numbers_on_page", [])
+                                },
+                                "connections": []
+                            }
+                        
+                        # 관련 슬라이드 연결 추가 (점수 포함)
+                        for slide in question.get("related_lesson_slides", []):
+                            all_connections[question_id]["connections"].append(slide)
         
         # 각 문제에 대해 상위 2개 연결만 선택
         final_pages = {}
