@@ -35,6 +35,62 @@ class PDFProcessor:
             except Exception as e:
                 print(f"  Failed to delete file {file.display_name}: {e}")
     
+    def split_pdf_for_analysis(self, pdf_path: str, max_pages: int = 40) -> List[Tuple[str, int, int]]:
+        """Split PDF into smaller chunks for analysis
+        
+        Args:
+            pdf_path: Path to the PDF file
+            max_pages: Maximum pages per chunk (default: 40)
+            
+        Returns:
+            List of tuples (pdf_path, start_page, end_page)
+        """
+        pdf_path = Path(pdf_path)
+        with fitz.open(str(pdf_path)) as pdf:
+            total_pages = len(pdf)
+        
+        if total_pages <= max_pages:
+            # Small enough to process as one chunk
+            return [(str(pdf_path), 1, total_pages)]
+        
+        # Split into chunks
+        chunks = []
+        for start in range(0, total_pages, max_pages):
+            end = min(start + max_pages, total_pages)
+            chunks.append((str(pdf_path), start + 1, end))
+        
+        print(f"  Split {pdf_path.name} into {len(chunks)} chunks ({total_pages} pages total)")
+        return chunks
+    
+    def extract_pdf_pages(self, pdf_path: str, start_page: int, end_page: int) -> str:
+        """Extract specific pages from PDF and save to temporary file
+        
+        Args:
+            pdf_path: Path to source PDF
+            start_page: First page to extract (1-based)
+            end_page: Last page to extract (1-based)
+            
+        Returns:
+            Path to temporary PDF file
+        """
+        import tempfile
+        
+        with fitz.open(str(pdf_path)) as src_pdf:
+            # Create new PDF with selected pages
+            output = fitz.open()
+            
+            # Convert to 0-based indexing
+            for page_num in range(start_page - 1, end_page):
+                if page_num < len(src_pdf):
+                    output.insert_pdf(src_pdf, from_page=page_num, to_page=page_num)
+            
+            # Save to temporary file
+            temp_file = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False)
+            output.save(temp_file.name)
+            output.close()
+            
+            return temp_file.name
+    
     def list_uploaded_files(self):
         """List all uploaded files in the account"""
         try:
@@ -393,7 +449,7 @@ class PDFProcessor:
         }
     
     def analyze_single_lesson_with_jokbo(self, lesson_path: str, jokbo_path: str) -> Dict[str, Any]:
-        """Analyze one lesson PDF against one jokbo PDF (jokbo-centric)"""
+        """Analyze one lesson PDF against one jokbo PDF (jokbo-centric) with splitting for large files"""
         
         # Extract the actual filename
         jokbo_filename = Path(jokbo_path).name
@@ -402,6 +458,63 @@ class PDFProcessor:
         # Delete all uploaded files before starting
         print("  기존 업로드 파일 정리 중...")
         self.delete_all_uploaded_files()
+        
+        # Split lesson PDF if it's too large
+        max_pages_per_chunk = int(os.environ.get('MAX_PAGES_PER_CHUNK', '40'))
+        lesson_chunks = self.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)
+        
+        if len(lesson_chunks) == 1:
+            # Small file, process normally
+            return self._analyze_single_lesson_with_jokbo_original(lesson_path, jokbo_path)
+        
+        # Large file, process in chunks
+        print(f"  큰 강의자료를 {len(lesson_chunks)}개 조각으로 분할하여 처리합니다.")
+        
+        # Upload jokbo PDF once (전체 족보는 한 번만 업로드)
+        jokbo_file = self.upload_pdf(jokbo_path, f"족보_{jokbo_filename}")
+        
+        all_results = []
+        temp_files = []
+        
+        try:
+            for chunk_path, start_page, end_page in lesson_chunks:
+                print(f"  분석 중: {lesson_filename} (페이지 {start_page}-{end_page})")
+                
+                # Extract pages to temporary file
+                temp_pdf = self.extract_pdf_pages(chunk_path, start_page, end_page)
+                temp_files.append(temp_pdf)
+                
+                # Analyze this chunk
+                chunk_result = self._analyze_jokbo_with_lesson_chunk(
+                    jokbo_file, temp_pdf, jokbo_filename, lesson_filename,
+                    start_page, end_page
+                )
+                
+                if "error" not in chunk_result:
+                    all_results.append(chunk_result)
+            
+            # Merge results from all chunks
+            merged_result = self._merge_jokbo_centric_results(all_results)
+            
+            # 오류 발생 시 중심 파일을 제외한 모든 파일 정리
+            self.cleanup_except_center_file(jokbo_file.display_name)
+            
+            return merged_result
+            
+        finally:
+            # Clean up temporary files
+            for temp_file in temp_files:
+                try:
+                    os.unlink(temp_file)
+                except:
+                    pass
+    
+    def _analyze_single_lesson_with_jokbo_original(self, lesson_path: str, jokbo_path: str) -> Dict[str, Any]:
+        """Original implementation for small files"""
+        
+        # Extract the actual filename
+        jokbo_filename = Path(jokbo_path).name
+        lesson_filename = Path(lesson_path).name
         
         # 프롬프트 구성
         intro = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
@@ -449,6 +562,127 @@ class PDFProcessor:
         except json.JSONDecodeError:
             print(f"Failed to parse JSON response: {response.text}")
             return {"error": "Failed to parse response"}
+    
+    def _analyze_jokbo_with_lesson_chunk(self, jokbo_file, lesson_chunk_path: str, 
+                                       jokbo_filename: str, lesson_filename: str,
+                                       start_page: int, end_page: int) -> Dict[str, Any]:
+        """Analyze jokbo with a chunk of lesson PDF"""
+        
+        # Upload lesson chunk
+        chunk_display_name = f"강의자료_{lesson_filename}_p{start_page}-{end_page}"
+        lesson_chunk_file = self.upload_pdf(lesson_chunk_path, chunk_display_name)
+        
+        # 프롬프트 구성 (페이지 범위 명시)
+        intro = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF의 일부분을 비교 분석합니다.
+
+중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
+중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요.
+중요: 현재 분석하는 강의자료는 전체의 {start_page}-{end_page} 페이지 부분입니다."""
+        
+        output_format = JOKBO_CENTRIC_OUTPUT_FORMAT.format(
+            jokbo_filename=jokbo_filename,
+            lesson_filename=lesson_filename
+        )
+        
+        prompt = f"""{intro}
+
+{JOKBO_CENTRIC_TASK}
+        
+{COMMON_WARNINGS}
+        
+{output_format}
+        """
+        
+        # Prepare content for model
+        content = [prompt, jokbo_file, lesson_chunk_file]
+        
+        response = self.model.generate_content(content)
+        
+        # Save API response for debugging
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        debug_filename = f"gemini_response_{timestamp}_chunk_p{start_page}-{end_page}_{lesson_filename}.json"
+        self.save_api_response(response.text, jokbo_filename, lesson_filename, f"chunk_p{start_page}-{end_page}")
+        
+        # Delete lesson chunk file immediately
+        self.delete_file_safe(lesson_chunk_file)
+        
+        try:
+            result = json.loads(response.text)
+            # Adjust page numbers to account for chunk offset
+            if "jokbo_pages" in result:
+                for page_info in result["jokbo_pages"]:
+                    for question in page_info.get("questions", []):
+                        for slide in question.get("related_lesson_slides", []):
+                            # Adjust lesson page numbers by adding offset
+                            if "lesson_page" in slide:
+                                slide["lesson_page"] += (start_page - 1)
+            return result
+        except json.JSONDecodeError:
+            print(f"Failed to parse JSON response for chunk p{start_page}-{end_page}")
+            return {"error": "Failed to parse response"}
+    
+    def _merge_jokbo_centric_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Merge results from multiple chunks for jokbo-centric mode"""
+        
+        if not results:
+            return {"error": "No valid results to merge"}
+        
+        # Start with the first result as base
+        merged = results[0].copy()
+        
+        # Merge additional results
+        for result in results[1:]:
+            if "jokbo_pages" in result:
+                for page_info in result["jokbo_pages"]:
+                    page_num = page_info["jokbo_page"]
+                    
+                    # Find matching page in merged result
+                    merged_page = None
+                    for mp in merged.get("jokbo_pages", []):
+                        if mp["jokbo_page"] == page_num:
+                            merged_page = mp
+                            break
+                    
+                    if merged_page:
+                        # Merge questions for this page
+                        for question in page_info.get("questions", []):
+                            q_num = question.get("question_number")
+                            
+                            # Find matching question
+                            merged_question = None
+                            for mq in merged_page.get("questions", []):
+                                if mq.get("question_number") == q_num:
+                                    merged_question = mq
+                                    break
+                            
+                            if merged_question:
+                                # Merge related_lesson_slides
+                                existing_slides = {s.get("lesson_page"): s for s in merged_question.get("related_lesson_slides", [])}
+                                
+                                for slide in question.get("related_lesson_slides", []):
+                                    slide_page = slide.get("lesson_page")
+                                    if slide_page not in existing_slides:
+                                        merged_question["related_lesson_slides"].append(slide)
+                                    else:
+                                        # Update if new score is higher
+                                        if slide.get("relevance_score", 0) > existing_slides[slide_page].get("relevance_score", 0):
+                                            existing_slides[slide_page].update(slide)
+        
+        # Re-sort and filter slides by relevance score
+        if "jokbo_pages" in merged:
+            for page_info in merged["jokbo_pages"]:
+                for question in page_info.get("questions", []):
+                    slides = question.get("related_lesson_slides", [])
+                    # Sort by relevance score (descending)
+                    slides.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)
+                    # Keep only top connections and those above threshold
+                    filtered_slides = []
+                    for slide in slides[:MAX_CONNECTIONS_PER_QUESTION]:
+                        if slide.get("relevance_score", 0) >= RELEVANCE_SCORE_THRESHOLD:
+                            filtered_slides.append(slide)
+                    question["related_lesson_slides"] = filtered_slides
+        
+        return merged
     
     def analyze_lessons_for_jokbo(self, lesson_paths: List[str], jokbo_path: str) -> Dict[str, Any]:
         """Analyze multiple lesson PDFs against one jokbo PDF (jokbo-centric)"""

@@ -12,11 +12,14 @@ from typing import List, Dict, Any
 from pathlib import Path
 import tempfile
 import os
+from datetime import datetime
 
 class PDFCreator:
     def __init__(self):
         self.temp_files = []
         self.jokbo_pdfs = {}  # Cache for opened jokbo PDFs
+        self.debug_log_path = Path("output/debug/pdf_creator_debug.log")
+        self.debug_log_path.parent.mkdir(parents=True, exist_ok=True)
         
     def __del__(self):
         for temp_file in self.temp_files:
@@ -26,6 +29,12 @@ class PDFCreator:
         for pdf in self.jokbo_pdfs.values():
             pdf.close()
     
+    def log_debug(self, message: str):
+        """Write debug message to file"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        with open(self.debug_log_path, 'a', encoding='utf-8') as f:
+            f.write(f"[{timestamp}] {message}\n")
+    
     def get_jokbo_pdf(self, jokbo_path: str) -> fitz.Document:
         """Get or open a jokbo PDF (cached)"""
         if jokbo_path not in self.jokbo_pdfs:
@@ -34,9 +43,14 @@ class PDFCreator:
     
     def extract_jokbo_question(self, jokbo_filename: str, jokbo_page: int, question_number, question_text: str, jokbo_dir: str = "jokbo", jokbo_end_page: int = None, is_last_question_on_page: bool = False, question_numbers_on_page = None):
         """Extract full page containing the question from jokbo PDF"""
+        self.log_debug(f"extract_jokbo_question called for Q{question_number} on page {jokbo_page}")
+        self.log_debug(f"  is_last_question_on_page: {is_last_question_on_page}")
+        self.log_debug(f"  question_numbers_on_page: {question_numbers_on_page}")
+        
         jokbo_path = Path(jokbo_dir) / jokbo_filename
         if not jokbo_path.exists():
             print(f"Warning: Jokbo file not found: {jokbo_path}")
+            self.log_debug(f"  ERROR: Jokbo file not found: {jokbo_path}")
             return None
             
         jokbo_pdf = self.get_jokbo_pdf(str(jokbo_path))
@@ -49,25 +63,31 @@ class PDFCreator:
         if jokbo_end_page is None:
             # Convert question_number to string for consistent comparison
             question_num_str = str(question_number)
+            self.log_debug(f"  question_num_str: {repr(question_num_str)}")
             
             # First, try to use question_numbers_on_page for more accurate detection
             if question_numbers_on_page and question_num_str in question_numbers_on_page:
+                self.log_debug(f"  Found in question_numbers_on_page")
                 # Check if current question is the last one on the page
                 if question_num_str == question_numbers_on_page[-1] and jokbo_page < len(jokbo_pdf):
                     # This is the last question on the page, include next page
                     jokbo_end_page = jokbo_page + 1
                     print(f"  DEBUG: Question {question_number} is last in {question_numbers_on_page} on page {jokbo_page}")
                     print(f"  DEBUG: Including next page {jokbo_end_page} (PDF has {len(jokbo_pdf)} pages)")
+                    self.log_debug(f"  LAST QUESTION: Including next page {jokbo_end_page}")
                 else:
                     jokbo_end_page = jokbo_page
                     print(f"  DEBUG: Question {question_number} on page {jokbo_page}, not last or no next page")
+                    self.log_debug(f"  NOT LAST: Using single page {jokbo_end_page}")
             # Fallback to is_last_question_on_page flag
             elif is_last_question_on_page and jokbo_page < len(jokbo_pdf):
                 # Automatically include the next page
                 jokbo_end_page = jokbo_page + 1
                 print(f"  Question {question_number} is last on page {jokbo_page}, including next page")
+                self.log_debug(f"  FALLBACK: Using is_last_question_on_page flag")
             else:
                 jokbo_end_page = jokbo_page
+                self.log_debug(f"  NO CONDITIONS MET: Using single page")
         
         # Validate end page
         if jokbo_end_page > len(jokbo_pdf) or jokbo_end_page < jokbo_page:
@@ -75,8 +95,10 @@ class PDFCreator:
             jokbo_end_page = jokbo_page
         
         # Extract the full page(s) containing the question
+        self.log_debug(f"  Final extraction: pages {jokbo_page} to {jokbo_end_page} (0-indexed: {jokbo_page-1} to {jokbo_end_page-1})")
         question_doc = fitz.open()
         question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_end_page-1)
+        self.log_debug(f"  Extracted document has {len(question_doc)} pages")
         
         return question_doc
     
@@ -244,9 +266,13 @@ class PDFCreator:
                         # Determine if this is the last question on the page
                         is_last_question = False
                         question_numbers = question.get("question_numbers_on_page", [])
+                        self.log_debug(f"Processing Q{question_num}: question_numbers = {question_numbers}")
                         if question_numbers and str(question_num) == question_numbers[-1]:
                             is_last_question = True
                             print(f"DEBUG: Question {question_num} is last on page {jokbo_page_num}, questions: {question_numbers}")
+                            self.log_debug(f"  Q{question_num} is LAST on page {jokbo_page_num}")
+                        else:
+                            self.log_debug(f"  Q{question_num} is NOT last on page {jokbo_page_num}")
                         
                         # Extract the question pages (handles multi-page questions)
                         question_doc = self.extract_jokbo_question(
