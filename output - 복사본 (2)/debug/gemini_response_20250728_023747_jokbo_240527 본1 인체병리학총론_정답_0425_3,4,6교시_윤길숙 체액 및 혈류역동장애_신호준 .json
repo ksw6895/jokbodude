@@ -1,0 +1,1726 @@
+{
+  "timestamp": "20250728_023747",
+  "mode": "chunk_p1-40",
+  "jokbo_file": "240527 본1 인체병리학총론_정답.pdf",
+  "lesson_file": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+  "response_text": "{\n    \"jokbo_pages\": [\n        {\n            \"jokbo_page\": 1,\n            \"questions\": [\n                {\n                    \"question_number\": \"1\",\n                    \"question_numbers_on_page\": [\n                        \"1\",\n                        \"2\",\n                        \"3\",\n                        \"4\"\n                    ],\n                    \"question_text\": \"<다음문장>의 (A)에 알맞은 용어를 하나 적으시오.(영어로 답할 것)\\n<다음문장>\\nNormal fluid (A) encompasses maintenance of vessel\\nwall integrity as well as intravascular pressure and\\nosmolarity within certain physiologic ranges.\\nHomeostasis\",\n                    \"answer\": \"Homeostasis\",\n                    \"explanation\": \"Normal fluid homeostasis refers to the maintenance of vessel wall integrity, intravascular pressure, and osmolarity within physiological ranges. This is a fundamental concept in fluid dynamics and pathology.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 2,\n                            \"relevance_reason\": \"강의자료 2페이지에 'Normal fluid homeostasis encompasses maintenance of vessel wall integrity as well as intravascular pressure and osmolarity within certain physiologic ranges.' 문장이 문제와 동일하게 제시되어 있습니다.\",\n                            \"relevance_score\": 10\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"2\",\n                    \"question_numbers_on_page\": [\n                        \"1\",\n                        \"2\",\n                        \"3\",\n                        \"4\"\n                    ],\n                    \"question_text\": \"다음은 Pulmonary edema 에 대한 설명이다. 옳지 않은 것을 하나 고르시오.\\n1) left ventricular failure, renal failure, acute respiratory distress syndrome 에 의해서 pulmonary edema가 생길 수 있다.\\n2) acute respiratory distress syndrome 에 의해서 pulmonary edema가 생길 수 있다.\\n3) pulmonary infections, & hypersensitivity reactions에 의해서 pulmonary edema 에 의해서도 pulmonary edema가 생길 수 있다.\\n4) pulmonary edema가 있는 lung 은 lung normal weight 보다 가벼워진다.\\n5) frothy, blood-tinged fluid w/ a mixture of air, edema fluid, and extravasated RBCs 가 관찰된다.\",\n                    \"answer\": \"4)\",\n                    \"explanation\": \"폐부종이 있는 폐는 정상 폐보다 액체가 더 많기 때문에 무게가 더 무거워집니다. 따라서 '가벼워진다'는 설명은 옳지 않습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"좌심실 부전, 신부전, 급성 호흡곤란 증후군 등은 폐부종의 주요 원인입니다. (강의자료 9페이지)\",\n                        \"2번\": \"급성 호흡곤란 증후군은 폐부종의 중요한 원인 중 하나입니다. (강의자료 9페이지)\",\n                        \"3번\": \"폐 감염 및 과민 반응도 폐부종을 유발할 수 있습니다. (강의자료 9페이지)\",\n                        \"5번\": \"폐부종 시 공기, 부종액, 적혈구가 혼합된 거품성 혈액성 액체가 관찰되는 것은 특징적인 소견입니다. (강의자료 9페이지)\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 9,\n                            \"relevance_reason\": \"강의자료 9페이지에 폐부종의 원인(left ventricular failure, renal failure, ARDS, pulmonary infections, hypersensitivity reactions)과 특징(2-3 times lung normal weight → 정상보다 무거워짐, frothy/blood-tinged fluid, extravasated RBCs)이 직접적으로 설명되어 있습니다.\",\n                            \"relevance_score\": 10\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"3\",\n                    \"question_numbers_on_page\": [\n                        \"1\",\n                        \"2\",\n                        \"3\",\n                        \"4\"\n                    ],\n                    \"question_text\": \"다음은 Hyperemia에 대한 설명이다. 옳지 않은 것을 하나 고르시오.\\n1) an active process resulting from augmented tissue inflow because of arteriolar dilation,\\n2) skeletal muscle during exercise 에서 생긴다.\\n3) inflammation sites 에서 생긴다.\\n4) redder because of the engorgement of vessels with oxygenated blood.\\n5) a passive process resulting from impaired outflow from a tissue.\",\n                    \"answer\": \"5)\",\n                    \"explanation\": \"5번 보기는 'Congestion(울혈)'에 대한 설명입니다. Hyperemia는 능동적인 과정으로 동맥 세동맥 확장으로 인한 조직 내 혈류량 증가를 의미합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Hyperemia는 세동맥 확장에 의한 능동적인 과정입니다. (강의자료 12페이지)\",\n                        \"2번\": \"운동 시 골격근에서 Hyperemia가 발생합니다. (강의자료 12페이지)\",\n                        \"3번\": \"염증 부위에서 Hyperemia가 발생합니다. (강의자료 12페이지)\",\n                        \"4번\": \"산소화된 혈액으로 혈관이 충혈되어 더 붉게 보입니다. (강의자료 12페이지)\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 12,\n                            \"relevance_reason\": \"강의자료 12페이지에 Hyperemia와 Congestion의 정의가 명확히 구분되어 설명되어 있습니다. Hyperemia의 특징(active process, arteriolar dilation, exercise, inflammation, redder)과 Congestion의 특징(passive process, impaired outflow)이 모두 제시되어 있습니다.\",\n                            \"relevance_score\": 10\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"4\",\n                    \"question_numbers_on_page\": [\n                        \"1\",\n                        \"2\",\n                        \"3\",\n                        \"4\"\n                    ],\n                    \"question_text\": \"다음 사진의 병리소견으로 옳은 것을 하나 고르시오.\",\n                    \"answer\": \"2) intracerebral hemorrhage\",\n                    \"explanation\": \"제시된 사진은 뇌 실질 내 출혈(intracerebral hemorrhage)을 보여줍니다. 뇌 조직 내에 혈액이 고여 있는 것이 특징입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"대장 점막의 점상 출혈은 다른 양상으로 나타납니다. (강의자료 21페이지 참조)\",\n                        \"3번\": \"뇌부종은 뇌 조직의 전반적인 부종을 의미하며 출혈과는 다릅니다.\",\n                        \"4번\": \"폐울혈은 폐 조직의 혈관 충혈을 의미합니다.\",\n                        \"5번\": \"간의 만성 수동성 울혈은 간 조직의 특정 변화를 보입니다. (강의자료 16페이지 참조)\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 22,\n                            \"relevance_reason\": \"족보 문제 4번의 사진과 강의자료 22페이지의 Figure 4-11B 사진이 동일합니다. 강의자료에는 'B, Fatal intracerebral bleed.'라고 명시되어 있습니다.\",\n                            \"relevance_score\": 11\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 2,\n            \"questions\": [\n                {\n                    \"question_number\": \"5\",\n                    \"question_numbers_on_page\": [\n                        \"5\"\n                    ],\n                    \"question_text\": \"다음 그림의 장기와 진단으로 알맞은 것을 하나 고르시오.\",\n                    \"answer\": \"4) spleen - white infarct\",\n                    \"explanation\": \"제시된 사진은 비장(spleen)에 발생한 백색 경색(white infarct)을 보여줍니다. 비장은 혈액 공급이 풍부한 장기이지만, 동맥 폐색 시 백색 경색이 발생할 수 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"폐의 적색 경색은 주로 이중 혈액 공급이 있는 장기에서 발생하며, 비장의 양상과는 다릅니다.\",\n                        \"2번\": \"폐의 백색 경색은 주로 단일 혈액 공급이 있는 장기에서 발생합니다.\",\n                        \"3번\": \"신장의 백색 경색은 비장의 양상과는 다릅니다.\",\n                        \"5번\": \"비장의 적색 경색은 비장에서는 흔하지 않습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 3,\n            \"questions\": [\n                {\n                    \"question_number\": \"6\",\n                    \"question_numbers_on_page\": [\n                        \"6\"\n                    ],\n                    \"question_text\": \"다음 그림은 major pathogenic pathways in septic shock 에 대한 것이다. “A” 에 알맞은 용어를 하나 적으시오.(영어로 답할 것)\",\n                    \"answer\": \"Immunosuppression\",\n                    \"explanation\": \"패혈성 쇼크의 주요 병태생리 경로 그림에서 'A'는 면역억제(Immunosuppression)를 나타냅니다. 이는 쇼크 상태에서 염증 반응과 함께 나타나는 중요한 기전 중 하나입니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 4,\n            \"questions\": [\n                {\n                    \"question_number\": \"7\",\n                    \"question_numbers_on_page\": [\n                        \"7\"\n                    ],\n                    \"question_text\": \"다음 그림의 장기와 진단으로 알맞은 것을 하나 고르시오.\",\n                    \"answer\": \"1) lung - red infarct\",\n                    \"explanation\": \"제시된 사진은 폐(lung)에 발생한 적색 경색(red infarct)을 보여줍니다. 폐는 이중 혈액 공급(폐동맥과 기관지동맥)을 가지므로, 혈관 폐색 시 출혈이 동반된 적색 경색이 흔히 발생합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"폐의 백색 경색은 흔하지 않습니다.\",\n                        \"3번\": \"신장의 백색 경색은 폐의 양상과는 다릅니다.\",\n                        \"4번\": \"비장의 백색 경색은 폐의 양상과는 다릅니다.\",\n                        \"5번\": \"비장의 적색 경색은 비장에서는 흔하지 않습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 5,\n            \"questions\": [\n                {\n                    \"question_number\": \"8\",\n                    \"question_numbers_on_page\": [\n                        \"8\",\n                        \"9\",\n                        \"10\",\n                        \"11\"\n                    ],\n                    \"question_text\": \"다음 문장에서 (A) 안에 알맞은 용어을 하나 적으시오.(영어로 답할 것)\\n(A) shoxk is caused by the host response to bacterial, viral or fungal infections; it\\nis a systemic inflammatory condition characterized by endothelial cell activation,\\ntissue edema, disseminated intravascular coagulation, and metabolic\\nderangements that often lead to organ failure and death.\\nSeptic\",\n                    \"answer\": \"Septic\",\n                    \"explanation\": \"제시된 설명은 세균, 바이러스, 곰팡이 감염에 대한 숙주 반응으로 발생하는 전신 염증 상태를 의미하며, 이는 패혈성 쇼크(Septic shock)의 정의입니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"9\",\n                    \"question_numbers_on_page\": [\n                        \"8\",\n                        \"9\",\n                        \"10\",\n                        \"11\"\n                    ],\n                    \"question_text\": \"<다음 문장>을 읽고 가장 알맞은 용어를 하나 적으시오.(영어로 답할 것)\\n<다음 문장>\\na detached intravascular solid, liquid, or gaseous mass that is carried by the blood\\nto a site distant from its point of origin\\nEmbolism\",\n                    \"answer\": \"Embolism\",\n                    \"explanation\": \"혈관 내에서 떨어져 나와 혈류를 타고 원래 위치에서 먼 곳으로 이동하는 고체, 액체 또는 기체 덩어리를 색전(Embolism)이라고 합니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"10\",\n                    \"question_numbers_on_page\": [\n                        \"8\",\n                        \"9\",\n                        \"10\",\n                        \"11\"\n                    ],\n                    \"question_text\": \"다음 문장에서 (A) 안에 알맞은 용어를 하나 적으시오. (영어로만 답할 것)\\nCentral nervous system infarction results in ( A ) necrosis.\\nLiquefactive\",\n                    \"answer\": \"Liquefactive\",\n                    \"explanation\": \"중추신경계의 경색(infarction)은 괴사된 조직이 효소적으로 소화되어 액체성 덩어리로 변하는 액화 괴사(Liquefactive necrosis)를 특징으로 합니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"11\",\n                    \"question_numbers_on_page\": [\n                        \"8\",\n                        \"9\",\n                        \"10\",\n                        \"11\"\n                    ],\n                    \"question_text\": \"다음은 Factors That Influence Development of an Infarct 를 설명한 것이다. 알맞지 않는 것을 하나 고르시오.\\n1) the nature of the vascular supply\\n2) the rate of development of the occlusion\\n3) the consistency of a given tissue\\n4) the blood oxygen content\",\n                    \"answer\": \"3) the consistency of a given tissue\",\n                    \"explanation\": \"조직의 경도(consistency)는 경색의 발생에 영향을 미치는 요소가 아니라, 경색이 발생했을 때 나타나는 괴사의 형태(예: 응고 괴사 vs 액화 괴사)에 영향을 미칩니다. 경색 발생에 영향을 미치는 주요 요인은 혈관 공급의 특성, 폐색 발생 속도, 조직의 산소 요구량 및 저산소증에 대한 취약성 등입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"혈관 공급의 특성(단일 vs 이중 공급)은 경색 발생에 중요합니다.\",\n                        \"2번\": \"폐색의 발생 속도가 느리면 측부 순환이 발달하여 경색을 예방할 수 있습니다.\",\n                        \"4번\": \"혈액 산소 함량(예: 빈혈, 청색증)은 조직의 산소 공급에 영향을 미쳐 경색 발생에 영향을 줄 수 있습니다.\",\n                        \"5번\": \"주어진 조직의 저산소증에 대한 취약성(vulnerability)은 경색 발생에 중요한 요소입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 6,\n            \"questions\": [\n                {\n                    \"question_number\": \"12\",\n                    \"question_numbers_on_page\": [\n                        \"12\",\n                        \"13\",\n                        \"14\"\n                    ],\n                    \"question_text\": \"다음 사진의 병리소견으로 옳은 것을 하나 고르시오.\",\n                    \"answer\": \"1) petechial hemorrhage of colonic mucosa\",\n                    \"explanation\": \"제시된 사진은 대장 점막에 나타난 작은 점상 출혈(petechial hemorrhage)을 보여줍니다. 이는 혈소판 감소증 등으로 인해 발생할 수 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"뇌 실질 내 출혈은 뇌 조직 내에 혈액이 고인 양상으로 나타납니다. (족보 1페이지 4번 문제 사진 참조)\",\n                        \"3번\": \"뇌부종은 뇌 조직의 전반적인 부종을 의미합니다.\",\n                        \"4번\": \"폐울혈은 폐 조직의 혈관 충혈을 의미합니다.\",\n                        \"5번\": \"간의 만성 수동성 울혈은 간 조직의 특정 변화를 보입니다. (강의자료 16페이지 참조)\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 21,\n                            \"relevance_reason\": \"족보 문제 12번의 사진과 강의자료 21페이지의 Figure 4-11A 사진이 동일합니다. 강의자료에는 'A, Punctate petechial hemorrhages of the colonic mucosa, a consequence of thrombocytopenia.'라고 명시되어 있습니다.\",\n                            \"relevance_score\": 11\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"13\",\n                    \"question_numbers_on_page\": [\n                        \"12\",\n                        \"13\",\n                        \"14\"\n                    ],\n                    \"question_text\": \"<다음 설명>을 읽고 (A)에 가장 알맞은 것을 하나 고르시오.\\n<다음 설명>\\n(A) % of spontaneous abortuses during the early months of gestation have a\\ndemonstrable chromosomal abnormality.\",\n                    \"answer\": \"5) 50\",\n                    \"explanation\": \"임신 초기 자연 유산의 약 50%는 염색체 이상과 관련이 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"10%는 너무 낮은 수치입니다.\",\n                        \"2번\": \"20%는 너무 낮은 수치입니다.\",\n                        \"3번\": \"30%는 너무 낮은 수치입니다.\",\n                        \"4번\": \"40%는 실제 수치보다 낮습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"14\",\n                    \"question_numbers_on_page\": [\n                        \"12\",\n                        \"13\",\n                        \"14\"\n                    ],\n                    \"question_text\": \"다음 그림의 장기와 진단으로 알맞은 것을 하나 고르시오.\",\n                    \"answer\": \"1) lung – bone marrow embolus\",\n                    \"explanation\": \"제시된 사진은 폐 조직 내에 골수 색전(bone marrow embolus)이 관찰되는 소견입니다. 이는 주로 외상이나 골절 후 발생할 수 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"간의 골수 색전은 폐와는 다른 양상입니다.\",\n                        \"3번\": \"폐의 양수 색전은 양수 성분이 관찰됩니다.\",\n                        \"4번\": \"간의 양수 색전은 간 조직에서 양수 성분이 관찰됩니다.\",\n                        \"5번\": \"폐경색은 조직 괴사를 동반합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 7,\n            \"questions\": [\n                {\n                    \"question_number\": \"15\",\n                    \"question_numbers_on_page\": [\n                        \"15\",\n                        \"16\"\n                    ],\n                    \"question_text\": \"다음설명은 Mendelian Disorders 에 대한 설명이다. (D) 에 알맞은 것을 하나 고르시오.\\n* Although gene expression is usually described as dominant or recessive, in some\\ncases, both of the alleles of a gene pair may be fully expressed in the\\nheterozygote-a condition called (A).\\n* A single mutant gene may lead to many end effects, termed ( B ); conversely,\\nmutations at several genetic loci may produce the same trait (C).\\n* It should be noted that not all nucleotide changes produce genes that cause\\ndisease. When such a DNA change occurs in at least 1% of the population, it is\\ncalled a (D).\",\n                    \"answer\": \"4) polymorphism\",\n                    \"explanation\": \"인구의 1% 이상에서 발생하는 DNA 변화는 다형성(polymorphism)이라고 불립니다. 이는 질병을 유발하지 않는 유전적 변이를 포함합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"공동우성(Codominance)은 두 대립유전자가 이형접합체에서 모두 발현되는 현상입니다.\",\n                        \"2번\": \"다면발현(Pleiotropism)은 단일 유전자 변이가 여러 표현형에 영향을 미치는 현상입니다.\",\n                        \"3번\": \"유전적 이질성(genetic heterogeneity)은 여러 유전자 위치의 돌연변이가 동일한 특성을 생성하는 현상입니다.\",\n                        \"5번\": \"유전체 각인(Genomic imprinting)은 부모 중 한쪽에서 유래한 유전자만 발현되는 현상입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"16\",\n                    \"question_numbers_on_page\": [\n                        \"15\",\n                        \"16\"\n                    ],\n                    \"question_text\": \"다음 <그림>을 읽고, 가장 알맞은 진단명(A)을 하나 고르시오.\",\n                    \"answer\": \"2) Leber Hereditary Optic Neuropathy\",\n                    \"explanation\": \"제시된 가계도는 미토콘드리아 DNA 돌연변이에 의한 질환의 특징적인 유전 양상을 보여줍니다. 이는 어머니로부터 모든 자녀에게 유전되며, 아버지로부터는 유전되지 않습니다. 이러한 특징을 보이는 질환 중 하나가 레버 유전성 시신경병증(Leber Hereditary Optic Neuropathy)입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"근긴장성 이영양증은 상염색체 우성 유전 질환입니다.\",\n                        \"3번\": \"취약 X 증후군은 X-연관 유전 질환입니다.\",\n                        \"4번\": \"프라더-윌리 증후군은 유전체 각인과 관련된 질환입니다.\",\n                        \"5번\": \"골형성부전증은 주로 상염색체 우성 유전 질환입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 8,\n            \"questions\": [\n                {\n                    \"question_number\": \"17\",\n                    \"question_numbers_on_page\": [\n                        \"17\",\n                        \"18\"\n                    ],\n                    \"question_text\": \"다음의 핵형(karyotype)을 나타내는 질환과 핵형을 바르게 적은것을 하나 고르시오.\",\n                    \"answer\": \"2) Down syndrome, 47,XY,+21\",\n                    \"explanation\": \"제시된 핵형은 21번 염색체가 3개 존재하는 삼염색체성(Trisomy 21)을 보여주며, 이는 다운 증후군(Down syndrome)의 특징적인 핵형입니다. 남성의 경우 47,XY,+21로 표기됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"클라인펠터 증후군은 47,XXY 핵형을 가집니다.\",\n                        \"3번\": \"터너 증후군은 45,X 핵형을 가집니다.\",\n                        \"4번\": \"취약 X 증후군은 X 염색체의 특정 부위 취약성을 특징으로 합니다.\",\n                        \"5번\": \"다운 증후군의 핵형 표기가 45,XX,der(14;21)(q10;q10)인 경우는 로버트슨 전좌형 다운 증후군입니다. 제시된 그림은 일반적인 삼염색체성입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"18\",\n                    \"question_numbers_on_page\": [\n                        \"17\",\n                        \"18\"\n                    ],\n                    \"question_text\": \"다음 <그림>을 보고, (A)에 알맞은 진단기법을 하나 고르시오.\",\n                    \"answer\": \"2) Fluorescence in situ hybridization\",\n                    \"explanation\": \"제시된 그림은 형광 동소 혼성화(FISH) 기법을 보여줍니다. 이는 특정 DNA 서열을 형광 프로브를 이용하여 염색체 상에서 시각화하는 기술입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"서던 블롯은 DNA 단편을 분리하여 특정 서열을 검출하는 방법입니다.\",\n                        \"3번\": \"G-밴딩은 염색체를 염색하여 밴딩 패턴을 관찰하는 핵형 분석 방법입니다.\",\n                        \"4번\": \"웨스턴 블롯은 단백질을 검출하는 방법입니다.\",\n                        \"5번\": \"노던 블롯은 RNA를 검출하는 방법입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 9,\n            \"questions\": [\n                {\n                    \"question_number\": \"19\",\n                    \"question_numbers_on_page\": [\n                        \"19\",\n                        \"20\"\n                    ],\n                    \"question_text\": \"다음 설명을 읽고 알맞은 진단명(A)을 하나 고르시오.\\n■(A) is caused by a mutation in the FBN1 gene encoding fibrillin, which is\\nrequired for structural integrity of connective tissues and regulation of TGF-β\\nsignaling.\\n■ The major tissues affected are the skeleton, eyes, and cardiovascular system.\\n■ Clinical features may include tall stature, long fingers, bilateral subluxation of\\nlens, mitral valve prolapse, aortic aneurysm, and aortic dissection.\\n■ Clinical trials with drugs that inhibit TGF-ẞ signaling such as angiotensin\\nreceptor blockers are ongoing, as these have been shown to improve aortic and\\ncardiac function in mouse models.\",\n                    \"answer\": \"4) Marfan syndrome\",\n                    \"explanation\": \"FBN1 유전자 돌연변이, 피브릴린 이상, 결합 조직의 구조적 통합성 문제, 골격계, 눈, 심혈관계 영향, 키가 크고 긴 손가락, 수정체 아탈구, 대동맥류 및 대동맥 박리 등의 특징은 마르판 증후군(Marfan syndrome)의 전형적인 설명입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"다운 증후군은 염색체 이상 질환입니다.\",\n                        \"2번\": \"엘러스-단로스 증후군은 콜라겐 합성 또는 조립 결함과 관련이 있습니다.\",\n                        \"3번\": \"프라더-윌리 증후군은 유전체 각인과 관련된 질환입니다.\",\n                        \"5번\": \"테이-삭스병은 GM2 강글리오사이드 대사 이상으로 인한 리소좀 축적병입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"20\",\n                    \"question_numbers_on_page\": [\n                        \"19\",\n                        \"20\"\n                    ],\n                    \"question_text\": \"다음 설명은 Ehlers-Danlos Syndromes 에 대한 것이다 (A)에 알맞은 용어를 하나 적으시오. (영어로 답할 것)\\nEhlers-Danlos Syndromes\\n• There are six variants of Ehlers-Danlos syndromes, all characterized by defects\\nin (A) synthesis or assembly. Each of the variants is caused by a distinct mutation\\ninvolving one of several ( A ) genes or genes that encode other ECM proteins like\\ntenascin-X.\\n■ Clinical features may include fragile, hyperextensible skin vulnerable to\\ntrauma, hypermobile joints, and ruptures involving colon, cornea, or large\\narteries.\",\n                    \"answer\": \"collagen\",\n                    \"explanation\": \"엘러스-단로스 증후군(Ehlers-Danlos Syndromes)은 콜라겐(collagen) 합성 또는 조립 결함으로 인해 발생하는 결합 조직 질환입니다. 피부의 과신장성, 관절 과운동성, 혈관 파열 등이 특징입니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 10,\n            \"questions\": [\n                {\n                    \"question_number\": \"21\",\n                    \"question_numbers_on_page\": [\n                        \"21\",\n                        \"22\",\n                        \"23\"\n                    ],\n                    \"question_text\": \"<다음 보기>을 읽고, Common forms of alteration in chromosome structure에 대한 서술로서 가장 알맞은 것을 하나 고르시오.\\n<다음 보기>\\n46,XY,r(14)\",\n                    \"answer\": \"1) ring chromosome\",\n                    \"explanation\": \"핵형 표기 '46,XY,r(14)'에서 'r(14)'는 14번 염색체가 고리 염색체(ring chromosome)를 형성했음을 의미합니다. 이는 염색체 구조 이상 중 하나입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"결실(deletion)은 염색체 일부가 소실된 것입니다.\",\n                        \"3번\": \"역위(inversion)는 염색체 일부가 뒤집힌 것입니다.\",\n                        \"4번\": \"등염색체(isochromosome)는 염색체의 한쪽 팔이 복제되고 다른 쪽 팔이 소실된 것입니다.\",\n                        \"5번\": \"전좌(translocation)는 염색체 조각이 다른 염색체로 이동한 것입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"22\",\n                    \"question_numbers_on_page\": [\n                        \"21\",\n                        \"22\",\n                        \"23\"\n                    ],\n                    \"question_text\": \"다음은 Familial Hypercholesterolemia 에 대한 설명이다. 알맞지 않은 것을 하나 고르시오.\\n1) a \\\"receptor disease\\\"\\n2) a mutation in the gene encoding the receptor for high density lipoprotein (HDL), which is involved in the transport and metabolism of cholesterol.\\n3) premature atherosclerosis\\n4) myocardial infarction.\\n5) possibly the most frequent mendelian disorder.\",\n                    \"answer\": \"2)\",\n                    \"explanation\": \"가족성 고콜레스테롤혈증(Familial Hypercholesterolemia)은 저밀도 지단백(LDL) 수용체 유전자(LDL receptor gene)의 돌연변이로 인해 발생합니다. HDL이 아닌 LDL 수용체에 문제가 생기는 질환입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"수용체 결함으로 인한 질환이므로 '수용체 질환'으로 불립니다.\",\n                        \"3번\": \"조기 죽상경화증을 유발하여 심혈관 질환 위험을 높입니다.\",\n                        \"4번\": \"조기 죽상경화증으로 인해 심근경색의 위험이 증가합니다.\",\n                        \"5번\": \"상염색체 우성 유전 질환 중 가장 흔한 것 중 하나입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"23\",\n                    \"question_numbers_on_page\": [\n                        \"21\",\n                        \"22\",\n                        \"23\"\n                    ],\n                    \"question_text\": \"다음설명을 읽고 알맞은 진단명 (A) 을 하나 고르시오.\\n■ (A) is caused by an inability to metabolize GM2gangliosidesduetolackof the a subunit of lysosor\\nGM2gangliosidesaccumulateinthecentralnervoussystemandcauseseverementalretardation,blindne\",\n                    \"answer\": \"3) Tay-Sachs disease\",\n                    \"explanation\": \"GM2 강글리오사이드 대사 불능, 리소좀 GM2 강글리오시다아제 알파 소단위체 결핍, 중추신경계 내 GM2 강글리오사이드 축적, 심각한 정신 지체 및 실명 등의 특징은 테이-삭스병(Tay-Sachs disease)의 전형적인 설명입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"고셔병은 글루코세레브로시다아제 결핍으로 글루코세레브로사이드가 축적됩니다.\",\n                        \"2번\": \"니만-픽병은 스핑고미엘리나아제 결핍으로 스핑고미엘린이 축적됩니다.\",\n                        \"4번\": \"뮤코다당증은 뮤코다당류(글리코사미노글리칸) 대사 이상으로 발생합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 11,\n            \"questions\": [\n                {\n                    \"question_number\": \"24\",\n                    \"question_numbers_on_page\": [\n                        \"24\",\n                        \"25\",\n                        \"26\"\n                    ],\n                    \"question_text\": \"다음 설명을 읽고 알맞은 진단명 (A)을 하나 고르시오.\\n■ (A) types A and B are caused by a deficiency of sphingomyelinase. In the more\\nsevere type A variant, accumulation of sphingomyelin in the nervous system\\nresults in neuronal damage. Lipid also is stored in phagocytes within the liver,\\nspleen, bone marrow, and lymph nodes, causing their enlargement. In type B,\\nneuronal damage is not present.\",\n                    \"answer\": \"4) Niemann-Pick disease\",\n                    \"explanation\": \"스핑고미엘리나아제 결핍, 스핑고미엘린 축적, A형에서의 신경계 손상, 간, 비장, 골수, 림프절의 대식세포 내 지질 저장 등의 특징은 니만-픽병(Niemann-Pick disease)의 전형적인 설명입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"테이-삭스병은 GM2 강글리오사이드 대사 이상입니다.\",\n                        \"2번\": \"헐러 증후군은 뮤코다당증의 일종입니다.\",\n                        \"3번\": \"고셔병은 글루코세레브로시다아제 결핍입니다.\",\n                        \"5번\": \"헌터 증후군은 뮤코다당증의 일종입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"25\",\n                    \"question_numbers_on_page\": [\n                        \"24\",\n                        \"25\",\n                        \"26\"\n                    ],\n                    \"question_text\": \"다음 그림은 Gaucher disease in bone marrow 에 대한 것이다. Gaucher cell cytoplasm 에 축적된 물질을 하나 적으시오.(영어로 답할 것)\",\n                    \"answer\": \"Glucocerebroside\",\n                    \"explanation\": \"고셔병(Gaucher disease)은 글루코세레브로시다아제(glucocerebrosidase) 효소의 결핍으로 인해 글루코세레브로사이드(glucocerebroside)가 대식세포의 세포질에 축적되는 리소좀 축적병입니다. 제시된 그림은 고셔 세포의 특징적인 형태를 보여줍니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"26\",\n                    \"question_numbers_on_page\": [\n                        \"24\",\n                        \"25\",\n                        \"26\"\n                    ],\n                    \"question_text\": \"다음의 Virchow Triad in thrombosis 를 구성하는 factors 중에서 thrombosis 를 일으키는 가장 중요한 factor를 하나 고르시오.\\n1) endothelial injury\\n2) stasis of blood flow\\n3) turbulence of blood flow\\n4) blood hypercoagulability\\n5) blood hypocoagulability\",\n                    \"answer\": \"1) endothelial injury\",\n                    \"explanation\": \"Virchow Triad는 혈전증(thrombosis) 발생의 세 가지 주요 요인으로 내피 손상(endothelial injury), 혈류 정체(stasis), 과응고성(hypercoagulability)을 제시합니다. 이 중 내피 손상이 혈전 형성을 시작하는 가장 중요한 요인으로 간주됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"혈류 정체는 혈전증의 중요한 요인이지만, 내피 손상만큼 시작에 결정적이지는 않습니다.\",\n                        \"3번\": \"혈류의 난류는 혈전증을 유발할 수 있지만, 내피 손상만큼 중요하지는 않습니다.\",\n                        \"4번\": \"혈액의 과응고성은 혈전증의 중요한 요인이지만, 내피 손상만큼 시작에 결정적이지는 않습니다.\",\n                        \"5번\": \"혈액의 저응고성은 혈전증을 억제하는 요인입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 26,\n                            \"relevance_reason\": \"강의자료 26페이지에서 혈액 응고 및 혈전증을 조절하는 세 가지 주요 구성 요소로 'the vascular wall, platelets, and the coagulation cascade'를 언급하며 Virchow Triad의 핵심 개념을 제시합니다. 혈관벽 손상(endothelial injury)이 혈전증의 시작에 중요함을 암시합니다.\",\n                            \"relevance_score\": 8\n                        },\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 27,\n                            \"relevance_reason\": \"강의자료 27페이지에서 'After initial injury, arteriolar vasoconstriction' 및 'primary hemostasis; highly thrombogenic subendothelial extracellular matrix (ECM)+platelet adherance & activation'을 통해 혈관 손상(endothelial injury)이 혈전 형성의 첫 단계임을 강조합니다.\",\n                            \"relevance_score\": 9\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 12,\n            \"questions\": [\n                {\n                    \"question_number\": \"27\",\n                    \"question_numbers_on_page\": [\n                        \"27\",\n                        \"28\",\n                        \"29\"\n                    ],\n                    \"question_text\": \"다음 설명문항중에서 알맞지 않은 것을 하나 고르시오.\\n1) Geneticsex - determined by the presence or absence of Y chromosome\\n2) Gonadalsex - histologic characteristics of gonads\\n3) Phenotypic sex - presence of derivatives of the Mullerian or wolffian ducts\\n4) Genital sex - appearance of external genitalia\\n5) Pseudohermaphroditism 의 정의는disagreement between phenotype & gonadal sex 이다.\",\n                    \"answer\": \"3)\",\n                    \"explanation\": \"표현형 성(Phenotypic sex)은 외부 생식기의 외형을 의미합니다. 뮐러관 또는 볼프관 유도체의 존재는 내부 생식기 성(internal genital sex)을 결정하는 요소입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"유전적 성은 Y 염색체의 유무에 의해 결정됩니다.\",\n                        \"2번\": \"생식선 성은 생식선의 조직학적 특성(난소 또는 고환)에 의해 결정됩니다.\",\n                        \"4번\": \"생식기 성은 외부 생식기의 외형을 의미합니다.\",\n                        \"5번\": \"가성반음양(Pseudohermaphroditism)은 표현형과 생식선 성이 일치하지 않는 상태를 의미합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"28\",\n                    \"question_numbers_on_page\": [\n                        \"27\",\n                        \"28\",\n                        \"29\"\n                    ],\n                    \"question_text\": \"<다음 설명>을 읽고 가장 알맞은 진단명을 하나 고르시오.\\n<다음 설명>\\n“menopause occurs before menarche”\",\n                    \"answer\": \"3) Turner syndrome\",\n                    \"explanation\": \"터너 증후군(Turner syndrome)은 난소 기능 부전으로 인해 사춘기 발달이 지연되거나 없으며, 조기 폐경(menarche 전에 menopause)이 나타날 수 있는 특징을 가집니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"클라인펠터 증후군은 남성에게서 나타나는 염색체 이상입니다.\",\n                        \"2번\": \"다운 증후군은 지적 장애와 신체적 특징을 동반합니다.\",\n                        \"4번\": \"취약 X 증후군은 X 염색체 관련 유전 질환입니다.\",\n                        \"5번\": \"안젤만 증후군은 유전체 각인과 관련된 신경 발달 장애입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"29\",\n                    \"question_numbers_on_page\": [\n                        \"27\",\n                        \"28\",\n                        \"29\"\n                    ],\n                    \"question_text\": \"다음 설명을 읽고 알맞은 것(A)을 하나 고르시오.\\n■(A) involves transcriptional silencing of the paternal or maternal copies of\\ncertain genes during gametogenesis. For such genes, only one functional copy\\nexists in the individual. Loss of the functional (not imprinted) allele by deletion\\ngives rise to diseases.\",\n                    \"answer\": \"2) genomic imprinting\",\n                    \"explanation\": \"배우자 형성 과정에서 특정 유전자의 부계 또는 모계 복사본이 전사적으로 침묵되는 현상을 유전체 각인(genomic imprinting)이라고 합니다. 이로 인해 한 기능적 사본만 존재하며, 기능적이지 않은 대립유전자의 소실은 질병을 유발할 수 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"기능 획득 돌연변이(gain-of-function mutations)는 유전자의 새로운 또는 증가된 기능을 초래합니다.\",\n                        \"3번\": \"전돌연변이(premutation)는 돌연변이의 전 단계로, 질병을 유발하지 않거나 경미한 증상을 보입니다.\",\n                        \"4번\": \"결실(deletion)은 염색체 또는 DNA의 일부가 소실되는 것입니다.\",\n                        \"5번\": \"복합 다유전자 질환(Complex multigenic disorders)은 여러 유전자의 상호작용과 환경 요인에 의해 발생합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 13,\n            \"questions\": [\n                {\n                    \"question_number\": \"30\",\n                    \"question_numbers_on_page\": [\n                        \"30\",\n                        \"31\"\n                    ],\n                    \"question_text\": \"다음 그림에서 A는 정상인의 심근 소견이고, B는 Pompe disease 환자의 심근이다. Pompe disease 환자의 심근세포에서 관찰되는 clear spaces 에 축적된 물질은 무엇인지 하나 적으시오.(영어로 답할 것)\",\n                    \"answer\": \"glycogen\",\n                    \"explanation\": \"폼페병(Pompe disease)은 글리코겐 저장 질환의 일종으로, 알파-글루코시다아제(acid alpha-glucosidase) 효소의 결핍으로 인해 글리코겐(glycogen)이 리소좀에 축적되어 심근 세포를 포함한 여러 조직에서 비대와 기능 부전을 초래합니다. 그림 B의 심근 세포 내 투명한 공간은 축적된 글리코겐이 조직 처리 과정에서 용해되어 생긴 것입니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"31\",\n                    \"question_numbers_on_page\": [\n                        \"30\",\n                        \"31\"\n                    ],\n                    \"question_text\": \"다음은 소아에게 호발하는 악성 종양들의 조직학적 소견이다. 이의 조직학적 특성에 대한 설명 중 옳은 것은?\\n1) 이러한 형태를 “소원형세포종 (small blue round cell tumor)”라고도 부른다.\\n2) 완전히 분화된 (differentiated) 조직학적 소견을 보인다.\\n3) 양성 종양과의 구별이 쉽지 않다.\\n4) N/C ratio가 낮은 것이 특징이다.\\n5) Neuroblastoma와는 상이하게 다른 조직학적 특성이 관찰이 된다.\",\n                    \"answer\": \"1)\",\n                    \"explanation\": \"소아에서 흔히 발생하는 악성 종양(예: 신경모세포종, 윌름스 종양, 횡문근육종, 유잉 육종 등)은 미분화된 작은 원형 세포들로 구성되어 있어 '소원형세포종(small blue round cell tumor)'으로 불립니다. 이들은 세포질이 적고 핵이 커서 N/C ratio가 높은 것이 특징입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"이러한 종양은 미분화된(undifferentiated) 소견을 보입니다.\",\n                        \"3번\": \"미분화된 세포로 구성되어 양성 종양과의 구별이 어렵습니다.\",\n                        \"4번\": \"N/C ratio(핵-세포질 비율)가 높은 것이 특징입니다.\",\n                        \"5번\": \"신경모세포종(Neuroblastoma)도 소원형세포종의 일종으로, 유사한 조직학적 특성을 공유합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 14,\n            \"questions\": [\n                {\n                    \"question_number\": \"32\",\n                    \"question_numbers_on_page\": [\n                        \"32\",\n                        \"33\"\n                    ],\n                    \"question_text\": \"빈혈과 태아수종 (fetal hydrops)가 동반된 신생아의 혈액 검사에서 다음 소견이 관찰되었다. 다음 설명 중 옳은 것은?\",\n                    \"answer\": \"5) Parvovirus B19 감염이 원인일 것으로 추정된다.\",\n                    \"explanation\": \"제시된 혈액 검사 소견(적혈모구 증가)과 빈혈, 태아수종이 동반된 신생아의 경우, 파르보바이러스 B19 감염이 흔한 원인입니다. 파르보바이러스 B19는 적혈구 전구세포를 감염시켜 빈혈을 유발할 수 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Rh 항원 관련은 용혈성 질환의 한 원인이지만, 파르보바이러스 B19 감염도 중요한 원인입니다.\",\n                        \"2번\": \"염색체 이상은 태아수종의 원인이 될 수 있지만, 혈액 소견과 직접적인 연관성은 낮습니다.\",\n                        \"3번\": \"심혈관계 이상은 태아수종의 원인이 될 수 있지만, 혈액 소견과 직접적인 연관성은 낮습니다.\",\n                        \"4번\": \"박테리아 감염은 패혈증을 유발할 수 있으나, 제시된 혈액 소견과는 직접적인 관련성이 낮습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"33\",\n                    \"question_numbers_on_page\": [\n                        \"32\",\n                        \"33\"\n                    ],\n                    \"question_text\": \"28주에 조산으로 태어난 경장영양 (enteral feeding)을 하는 1400g의 신생아에게 다음 소견이 관찰되었다. 이 질환에 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"5) 혈소판활성인자 (platelet activating factor) 와의 연관성이 제시되고 있다.\",\n                    \"explanation\": \"제시된 임상 양상(28주 조산, 1400g, 경장영양 중 발생한 장 소견)은 괴사성 장염(Necrotizing Enterocolitis, NEC)을 시사합니다. NEC의 병태생리에는 혈소판 활성 인자(PAF)가 중요한 역할을 하는 것으로 알려져 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"NEC는 만기 임신(Full term) 신생아보다는 미숙아(preterm)에게서 더 자주 발생합니다.\",\n                        \"2번\": \"창자벽 공기낭증(Pneumatosis intestinalis)은 NEC의 특징적인 소견 중 하나로, 매우 흔하게 관찰됩니다.\",\n                        \"3번\": \"경장영양(enteral feeding)은 NEC 발생의 위험 인자 중 하나로 알려져 있습니다.\",\n                        \"4번\": \"NEC는 정상 체중 신생아보다는 저체중 또는 미숙아에게서 더 흔하게 발생합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 15,\n            \"questions\": [\n                {\n                    \"question_number\": \"34\",\n                    \"question_numbers_on_page\": [\n                        \"34\",\n                        \"35\"\n                    ],\n                    \"question_text\": \"1. 6개월된 소아의 부신 (adrenal gland)에서 5cm 크기의 종양이 관찰되었으며, 육안 조직 소견은 다음과 같다. 임상 양상과 육안소견으로 미루어 볼 때, 가장 가능성이 높은 진단에 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"5) MYCN amplification이 있는 경우는 나쁜 예후와 관련이 있다.\",\n                    \"explanation\": \"1.6개월 소아의 부신 종양은 신경모세포종(Neuroblastoma)을 시사합니다. 신경모세포종에서 MYCN 유전자의 증폭(amplification)은 불량한 예후와 밀접하게 관련되어 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"신경모세포종은 부신 피질(Adrenal cortex)이 아닌 신경능선(neural crest) 세포에서 유래한 종양입니다.\",\n                        \"2번\": \"신경모세포종은 소아에게 가장 흔한 고형 종양 중 하나이며, 성인보다 소아에게서 자주 호발합니다.\",\n                        \"3번\": \"신경모세포종은 산발적으로 발생하기도 하지만, 가족력이나 유전적 소인이 있는 경우도 있습니다.\",\n                        \"4번\": \"신경모세포종은 교감신경절(sympathetic ganglia)에서 호발하며, 부신 수질이 가장 흔한 발생 부위입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"35\",\n                    \"question_numbers_on_page\": [\n                        \"34\",\n                        \"35\"\n                    ],\n                    \"question_text\": \"39주에 출생한 남아의 눈에서 다음과 같은 소견이 관찰되었다 (상단 그림). 이 환아는, 생후 38개월에 우측 신장에 12cm 크기의 종괴가 관찰이 되었으며, 적출 후 시행한 현미경 검사에서의 조직학적 소견은 다음과 같다 (하단 그림). 이 환아에서 발생한 종양에 대한 설명중 옳은 것은?\",\n                    \"answer\": \"4) 반대편 신장에서도 해당 종양이 발생할 가능성이 있다.\",\n                    \"explanation\": \"상단 그림의 무홍채증(aniridia)과 하단 그림의 신장 종괴(Wilms tumor)는 WAGR 증후군(Wilms tumor, Aniridia, Genitourinary anomalies, intellectual disability)의 특징적인 조합입니다. WAGR 증후군 환자는 WT1 유전자 변이와 관련이 있으며, 양측 신장에 윌름스 종양이 발생할 위험이 높습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"WT1 유전자의 이상이 원인입니다. (WT2는 존재하지 않습니다)\",\n                        \"2번\": \"편측 비대(Hemihypertrophy)는 윌름스 종양과 연관될 수 있지만, 모든 경우에 동반되는 것은 아닙니다.\",\n                        \"3번\": \"윌름스 종양은 주로 배아 세포의 발생 이상과 관련이 있으며, 체성 변이(somatic mutation)도 원인이 될 수 있지만, 유전적 소인도 중요합니다.\",\n                        \"5번\": \"TP53 변이가 동반될 경우, 예후가 나쁜 것으로 알려져 있습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 16,\n            \"questions\": [\n                {\n                    \"question_number\": \"36\",\n                    \"question_numbers_on_page\": [\n                        \"36\"\n                    ],\n                    \"question_text\": \"다음 종양에 대한 설명중 옳은 것은?\",\n                    \"answer\": \"2) Childhood일때는 sacrococcygeal location이 가장 호발 위치이다.\",\n                    \"explanation\": \"제시된 사진은 천미골 기형종(sacrococcygeal teratoma)을 보여줍니다. 이는 소아, 특히 신생아에서 가장 흔한 기형종으로, 천미골 부위가 가장 흔한 발생 위치입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"기형종은 양성일 수도 악성일 수도 있으며, 악성 기형종도 보고됩니다.\",\n                        \"3번\": \"기형종은 배아의 세 가지 배엽(외배엽, 중배엽, 내배엽)에서 유래한 다양한 조직이 관찰되는 것이 특징입니다.\",\n                        \"4번\": \"악성화가 관찰될 경우, 양성 종양보다 연령대가 높은 경향이 있습니다.\",\n                        \"5번\": \"기형종은 주로 출생 시 또는 2세 이전에 진단되지만, 모든 경우가 2세 이전에 발생하는 것은 아닙니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 17,\n            \"questions\": [\n                {\n                    \"question_number\": \"37\",\n                    \"question_numbers_on_page\": [\n                        \"37\"\n                    ],\n                    \"question_text\": \"다음은 1개월된 환아의 사진이다. 해당 종양에 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"5) 자연히 소실 (spontaneous regression) 되는 경우가 자주 발생한다.\",\n                    \"explanation\": \"제시된 사진은 영아 혈관종(infantile hemangioma)을 보여줍니다. 이는 소아에게 가장 흔한 양성 종양으로, 대부분의 경우 자연적으로 퇴행(spontaneous regression)하는 경향이 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"영아 혈관종은 대부분 양성 종양입니다.\",\n                        \"2번\": \"얼굴과 두피에 가장 흔하게 발생합니다.\",\n                        \"3번\": \"일부 유전적 요인과 관련이 있을 수 있습니다.\",\n                        \"4번\": \"소아에게서 매우 흔하게 발생합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 18,\n            \"questions\": [\n                {\n                    \"question_number\": \"38\",\n                    \"question_numbers_on_page\": [\n                        \"38\",\n                        \"39\",\n                        \"40\"\n                    ],\n                    \"question_text\": \"38주에 출생한 신생아에게서 다음 소견이 관찰되었다. 이는, congenital anomalies중 무엇에 해당하는가?\",\n                    \"answer\": \"2) Disruptions\",\n                    \"explanation\": \"제시된 사진은 외부 요인(예: 양막대)에 의해 정상적으로 발달하던 신체 부위가 파괴되거나 변형된 '파열(Disruptions)'을 보여줍니다. 이는 내재적인 발생 이상인 기형(Malformations)과는 구분됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"기형(Malformations)은 내재적인 발생 이상으로 인한 구조적 결함입니다.\",\n                        \"3번\": \"변형(Deformation)은 외부 기계적 힘에 의해 정상적으로 형성된 구조가 변형된 것입니다.\",\n                        \"4번\": \"연쇄(Sequence)는 단일한 일차적 이상으로 인해 여러 개의 이차적 이상이 연쇄적으로 발생하는 것입니다.\",\n                        \"5번\": \"기형 증후군(Malformation syndrome)은 여러 기형이 특정 패턴으로 나타나는 것입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"39\",\n                    \"question_numbers_on_page\": [\n                        \"38\",\n                        \"39\",\n                        \"40\"\n                    ],\n                    \"question_text\": \"Phenylketonuria (PKU)에 대한 설명중 옳은 것은?\\n1) Autosomal dominant pattern으로 보통 유전된다.\\n2) 대부분의 경우 dihydroptedirine reductase (DHPR) deficiency가 원인이다.\\n3) Dietary restriction을 하지 않고 방치할 경우 Hair and skin pigmentation이 더욱 진해진다.\\n4) 어린 시절부터 tyrosine 섭취를 조절하는 것이 가장 좋은 dietary restriction이다.\\n5) 대부분의 경우 phenyalanine hydroxylase (PAH) deficiency가 원인이다.\",\n                    \"answer\": \"5)\",\n                    \"explanation\": \"페닐케톤뇨증(PKU)은 페닐알라닌 수산화효소(phenylalanine hydroxylase, PAH)의 결핍으로 인해 페닐알라닌이 티로신으로 전환되지 못하여 체내에 축적되는 상염색체 열성 유전 질환입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"PKU는 상염색체 열성(autosomal recessive) 유전 질환입니다.\",\n                        \"2번\": \"DHPR 결핍은 PKU의 소수 원인이며, 대부분은 PAH 결핍입니다.\",\n                        \"3번\": \"페닐알라닌 축적은 티로신 합성을 방해하여 멜라닌 생성을 감소시키므로, 머리카락과 피부 색소 침착이 옅어집니다.\",\n                        \"4번\": \"PKU 환자는 페닐알라닌 섭취를 제한하고 티로신을 보충해야 합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"40\",\n                    \"question_numbers_on_page\": [\n                        \"38\",\n                        \"39\",\n                        \"40\"\n                    ],\n                    \"question_text\": \"31주에 preterm birth로 태어난 신생아의 폐에서 다음 조직학적 소견이 관찰되었다. 이 질환에 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"5) \\\"Hyaline membrane disease”라고도 불리며, 이는 fibrin과 necrotic cell로 구성이 된 hyaline proteinaceous material이 peripheral airspace에 deposition이 되어서 발생하는 조직학적 소견에서 유래한 이름이다.\",\n                    \"explanation\": \"제시된 사진은 미숙아의 폐에서 관찰되는 유리질막병(Hyaline membrane disease), 즉 신생아 호흡곤란 증후군(Neonatal Respiratory Distress Syndrome, NRDS)의 특징적인 조직학적 소견입니다. 이는 폐포 내에 섬유소와 괴사 세포로 구성된 유리질막이 침착되는 것을 특징으로 합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"계면활성제(Surfactant)의 부족 또는 결핍이 가장 중요한 원인입니다.\",\n                        \"2번\": \"제2형 당뇨병 산모에게서 태어난 신생아는 NRDS 발생 가능성이 증가합니다.\",\n                        \"3번\": \"제왕절개 분만은 NRDS 발생 가능성을 증가시킬 수 있습니다.\",\n                        \"4번\": \"폐 선암종(Lung adenocarcinoma)과는 관련이 없습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 19,\n            \"questions\": [\n                {\n                    \"question_number\": \"41\",\n                    \"question_numbers_on_page\": [\n                        \"41\",\n                        \"42\"\n                    ],\n                    \"question_text\": \"Hypoxia와 ischemia에 대한 설명으로 틀린 것은?\\n1) 임상적으로 cell injury를 유발하는 흔한 요인이다\\n2) Hypoxia 상태에서는 anaerobic glycolysis가 활성화되어 cellular metabolism을 유지한다\\n3) ATP depletion 초기 cell injury는 reversible하지만, 지속적일 경우 apoptosis에 의한 cell death가 발생한다\\n4) 일반적으로 ischemia에 의한 세포손상이 hypoxia에 의한 세포손상보다 심각하다\\n5) Ischemic cell injury에서 초기에 심각하게 손상 받는 세포 소기관은 mitochondria이다\",\n                    \"answer\": \"3)\",\n                    \"explanation\": \"ATP 고갈로 인한 초기 세포 손상은 가역적이지만, 지속될 경우 세포 사멸(cell death)은 주로 괴사(necrosis) 형태로 발생합니다. 특히 허혈성 손상에서는 괴사가 더 흔합니다. 아포프토시스(apoptosis)는 프로그램된 세포 사멸로, 괴사와는 다른 기전을 가집니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"저산소증과 허혈은 임상적으로 세포 손상을 유발하는 매우 흔한 요인입니다.\",\n                        \"2번\": \"저산소증 상태에서는 산소 없이 에너지를 생산하기 위해 혐기성 해당과정(anaerobic glycolysis)이 활성화됩니다.\",\n                        \"4번\": \"허혈은 저산소증에 더하여 대사 노폐물 축적과 영양분 공급 중단까지 포함하므로, 일반적으로 저산소증보다 더 심각한 세포 손상을 유발합니다.\",\n                        \"5번\": \"허혈성 세포 손상 시 미토콘드리아는 ATP 생성의 핵심 기관이므로 초기에 심각한 손상을 받습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"42\",\n                    \"question_numbers_on_page\": [\n                        \"41\",\n                        \"42\"\n                    ],\n                    \"question_text\": \"Ischemia-reperfusion injury에 대한 설명으로 틀린 것은?\\n1) ischemic tissue에 blood flow가 회복될 때 발생하는 cell injury의 형태이다\\n2) cytokine pathway를 통하지 않으므로 inflammation 반응은 미미하다\\n3) cell injury를 악화시켜 cell death를 유발할 수 있다\\n4) free radical의 과도한 생성에 의한 endothelial cell damage가 주요한 작동 기전이다\",\n                    \"answer\": \"2)\",\n                    \"explanation\": \"허혈-재관류 손상(Ischemia-reperfusion injury) 시에는 염증 반응이 활발하게 일어나며, 사이토카인(cytokine) 경로를 포함한 다양한 염증 매개체가 관여합니다. 따라서 염증 반응이 미미하다는 설명은 틀렸습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"허혈-재관류 손상은 허혈 상태였던 조직에 혈류가 다시 공급될 때 발생하는 세포 손상입니다.\",\n                        \"3번\": \"재관류는 오히려 세포 손상을 악화시키고 세포 사멸을 유발할 수 있습니다.\",\n                        \"4번\": \"활성산소종(free radical)의 과도한 생성으로 인한 내피세포 손상이 주요 기전 중 하나입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 20,\n            \"questions\": [\n                {\n                    \"question_number\": \"43\",\n                    \"question_numbers_on_page\": [\n                        \"43\",\n                        \"44\",\n                        \"45\",\n                        \"46\"\n                    ],\n                    \"question_text\": \"Chemical injury에 대한 설명으로 틀린 것은?\\n1) 임상적으로 약물치료를 중지하는 흔한 원인 중 하나이다\\n2) Liver와 kidney는 toxic injury가 발생하는 대표적인 장기이다\\n3) direct toxic injury는 toxic metabolite에 의해 발생한다\\n4) cytochrome P-450 system에서 drug metabolism이 주로 발생한다\\n5) chemotherapeutics, antibiotics, analgesics 등 다양한 약물이 toxic injury를 유발할 수 있다\",\n                    \"answer\": \"3)\",\n                    \"explanation\": \"직접 독성 손상(direct toxic injury)은 화학 물질 자체가 세포에 직접적으로 독성을 나타내는 것을 의미합니다. 독성 대사산물(toxic metabolite)에 의해 발생하는 손상은 간접 독성 손상(indirect toxic injury)에 해당합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"약물로 인한 독성 손상은 임상에서 약물 치료를 중단하는 흔한 원인입니다.\",\n                        \"2번\": \"간과 신장은 약물 대사와 배설에 관여하므로 독성 손상이 흔히 발생하는 대표적인 장기입니다.\",\n                        \"4번\": \"많은 약물이 사이토크롬 P-450 시스템에 의해 대사되어 독성 대사산물을 생성할 수 있습니다.\",\n                        \"5번\": \"항암제, 항생제, 진통제 등 다양한 약물이 독성 손상을 유발할 수 있습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"44\",\n                    \"question_numbers_on_page\": [\n                        \"43\",\n                        \"44\",\n                        \"45\",\n                        \"46\"\n                    ],\n                    \"question_text\": \"Cellular adaptation의 대표적인 형태가 아닌 것은?\\n1) Hypertrophy\\n2) Hyperplasia\\n3) Metaplasia\\n4) Metastasis\\n5) Atrophy\",\n                    \"answer\": \"4) Metastasis\",\n                    \"explanation\": \"세포 적응(Cellular adaptation)은 세포가 스트레스에 반응하여 형태나 기능이 가역적으로 변화하는 현상으로, 비대(Hypertrophy), 증식(Hyperplasia), 이형성(Metaplasia), 위축(Atrophy) 등이 있습니다. 전이(Metastasis)는 악성 종양 세포가 원발 부위에서 떨어져 나와 다른 부위로 이동하여 성장하는 현상으로, 세포 적응과는 다른 개념입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"비대(Hypertrophy)는 세포 크기 증가로 인한 장기 크기 증가입니다.\",\n                        \"2번\": \"증식(Hyperplasia)은 세포 수 증가로 인한 장기 크기 증가입니다.\",\n                        \"3번\": \"이형성(Metaplasia)은 한 분화된 세포 유형이 다른 분화된 세포 유형으로 대체되는 것입니다.\",\n                        \"5번\": \"위축(Atrophy)은 세포 크기 감소로 인한 장기 크기 감소입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"45\",\n                    \"question_numbers_on_page\": [\n                        \"43\",\n                        \"44\",\n                        \"45\",\n                        \"46\"\n                    ],\n                    \"question_text\": \"Cellular adaptation에 대한 설명으로 틀린 것은?\\n1) metaplasia는 cellular stress에 대한 fully differentiated cell의 reversible morphologic change이다\\n2) Hyperplasia와 hypertrophy는 종종 함께 관찰된다\\n3) Hypertrophy는 non-dividing cell에서 intracellular structural component 합성이 증가된 상태이다\\n4) Pathologic hyperplasia가 지속되면 암이 발생할 수 있다\\n5) Atrophy는 해당 organ의 workload 감소, innervation 소실, blood supply의 감소와 밀접하게 관련되어 있다\",\n                    \"answer\": \"1)\",\n                    \"explanation\": \"이형성(Metaplasia)은 한 분화된 세포 유형이 스트레스에 반응하여 다른 분화된 세포 유형으로 가역적으로 대체되는 것입니다. 'fully differentiated cell의 reversible morphologic change'라는 표현은 정확하지 않습니다. 기존의 분화된 세포가 다른 분화된 세포로 '변환'되는 것이 핵심입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"증식과 비대는 종종 함께 발생합니다 (예: 임신 시 자궁).\",\n                        \"3번\": \"비대(Hypertrophy)는 분열하지 않는 세포(예: 심근세포)에서 세포 내 구조 성분(단백질 등)의 합성이 증가하여 세포 크기가 커지는 것입니다.\",\n                        \"4번\": \"병리학적 증식(Pathologic hyperplasia)이 지속되면 암 발생 위험이 증가할 수 있습니다 (예: 자궁내막 증식증).\",\n                        \"5번\": \"위축(Atrophy)은 장기의 작업량 감소, 신경 지배 소실, 혈액 공급 감소 등과 밀접하게 관련되어 있습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"46\",\n                    \"question_numbers_on_page\": [\n                        \"43\",\n                        \"44\",\n                        \"45\",\n                        \"46\"\n                    ],\n                    \"question_text\": \"Abnormal intracellular accumulation의 기전과 질병상태의 연결이 잘못된 것은?\\n1) defect in protein transport and secretion: a1-antitrypsin deficiency\\n2) aggregation of abnormal protein: amyloidosis\\n3) inadequate removal of normal substance: fatty change (steatosis) in liver\\n4) ingestion of indigestible materials: lipofuscin accumulation in alveolar macrophage\\n5) lack of enzyme degrading a metabolite: lysosomal storage disease\",\n                    \"answer\": \"4)\",\n                    \"explanation\": \"리포푸신(lipofuscin) 축적은 '소화되지 않는 물질의 섭취'보다는 세포의 '마모 및 노화 색소(wear-and-tear pigment)'로 알려져 있습니다. 이는 세포 내 지질 과산화 및 단백질 산화의 결과로 축적되는 물질입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"알파-1-항트립신 결핍증은 단백질 수송 및 분비 결함으로 인해 간세포 내에 비정상 단백질이 축적됩니다.\",\n                        \"2번\": \"아밀로이드증은 비정상 단백질이 응집되어 세포 외 공간에 축적되는 질환입니다.\",\n                        \"3번\": \"간의 지방 변성(steatosis)은 정상 물질(지방)의 제거 부족 또는 과도한 생성으로 인해 발생합니다.\",\n                        \"5번\": \"리소좀 저장 질환은 특정 대사산물을 분해하는 효소의 결핍으로 인해 해당 물질이 리소좀에 축적되는 것입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 21,\n            \"questions\": [\n                {\n                    \"question_number\": \"47\",\n                    \"question_numbers_on_page\": [\n                        \"47\",\n                        \"48\",\n                        \"49\"\n                    ],\n                    \"question_text\": \"Pigments에 대한 설명으로 틀린 것은?\\n1) exogeneous pigment로 가장 흔한 물질은 coal dust이다\\n2) 대표적인 endogenous pigment로는 lipofuscin, melanin, hemosiderin 등이 있다\\n3) melanin pigment는 skin, cartilage, melanoma 등에서 관찰된다\\n4) melanin pigment는 brown-black colored, crystalline pigment이다\\n5) hemosiderin pigment는 hemoglobin-derived pigment이다\",\n                    \"answer\": \"4)\",\n                    \"explanation\": \"멜라닌 색소는 갈색-검은색을 띠지만, 결정성(crystalline)이 아닌 비정형(amorphous) 색소입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"외인성 색소 중 가장 흔한 것은 석탄 먼지(coal dust)입니다.\",\n                        \"2번\": \"대표적인 내인성 색소로는 리포푸신, 멜라닌, 헤모시데린 등이 있습니다.\",\n                        \"3번\": \"멜라닌 색소는 피부, 연골, 흑색종 등에서 관찰됩니다.\",\n                        \"5번\": \"헤모시데린 색소는 헤모글로빈에서 유래한 철 함유 색소입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"48\",\n                    \"question_numbers_on_page\": [\n                        \"47\",\n                        \"48\",\n                        \"49\"\n                    ],\n                    \"question_text\": \"아래 현미경 소견과 관련된 설명으로 맞는 것은?\",\n                    \"answer\": \"1) 자궁경부 염증과 관련성이 높다\",\n                    \"explanation\": \"제시된 현미경 사진은 편평 상피화생(squamous metaplasia) 소견을 보여줍니다. 이는 만성 자궁경부염(cervicitis)과 같은 만성 자극에 대한 반응으로 흔히 발생합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"장 상피화생(intestinal metaplasia)은 장 점막에서 관찰되는 소견입니다.\",\n                        \"3번\": \"호르몬 변화에 대한 주기적 반응은 주로 생리적 증식(hyperplasia)과 관련됩니다.\",\n                        \"4번\": \"화생은 암으로 진행될 가능성이 있습니다(전암성 병변).\",\n                        \"5번\": \"화생은 가역적인(reversible) 변화입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"49\",\n                    \"question_numbers_on_page\": [\n                        \"47\",\n                        \"48\",\n                        \"49\"\n                    ],\n                    \"question_text\": \"아래 소견과 관련된 cellular adaptation과 관련된 설명으로 틀린 것은?\",\n                    \"answer\": \"4) Tissue stem cell의 reprogramming에 의한 cellular differentiation의 변화가 주요기전이다\",\n                    \"explanation\": \"제시된 그림은 자궁의 생리적 비대(hypertrophy) 및 증식(hyperplasia) 소견을 보여줍니다. 조직 줄기세포의 재프로그래밍에 의한 세포 분화의 변화는 화생(metaplasia)의 주요 기전이며, 비대나 증식과는 직접적인 관련이 적습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"임신과 관련된 자궁의 비대/증식은 가역적인 세포 적응입니다.\",\n                        \"2번\": \"비대 시 세포 내 단백질 합성이 증가하여 세포 크기가 커집니다.\",\n                        \"3번\": \"PI3K/AKT 경로, G-단백질 결합 수용체 경로 등 다양한 신호 전달 경로가 비대/증식과 관련되어 있습니다.\",\n                        \"5번\": \"호르몬 자극이 없어지면 세포 크기가 감소하여 장기 크기가 정상화됩니다 (예: 출산 후 자궁 퇴축).\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 22,\n            \"questions\": [\n                {\n                    \"question_number\": \"50\",\n                    \"question_numbers_on_page\": [\n                        \"50\"\n                    ],\n                    \"question_text\": \"아래 현미경 소견에 가장 부합하는 것은?\",\n                    \"answer\": \"4) atrophy\",\n                    \"explanation\": \"제시된 현미경 사진은 고환 위축(testicular atrophy)과 같은 위축(atrophy) 소견을 보여줍니다. 위축은 세포 크기 감소 및 세포 수 감소로 인해 장기나 조직의 크기가 줄어드는 현상입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"편평 상피화생은 한 상피가 다른 상피로 변하는 것입니다.\",\n                        \"2번\": \"죽상경화증은 동맥벽에 지방 침착이 일어나는 질환입니다.\",\n                        \"3번\": \"아밀로이드증은 비정상 단백질이 조직에 침착되는 질환입니다.\",\n                        \"5번\": \"이영양성 석회화는 괴사된 조직에 칼슘이 침착되는 것입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 23,\n            \"questions\": [\n                {\n                    \"question_number\": \"51\",\n                    \"question_numbers_on_page\": [\n                        \"51\",\n                        \"52\",\n                        \"53\"\n                    ],\n                    \"question_text\": \"급성염증 반응에 의해 야기된 질환과 손상에 연관된 세포와 분자들 조합이 아닌것은?\\n1) 파혈쇼크 (Septic shock) - Cytokines\\n2) 천식 (Asthma) – Eosinophils; IgE antibodies\\n3) 관절염 (Arthritis) - Macrophages; Fibroblasts\\n4) 사구체염 (Glomerulonephritis) – Antibodies and complement; neutrophils, monocytes\\n5) 급성호흡곤란증후군 (Acute respiratory distress syndrome) – Neutrophils\",\n                    \"answer\": \"3)\",\n                    \"explanation\": \"관절염(Arthritis)은 급성 염증과 만성 염증 모두를 포함할 수 있지만, 섬유아세포(Fibroblasts)는 주로 만성 염증과 조직 복구 과정에서 중요한 역할을 합니다. 급성 염증 반응에서는 주로 호중구, 대식세포, 염증 매개체 등이 관여합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"패혈성 쇼크는 사이토카인 폭풍과 관련이 깊습니다.\",\n                        \"2번\": \"천식은 호산구와 IgE 항체가 관여하는 알레르기성 염증 반응입니다.\",\n                        \"4번\": \"사구체염은 항체, 보체, 호중구, 단핵구 등이 관여하는 면역 매개 염증입니다.\",\n                        \"5번\": \"급성 호흡곤란 증후군(ARDS)은 호중구가 폐 손상에 중요한 역할을 합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"52\",\n                    \"question_numbers_on_page\": [\n                        \"51\",\n                        \"52\",\n                        \"53\"\n                    ],\n                    \"question_text\": \"급성염증반응에서 혈관 투과성의 증가, 백혈구 (leukocyte)의 부착 (adhesion)과 활성 (activation)에 모두 관여하는 화학매개체는?\\n1) 케모카인 (Chemokines)\\n2) 히스타민 (Histamine)\\n3) 류코트리엔 (leukotrienes)\\n4) 종양괴사인자 (Tumor Necrosis Factor;TNF)\\n5) 혈소판활성인자 (Platelet-activating factor)\",\n                    \"answer\": \"3) 류코트리엔 (leukotrienes)\",\n                    \"explanation\": \"류코트리엔(leukotrienes)은 급성 염증 반응에서 혈관 투과성 증가, 백혈구 부착 및 활성화에 모두 관여하는 중요한 화학 매개체입니다. 특히 류코트리엔 B4는 강력한 백혈구 유인 물질입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"케모카인은 주로 백혈구 유인에 관여합니다.\",\n                        \"2번\": \"히스타민은 주로 초기 혈관 확장 및 투과성 증가에 관여합니다.\",\n                        \"4번\": \"TNF는 전신 염증 반응과 백혈구 활성화에 중요하지만, 혈관 투과성 증가에 직접적인 주된 매개체는 아닙니다.\",\n                        \"5번\": \"혈소판 활성 인자(PAF)는 혈소판 응집, 혈관 투과성 증가, 백혈구 활성화에 관여하지만, 류코트리엔이 더 포괄적입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"53\",\n                    \"question_numbers_on_page\": [\n                        \"51\",\n                        \"52\",\n                        \"53\"\n                    ],\n                    \"question_text\": \"급성 염증에 중심적인 역할을 하며, 아래 H&E 그림에서 주로 관찰되며, () 안에 들어갈 세포는?\",\n                    \"answer\": \"4) 대식세포 (Macrophages)\",\n                    \"explanation\": \"제시된 그래프는 염증 반응에서 단핵구/대식세포(Monocytes/Macrophages)의 시간 경과에 따른 활성 변화를 보여줍니다. 대식세포는 급성 염증의 후기 단계와 만성 염증에서 중심적인 역할을 하며, 염증 반응을 조절하고 조직 복구에 기여합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"호중구는 급성 염증의 초기 단계에 주로 관여합니다.\",\n                        \"2번\": \"호산구는 주로 알레르기 반응이나 기생충 감염에 관여합니다.\",\n                        \"3번\": \"비만세포는 히스타민 분비로 초기 염증 반응에 관여합니다.\",\n                        \"5번\": \"형질세포는 만성 염증에서 항체 생산에 관여합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 24,\n            \"questions\": [\n                {\n                    \"question_number\": \"54\",\n                    \"question_numbers_on_page\": [\n                        \"54\",\n                        \"55\"\n                    ],\n                    \"question_text\": \"급성염증의 형태학적 양상 중에 하나로세포의 손상에 의해 형성된 공간 또는 복막 (peritoneum), 흉막 (pleura), 심막 (pericardium)에 의해 둘러싸인 체강 (body cavities)으로 세포수가 적은 체액의 삼출이 뚜렷한 것을 설명하는 것은?\",\n                    \"answer\": \"2) 장액성염증 (Serous inflammation)\",\n                    \"explanation\": \"장액성 염증(Serous inflammation)은 세포 손상에 의해 체강(복막, 흉막, 심막 등)이나 피부 수포에 단백질이 풍부하고 세포 수가 적은 맑은 액체(삼출액)가 축적되는 급성 염증의 형태학적 양상입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"궤양(Ulcer)은 상피 표면의 국소적 결손과 염증을 동반한 괴사입니다.\",\n                        \"3번\": \"화농성 염증(Purulent inflammation)은 고름(농) 형성을 특징으로 하며, 이는 많은 수의 호중구와 괴사 세포 잔해로 구성됩니다.\",\n                        \"4번\": \"완전 용해(Complete resolution)는 염증 반응 후 조직이 정상 상태로 완전히 회복되는 것입니다.\",\n                        \"5번\": \"섬유소성 염증(Fibrinous inflammation)은 혈관 투과성 증가로 인해 혈관 밖으로 섬유소원(fibrinogen)이 유출되어 섬유소로 중합되는 것을 특징으로 합니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 4,\n                            \"relevance_reason\": \"강의자료 4페이지에서 'Edema? increased fluid in the interstitial tissue spaces.'와 'hydrothorax, hydropericardium, hydroperitoneum (ascites)'를 언급하며 체강 내 액체 증가 현상을 설명하고 있습니다. 이는 장액성 염증의 핵심 개념과 직접적으로 관련됩니다.\",\n                            \"relevance_score\": 8\n                        },\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 6,\n                            \"relevance_reason\": \"강의자료 6페이지에서 'inflammation'이 '혈관에서 fluid가 많이 빠져나감'을 유발한다고 설명하여, 염증과 액체 삼출의 관련성을 제시합니다.\",\n                            \"relevance_score\": 7\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"55\",\n                    \"question_numbers_on_page\": [\n                        \"54\",\n                        \"55\"\n                    ],\n                    \"question_text\": \"아래 H&E 소견을 보일 수 있는 대표적인 질환은?\",\n                    \"answer\": \"2) 결핵 (Tuberculosis)\",\n                    \"explanation\": \"제시된 H&E 사진은 육아종성 염증(granulomatous inflammation)의 전형적인 소견을 보여줍니다. 이는 대식세포가 변형된 상피양 세포(epithelioid cells)와 랑한스 거대세포(Langhans giant cells)를 형성하고, 중심부에 건락성 괴사(caseous necrosis)를 동반하는 경우가 많습니다. 이러한 소견은 결핵(Tuberculosis)에서 가장 특징적으로 관찰됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"나병(leprosy)도 육아종을 형성하지만, 결핵과는 다른 형태학적 특징을 보일 수 있습니다.\",\n                        \"3번\": \"이물질 육아종은 이물질 주변에 육아종을 형성합니다.\",\n                        \"4번\": \"크론병(Crohn disease)은 비건락성 육아종을 특징으로 합니다.\",\n                        \"5번\": \"사르코이드증(sarcoidosis)도 비건락성 육아종을 형성합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 25,\n            \"questions\": [\n                {\n                    \"question_number\": \"56\",\n                    \"question_numbers_on_page\": [\n                        \"56\",\n                        \"57\",\n                        \"58\",\n                        \"59\"\n                    ],\n                    \"question_text\": \"만성 염증의 형태학적 소견에 대한 설명 중 틀린 것은?\\n1) 대식세포(Macrophage)에 의한 육아종성 염증 (Granulomatous inflammation)\\n2) 세정맥의 울혈 (Congestion)과 부종 (Edema)\\n3) 신생혈관의 증식과 섬유화 (Fibrosis)로 대체되는 치유반응\\n4) 지속적 손상인자나 염증세포에 의해 유발되는 조직 손상\\n5) 림프구 (Lymphocytes), 형질세포 (Plasma cells), 대식세포 (Macrophage)와 같은 단핵세포 (Mononuclear cells) 침윤\",\n                    \"answer\": \"2)\",\n                    \"explanation\": \"세정맥의 울혈(Congestion)과 부종(Edema)은 주로 급성 염증 반응이나 혈류역동학적 장애의 특징적인 소견입니다. 만성 염증에서는 이러한 급성 소견보다는 단핵세포 침윤, 조직 파괴, 신생혈관 형성 및 섬유화가 주된 형태학적 특징입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"대식세포에 의한 육아종성 염증은 만성 염증의 특징적인 형태 중 하나입니다.\",\n                        \"3번\": \"만성 염증에서는 조직 손상 후 신생혈관 형성(angiogenesis)과 섬유화(fibrosis)를 통한 치유 반응이 동반됩니다.\",\n                        \"4번\": \"만성 염증은 지속적인 손상 인자나 염증 세포에 의해 유발되는 조직 손상을 특징으로 합니다.\",\n                        \"5번\": \"림프구, 형질세포, 대식세포와 같은 단핵세포의 침윤은 만성 염증의 가장 중요한 조직학적 특징입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 6,\n                            \"relevance_reason\": \"강의자료 6페이지에서 'inflammation' 섹션에 'Acute inflammation'과 'Chronic inflammation'을 구분하고, 'increased hydrostatic pressure'와 'inflammation'이 'edema'를 유발한다고 설명합니다. 이는 울혈과 부종이 급성 염증 및 혈류역동학적 장애와 더 밀접하게 관련됨을 시사합니다.\",\n                            \"relevance_score\": 9\n                        },\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 12,\n                            \"relevance_reason\": \"강의자료 12페이지에서 'Hyperemia and Congestion'을 설명하며 울혈(Congestion)이 'a passive process resulting from impaired outflow from a tissue'라고 정의합니다. 이는 울혈이 급성 혈류역동학적 장애의 특징임을 강조합니다.\",\n                            \"relevance_score\": 8\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"57\",\n                    \"question_numbers_on_page\": [\n                        \"56\",\n                        \"57\",\n                        \"58\",\n                        \"59\"\n                    ],\n                    \"question_text\": \"그림에서 까만색 동그라미로 표시한 세포를 적으시오 (주관식)\",\n                    \"answer\": \"호산구; Eosinophils; Eosinophil\",\n                    \"explanation\": \"제시된 그림에서 검은색 동그라미로 표시된 세포는 호산구(Eosinophils)입니다. 호산구는 특징적인 붉은색 과립을 가진 백혈구로, 주로 알레르기 반응이나 기생충 감염 시 증가합니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"58\",\n                    \"question_numbers_on_page\": [\n                        \"56\",\n                        \"57\",\n                        \"58\",\n                        \"59\"\n                    ],\n                    \"question_text\": \"해당 설명에 부합하는 세포를 적으시오 (주관식)\\n- 결합조직 (Connective tissues)에 광범위하게 분포\\n- 급성과 만성염증에 모두 관여\\n- IgE 항체 (Antibody)에 Fc 부분과 결합하는 수용체FcɛRI을 발현함\\n- 탈과립되면서 히스타민 (Histamine)과 프로스타글란딘 (Prostaglandins) 같은 매개체를 분비함\\n음\\n아나필락시스 쇼크 (Anaphylactic shock)를 일으킬 수 있\",\n                    \"answer\": \"비만세포; Mast cells; Mast cell\",\n                    \"explanation\": \"제시된 설명은 비만세포(Mast cells)의 특징입니다. 비만세포는 결합 조직에 분포하며, IgE 수용체를 발현하여 알레르기 반응 시 탈과립을 통해 히스타민, 프로스타글란딘 등을 분비하여 급성 및 만성 염증, 아나필락시스 쇼크를 유발할 수 있습니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"59\",\n                    \"question_numbers_on_page\": [\n                        \"56\",\n                        \"57\",\n                        \"58\",\n                        \"59\"\n                    ],\n                    \"question_text\": \"다음 설명에 해당하는 세포는?\",\n                    \"answer\": \"4) 대식세포 (Macrophages)\",\n                    \"explanation\": \"제시된 설명은 대식세포(Macrophages)의 특징입니다. 대식세포는 염증 반응을 증폭하거나 제한할 수 있는 사이토카인을 분비하고, 성장 인자를 자극하며, 결합 조직을 리모델링하는 효소를 생성합니다. 또한 만성 염증 및 조직 복구에 중요한 역할을 하며, 골수의 조혈모세포에서 유래합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"호산구는 주로 알레르기 및 기생충 반응에 관여합니다.\",\n                        \"2번\": \"호중구는 급성 염증의 주요 세포입니다.\",\n                        \"3번\": \"단핵구는 혈액 내 대식세포의 전구 세포입니다.\",\n                        \"5번\": \"형질세포는 B 림프구에서 분화하여 항체를 생산합니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 26,\n            \"questions\": [\n                {\n                    \"question_number\": \"60\",\n                    \"question_numbers_on_page\": [\n                        \"60\",\n                        \"61\",\n                        \"62\"\n                    ],\n                    \"question_text\": \"조직 손상 후 완전한 수복이 되는데 가장 중요한 사항은?\\n1) 실질세포 (Parenchymal cells)\\n2) 평활근세포 (Smooth muscle cells)\\n3) 근섬유모세포 (Myofibroblast)\\n4) 혈관내피세포 (vascular endothelial cells)\\n5) 기존의 구조적 틀 (structural framework)\",\n                    \"answer\": \"5) 기존의 구조적 틀 (structural framework)\",\n                    \"explanation\": \"조직 손상 후 완전한 수복(complete resolution)이 이루어지기 위해서는 손상되지 않은 기존의 구조적 틀(structural framework), 즉 세포외 기질(ECM)의 보존이 가장 중요합니다. 이 틀이 유지되어야 실질세포가 증식하여 원래의 구조와 기능을 회복할 수 있습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"실질세포의 증식은 중요하지만, 틀이 없으면 정상적인 구조를 형성할 수 없습니다.\",\n                        \"2번\": \"평활근세포는 조직 복구에 직접적인 주역은 아닙니다.\",\n                        \"3번\": \"근섬유모세포는 흉터 형성에 관여합니다.\",\n                        \"4번\": \"혈관내피세포는 신생혈관 형성에 중요하지만, 완전한 수복의 가장 중요한 요소는 아닙니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"61\",\n                    \"question_numbers_on_page\": [\n                        \"60\",\n                        \"61\",\n                        \"62\"\n                    ],\n                    \"question_text\": \"산화질소 (Nitric oxide)는 자극에 의해 혈관이 확장되고 ()의 유도에 의해 기존 혈관의 투과성이 증가된다. ( ) 는?\\n1) FGFR (fibroblast growth factor receptor)\\n2) VEGF (vascular endothelial growth factor)\\n3) EGFR (Epidermal growth factor receptor)\\n4) TGF-β\\n5) PDGF (Platelet derived growth factor)\",\n                    \"answer\": \"2) VEGF (vascular endothelial growth factor)\",\n                    \"explanation\": \"산화질소(Nitric oxide)는 혈관을 확장시키고, 혈관내피성장인자(VEGF)는 혈관 신생(angiogenesis)을 유도하며 기존 혈관의 투과성을 증가시키는 데 중요한 역할을 합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"FGFR은 섬유아세포 성장 인자 수용체입니다.\",\n                        \"3번\": \"EGFR은 상피세포 성장 인자 수용체입니다.\",\n                        \"4번\": \"TGF-β는 섬유화 및 염증 조절에 관여합니다.\",\n                        \"5번\": \"PDGF는 혈소판 유래 성장 인자로 세포 증식 및 이동에 관여합니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 33,\n                            \"relevance_reason\": \"강의자료 33페이지에서 'Endothelium Antithrombotic Properties' 중 하나로 'nitric oxide'를 언급하며 혈관내피세포의 기능과 관련성을 제시합니다. 이는 산화질소의 혈관 조절 역할과 간접적으로 관련됩니다.\",\n                            \"relevance_score\": 5\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"62\",\n                    \"question_numbers_on_page\": [\n                        \"60\",\n                        \"61\",\n                        \"62\"\n                    ],\n                    \"question_text\": \"피부창상의 치유에서 일차유합 (First Intention) 과 달리 이차유합 (Second Intention)에 의한 치유과정에서의 중요한 특징은?\\n1) 염증반응 (Inflammatory response)\\n2) 혈전형성 (Blood clot formation)\\n3) 신생혈관 (neovascularization) 형성\\n4) 육아조직 (granulation tissue) 형성\\n5) 상처수축 (Wound contraction)\",\n                    \"answer\": \"5) 상처수축 (Wound contraction)\",\n                    \"explanation\": \"이차유합(Second Intention)은 광범위한 조직 손상이나 감염이 있을 때 발생하며, 일차유합과 달리 육아조직 형성 및 상처 수축(wound contraction)이 두드러지게 나타납니다. 상처 수축은 근섬유모세포에 의해 매개되어 상처 가장자리를 당겨 상처 크기를 줄이는 과정입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"염증 반응은 일차유합과 이차유합 모두에서 발생합니다.\",\n                        \"2번\": \"혈전 형성은 상처 치유의 초기 단계에 모두 발생합니다.\",\n                        \"3번\": \"신생혈관 형성(neovascularization)은 육아조직 형성의 일부로, 일차유합과 이차유합 모두에서 관찰됩니다.\",\n                        \"4번\": \"육아조직 형성(granulation tissue formation)은 이차유합에서 더 광범위하게 나타나지만, 상처 수축이 이차유합의 가장 특징적인 차이점입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 27,\n            \"questions\": [\n                {\n                    \"question_number\": \"63\",\n                    \"question_numbers_on_page\": [\n                        \"63\",\n                        \"64\",\n                        \"65\",\n                        \"66\"\n                    ],\n                    \"question_text\": \"그림에서 가장 많이 관찰되는 세포는?\",\n                    \"answer\": \"5) 형질세포 (Plasma cells)\",\n                    \"explanation\": \"제시된 현미경 사진은 형질세포(Plasma cells)의 특징적인 형태를 보여줍니다. 형질세포는 편심성 핵, 시계바퀴 모양의 염색질, 풍부한 호염기성 세포질을 가지며, 항체 생산에 관여합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"호중구는 다엽성 핵을 가집니다.\",\n                        \"2번\": \"호산구는 붉은색 과립을 가집니다.\",\n                        \"3번\": \"비만세포는 큰 과립을 가집니다.\",\n                        \"4번\": \"대식세포는 신장 모양의 핵과 풍부한 세포질을 가집니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"64\",\n                    \"question_numbers_on_page\": [\n                        \"63\",\n                        \"64\",\n                        \"65\",\n                        \"66\"\n                    ],\n                    \"question_text\": \"염증반응에서 백혈구 (leukocyte)의 상피세포에 부착과 혈관을 통한 이주를 촉진함으로써 백혈구 동원에 핵심적인 역할을 하며, 발열 (Fever)와 관련있는 매개체는?\\n1) ROS (reactive oxygen species)\\n2) C3 & C5\\n3) TNF & IL-6\\n4) 브라디키닌 (Bradykinin)\\n5) 프로스타글란딘 (Prostaglandin)\",\n                    \"answer\": \"3) TNF & IL-6\",\n                    \"explanation\": \"종양괴사인자(TNF)와 인터루킨-6(IL-6)은 백혈구의 내피세포 부착 및 혈관 외 유출을 촉진하여 백혈구 동원에 핵심적인 역할을 하는 주요 사이토카인입니다. 또한 이들은 발열(fever)을 유발하는 내인성 발열원(endogenous pyrogens)으로 작용합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"활성산소종(ROS)은 세포 손상에 관여합니다.\",\n                        \"2번\": \"C3 및 C5는 보체 활성화 산물로, 염증 반응에 관여하지만 발열의 주된 매개체는 아닙니다.\",\n                        \"4번\": \"브라디키닌은 혈관 확장 및 통증 유발에 관여합니다.\",\n                        \"5번\": \"프로스타글란딘은 발열을 유발하지만, 백혈구 부착 및 이주 촉진에는 TNF와 IL-6가 더 핵심적입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"65\",\n                    \"question_numbers_on_page\": [\n                        \"63\",\n                        \"64\",\n                        \"65\",\n                        \"66\"\n                    ],\n                    \"question_text\": \"The main phases of cutaneous wound healing are (), formation of granulation tissue, and extracellular matrix (ECM) remodeling. () 안에 들어갈 말을 적어라\",\n                    \"answer\": \"염증; Inflammation\",\n                    \"explanation\": \"피부 상처 치유의 주요 단계는 염증(Inflammation), 육아조직 형성(granulation tissue formation), 그리고 세포외 기질(ECM) 재형성입니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"66\",\n                    \"question_numbers_on_page\": [\n                        \"63\",\n                        \"64\",\n                        \"65\",\n                        \"66\"\n                    ],\n                    \"question_text\": \"다음중 Hyperplasia의 성격이 다른 것을 고르시오.\\n1) Endometrial hyperplasia\\n2) Compensatory hyperplasia after parial hepatectomy\\n3) Hormonal stimulation seen in breast develpoment at puberty\\n4) Antigenic stimulation seen in lymphoid hyperplasia\\n5) Cardiac muscle in hypertension\",\n                    \"answer\": \"5) Cardiac muscle in hypertension\",\n                    \"explanation\": \"심장 근육은 분열하지 않는 영구 세포이므로, 고혈압에 의한 심장 근육의 크기 증가는 세포 수 증가(hyperplasia)가 아닌 세포 크기 증가(hypertrophy)입니다. 나머지 보기들은 모두 세포 수 증가를 특징으로 하는 증식(hyperplasia)의 예시입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"자궁내막 증식증은 호르몬 자극에 의한 자궁내막 세포 수 증가입니다.\",\n                        \"2번\": \"부분 간 절제술 후 보상성 증식은 남아있는 간세포의 증식에 의한 간 재생입니다.\",\n                        \"3번\": \"사춘기 유방 발달 시 호르몬 자극에 의한 유선 세포의 증식입니다.\",\n                        \"4번\": \"림프절 증식증은 항원 자극에 의한 림프구 수 증가입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 28,\n            \"questions\": [\n                {\n                    \"question_number\": \"67\",\n                    \"question_numbers_on_page\": [\n                        \"67\",\n                        \"68\"\n                    ],\n                    \"question_text\": \"다음 그림의 B 와 같은 변화가 있을 때 전자 현미경적으로 보일 수 있는 소견이 아닌 것을 한 개 고르시오.\",\n                    \"answer\": \"5) Markedly swollen mitochondria containing electron-dense deposits, expected to contain precipitated calcium and proteins\",\n                    \"explanation\": \"제시된 그림의 B는 가역적 세포 손상(reversible cell injury) 중 세포 부종(cell swelling)을 나타냅니다. 5번 보기는 비가역적 세포 손상(irreversible cell injury) 또는 괴사(necrosis)의 특징적인 전자 현미경 소견으로, 미토콘드리아의 심한 부종과 전자 밀도 침착물(칼슘 및 단백질 침전)은 세포 사멸이 임박했거나 이미 발생했음을 시사합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"세포막 변화(blebbing, microvilli 소실)는 가역적 손상에서 나타날 수 있습니다.\",\n                        \"2번\": \"핵 변화(과립 및 섬유성 요소의 분리)는 가역적 손상에서 나타날 수 있습니다.\",\n                        \"3번\": \"세포질 내 '미엘린 소체(myelin figures)' 축적은 손상된 세포막에서 유래한 인지질로 구성되며 가역적 손상에서 관찰될 수 있습니다.\",\n                        \"4번\": \"ER 확장 및 리보솜 분리는 가역적 손상에서 나타날 수 있습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"68\",\n                    \"question_numbers_on_page\": [\n                        \"67\",\n                        \"68\"\n                    ],\n                    \"question_text\": \"다음 그림 C와 같은 변화에서 나타나는 특징이 아닌 것을 한 개 고르시오.\",\n                    \"answer\": \"5) Chromatin condensation\",\n                    \"explanation\": \"제시된 그림의 C는 비가역적 세포 손상, 즉 괴사(necrosis)를 나타냅니다. 괴사 시에는 세포 내용물의 변성, 세포막 손상으로 인한 내용물 유출, 국소 염증 반응, 효소적 소화 등이 발생합니다. 반면, 염색질 응축(chromatin condensation)은 아포프토시스(apoptosis)의 특징적인 핵 변화입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"세포 단백질의 변성(denaturation)은 괴사의 특징입니다.\",\n                        \"2번\": \"손상된 막을 통한 세포 내용물의 유출은 괴사의 특징입니다.\",\n                        \"3번\": \"괴사된 세포에 대한 국소 염증 반응은 흔히 관찰됩니다.\",\n                        \"4번\": \"치명적으로 손상된 세포의 효소적 소화는 괴사의 특징입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 29,\n            \"questions\": [\n                {\n                    \"question_number\": \"69\",\n                    \"question_numbers_on_page\": [\n                        \"69\",\n                        \"70\"\n                    ],\n                    \"question_text\": \"세포자멸사(apoptosis) 진행에 중심적인 역할을 하는 것을 그림에서 골라 명칭을 적으시오\\n(답안 예시: 1번, nucleus)\",\n                    \"answer\": \"1번 mitochondria\",\n                    \"explanation\": \"세포자멸사(apoptosis)의 내인성 경로(intrinsic pathway)에서 미토콘드리아(mitochondria)는 사이토크롬 c(cytochrome c)와 같은 전-아포프토시스(pro-apoptotic) 단백질을 방출하여 캐스페이스(caspase) 활성화를 유도하는 중심적인 역할을 합니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"70\",\n                    \"question_numbers_on_page\": [\n                        \"69\",\n                        \"70\"\n                    ],\n                    \"question_text\": \"다음은 괴사와 세포 자멸사의 특징을 비교한 표이다. 빈 칸 A에 들어갈 특징을 보이는 그림을 고르시오.\",\n                    \"answer\": \"2)\",\n                    \"explanation\": \"표에서 빈 칸 A는 아포프토시스(Apoptosis)의 'Cell size' 특징인 'Reduced (shrinkage)'를 나타냅니다. 2번 그림은 세포가 수축하고 핵이 응축되는 아포프토시스의 특징적인 형태를 보여줍니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"1번 그림은 정상 세포에 가깝습니다.\",\n                        \"3번\": \"3번 그림은 핵이 파괴되고 세포가 부어오르는 괴사 소견에 가깝습니다.\",\n                        \"4번\": \"4번 그림은 세포가 부어오르고 핵이 용해되는 괴사 소견에 가깝습니다.\",\n                        \"5번\": \"5번 그림은 세포가 부어오르고 핵이 용해되는 괴사 소견에 가깝습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 32,\n            \"questions\": [\n                {\n                    \"question_number\": \"71\",\n                    \"question_numbers_on_page\": [\n                        \"71\",\n                        \"72\"\n                    ],\n                    \"question_text\": \"다음 빈 칸 C에 들어갈 특징을 적으시오.\",\n                    \"answer\": \"Plasma membrane\",\n                    \"explanation\": \"표에서 빈 칸 C는 괴사(Necrosis)의 'Nucleus' 특징인 'Disrupted'와 함께 'Cellular contents'가 'Enzymatic digestion; may leak out of cell'로 설명되어 있습니다. 이는 세포막(Plasma membrane)의 손상과 파괴를 의미합니다. 괴사 시 세포막의 완전성이 상실되어 세포 내용물이 외부로 유출됩니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"72\",\n                    \"question_numbers_on_page\": [\n                        \"71\",\n                        \"72\"\n                    ],\n                    \"question_text\": \"다음 그림과 같은 조직소견에 대한 설명으로 옳은 것을 고르시오\",\n                    \"answer\": \"4) 죽은 조직의 구조적 형태는 며칠간 유지된다.\",\n                    \"explanation\": \"제시된 그림은 응고 괴사(Coagulative necrosis)의 특징적인 소견을 보여줍니다. 응고 괴사에서는 세포의 윤곽과 조직의 기본적인 구조적 형태가 며칠 동안 유지됩니다. 이는 단백질 변성으로 인한 효소의 자가소화 억제 때문입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"응고 괴사는 동맥이나 정맥 순환의 과다 흐름과는 직접적인 관련이 없습니다.\",\n                        \"2번\": \"죽은 세포가 액체성 용액으로 변하는 것은 액화 괴사(liquefactive necrosis)의 특징입니다.\",\n                        \"3번\": \"중추신경계 세포의 저산소성 손상은 주로 액화 괴사를 유발합니다.\",\n                        \"5번\": \"팔다리(특히 하지)의 혈류 공급 문제로 인한 괴사에 세균 감염이 동반되는 것은 괴저 괴사(gangrenous necrosis)입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 33,\n            \"questions\": [\n                {\n                    \"question_number\": \"73\",\n                    \"question_numbers_on_page\": [\n                        \"73\"\n                    ],\n                    \"question_text\": \"60세 남자가 갑작스런 흉통으로 병원에 왔으나 곧 사망하였다. 환자는 3-4일 전에 계단을 오를 때 가슴 통증이 있었다고 하였다. 환자의 심장 부검을 통해 제작한 심근 조직 현미경 소견이다. 화살표 한 부위의 병리 소견에 대한 설명으로 적절한 것을 고르시오.\",\n                    \"answer\": \"2) Increased eosinophilia in H&E stains, attributable in part to the loss of nuclear DNA and in part to accumulation of denatured cytoplasmic proteins.\",\n                    \"explanation\": \"제시된 심근 조직 현미경 소견은 심근 경색 후 발생하는 응고 괴사(coagulative necrosis)를 보여줍니다. 응고 괴사된 심근 세포는 핵이 소실되거나 변성되고, 세포질은 호산성(eosinophilic)으로 변하며, 변성된 세포질 단백질이 축적됩니다. 이는 H&E 염색에서 붉게 염색되는 특징을 보입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"DNA 소실은 핵의 변화를 의미하지만, 세포질의 호산성 증가와 변성 단백질 축적이 더 포괄적인 설명입니다.\",\n                        \"3번\": \"세포질이 공포화되고 '좀먹은(moth-eaten)' 양상을 보이는 것은 주로 액화 괴사에서 관찰됩니다.\",\n                        \"4번\": \"전자 현미경 소견은 더 미세한 변화를 설명하며, 제시된 내용은 괴사 전반의 특징을 포함합니다.\",\n                        \"5번\": \"세포 크기 감소, 세포질 밀도 증가, 호산성 증가는 아포프토시스(apoptosis)의 특징에 가깝습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 34,\n            \"questions\": [\n                {\n                    \"question_number\": \"74\",\n                    \"question_numbers_on_page\": [\n                        \"74\",\n                        \"75\",\n                        \"76\"\n                    ],\n                    \"question_text\": \"세포 손상에 대한 내용으로 맞는 것을 고르시오.\\n1) 고농도 산소에서 세포 손상이 유발되는 반면 저농도 산소에서는 세포 재생이 유발된다.\\n2) 형태학적 변화가 먼저 발생한 이후에 분자적, 생화학적 변화가 유발된다.\\n3) 괴사에서 유해자극이 중단되면 세포는 회복할 수 있다.\\n4) 가역성 세포 손상의 특징적 형태변화는 세포종창이다.\\n5) 비만은 세포 손상을 유발하지만 영양 결핍은 세포 손상과 관련이 없다.\",\n                    \"answer\": \"4) 가역성 세포 손상의 특징적 형태변화는 세포종창이다.\",\n                    \"explanation\": \"가역적 세포 손상(reversible cell injury)의 가장 흔하고 특징적인 형태학적 변화는 세포 부종(cell swelling) 또는 세포 종창(cellular hydropic swelling)입니다. 이는 세포 내 수분 축적으로 인해 세포가 팽창하는 것입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"저농도 산소는 세포 손상을 유발할 수 있으며, 세포 재생과 직접적인 관련은 없습니다.\",\n                        \"2번\": \"세포 손상 시 분자적, 생화학적 변화가 형태학적 변화보다 먼저 발생합니다.\",\n                        \"3번\": \"괴사는 비가역적 세포 손상이므로, 유해 자극이 중단되어도 세포는 회복할 수 없습니다.\",\n                        \"5번\": \"비만뿐만 아니라 영양 결핍(예: 단백질-에너지 영양실조)도 세포 손상과 관련이 있습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"75\",\n                    \"question_numbers_on_page\": [\n                        \"74\",\n                        \"75\",\n                        \"76\"\n                    ],\n                    \"question_text\": \"다음 그림의 A-B-C에 들어가는 것으로 맞게 짝지어 진 것을 고르시오.\",\n                    \"answer\": \"2) BAX_BCL2_TNF receptor\",\n                    \"explanation\": \"제시된 그림은 세포자멸사(apoptosis)의 내인성(intrinsic) 및 외인성(extrinsic) 경로를 보여줍니다. A는 BCL2 family sensors (예: BH3-only protein)에 의해 활성화되는 BAX/BAK를, B는 BCL2 family regulators (예: BCL2)를, C는 Extrinsic pathway의 시작인 Death receptor-ligand interactions (예: TNF receptor)를 나타냅니다. 따라서 2번 보기가 가장 적절합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"BAX_BAK_BH3-only protein은 A에 해당하지만, B와 C가 틀립니다.\",\n                        \"3번\": \"BCL2_BAX_EGF receptor는 틀린 조합입니다.\",\n                        \"4번\": \"BCL2_cytosolic ca2+_GH receptor는 틀린 조합입니다.\",\n                        \"5번\": \"BAK_BAX_TNF receptor는 틀린 조합입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"76\",\n                    \"question_numbers_on_page\": [\n                        \"74\",\n                        \"75\",\n                        \"76\"\n                    ],\n                    \"question_text\": \"다음 그림에서 나타내고 있는 과정에 대한 설명으로 옳은 것을 고르시오.\",\n                    \"answer\": \"4) an adaptive response that is enhanced during nutrient deprivation, allowing the cell to cannibalize itself to survive.\",\n                    \"explanation\": \"제시된 그림은 자가포식(Autophagy) 과정을 보여줍니다. 자가포식은 영양 결핍 시 세포가 스스로 구성 요소를 분해하여 생존에 필요한 에너지를 얻는 적응 반응입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"RIPK1 유전자에 의해 조절되는 것은 주로 괴사성 세포 사멸(necroptosis)입니다.\",\n                        \"2번\": \"TNFR1 리간드 및 바이러스 DNA/RNA에 의해 유발되는 것은 괴사성 세포 사멸 또는 파이로프토시스(pyroptosis)일 수 있습니다.\",\n                        \"3번\": \"캐스페이스-1 활성화는 파이로프토시스와 관련이 깊습니다.\",\n                        \"5번\": \"철 의존성 지질 과산화에 의해 유도되는 세포 사멸 경로는 페로프토시스(ferroptosis)입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 35,\n            \"questions\": [\n                {\n                    \"question_number\": \"77\",\n                    \"question_numbers_on_page\": [\n                        \"77\",\n                        \"78\",\n                        \"79\"\n                    ],\n                    \"question_text\": \"다음 A에 해당하는 가장 알맞은 현상을 고르시오.\",\n                    \"answer\": \"3) Necroptosis\",\n                    \"explanation\": \"제시된 설명은 괴사(necrosis)와 형태학적으로 유사하지만 유전적으로 조절되는 세포 사멸 형태이며, TNFR1 리간드 및 바이러스 DNA/RNA에 의해 유발되고, 캐스페이스 비의존적이며 RIPK1-RIPK3 복합체에 의존하는 세포 사멸 경로인 괴사성 세포 사멸(Necroptosis)에 대한 설명입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"아포프토시스는 세포 수축과 캐스페이스 의존성을 특징으로 합니다.\",\n                        \"2번\": \"자가용해(Autolysis)는 효소에 의한 세포의 자가 소화로, 생체 내에서 발생하는 괴사와는 다릅니다.\",\n                        \"4번\": \"파이로프토시스(Pyroptosis)는 캐스페이스-1 의존적이며 염증 반응을 동반하는 세포 사멸입니다.\",\n                        \"5번\": \"페로프토시스(Ferroptosis)는 철 의존성 지질 과산화에 의해 유도되는 세포 사멸입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"78\",\n                    \"question_numbers_on_page\": [\n                        \"77\",\n                        \"78\",\n                        \"79\"\n                    ],\n                    \"question_text\": \"다음 그림 A,B,C에 들어갈 명칭을 각각 적으시오.\",\n                    \"answer\": \"Heterochromatin, Euchromatin, Nucleosome\",\n                    \"explanation\": \"제시된 그림은 염색질(chromatin)의 구조를 보여줍니다. A는 이질염색질(Heterochromatin), B는 진정염색질(Euchromatin)을 나타내며, C는 DNA가 히스톤 단백질에 감겨 형성된 뉴클레오솜(Nucleosome)을 나타냅니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"79\",\n                    \"question_numbers_on_page\": [\n                        \"77\",\n                        \"78\",\n                        \"79\"\n                    ],\n                    \"question_text\": \"다음 중 옳은 설명을 한 개 고르시오.\\n1) SNPs are variants at several nucleotide positions and are almost always biallelic\\n2) Roughly 10% of SNPs occur in coding regions, which is about what would be expected by chance, since coding regions comprise about 15% of the genome.\\n3) SNPs located in coding regions can occur within genomic regulatory elements, thereby altering gene expression; in such instances, SNPs influence disease susceptibility directly\\n4) Approximately 5% of CNVs involve gene-coding sequences; thus CNVs may underlie a large portion of human phenotypic diversity\\n5) SNPs occur across the genome—within exons, introns, intergenic regions, and coding regions.\",\n                    \"answer\": \"5)\",\n                    \"explanation\": \"단일 염기 다형성(SNPs)은 게놈 전체에 걸쳐 존재하며, 엑손, 인트론, 유전자간 영역(intergenic regions) 및 코딩 영역(coding regions) 등 다양한 위치에서 발견됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"SNPs는 단일 염기 위치에서의 변이이며, 대부분 이형대립유전자(biallelic) 형태를 가집니다.\",\n                        \"2번\": \"코딩 영역은 게놈의 약 1.5%를 차지하므로, 10%의 SNP가 코딩 영역에 존재한다는 것은 우연히 예상되는 것보다 훨씬 높은 수치입니다.\",\n                        \"3번\": \"코딩 영역에 위치한 SNP는 유전자 발현에 영향을 미치지 않을 수도 있습니다. 유전자 발현에 영향을 미치는 SNP는 주로 조절 요소(regulatory elements)에 위치합니다.\",\n                        \"4번\": \"CNV(Copy Number Variations)는 유전자 코딩 서열을 포함할 수 있으며, 인간 표현형 다양성의 상당 부분을 설명할 수 있습니다. 5%는 대략적인 수치입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 36,\n            \"questions\": [\n                {\n                    \"question_number\": \"80\",\n                    \"question_numbers_on_page\": [\n                        \"80\",\n                        \"81\"\n                    ],\n                    \"question_text\": \"다음 사진과 설명에 해당하는 괴사를 고르시오.\\n1) characterized by digestion of the dead cells, resulting in transformation of the tissue into a viscous liquid\\n2) It is seen in focal bacterial or, occasionally, fungal infections\\n3) hypoxic death of cells within the central nervous system often manifests as this form of necrosis\",\n                    \"answer\": \"3) Liquefactive necrosis\",\n                    \"explanation\": \"제시된 설명은 죽은 세포가 소화되어 점성 액체로 변하고, 국소 세균 또는 곰팡이 감염에서 관찰되며, 중추신경계 세포의 저산소성 사멸이 이 형태로 나타나는 액화 괴사(Liquefactive necrosis)의 특징입니다. 사진은 뇌의 액화 괴사 소견을 보여줍니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"건락성 괴사(Caseous necrosis)는 치즈 같은 외형을 가집니다.\",\n                        \"2번\": \"괴저 괴사(Gangrenous necrosis)는 허혈성 응고 괴사에 세균 감염이 동반된 형태입니다.\",\n                        \"4번\": \"지방 괴사(Fat necrosis)는 지방 조직의 파괴를 특징으로 합니다.\",\n                        \"5번\": \"섬유소양 괴사(Fibrinoid necrosis)는 혈관 벽에 섬유소와 단백질이 침착되는 것입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"81\",\n                    \"question_numbers_on_page\": [\n                        \"80\",\n                        \"81\"\n                    ],\n                    \"question_text\": \"세포 손상의 기전에 대한 설명 중 틀린 것을 고르시오.\\n1) Increased permeability of cellular membranes: may affect plasma membrane, lysosomal membranes, mitochondrial membranes; typically culminates in necrosis\\n2) The cellular response to injurious stimuli depends on the nature of the injury, its duration, and its severity.\\n3) Any injurious stimulus may simultaneously trigger multiple interconnected mechanisms that damage cells.\\n4) Leakage of mitochondrial proteins due to channel formation by pro-apoptotic BAX and BAK is the initial step in necrosis\\n5) The consequences of cell injury depend on the type, state, and adaptability of the injured cell.\",\n                    \"answer\": \"4)\",\n                    \"explanation\": \"BAX와 BAK에 의한 채널 형성을 통한 미토콘드리아 단백질 유출은 주로 아포프토시스(apoptosis)의 내인성 경로에서 중요한 단계이며, 괴사(necrosis)의 초기 단계는 아닙니다. 괴사는 주로 세포막의 직접적인 손상이나 ATP 고갈로 시작됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"세포막, 리소좀막, 미토콘드리아막의 투과성 증가는 세포 손상의 중요한 기전이며, 종종 괴사로 이어집니다.\",\n                        \"2번\": \"세포의 손상 자극에 대한 반응은 손상의 성격, 지속 시간, 심각도에 따라 달라집니다.\",\n                        \"3번\": \"하나의 손상 자극도 세포 손상을 유발하는 여러 상호 연결된 기전을 동시에 활성화할 수 있습니다.\",\n                        \"5번\": \"세포 손상의 결과는 손상된 세포의 유형, 상태 및 적응 능력에 따라 달라집니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 37,\n            \"questions\": [\n                {\n                    \"question_number\": \"82\",\n                    \"question_numbers_on_page\": [\n                        \"82\",\n                        \"83\"\n                    ],\n                    \"question_text\": \"Stem cell의 특징에 대한 설명으로 옳은 것을 고르시오.\\n1) The bone marrow contains a population of mesenchymal stem cells. These are multipotent cells that can differentiate into a variety of stromal cells including chondrocytes (cartilage), osteocytes (bone), adipocytes (fat), and myocytes (muscle).\\n2) During development, pluripotent stem cells can give rise to the full range of differentiated tissues\\n3) Adult stem cells only have the capacity to replace damaged cells and maintain cell populations within or outside the tissues where they reside.\\n4) Embryonic stem (ES) cells are the most differentiated. They are present in the inner cell mass of the blastocyst, have virtually limitless cell renewal capacity, and can give rise to every cell in the body; they are thus said to be totipotent\\n5) Tissue stem cells (also called adult stem cells) are found in intimate association with the differentiated cells of a given tissue. They are normally protected within specialized tissue microenvironments called stem cell niches.\",\n                    \"answer\": \"5)\",\n                    \"explanation\": \"조직 줄기세포(성체 줄기세포)는 특정 조직 내에서 분화된 세포와 밀접하게 연관되어 있으며, 특화된 줄기세포 틈새(stem cell niches) 내에서 보호됩니다. 이 틈새는 줄기세포의 자기 재생 및 분화를 조절하는 미세 환경을 제공합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"골수에는 중간엽 줄기세포(mesenchymal stem cells)가 있으며, 이들은 연골세포, 골세포, 지방세포 등으로 분화할 수 있지만, 근세포(myocytes)로의 분화는 제한적일 수 있습니다.\",\n                        \"2번\": \"전능성 줄기세포(totipotent stem cells)는 모든 종류의 분화된 조직을 형성할 수 있습니다. 다능성 줄기세포(pluripotent stem cells)는 배아의 세 배엽에서 유래하는 모든 세포 유형으로 분화할 수 있지만, 태반 외 조직은 형성하지 못합니다.\",\n                        \"3번\": \"성체 줄기세포는 손상된 세포를 대체하고 조직 내 세포 집단을 유지하는 능력 외에도, 특정 조건 하에서는 조직 외부로 이동하여 다른 조직의 세포로 분화할 수도 있습니다.\",\n                        \"4번\": \"배아 줄기세포(ES cells)는 '가장 분화된' 것이 아니라 '미분화된' 상태이며, 전능성(pluripotent)을 가집니다. 전능성은 모든 세포 유형으로 분화할 수 있는 능력을 의미합니다. 'totipotent'는 태반까지 포함한 완전한 개체를 형성할 수 있는 능력입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"83\",\n                    \"question_numbers_on_page\": [\n                        \"82\",\n                        \"83\"\n                    ],\n                    \"question_text\": \"다음 설명 중 long noncoding RNA(lcRNA)의 역할을 설명한 것이 아닌 것을 한 가지 고르시오.\\n1) IncRNAs can facilitate transcription factor binding and thus promote gene activation.\\n2) IncRNAs can preemptively bind transcription factors to inhibit transcription\\n3) Histone and DNA modification by acetylases or methylases (or deacetylases and demethylases) may be directed by IncRNA binding\\n4) IncRNAs can act as scaffolds to stabilize secondary or tertiary structures and multisubunit complexes that influence chromatin architecture or gene activity.\\n5) Synthetic IncRNAsare also being studied as potential therapeutic agents to silence pathogenic genes (e.g., oncogenes that drive neoplastic transformation).\",\n                    \"answer\": \"5)\",\n                    \"explanation\": \"합성 lncRNA가 병원성 유전자(예: 종양 유전자)를 침묵시키는 잠재적인 치료제로 연구되고 있다는 것은 lncRNA의 '응용' 또는 '치료적 가능성'에 대한 설명이지, 자연적으로 존재하는 lncRNA의 '역할'에 대한 설명은 아닙니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"lncRNA는 전사 인자 결합을 촉진하여 유전자 활성화를 유도할 수 있습니다.\",\n                        \"2번\": \"lncRNA는 전사 인자에 선제적으로 결합하여 전사를 억제할 수 있습니다.\",\n                        \"3번\": \"lncRNA 결합에 의해 아세틸화효소 또는 메틸화효소(또는 탈아세틸화효소 및 탈메틸화효소)에 의한 히스톤 및 DNA 변형이 유도될 수 있습니다.\",\n                        \"4번\": \"lncRNA는 크로마틴 구조나 유전자 활성에 영향을 미치는 2차 또는 3차 구조 및 다중 소단위 복합체를 안정화하는 스캐폴드(scaffold) 역할을 할 수 있습니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 38,\n            \"questions\": [\n                {\n                    \"question_number\": \"84\",\n                    \"question_numbers_on_page\": [\n                        \"84\",\n                        \"85\"\n                    ],\n                    \"question_text\": \"세포바깥 바탕질(Extracellular matrix)의 역할에 대한 설명으로 옳은 것을 고르시오.(3개)\\n1) 세포신호전달을 위한 화학적 조절자 역할\\n2) 수용체를 통한 신호를 통해 세포증식을 조절\\n3) 정상조직의 구조를 유지하기 위한 지지대의 역할\\n4) 조직의 미세환경 형성\\n5) 조직손상이나 염증시에 활성화되어 이용될 수 있는 혈구세포의 저장소 역할\",\n                    \"answer\": \"1), 2), 3)\",\n                    \"explanation\": \"세포외 기질(Extracellular matrix, ECM)은 세포 신호 전달을 위한 화학적 조절자 역할을 하며, 수용체를 통한 신호를 통해 세포 증식을 조절하고, 정상 조직의 구조를 유지하는 지지대 역할을 합니다. 또한 조직의 미세환경을 형성하고, 조직 손상이나 염증 시 혈구세포의 이동 및 활성화에 관여하지만, 혈구세포의 저장소 역할은 아닙니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"4번\": \"조직의 미세환경 형성도 ECM의 중요한 역할입니다. (문제에서 3개를 고르라고 했으므로 1,2,3번이 더 핵심적인 역할로 간주될 수 있습니다.)\",\n                        \"5번\": \"ECM은 혈구세포의 저장소가 아니라, 혈구세포가 이동하고 상호작용하는 환경을 제공합니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 27,\n                            \"relevance_reason\": \"강의자료 27페이지에서 'subendothelial extracellular matrix (ECM)+platelet adherance & activation'을 언급하며 ECM이 혈소판 부착 및 활성화에 중요한 역할을 함을 제시합니다. 이는 ECM의 구조적 지지 및 세포 상호작용 역할과 간접적으로 관련됩니다.\",\n                            \"relevance_score\": 4\n                        },\n                        {\n                            \"lesson_filename\": \"0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf\",\n                            \"lesson_page\": 36,\n                            \"relevance_reason\": \"강의자료 36페이지에서 'platelets encounter ECM constituents that are normally sequestered beneath an intact endothelium; collagen (most important), proteoglycans, fibronectin, and other adhesive glycoproteins.'를 통해 ECM이 세포 부착 및 조직 통합성에 기여함을 설명합니다.\",\n                            \"relevance_score\": 4\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"85\",\n                    \"question_numbers_on_page\": [\n                        \"84\",\n                        \"85\"\n                    ],\n                    \"question_text\": \"다음이 설명하고 있는 인자를 그림에서 골라 맞게 연결된 것을 고르시오.\",\n                    \"answer\": \"1) A- microtubule\",\n                    \"explanation\": \"제시된 설명은 '분자 모터 단백질의 계류선 역할', '자매 염색분체 분리 매개', '원발성 섬모의 핵심 형성', '운동성 섬모 또는 편모의 핵심 형성' 등을 언급하고 있습니다. 이는 모두 미세소관(microtubule)의 기능에 해당합니다. 그림에서 A는 세포 내 미세소관 구조를 가리킵니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"B는 액틴 필라멘트(actin filament)를 가리킵니다.\",\n                        \"3번\": \"J는 기저막(basement membrane)을 가리킵니다.\",\n                        \"4번\": \"K는 인테그린(Integrin)을 가리킵니다.\",\n                        \"5번\": \"E는 세포 부착 단백질(adhesion protein)을 가리킵니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        }\n    ],\n    \"summary\": {\n        \"total_jokbo_pages\": 35,\n        \"total_questions\": 85,\n        \"total_related_slides\": 14\n    }\n}",
+  "response_length": 102431,
+  "parsed_successfully": true,
+  "parsed_data": {
+    "jokbo_pages": [
+      {
+        "jokbo_page": 1,
+        "questions": [
+          {
+            "question_number": "1",
+            "question_numbers_on_page": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            "question_text": "<다음문장>의 (A)에 알맞은 용어를 하나 적으시오.(영어로 답할 것)\n<다음문장>\nNormal fluid (A) encompasses maintenance of vessel\nwall integrity as well as intravascular pressure and\nosmolarity within certain physiologic ranges.\nHomeostasis",
+            "answer": "Homeostasis",
+            "explanation": "Normal fluid homeostasis refers to the maintenance of vessel wall integrity, intravascular pressure, and osmolarity within physiological ranges. This is a fundamental concept in fluid dynamics and pathology.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 2,
+                "relevance_reason": "강의자료 2페이지에 'Normal fluid homeostasis encompasses maintenance of vessel wall integrity as well as intravascular pressure and osmolarity within certain physiologic ranges.' 문장이 문제와 동일하게 제시되어 있습니다.",
+                "relevance_score": 10
+              }
+            ]
+          },
+          {
+            "question_number": "2",
+            "question_numbers_on_page": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            "question_text": "다음은 Pulmonary edema 에 대한 설명이다. 옳지 않은 것을 하나 고르시오.\n1) left ventricular failure, renal failure, acute respiratory distress syndrome 에 의해서 pulmonary edema가 생길 수 있다.\n2) acute respiratory distress syndrome 에 의해서 pulmonary edema가 생길 수 있다.\n3) pulmonary infections, & hypersensitivity reactions에 의해서 pulmonary edema 에 의해서도 pulmonary edema가 생길 수 있다.\n4) pulmonary edema가 있는 lung 은 lung normal weight 보다 가벼워진다.\n5) frothy, blood-tinged fluid w/ a mixture of air, edema fluid, and extravasated RBCs 가 관찰된다.",
+            "answer": "4)",
+            "explanation": "폐부종이 있는 폐는 정상 폐보다 액체가 더 많기 때문에 무게가 더 무거워집니다. 따라서 '가벼워진다'는 설명은 옳지 않습니다.",
+            "wrong_answer_explanations": {
+              "1번": "좌심실 부전, 신부전, 급성 호흡곤란 증후군 등은 폐부종의 주요 원인입니다. (강의자료 9페이지)",
+              "2번": "급성 호흡곤란 증후군은 폐부종의 중요한 원인 중 하나입니다. (강의자료 9페이지)",
+              "3번": "폐 감염 및 과민 반응도 폐부종을 유발할 수 있습니다. (강의자료 9페이지)",
+              "5번": "폐부종 시 공기, 부종액, 적혈구가 혼합된 거품성 혈액성 액체가 관찰되는 것은 특징적인 소견입니다. (강의자료 9페이지)"
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 9,
+                "relevance_reason": "강의자료 9페이지에 폐부종의 원인(left ventricular failure, renal failure, ARDS, pulmonary infections, hypersensitivity reactions)과 특징(2-3 times lung normal weight → 정상보다 무거워짐, frothy/blood-tinged fluid, extravasated RBCs)이 직접적으로 설명되어 있습니다.",
+                "relevance_score": 10
+              }
+            ]
+          },
+          {
+            "question_number": "3",
+            "question_numbers_on_page": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            "question_text": "다음은 Hyperemia에 대한 설명이다. 옳지 않은 것을 하나 고르시오.\n1) an active process resulting from augmented tissue inflow because of arteriolar dilation,\n2) skeletal muscle during exercise 에서 생긴다.\n3) inflammation sites 에서 생긴다.\n4) redder because of the engorgement of vessels with oxygenated blood.\n5) a passive process resulting from impaired outflow from a tissue.",
+            "answer": "5)",
+            "explanation": "5번 보기는 'Congestion(울혈)'에 대한 설명입니다. Hyperemia는 능동적인 과정으로 동맥 세동맥 확장으로 인한 조직 내 혈류량 증가를 의미합니다.",
+            "wrong_answer_explanations": {
+              "1번": "Hyperemia는 세동맥 확장에 의한 능동적인 과정입니다. (강의자료 12페이지)",
+              "2번": "운동 시 골격근에서 Hyperemia가 발생합니다. (강의자료 12페이지)",
+              "3번": "염증 부위에서 Hyperemia가 발생합니다. (강의자료 12페이지)",
+              "4번": "산소화된 혈액으로 혈관이 충혈되어 더 붉게 보입니다. (강의자료 12페이지)"
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 12,
+                "relevance_reason": "강의자료 12페이지에 Hyperemia와 Congestion의 정의가 명확히 구분되어 설명되어 있습니다. Hyperemia의 특징(active process, arteriolar dilation, exercise, inflammation, redder)과 Congestion의 특징(passive process, impaired outflow)이 모두 제시되어 있습니다.",
+                "relevance_score": 10
+              }
+            ]
+          },
+          {
+            "question_number": "4",
+            "question_numbers_on_page": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            "question_text": "다음 사진의 병리소견으로 옳은 것을 하나 고르시오.",
+            "answer": "2) intracerebral hemorrhage",
+            "explanation": "제시된 사진은 뇌 실질 내 출혈(intracerebral hemorrhage)을 보여줍니다. 뇌 조직 내에 혈액이 고여 있는 것이 특징입니다.",
+            "wrong_answer_explanations": {
+              "1번": "대장 점막의 점상 출혈은 다른 양상으로 나타납니다. (강의자료 21페이지 참조)",
+              "3번": "뇌부종은 뇌 조직의 전반적인 부종을 의미하며 출혈과는 다릅니다.",
+              "4번": "폐울혈은 폐 조직의 혈관 충혈을 의미합니다.",
+              "5번": "간의 만성 수동성 울혈은 간 조직의 특정 변화를 보입니다. (강의자료 16페이지 참조)"
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 22,
+                "relevance_reason": "족보 문제 4번의 사진과 강의자료 22페이지의 Figure 4-11B 사진이 동일합니다. 강의자료에는 'B, Fatal intracerebral bleed.'라고 명시되어 있습니다.",
+                "relevance_score": 11
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 2,
+        "questions": [
+          {
+            "question_number": "5",
+            "question_numbers_on_page": [
+              "5"
+            ],
+            "question_text": "다음 그림의 장기와 진단으로 알맞은 것을 하나 고르시오.",
+            "answer": "4) spleen - white infarct",
+            "explanation": "제시된 사진은 비장(spleen)에 발생한 백색 경색(white infarct)을 보여줍니다. 비장은 혈액 공급이 풍부한 장기이지만, 동맥 폐색 시 백색 경색이 발생할 수 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "폐의 적색 경색은 주로 이중 혈액 공급이 있는 장기에서 발생하며, 비장의 양상과는 다릅니다.",
+              "2번": "폐의 백색 경색은 주로 단일 혈액 공급이 있는 장기에서 발생합니다.",
+              "3번": "신장의 백색 경색은 비장의 양상과는 다릅니다.",
+              "5번": "비장의 적색 경색은 비장에서는 흔하지 않습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 3,
+        "questions": [
+          {
+            "question_number": "6",
+            "question_numbers_on_page": [
+              "6"
+            ],
+            "question_text": "다음 그림은 major pathogenic pathways in septic shock 에 대한 것이다. “A” 에 알맞은 용어를 하나 적으시오.(영어로 답할 것)",
+            "answer": "Immunosuppression",
+            "explanation": "패혈성 쇼크의 주요 병태생리 경로 그림에서 'A'는 면역억제(Immunosuppression)를 나타냅니다. 이는 쇼크 상태에서 염증 반응과 함께 나타나는 중요한 기전 중 하나입니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 4,
+        "questions": [
+          {
+            "question_number": "7",
+            "question_numbers_on_page": [
+              "7"
+            ],
+            "question_text": "다음 그림의 장기와 진단으로 알맞은 것을 하나 고르시오.",
+            "answer": "1) lung - red infarct",
+            "explanation": "제시된 사진은 폐(lung)에 발생한 적색 경색(red infarct)을 보여줍니다. 폐는 이중 혈액 공급(폐동맥과 기관지동맥)을 가지므로, 혈관 폐색 시 출혈이 동반된 적색 경색이 흔히 발생합니다.",
+            "wrong_answer_explanations": {
+              "2번": "폐의 백색 경색은 흔하지 않습니다.",
+              "3번": "신장의 백색 경색은 폐의 양상과는 다릅니다.",
+              "4번": "비장의 백색 경색은 폐의 양상과는 다릅니다.",
+              "5번": "비장의 적색 경색은 비장에서는 흔하지 않습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 5,
+        "questions": [
+          {
+            "question_number": "8",
+            "question_numbers_on_page": [
+              "8",
+              "9",
+              "10",
+              "11"
+            ],
+            "question_text": "다음 문장에서 (A) 안에 알맞은 용어을 하나 적으시오.(영어로 답할 것)\n(A) shoxk is caused by the host response to bacterial, viral or fungal infections; it\nis a systemic inflammatory condition characterized by endothelial cell activation,\ntissue edema, disseminated intravascular coagulation, and metabolic\nderangements that often lead to organ failure and death.\nSeptic",
+            "answer": "Septic",
+            "explanation": "제시된 설명은 세균, 바이러스, 곰팡이 감염에 대한 숙주 반응으로 발생하는 전신 염증 상태를 의미하며, 이는 패혈성 쇼크(Septic shock)의 정의입니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "9",
+            "question_numbers_on_page": [
+              "8",
+              "9",
+              "10",
+              "11"
+            ],
+            "question_text": "<다음 문장>을 읽고 가장 알맞은 용어를 하나 적으시오.(영어로 답할 것)\n<다음 문장>\na detached intravascular solid, liquid, or gaseous mass that is carried by the blood\nto a site distant from its point of origin\nEmbolism",
+            "answer": "Embolism",
+            "explanation": "혈관 내에서 떨어져 나와 혈류를 타고 원래 위치에서 먼 곳으로 이동하는 고체, 액체 또는 기체 덩어리를 색전(Embolism)이라고 합니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "10",
+            "question_numbers_on_page": [
+              "8",
+              "9",
+              "10",
+              "11"
+            ],
+            "question_text": "다음 문장에서 (A) 안에 알맞은 용어를 하나 적으시오. (영어로만 답할 것)\nCentral nervous system infarction results in ( A ) necrosis.\nLiquefactive",
+            "answer": "Liquefactive",
+            "explanation": "중추신경계의 경색(infarction)은 괴사된 조직이 효소적으로 소화되어 액체성 덩어리로 변하는 액화 괴사(Liquefactive necrosis)를 특징으로 합니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "11",
+            "question_numbers_on_page": [
+              "8",
+              "9",
+              "10",
+              "11"
+            ],
+            "question_text": "다음은 Factors That Influence Development of an Infarct 를 설명한 것이다. 알맞지 않는 것을 하나 고르시오.\n1) the nature of the vascular supply\n2) the rate of development of the occlusion\n3) the consistency of a given tissue\n4) the blood oxygen content",
+            "answer": "3) the consistency of a given tissue",
+            "explanation": "조직의 경도(consistency)는 경색의 발생에 영향을 미치는 요소가 아니라, 경색이 발생했을 때 나타나는 괴사의 형태(예: 응고 괴사 vs 액화 괴사)에 영향을 미칩니다. 경색 발생에 영향을 미치는 주요 요인은 혈관 공급의 특성, 폐색 발생 속도, 조직의 산소 요구량 및 저산소증에 대한 취약성 등입니다.",
+            "wrong_answer_explanations": {
+              "1번": "혈관 공급의 특성(단일 vs 이중 공급)은 경색 발생에 중요합니다.",
+              "2번": "폐색의 발생 속도가 느리면 측부 순환이 발달하여 경색을 예방할 수 있습니다.",
+              "4번": "혈액 산소 함량(예: 빈혈, 청색증)은 조직의 산소 공급에 영향을 미쳐 경색 발생에 영향을 줄 수 있습니다.",
+              "5번": "주어진 조직의 저산소증에 대한 취약성(vulnerability)은 경색 발생에 중요한 요소입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 6,
+        "questions": [
+          {
+            "question_number": "12",
+            "question_numbers_on_page": [
+              "12",
+              "13",
+              "14"
+            ],
+            "question_text": "다음 사진의 병리소견으로 옳은 것을 하나 고르시오.",
+            "answer": "1) petechial hemorrhage of colonic mucosa",
+            "explanation": "제시된 사진은 대장 점막에 나타난 작은 점상 출혈(petechial hemorrhage)을 보여줍니다. 이는 혈소판 감소증 등으로 인해 발생할 수 있습니다.",
+            "wrong_answer_explanations": {
+              "2번": "뇌 실질 내 출혈은 뇌 조직 내에 혈액이 고인 양상으로 나타납니다. (족보 1페이지 4번 문제 사진 참조)",
+              "3번": "뇌부종은 뇌 조직의 전반적인 부종을 의미합니다.",
+              "4번": "폐울혈은 폐 조직의 혈관 충혈을 의미합니다.",
+              "5번": "간의 만성 수동성 울혈은 간 조직의 특정 변화를 보입니다. (강의자료 16페이지 참조)"
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 21,
+                "relevance_reason": "족보 문제 12번의 사진과 강의자료 21페이지의 Figure 4-11A 사진이 동일합니다. 강의자료에는 'A, Punctate petechial hemorrhages of the colonic mucosa, a consequence of thrombocytopenia.'라고 명시되어 있습니다.",
+                "relevance_score": 11
+              }
+            ]
+          },
+          {
+            "question_number": "13",
+            "question_numbers_on_page": [
+              "12",
+              "13",
+              "14"
+            ],
+            "question_text": "<다음 설명>을 읽고 (A)에 가장 알맞은 것을 하나 고르시오.\n<다음 설명>\n(A) % of spontaneous abortuses during the early months of gestation have a\ndemonstrable chromosomal abnormality.",
+            "answer": "5) 50",
+            "explanation": "임신 초기 자연 유산의 약 50%는 염색체 이상과 관련이 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "10%는 너무 낮은 수치입니다.",
+              "2번": "20%는 너무 낮은 수치입니다.",
+              "3번": "30%는 너무 낮은 수치입니다.",
+              "4번": "40%는 실제 수치보다 낮습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "14",
+            "question_numbers_on_page": [
+              "12",
+              "13",
+              "14"
+            ],
+            "question_text": "다음 그림의 장기와 진단으로 알맞은 것을 하나 고르시오.",
+            "answer": "1) lung – bone marrow embolus",
+            "explanation": "제시된 사진은 폐 조직 내에 골수 색전(bone marrow embolus)이 관찰되는 소견입니다. 이는 주로 외상이나 골절 후 발생할 수 있습니다.",
+            "wrong_answer_explanations": {
+              "2번": "간의 골수 색전은 폐와는 다른 양상입니다.",
+              "3번": "폐의 양수 색전은 양수 성분이 관찰됩니다.",
+              "4번": "간의 양수 색전은 간 조직에서 양수 성분이 관찰됩니다.",
+              "5번": "폐경색은 조직 괴사를 동반합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 7,
+        "questions": [
+          {
+            "question_number": "15",
+            "question_numbers_on_page": [
+              "15",
+              "16"
+            ],
+            "question_text": "다음설명은 Mendelian Disorders 에 대한 설명이다. (D) 에 알맞은 것을 하나 고르시오.\n* Although gene expression is usually described as dominant or recessive, in some\ncases, both of the alleles of a gene pair may be fully expressed in the\nheterozygote-a condition called (A).\n* A single mutant gene may lead to many end effects, termed ( B ); conversely,\nmutations at several genetic loci may produce the same trait (C).\n* It should be noted that not all nucleotide changes produce genes that cause\ndisease. When such a DNA change occurs in at least 1% of the population, it is\ncalled a (D).",
+            "answer": "4) polymorphism",
+            "explanation": "인구의 1% 이상에서 발생하는 DNA 변화는 다형성(polymorphism)이라고 불립니다. 이는 질병을 유발하지 않는 유전적 변이를 포함합니다.",
+            "wrong_answer_explanations": {
+              "1번": "공동우성(Codominance)은 두 대립유전자가 이형접합체에서 모두 발현되는 현상입니다.",
+              "2번": "다면발현(Pleiotropism)은 단일 유전자 변이가 여러 표현형에 영향을 미치는 현상입니다.",
+              "3번": "유전적 이질성(genetic heterogeneity)은 여러 유전자 위치의 돌연변이가 동일한 특성을 생성하는 현상입니다.",
+              "5번": "유전체 각인(Genomic imprinting)은 부모 중 한쪽에서 유래한 유전자만 발현되는 현상입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "16",
+            "question_numbers_on_page": [
+              "15",
+              "16"
+            ],
+            "question_text": "다음 <그림>을 읽고, 가장 알맞은 진단명(A)을 하나 고르시오.",
+            "answer": "2) Leber Hereditary Optic Neuropathy",
+            "explanation": "제시된 가계도는 미토콘드리아 DNA 돌연변이에 의한 질환의 특징적인 유전 양상을 보여줍니다. 이는 어머니로부터 모든 자녀에게 유전되며, 아버지로부터는 유전되지 않습니다. 이러한 특징을 보이는 질환 중 하나가 레버 유전성 시신경병증(Leber Hereditary Optic Neuropathy)입니다.",
+            "wrong_answer_explanations": {
+              "1번": "근긴장성 이영양증은 상염색체 우성 유전 질환입니다.",
+              "3번": "취약 X 증후군은 X-연관 유전 질환입니다.",
+              "4번": "프라더-윌리 증후군은 유전체 각인과 관련된 질환입니다.",
+              "5번": "골형성부전증은 주로 상염색체 우성 유전 질환입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 8,
+        "questions": [
+          {
+            "question_number": "17",
+            "question_numbers_on_page": [
+              "17",
+              "18"
+            ],
+            "question_text": "다음의 핵형(karyotype)을 나타내는 질환과 핵형을 바르게 적은것을 하나 고르시오.",
+            "answer": "2) Down syndrome, 47,XY,+21",
+            "explanation": "제시된 핵형은 21번 염색체가 3개 존재하는 삼염색체성(Trisomy 21)을 보여주며, 이는 다운 증후군(Down syndrome)의 특징적인 핵형입니다. 남성의 경우 47,XY,+21로 표기됩니다.",
+            "wrong_answer_explanations": {
+              "1번": "클라인펠터 증후군은 47,XXY 핵형을 가집니다.",
+              "3번": "터너 증후군은 45,X 핵형을 가집니다.",
+              "4번": "취약 X 증후군은 X 염색체의 특정 부위 취약성을 특징으로 합니다.",
+              "5번": "다운 증후군의 핵형 표기가 45,XX,der(14;21)(q10;q10)인 경우는 로버트슨 전좌형 다운 증후군입니다. 제시된 그림은 일반적인 삼염색체성입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "18",
+            "question_numbers_on_page": [
+              "17",
+              "18"
+            ],
+            "question_text": "다음 <그림>을 보고, (A)에 알맞은 진단기법을 하나 고르시오.",
+            "answer": "2) Fluorescence in situ hybridization",
+            "explanation": "제시된 그림은 형광 동소 혼성화(FISH) 기법을 보여줍니다. 이는 특정 DNA 서열을 형광 프로브를 이용하여 염색체 상에서 시각화하는 기술입니다.",
+            "wrong_answer_explanations": {
+              "1번": "서던 블롯은 DNA 단편을 분리하여 특정 서열을 검출하는 방법입니다.",
+              "3번": "G-밴딩은 염색체를 염색하여 밴딩 패턴을 관찰하는 핵형 분석 방법입니다.",
+              "4번": "웨스턴 블롯은 단백질을 검출하는 방법입니다.",
+              "5번": "노던 블롯은 RNA를 검출하는 방법입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 9,
+        "questions": [
+          {
+            "question_number": "19",
+            "question_numbers_on_page": [
+              "19",
+              "20"
+            ],
+            "question_text": "다음 설명을 읽고 알맞은 진단명(A)을 하나 고르시오.\n■(A) is caused by a mutation in the FBN1 gene encoding fibrillin, which is\nrequired for structural integrity of connective tissues and regulation of TGF-β\nsignaling.\n■ The major tissues affected are the skeleton, eyes, and cardiovascular system.\n■ Clinical features may include tall stature, long fingers, bilateral subluxation of\nlens, mitral valve prolapse, aortic aneurysm, and aortic dissection.\n■ Clinical trials with drugs that inhibit TGF-ẞ signaling such as angiotensin\nreceptor blockers are ongoing, as these have been shown to improve aortic and\ncardiac function in mouse models.",
+            "answer": "4) Marfan syndrome",
+            "explanation": "FBN1 유전자 돌연변이, 피브릴린 이상, 결합 조직의 구조적 통합성 문제, 골격계, 눈, 심혈관계 영향, 키가 크고 긴 손가락, 수정체 아탈구, 대동맥류 및 대동맥 박리 등의 특징은 마르판 증후군(Marfan syndrome)의 전형적인 설명입니다.",
+            "wrong_answer_explanations": {
+              "1번": "다운 증후군은 염색체 이상 질환입니다.",
+              "2번": "엘러스-단로스 증후군은 콜라겐 합성 또는 조립 결함과 관련이 있습니다.",
+              "3번": "프라더-윌리 증후군은 유전체 각인과 관련된 질환입니다.",
+              "5번": "테이-삭스병은 GM2 강글리오사이드 대사 이상으로 인한 리소좀 축적병입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "20",
+            "question_numbers_on_page": [
+              "19",
+              "20"
+            ],
+            "question_text": "다음 설명은 Ehlers-Danlos Syndromes 에 대한 것이다 (A)에 알맞은 용어를 하나 적으시오. (영어로 답할 것)\nEhlers-Danlos Syndromes\n• There are six variants of Ehlers-Danlos syndromes, all characterized by defects\nin (A) synthesis or assembly. Each of the variants is caused by a distinct mutation\ninvolving one of several ( A ) genes or genes that encode other ECM proteins like\ntenascin-X.\n■ Clinical features may include fragile, hyperextensible skin vulnerable to\ntrauma, hypermobile joints, and ruptures involving colon, cornea, or large\narteries.",
+            "answer": "collagen",
+            "explanation": "엘러스-단로스 증후군(Ehlers-Danlos Syndromes)은 콜라겐(collagen) 합성 또는 조립 결함으로 인해 발생하는 결합 조직 질환입니다. 피부의 과신장성, 관절 과운동성, 혈관 파열 등이 특징입니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 10,
+        "questions": [
+          {
+            "question_number": "21",
+            "question_numbers_on_page": [
+              "21",
+              "22",
+              "23"
+            ],
+            "question_text": "<다음 보기>을 읽고, Common forms of alteration in chromosome structure에 대한 서술로서 가장 알맞은 것을 하나 고르시오.\n<다음 보기>\n46,XY,r(14)",
+            "answer": "1) ring chromosome",
+            "explanation": "핵형 표기 '46,XY,r(14)'에서 'r(14)'는 14번 염색체가 고리 염색체(ring chromosome)를 형성했음을 의미합니다. 이는 염색체 구조 이상 중 하나입니다.",
+            "wrong_answer_explanations": {
+              "2번": "결실(deletion)은 염색체 일부가 소실된 것입니다.",
+              "3번": "역위(inversion)는 염색체 일부가 뒤집힌 것입니다.",
+              "4번": "등염색체(isochromosome)는 염색체의 한쪽 팔이 복제되고 다른 쪽 팔이 소실된 것입니다.",
+              "5번": "전좌(translocation)는 염색체 조각이 다른 염색체로 이동한 것입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "22",
+            "question_numbers_on_page": [
+              "21",
+              "22",
+              "23"
+            ],
+            "question_text": "다음은 Familial Hypercholesterolemia 에 대한 설명이다. 알맞지 않은 것을 하나 고르시오.\n1) a \"receptor disease\"\n2) a mutation in the gene encoding the receptor for high density lipoprotein (HDL), which is involved in the transport and metabolism of cholesterol.\n3) premature atherosclerosis\n4) myocardial infarction.\n5) possibly the most frequent mendelian disorder.",
+            "answer": "2)",
+            "explanation": "가족성 고콜레스테롤혈증(Familial Hypercholesterolemia)은 저밀도 지단백(LDL) 수용체 유전자(LDL receptor gene)의 돌연변이로 인해 발생합니다. HDL이 아닌 LDL 수용체에 문제가 생기는 질환입니다.",
+            "wrong_answer_explanations": {
+              "1번": "수용체 결함으로 인한 질환이므로 '수용체 질환'으로 불립니다.",
+              "3번": "조기 죽상경화증을 유발하여 심혈관 질환 위험을 높입니다.",
+              "4번": "조기 죽상경화증으로 인해 심근경색의 위험이 증가합니다.",
+              "5번": "상염색체 우성 유전 질환 중 가장 흔한 것 중 하나입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "23",
+            "question_numbers_on_page": [
+              "21",
+              "22",
+              "23"
+            ],
+            "question_text": "다음설명을 읽고 알맞은 진단명 (A) 을 하나 고르시오.\n■ (A) is caused by an inability to metabolize GM2gangliosidesduetolackof the a subunit of lysosor\nGM2gangliosidesaccumulateinthecentralnervoussystemandcauseseverementalretardation,blindne",
+            "answer": "3) Tay-Sachs disease",
+            "explanation": "GM2 강글리오사이드 대사 불능, 리소좀 GM2 강글리오시다아제 알파 소단위체 결핍, 중추신경계 내 GM2 강글리오사이드 축적, 심각한 정신 지체 및 실명 등의 특징은 테이-삭스병(Tay-Sachs disease)의 전형적인 설명입니다.",
+            "wrong_answer_explanations": {
+              "1번": "고셔병은 글루코세레브로시다아제 결핍으로 글루코세레브로사이드가 축적됩니다.",
+              "2번": "니만-픽병은 스핑고미엘리나아제 결핍으로 스핑고미엘린이 축적됩니다.",
+              "4번": "뮤코다당증은 뮤코다당류(글리코사미노글리칸) 대사 이상으로 발생합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 11,
+        "questions": [
+          {
+            "question_number": "24",
+            "question_numbers_on_page": [
+              "24",
+              "25",
+              "26"
+            ],
+            "question_text": "다음 설명을 읽고 알맞은 진단명 (A)을 하나 고르시오.\n■ (A) types A and B are caused by a deficiency of sphingomyelinase. In the more\nsevere type A variant, accumulation of sphingomyelin in the nervous system\nresults in neuronal damage. Lipid also is stored in phagocytes within the liver,\nspleen, bone marrow, and lymph nodes, causing their enlargement. In type B,\nneuronal damage is not present.",
+            "answer": "4) Niemann-Pick disease",
+            "explanation": "스핑고미엘리나아제 결핍, 스핑고미엘린 축적, A형에서의 신경계 손상, 간, 비장, 골수, 림프절의 대식세포 내 지질 저장 등의 특징은 니만-픽병(Niemann-Pick disease)의 전형적인 설명입니다.",
+            "wrong_answer_explanations": {
+              "1번": "테이-삭스병은 GM2 강글리오사이드 대사 이상입니다.",
+              "2번": "헐러 증후군은 뮤코다당증의 일종입니다.",
+              "3번": "고셔병은 글루코세레브로시다아제 결핍입니다.",
+              "5번": "헌터 증후군은 뮤코다당증의 일종입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "25",
+            "question_numbers_on_page": [
+              "24",
+              "25",
+              "26"
+            ],
+            "question_text": "다음 그림은 Gaucher disease in bone marrow 에 대한 것이다. Gaucher cell cytoplasm 에 축적된 물질을 하나 적으시오.(영어로 답할 것)",
+            "answer": "Glucocerebroside",
+            "explanation": "고셔병(Gaucher disease)은 글루코세레브로시다아제(glucocerebrosidase) 효소의 결핍으로 인해 글루코세레브로사이드(glucocerebroside)가 대식세포의 세포질에 축적되는 리소좀 축적병입니다. 제시된 그림은 고셔 세포의 특징적인 형태를 보여줍니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "26",
+            "question_numbers_on_page": [
+              "24",
+              "25",
+              "26"
+            ],
+            "question_text": "다음의 Virchow Triad in thrombosis 를 구성하는 factors 중에서 thrombosis 를 일으키는 가장 중요한 factor를 하나 고르시오.\n1) endothelial injury\n2) stasis of blood flow\n3) turbulence of blood flow\n4) blood hypercoagulability\n5) blood hypocoagulability",
+            "answer": "1) endothelial injury",
+            "explanation": "Virchow Triad는 혈전증(thrombosis) 발생의 세 가지 주요 요인으로 내피 손상(endothelial injury), 혈류 정체(stasis), 과응고성(hypercoagulability)을 제시합니다. 이 중 내피 손상이 혈전 형성을 시작하는 가장 중요한 요인으로 간주됩니다.",
+            "wrong_answer_explanations": {
+              "2번": "혈류 정체는 혈전증의 중요한 요인이지만, 내피 손상만큼 시작에 결정적이지는 않습니다.",
+              "3번": "혈류의 난류는 혈전증을 유발할 수 있지만, 내피 손상만큼 중요하지는 않습니다.",
+              "4번": "혈액의 과응고성은 혈전증의 중요한 요인이지만, 내피 손상만큼 시작에 결정적이지는 않습니다.",
+              "5번": "혈액의 저응고성은 혈전증을 억제하는 요인입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 26,
+                "relevance_reason": "강의자료 26페이지에서 혈액 응고 및 혈전증을 조절하는 세 가지 주요 구성 요소로 'the vascular wall, platelets, and the coagulation cascade'를 언급하며 Virchow Triad의 핵심 개념을 제시합니다. 혈관벽 손상(endothelial injury)이 혈전증의 시작에 중요함을 암시합니다.",
+                "relevance_score": 8
+              },
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 27,
+                "relevance_reason": "강의자료 27페이지에서 'After initial injury, arteriolar vasoconstriction' 및 'primary hemostasis; highly thrombogenic subendothelial extracellular matrix (ECM)+platelet adherance & activation'을 통해 혈관 손상(endothelial injury)이 혈전 형성의 첫 단계임을 강조합니다.",
+                "relevance_score": 9
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 12,
+        "questions": [
+          {
+            "question_number": "27",
+            "question_numbers_on_page": [
+              "27",
+              "28",
+              "29"
+            ],
+            "question_text": "다음 설명문항중에서 알맞지 않은 것을 하나 고르시오.\n1) Geneticsex - determined by the presence or absence of Y chromosome\n2) Gonadalsex - histologic characteristics of gonads\n3) Phenotypic sex - presence of derivatives of the Mullerian or wolffian ducts\n4) Genital sex - appearance of external genitalia\n5) Pseudohermaphroditism 의 정의는disagreement between phenotype & gonadal sex 이다.",
+            "answer": "3)",
+            "explanation": "표현형 성(Phenotypic sex)은 외부 생식기의 외형을 의미합니다. 뮐러관 또는 볼프관 유도체의 존재는 내부 생식기 성(internal genital sex)을 결정하는 요소입니다.",
+            "wrong_answer_explanations": {
+              "1번": "유전적 성은 Y 염색체의 유무에 의해 결정됩니다.",
+              "2번": "생식선 성은 생식선의 조직학적 특성(난소 또는 고환)에 의해 결정됩니다.",
+              "4번": "생식기 성은 외부 생식기의 외형을 의미합니다.",
+              "5번": "가성반음양(Pseudohermaphroditism)은 표현형과 생식선 성이 일치하지 않는 상태를 의미합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "28",
+            "question_numbers_on_page": [
+              "27",
+              "28",
+              "29"
+            ],
+            "question_text": "<다음 설명>을 읽고 가장 알맞은 진단명을 하나 고르시오.\n<다음 설명>\n“menopause occurs before menarche”",
+            "answer": "3) Turner syndrome",
+            "explanation": "터너 증후군(Turner syndrome)은 난소 기능 부전으로 인해 사춘기 발달이 지연되거나 없으며, 조기 폐경(menarche 전에 menopause)이 나타날 수 있는 특징을 가집니다.",
+            "wrong_answer_explanations": {
+              "1번": "클라인펠터 증후군은 남성에게서 나타나는 염색체 이상입니다.",
+              "2번": "다운 증후군은 지적 장애와 신체적 특징을 동반합니다.",
+              "4번": "취약 X 증후군은 X 염색체 관련 유전 질환입니다.",
+              "5번": "안젤만 증후군은 유전체 각인과 관련된 신경 발달 장애입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "29",
+            "question_numbers_on_page": [
+              "27",
+              "28",
+              "29"
+            ],
+            "question_text": "다음 설명을 읽고 알맞은 것(A)을 하나 고르시오.\n■(A) involves transcriptional silencing of the paternal or maternal copies of\ncertain genes during gametogenesis. For such genes, only one functional copy\nexists in the individual. Loss of the functional (not imprinted) allele by deletion\ngives rise to diseases.",
+            "answer": "2) genomic imprinting",
+            "explanation": "배우자 형성 과정에서 특정 유전자의 부계 또는 모계 복사본이 전사적으로 침묵되는 현상을 유전체 각인(genomic imprinting)이라고 합니다. 이로 인해 한 기능적 사본만 존재하며, 기능적이지 않은 대립유전자의 소실은 질병을 유발할 수 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "기능 획득 돌연변이(gain-of-function mutations)는 유전자의 새로운 또는 증가된 기능을 초래합니다.",
+              "3번": "전돌연변이(premutation)는 돌연변이의 전 단계로, 질병을 유발하지 않거나 경미한 증상을 보입니다.",
+              "4번": "결실(deletion)은 염색체 또는 DNA의 일부가 소실되는 것입니다.",
+              "5번": "복합 다유전자 질환(Complex multigenic disorders)은 여러 유전자의 상호작용과 환경 요인에 의해 발생합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 13,
+        "questions": [
+          {
+            "question_number": "30",
+            "question_numbers_on_page": [
+              "30",
+              "31"
+            ],
+            "question_text": "다음 그림에서 A는 정상인의 심근 소견이고, B는 Pompe disease 환자의 심근이다. Pompe disease 환자의 심근세포에서 관찰되는 clear spaces 에 축적된 물질은 무엇인지 하나 적으시오.(영어로 답할 것)",
+            "answer": "glycogen",
+            "explanation": "폼페병(Pompe disease)은 글리코겐 저장 질환의 일종으로, 알파-글루코시다아제(acid alpha-glucosidase) 효소의 결핍으로 인해 글리코겐(glycogen)이 리소좀에 축적되어 심근 세포를 포함한 여러 조직에서 비대와 기능 부전을 초래합니다. 그림 B의 심근 세포 내 투명한 공간은 축적된 글리코겐이 조직 처리 과정에서 용해되어 생긴 것입니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "31",
+            "question_numbers_on_page": [
+              "30",
+              "31"
+            ],
+            "question_text": "다음은 소아에게 호발하는 악성 종양들의 조직학적 소견이다. 이의 조직학적 특성에 대한 설명 중 옳은 것은?\n1) 이러한 형태를 “소원형세포종 (small blue round cell tumor)”라고도 부른다.\n2) 완전히 분화된 (differentiated) 조직학적 소견을 보인다.\n3) 양성 종양과의 구별이 쉽지 않다.\n4) N/C ratio가 낮은 것이 특징이다.\n5) Neuroblastoma와는 상이하게 다른 조직학적 특성이 관찰이 된다.",
+            "answer": "1)",
+            "explanation": "소아에서 흔히 발생하는 악성 종양(예: 신경모세포종, 윌름스 종양, 횡문근육종, 유잉 육종 등)은 미분화된 작은 원형 세포들로 구성되어 있어 '소원형세포종(small blue round cell tumor)'으로 불립니다. 이들은 세포질이 적고 핵이 커서 N/C ratio가 높은 것이 특징입니다.",
+            "wrong_answer_explanations": {
+              "2번": "이러한 종양은 미분화된(undifferentiated) 소견을 보입니다.",
+              "3번": "미분화된 세포로 구성되어 양성 종양과의 구별이 어렵습니다.",
+              "4번": "N/C ratio(핵-세포질 비율)가 높은 것이 특징입니다.",
+              "5번": "신경모세포종(Neuroblastoma)도 소원형세포종의 일종으로, 유사한 조직학적 특성을 공유합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 14,
+        "questions": [
+          {
+            "question_number": "32",
+            "question_numbers_on_page": [
+              "32",
+              "33"
+            ],
+            "question_text": "빈혈과 태아수종 (fetal hydrops)가 동반된 신생아의 혈액 검사에서 다음 소견이 관찰되었다. 다음 설명 중 옳은 것은?",
+            "answer": "5) Parvovirus B19 감염이 원인일 것으로 추정된다.",
+            "explanation": "제시된 혈액 검사 소견(적혈모구 증가)과 빈혈, 태아수종이 동반된 신생아의 경우, 파르보바이러스 B19 감염이 흔한 원인입니다. 파르보바이러스 B19는 적혈구 전구세포를 감염시켜 빈혈을 유발할 수 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "Rh 항원 관련은 용혈성 질환의 한 원인이지만, 파르보바이러스 B19 감염도 중요한 원인입니다.",
+              "2번": "염색체 이상은 태아수종의 원인이 될 수 있지만, 혈액 소견과 직접적인 연관성은 낮습니다.",
+              "3번": "심혈관계 이상은 태아수종의 원인이 될 수 있지만, 혈액 소견과 직접적인 연관성은 낮습니다.",
+              "4번": "박테리아 감염은 패혈증을 유발할 수 있으나, 제시된 혈액 소견과는 직접적인 관련성이 낮습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "33",
+            "question_numbers_on_page": [
+              "32",
+              "33"
+            ],
+            "question_text": "28주에 조산으로 태어난 경장영양 (enteral feeding)을 하는 1400g의 신생아에게 다음 소견이 관찰되었다. 이 질환에 대한 설명 중 옳은 것은?",
+            "answer": "5) 혈소판활성인자 (platelet activating factor) 와의 연관성이 제시되고 있다.",
+            "explanation": "제시된 임상 양상(28주 조산, 1400g, 경장영양 중 발생한 장 소견)은 괴사성 장염(Necrotizing Enterocolitis, NEC)을 시사합니다. NEC의 병태생리에는 혈소판 활성 인자(PAF)가 중요한 역할을 하는 것으로 알려져 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "NEC는 만기 임신(Full term) 신생아보다는 미숙아(preterm)에게서 더 자주 발생합니다.",
+              "2번": "창자벽 공기낭증(Pneumatosis intestinalis)은 NEC의 특징적인 소견 중 하나로, 매우 흔하게 관찰됩니다.",
+              "3번": "경장영양(enteral feeding)은 NEC 발생의 위험 인자 중 하나로 알려져 있습니다.",
+              "4번": "NEC는 정상 체중 신생아보다는 저체중 또는 미숙아에게서 더 흔하게 발생합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 15,
+        "questions": [
+          {
+            "question_number": "34",
+            "question_numbers_on_page": [
+              "34",
+              "35"
+            ],
+            "question_text": "1. 6개월된 소아의 부신 (adrenal gland)에서 5cm 크기의 종양이 관찰되었으며, 육안 조직 소견은 다음과 같다. 임상 양상과 육안소견으로 미루어 볼 때, 가장 가능성이 높은 진단에 대한 설명 중 옳은 것은?",
+            "answer": "5) MYCN amplification이 있는 경우는 나쁜 예후와 관련이 있다.",
+            "explanation": "1.6개월 소아의 부신 종양은 신경모세포종(Neuroblastoma)을 시사합니다. 신경모세포종에서 MYCN 유전자의 증폭(amplification)은 불량한 예후와 밀접하게 관련되어 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "신경모세포종은 부신 피질(Adrenal cortex)이 아닌 신경능선(neural crest) 세포에서 유래한 종양입니다.",
+              "2번": "신경모세포종은 소아에게 가장 흔한 고형 종양 중 하나이며, 성인보다 소아에게서 자주 호발합니다.",
+              "3번": "신경모세포종은 산발적으로 발생하기도 하지만, 가족력이나 유전적 소인이 있는 경우도 있습니다.",
+              "4번": "신경모세포종은 교감신경절(sympathetic ganglia)에서 호발하며, 부신 수질이 가장 흔한 발생 부위입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "35",
+            "question_numbers_on_page": [
+              "34",
+              "35"
+            ],
+            "question_text": "39주에 출생한 남아의 눈에서 다음과 같은 소견이 관찰되었다 (상단 그림). 이 환아는, 생후 38개월에 우측 신장에 12cm 크기의 종괴가 관찰이 되었으며, 적출 후 시행한 현미경 검사에서의 조직학적 소견은 다음과 같다 (하단 그림). 이 환아에서 발생한 종양에 대한 설명중 옳은 것은?",
+            "answer": "4) 반대편 신장에서도 해당 종양이 발생할 가능성이 있다.",
+            "explanation": "상단 그림의 무홍채증(aniridia)과 하단 그림의 신장 종괴(Wilms tumor)는 WAGR 증후군(Wilms tumor, Aniridia, Genitourinary anomalies, intellectual disability)의 특징적인 조합입니다. WAGR 증후군 환자는 WT1 유전자 변이와 관련이 있으며, 양측 신장에 윌름스 종양이 발생할 위험이 높습니다.",
+            "wrong_answer_explanations": {
+              "1번": "WT1 유전자의 이상이 원인입니다. (WT2는 존재하지 않습니다)",
+              "2번": "편측 비대(Hemihypertrophy)는 윌름스 종양과 연관될 수 있지만, 모든 경우에 동반되는 것은 아닙니다.",
+              "3번": "윌름스 종양은 주로 배아 세포의 발생 이상과 관련이 있으며, 체성 변이(somatic mutation)도 원인이 될 수 있지만, 유전적 소인도 중요합니다.",
+              "5번": "TP53 변이가 동반될 경우, 예후가 나쁜 것으로 알려져 있습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 16,
+        "questions": [
+          {
+            "question_number": "36",
+            "question_numbers_on_page": [
+              "36"
+            ],
+            "question_text": "다음 종양에 대한 설명중 옳은 것은?",
+            "answer": "2) Childhood일때는 sacrococcygeal location이 가장 호발 위치이다.",
+            "explanation": "제시된 사진은 천미골 기형종(sacrococcygeal teratoma)을 보여줍니다. 이는 소아, 특히 신생아에서 가장 흔한 기형종으로, 천미골 부위가 가장 흔한 발생 위치입니다.",
+            "wrong_answer_explanations": {
+              "1번": "기형종은 양성일 수도 악성일 수도 있으며, 악성 기형종도 보고됩니다.",
+              "3번": "기형종은 배아의 세 가지 배엽(외배엽, 중배엽, 내배엽)에서 유래한 다양한 조직이 관찰되는 것이 특징입니다.",
+              "4번": "악성화가 관찰될 경우, 양성 종양보다 연령대가 높은 경향이 있습니다.",
+              "5번": "기형종은 주로 출생 시 또는 2세 이전에 진단되지만, 모든 경우가 2세 이전에 발생하는 것은 아닙니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 17,
+        "questions": [
+          {
+            "question_number": "37",
+            "question_numbers_on_page": [
+              "37"
+            ],
+            "question_text": "다음은 1개월된 환아의 사진이다. 해당 종양에 대한 설명 중 옳은 것은?",
+            "answer": "5) 자연히 소실 (spontaneous regression) 되는 경우가 자주 발생한다.",
+            "explanation": "제시된 사진은 영아 혈관종(infantile hemangioma)을 보여줍니다. 이는 소아에게 가장 흔한 양성 종양으로, 대부분의 경우 자연적으로 퇴행(spontaneous regression)하는 경향이 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "영아 혈관종은 대부분 양성 종양입니다.",
+              "2번": "얼굴과 두피에 가장 흔하게 발생합니다.",
+              "3번": "일부 유전적 요인과 관련이 있을 수 있습니다.",
+              "4번": "소아에게서 매우 흔하게 발생합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 18,
+        "questions": [
+          {
+            "question_number": "38",
+            "question_numbers_on_page": [
+              "38",
+              "39",
+              "40"
+            ],
+            "question_text": "38주에 출생한 신생아에게서 다음 소견이 관찰되었다. 이는, congenital anomalies중 무엇에 해당하는가?",
+            "answer": "2) Disruptions",
+            "explanation": "제시된 사진은 외부 요인(예: 양막대)에 의해 정상적으로 발달하던 신체 부위가 파괴되거나 변형된 '파열(Disruptions)'을 보여줍니다. 이는 내재적인 발생 이상인 기형(Malformations)과는 구분됩니다.",
+            "wrong_answer_explanations": {
+              "1번": "기형(Malformations)은 내재적인 발생 이상으로 인한 구조적 결함입니다.",
+              "3번": "변형(Deformation)은 외부 기계적 힘에 의해 정상적으로 형성된 구조가 변형된 것입니다.",
+              "4번": "연쇄(Sequence)는 단일한 일차적 이상으로 인해 여러 개의 이차적 이상이 연쇄적으로 발생하는 것입니다.",
+              "5번": "기형 증후군(Malformation syndrome)은 여러 기형이 특정 패턴으로 나타나는 것입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "39",
+            "question_numbers_on_page": [
+              "38",
+              "39",
+              "40"
+            ],
+            "question_text": "Phenylketonuria (PKU)에 대한 설명중 옳은 것은?\n1) Autosomal dominant pattern으로 보통 유전된다.\n2) 대부분의 경우 dihydroptedirine reductase (DHPR) deficiency가 원인이다.\n3) Dietary restriction을 하지 않고 방치할 경우 Hair and skin pigmentation이 더욱 진해진다.\n4) 어린 시절부터 tyrosine 섭취를 조절하는 것이 가장 좋은 dietary restriction이다.\n5) 대부분의 경우 phenyalanine hydroxylase (PAH) deficiency가 원인이다.",
+            "answer": "5)",
+            "explanation": "페닐케톤뇨증(PKU)은 페닐알라닌 수산화효소(phenylalanine hydroxylase, PAH)의 결핍으로 인해 페닐알라닌이 티로신으로 전환되지 못하여 체내에 축적되는 상염색체 열성 유전 질환입니다.",
+            "wrong_answer_explanations": {
+              "1번": "PKU는 상염색체 열성(autosomal recessive) 유전 질환입니다.",
+              "2번": "DHPR 결핍은 PKU의 소수 원인이며, 대부분은 PAH 결핍입니다.",
+              "3번": "페닐알라닌 축적은 티로신 합성을 방해하여 멜라닌 생성을 감소시키므로, 머리카락과 피부 색소 침착이 옅어집니다.",
+              "4번": "PKU 환자는 페닐알라닌 섭취를 제한하고 티로신을 보충해야 합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "40",
+            "question_numbers_on_page": [
+              "38",
+              "39",
+              "40"
+            ],
+            "question_text": "31주에 preterm birth로 태어난 신생아의 폐에서 다음 조직학적 소견이 관찰되었다. 이 질환에 대한 설명 중 옳은 것은?",
+            "answer": "5) \"Hyaline membrane disease”라고도 불리며, 이는 fibrin과 necrotic cell로 구성이 된 hyaline proteinaceous material이 peripheral airspace에 deposition이 되어서 발생하는 조직학적 소견에서 유래한 이름이다.",
+            "explanation": "제시된 사진은 미숙아의 폐에서 관찰되는 유리질막병(Hyaline membrane disease), 즉 신생아 호흡곤란 증후군(Neonatal Respiratory Distress Syndrome, NRDS)의 특징적인 조직학적 소견입니다. 이는 폐포 내에 섬유소와 괴사 세포로 구성된 유리질막이 침착되는 것을 특징으로 합니다.",
+            "wrong_answer_explanations": {
+              "1번": "계면활성제(Surfactant)의 부족 또는 결핍이 가장 중요한 원인입니다.",
+              "2번": "제2형 당뇨병 산모에게서 태어난 신생아는 NRDS 발생 가능성이 증가합니다.",
+              "3번": "제왕절개 분만은 NRDS 발생 가능성을 증가시킬 수 있습니다.",
+              "4번": "폐 선암종(Lung adenocarcinoma)과는 관련이 없습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 19,
+        "questions": [
+          {
+            "question_number": "41",
+            "question_numbers_on_page": [
+              "41",
+              "42"
+            ],
+            "question_text": "Hypoxia와 ischemia에 대한 설명으로 틀린 것은?\n1) 임상적으로 cell injury를 유발하는 흔한 요인이다\n2) Hypoxia 상태에서는 anaerobic glycolysis가 활성화되어 cellular metabolism을 유지한다\n3) ATP depletion 초기 cell injury는 reversible하지만, 지속적일 경우 apoptosis에 의한 cell death가 발생한다\n4) 일반적으로 ischemia에 의한 세포손상이 hypoxia에 의한 세포손상보다 심각하다\n5) Ischemic cell injury에서 초기에 심각하게 손상 받는 세포 소기관은 mitochondria이다",
+            "answer": "3)",
+            "explanation": "ATP 고갈로 인한 초기 세포 손상은 가역적이지만, 지속될 경우 세포 사멸(cell death)은 주로 괴사(necrosis) 형태로 발생합니다. 특히 허혈성 손상에서는 괴사가 더 흔합니다. 아포프토시스(apoptosis)는 프로그램된 세포 사멸로, 괴사와는 다른 기전을 가집니다.",
+            "wrong_answer_explanations": {
+              "1번": "저산소증과 허혈은 임상적으로 세포 손상을 유발하는 매우 흔한 요인입니다.",
+              "2번": "저산소증 상태에서는 산소 없이 에너지를 생산하기 위해 혐기성 해당과정(anaerobic glycolysis)이 활성화됩니다.",
+              "4번": "허혈은 저산소증에 더하여 대사 노폐물 축적과 영양분 공급 중단까지 포함하므로, 일반적으로 저산소증보다 더 심각한 세포 손상을 유발합니다.",
+              "5번": "허혈성 세포 손상 시 미토콘드리아는 ATP 생성의 핵심 기관이므로 초기에 심각한 손상을 받습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "42",
+            "question_numbers_on_page": [
+              "41",
+              "42"
+            ],
+            "question_text": "Ischemia-reperfusion injury에 대한 설명으로 틀린 것은?\n1) ischemic tissue에 blood flow가 회복될 때 발생하는 cell injury의 형태이다\n2) cytokine pathway를 통하지 않으므로 inflammation 반응은 미미하다\n3) cell injury를 악화시켜 cell death를 유발할 수 있다\n4) free radical의 과도한 생성에 의한 endothelial cell damage가 주요한 작동 기전이다",
+            "answer": "2)",
+            "explanation": "허혈-재관류 손상(Ischemia-reperfusion injury) 시에는 염증 반응이 활발하게 일어나며, 사이토카인(cytokine) 경로를 포함한 다양한 염증 매개체가 관여합니다. 따라서 염증 반응이 미미하다는 설명은 틀렸습니다.",
+            "wrong_answer_explanations": {
+              "1번": "허혈-재관류 손상은 허혈 상태였던 조직에 혈류가 다시 공급될 때 발생하는 세포 손상입니다.",
+              "3번": "재관류는 오히려 세포 손상을 악화시키고 세포 사멸을 유발할 수 있습니다.",
+              "4번": "활성산소종(free radical)의 과도한 생성으로 인한 내피세포 손상이 주요 기전 중 하나입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 20,
+        "questions": [
+          {
+            "question_number": "43",
+            "question_numbers_on_page": [
+              "43",
+              "44",
+              "45",
+              "46"
+            ],
+            "question_text": "Chemical injury에 대한 설명으로 틀린 것은?\n1) 임상적으로 약물치료를 중지하는 흔한 원인 중 하나이다\n2) Liver와 kidney는 toxic injury가 발생하는 대표적인 장기이다\n3) direct toxic injury는 toxic metabolite에 의해 발생한다\n4) cytochrome P-450 system에서 drug metabolism이 주로 발생한다\n5) chemotherapeutics, antibiotics, analgesics 등 다양한 약물이 toxic injury를 유발할 수 있다",
+            "answer": "3)",
+            "explanation": "직접 독성 손상(direct toxic injury)은 화학 물질 자체가 세포에 직접적으로 독성을 나타내는 것을 의미합니다. 독성 대사산물(toxic metabolite)에 의해 발생하는 손상은 간접 독성 손상(indirect toxic injury)에 해당합니다.",
+            "wrong_answer_explanations": {
+              "1번": "약물로 인한 독성 손상은 임상에서 약물 치료를 중단하는 흔한 원인입니다.",
+              "2번": "간과 신장은 약물 대사와 배설에 관여하므로 독성 손상이 흔히 발생하는 대표적인 장기입니다.",
+              "4번": "많은 약물이 사이토크롬 P-450 시스템에 의해 대사되어 독성 대사산물을 생성할 수 있습니다.",
+              "5번": "항암제, 항생제, 진통제 등 다양한 약물이 독성 손상을 유발할 수 있습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "44",
+            "question_numbers_on_page": [
+              "43",
+              "44",
+              "45",
+              "46"
+            ],
+            "question_text": "Cellular adaptation의 대표적인 형태가 아닌 것은?\n1) Hypertrophy\n2) Hyperplasia\n3) Metaplasia\n4) Metastasis\n5) Atrophy",
+            "answer": "4) Metastasis",
+            "explanation": "세포 적응(Cellular adaptation)은 세포가 스트레스에 반응하여 형태나 기능이 가역적으로 변화하는 현상으로, 비대(Hypertrophy), 증식(Hyperplasia), 이형성(Metaplasia), 위축(Atrophy) 등이 있습니다. 전이(Metastasis)는 악성 종양 세포가 원발 부위에서 떨어져 나와 다른 부위로 이동하여 성장하는 현상으로, 세포 적응과는 다른 개념입니다.",
+            "wrong_answer_explanations": {
+              "1번": "비대(Hypertrophy)는 세포 크기 증가로 인한 장기 크기 증가입니다.",
+              "2번": "증식(Hyperplasia)은 세포 수 증가로 인한 장기 크기 증가입니다.",
+              "3번": "이형성(Metaplasia)은 한 분화된 세포 유형이 다른 분화된 세포 유형으로 대체되는 것입니다.",
+              "5번": "위축(Atrophy)은 세포 크기 감소로 인한 장기 크기 감소입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "45",
+            "question_numbers_on_page": [
+              "43",
+              "44",
+              "45",
+              "46"
+            ],
+            "question_text": "Cellular adaptation에 대한 설명으로 틀린 것은?\n1) metaplasia는 cellular stress에 대한 fully differentiated cell의 reversible morphologic change이다\n2) Hyperplasia와 hypertrophy는 종종 함께 관찰된다\n3) Hypertrophy는 non-dividing cell에서 intracellular structural component 합성이 증가된 상태이다\n4) Pathologic hyperplasia가 지속되면 암이 발생할 수 있다\n5) Atrophy는 해당 organ의 workload 감소, innervation 소실, blood supply의 감소와 밀접하게 관련되어 있다",
+            "answer": "1)",
+            "explanation": "이형성(Metaplasia)은 한 분화된 세포 유형이 스트레스에 반응하여 다른 분화된 세포 유형으로 가역적으로 대체되는 것입니다. 'fully differentiated cell의 reversible morphologic change'라는 표현은 정확하지 않습니다. 기존의 분화된 세포가 다른 분화된 세포로 '변환'되는 것이 핵심입니다.",
+            "wrong_answer_explanations": {
+              "2번": "증식과 비대는 종종 함께 발생합니다 (예: 임신 시 자궁).",
+              "3번": "비대(Hypertrophy)는 분열하지 않는 세포(예: 심근세포)에서 세포 내 구조 성분(단백질 등)의 합성이 증가하여 세포 크기가 커지는 것입니다.",
+              "4번": "병리학적 증식(Pathologic hyperplasia)이 지속되면 암 발생 위험이 증가할 수 있습니다 (예: 자궁내막 증식증).",
+              "5번": "위축(Atrophy)은 장기의 작업량 감소, 신경 지배 소실, 혈액 공급 감소 등과 밀접하게 관련되어 있습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "46",
+            "question_numbers_on_page": [
+              "43",
+              "44",
+              "45",
+              "46"
+            ],
+            "question_text": "Abnormal intracellular accumulation의 기전과 질병상태의 연결이 잘못된 것은?\n1) defect in protein transport and secretion: a1-antitrypsin deficiency\n2) aggregation of abnormal protein: amyloidosis\n3) inadequate removal of normal substance: fatty change (steatosis) in liver\n4) ingestion of indigestible materials: lipofuscin accumulation in alveolar macrophage\n5) lack of enzyme degrading a metabolite: lysosomal storage disease",
+            "answer": "4)",
+            "explanation": "리포푸신(lipofuscin) 축적은 '소화되지 않는 물질의 섭취'보다는 세포의 '마모 및 노화 색소(wear-and-tear pigment)'로 알려져 있습니다. 이는 세포 내 지질 과산화 및 단백질 산화의 결과로 축적되는 물질입니다.",
+            "wrong_answer_explanations": {
+              "1번": "알파-1-항트립신 결핍증은 단백질 수송 및 분비 결함으로 인해 간세포 내에 비정상 단백질이 축적됩니다.",
+              "2번": "아밀로이드증은 비정상 단백질이 응집되어 세포 외 공간에 축적되는 질환입니다.",
+              "3번": "간의 지방 변성(steatosis)은 정상 물질(지방)의 제거 부족 또는 과도한 생성으로 인해 발생합니다.",
+              "5번": "리소좀 저장 질환은 특정 대사산물을 분해하는 효소의 결핍으로 인해 해당 물질이 리소좀에 축적되는 것입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 21,
+        "questions": [
+          {
+            "question_number": "47",
+            "question_numbers_on_page": [
+              "47",
+              "48",
+              "49"
+            ],
+            "question_text": "Pigments에 대한 설명으로 틀린 것은?\n1) exogeneous pigment로 가장 흔한 물질은 coal dust이다\n2) 대표적인 endogenous pigment로는 lipofuscin, melanin, hemosiderin 등이 있다\n3) melanin pigment는 skin, cartilage, melanoma 등에서 관찰된다\n4) melanin pigment는 brown-black colored, crystalline pigment이다\n5) hemosiderin pigment는 hemoglobin-derived pigment이다",
+            "answer": "4)",
+            "explanation": "멜라닌 색소는 갈색-검은색을 띠지만, 결정성(crystalline)이 아닌 비정형(amorphous) 색소입니다.",
+            "wrong_answer_explanations": {
+              "1번": "외인성 색소 중 가장 흔한 것은 석탄 먼지(coal dust)입니다.",
+              "2번": "대표적인 내인성 색소로는 리포푸신, 멜라닌, 헤모시데린 등이 있습니다.",
+              "3번": "멜라닌 색소는 피부, 연골, 흑색종 등에서 관찰됩니다.",
+              "5번": "헤모시데린 색소는 헤모글로빈에서 유래한 철 함유 색소입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "48",
+            "question_numbers_on_page": [
+              "47",
+              "48",
+              "49"
+            ],
+            "question_text": "아래 현미경 소견과 관련된 설명으로 맞는 것은?",
+            "answer": "1) 자궁경부 염증과 관련성이 높다",
+            "explanation": "제시된 현미경 사진은 편평 상피화생(squamous metaplasia) 소견을 보여줍니다. 이는 만성 자궁경부염(cervicitis)과 같은 만성 자극에 대한 반응으로 흔히 발생합니다.",
+            "wrong_answer_explanations": {
+              "2번": "장 상피화생(intestinal metaplasia)은 장 점막에서 관찰되는 소견입니다.",
+              "3번": "호르몬 변화에 대한 주기적 반응은 주로 생리적 증식(hyperplasia)과 관련됩니다.",
+              "4번": "화생은 암으로 진행될 가능성이 있습니다(전암성 병변).",
+              "5번": "화생은 가역적인(reversible) 변화입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "49",
+            "question_numbers_on_page": [
+              "47",
+              "48",
+              "49"
+            ],
+            "question_text": "아래 소견과 관련된 cellular adaptation과 관련된 설명으로 틀린 것은?",
+            "answer": "4) Tissue stem cell의 reprogramming에 의한 cellular differentiation의 변화가 주요기전이다",
+            "explanation": "제시된 그림은 자궁의 생리적 비대(hypertrophy) 및 증식(hyperplasia) 소견을 보여줍니다. 조직 줄기세포의 재프로그래밍에 의한 세포 분화의 변화는 화생(metaplasia)의 주요 기전이며, 비대나 증식과는 직접적인 관련이 적습니다.",
+            "wrong_answer_explanations": {
+              "1번": "임신과 관련된 자궁의 비대/증식은 가역적인 세포 적응입니다.",
+              "2번": "비대 시 세포 내 단백질 합성이 증가하여 세포 크기가 커집니다.",
+              "3번": "PI3K/AKT 경로, G-단백질 결합 수용체 경로 등 다양한 신호 전달 경로가 비대/증식과 관련되어 있습니다.",
+              "5번": "호르몬 자극이 없어지면 세포 크기가 감소하여 장기 크기가 정상화됩니다 (예: 출산 후 자궁 퇴축)."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 22,
+        "questions": [
+          {
+            "question_number": "50",
+            "question_numbers_on_page": [
+              "50"
+            ],
+            "question_text": "아래 현미경 소견에 가장 부합하는 것은?",
+            "answer": "4) atrophy",
+            "explanation": "제시된 현미경 사진은 고환 위축(testicular atrophy)과 같은 위축(atrophy) 소견을 보여줍니다. 위축은 세포 크기 감소 및 세포 수 감소로 인해 장기나 조직의 크기가 줄어드는 현상입니다.",
+            "wrong_answer_explanations": {
+              "1번": "편평 상피화생은 한 상피가 다른 상피로 변하는 것입니다.",
+              "2번": "죽상경화증은 동맥벽에 지방 침착이 일어나는 질환입니다.",
+              "3번": "아밀로이드증은 비정상 단백질이 조직에 침착되는 질환입니다.",
+              "5번": "이영양성 석회화는 괴사된 조직에 칼슘이 침착되는 것입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 23,
+        "questions": [
+          {
+            "question_number": "51",
+            "question_numbers_on_page": [
+              "51",
+              "52",
+              "53"
+            ],
+            "question_text": "급성염증 반응에 의해 야기된 질환과 손상에 연관된 세포와 분자들 조합이 아닌것은?\n1) 파혈쇼크 (Septic shock) - Cytokines\n2) 천식 (Asthma) – Eosinophils; IgE antibodies\n3) 관절염 (Arthritis) - Macrophages; Fibroblasts\n4) 사구체염 (Glomerulonephritis) – Antibodies and complement; neutrophils, monocytes\n5) 급성호흡곤란증후군 (Acute respiratory distress syndrome) – Neutrophils",
+            "answer": "3)",
+            "explanation": "관절염(Arthritis)은 급성 염증과 만성 염증 모두를 포함할 수 있지만, 섬유아세포(Fibroblasts)는 주로 만성 염증과 조직 복구 과정에서 중요한 역할을 합니다. 급성 염증 반응에서는 주로 호중구, 대식세포, 염증 매개체 등이 관여합니다.",
+            "wrong_answer_explanations": {
+              "1번": "패혈성 쇼크는 사이토카인 폭풍과 관련이 깊습니다.",
+              "2번": "천식은 호산구와 IgE 항체가 관여하는 알레르기성 염증 반응입니다.",
+              "4번": "사구체염은 항체, 보체, 호중구, 단핵구 등이 관여하는 면역 매개 염증입니다.",
+              "5번": "급성 호흡곤란 증후군(ARDS)은 호중구가 폐 손상에 중요한 역할을 합니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "52",
+            "question_numbers_on_page": [
+              "51",
+              "52",
+              "53"
+            ],
+            "question_text": "급성염증반응에서 혈관 투과성의 증가, 백혈구 (leukocyte)의 부착 (adhesion)과 활성 (activation)에 모두 관여하는 화학매개체는?\n1) 케모카인 (Chemokines)\n2) 히스타민 (Histamine)\n3) 류코트리엔 (leukotrienes)\n4) 종양괴사인자 (Tumor Necrosis Factor;TNF)\n5) 혈소판활성인자 (Platelet-activating factor)",
+            "answer": "3) 류코트리엔 (leukotrienes)",
+            "explanation": "류코트리엔(leukotrienes)은 급성 염증 반응에서 혈관 투과성 증가, 백혈구 부착 및 활성화에 모두 관여하는 중요한 화학 매개체입니다. 특히 류코트리엔 B4는 강력한 백혈구 유인 물질입니다.",
+            "wrong_answer_explanations": {
+              "1번": "케모카인은 주로 백혈구 유인에 관여합니다.",
+              "2번": "히스타민은 주로 초기 혈관 확장 및 투과성 증가에 관여합니다.",
+              "4번": "TNF는 전신 염증 반응과 백혈구 활성화에 중요하지만, 혈관 투과성 증가에 직접적인 주된 매개체는 아닙니다.",
+              "5번": "혈소판 활성 인자(PAF)는 혈소판 응집, 혈관 투과성 증가, 백혈구 활성화에 관여하지만, 류코트리엔이 더 포괄적입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "53",
+            "question_numbers_on_page": [
+              "51",
+              "52",
+              "53"
+            ],
+            "question_text": "급성 염증에 중심적인 역할을 하며, 아래 H&E 그림에서 주로 관찰되며, () 안에 들어갈 세포는?",
+            "answer": "4) 대식세포 (Macrophages)",
+            "explanation": "제시된 그래프는 염증 반응에서 단핵구/대식세포(Monocytes/Macrophages)의 시간 경과에 따른 활성 변화를 보여줍니다. 대식세포는 급성 염증의 후기 단계와 만성 염증에서 중심적인 역할을 하며, 염증 반응을 조절하고 조직 복구에 기여합니다.",
+            "wrong_answer_explanations": {
+              "1번": "호중구는 급성 염증의 초기 단계에 주로 관여합니다.",
+              "2번": "호산구는 주로 알레르기 반응이나 기생충 감염에 관여합니다.",
+              "3번": "비만세포는 히스타민 분비로 초기 염증 반응에 관여합니다.",
+              "5번": "형질세포는 만성 염증에서 항체 생산에 관여합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 24,
+        "questions": [
+          {
+            "question_number": "54",
+            "question_numbers_on_page": [
+              "54",
+              "55"
+            ],
+            "question_text": "급성염증의 형태학적 양상 중에 하나로세포의 손상에 의해 형성된 공간 또는 복막 (peritoneum), 흉막 (pleura), 심막 (pericardium)에 의해 둘러싸인 체강 (body cavities)으로 세포수가 적은 체액의 삼출이 뚜렷한 것을 설명하는 것은?",
+            "answer": "2) 장액성염증 (Serous inflammation)",
+            "explanation": "장액성 염증(Serous inflammation)은 세포 손상에 의해 체강(복막, 흉막, 심막 등)이나 피부 수포에 단백질이 풍부하고 세포 수가 적은 맑은 액체(삼출액)가 축적되는 급성 염증의 형태학적 양상입니다.",
+            "wrong_answer_explanations": {
+              "1번": "궤양(Ulcer)은 상피 표면의 국소적 결손과 염증을 동반한 괴사입니다.",
+              "3번": "화농성 염증(Purulent inflammation)은 고름(농) 형성을 특징으로 하며, 이는 많은 수의 호중구와 괴사 세포 잔해로 구성됩니다.",
+              "4번": "완전 용해(Complete resolution)는 염증 반응 후 조직이 정상 상태로 완전히 회복되는 것입니다.",
+              "5번": "섬유소성 염증(Fibrinous inflammation)은 혈관 투과성 증가로 인해 혈관 밖으로 섬유소원(fibrinogen)이 유출되어 섬유소로 중합되는 것을 특징으로 합니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 4,
+                "relevance_reason": "강의자료 4페이지에서 'Edema? increased fluid in the interstitial tissue spaces.'와 'hydrothorax, hydropericardium, hydroperitoneum (ascites)'를 언급하며 체강 내 액체 증가 현상을 설명하고 있습니다. 이는 장액성 염증의 핵심 개념과 직접적으로 관련됩니다.",
+                "relevance_score": 8
+              },
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 6,
+                "relevance_reason": "강의자료 6페이지에서 'inflammation'이 '혈관에서 fluid가 많이 빠져나감'을 유발한다고 설명하여, 염증과 액체 삼출의 관련성을 제시합니다.",
+                "relevance_score": 7
+              }
+            ]
+          },
+          {
+            "question_number": "55",
+            "question_numbers_on_page": [
+              "54",
+              "55"
+            ],
+            "question_text": "아래 H&E 소견을 보일 수 있는 대표적인 질환은?",
+            "answer": "2) 결핵 (Tuberculosis)",
+            "explanation": "제시된 H&E 사진은 육아종성 염증(granulomatous inflammation)의 전형적인 소견을 보여줍니다. 이는 대식세포가 변형된 상피양 세포(epithelioid cells)와 랑한스 거대세포(Langhans giant cells)를 형성하고, 중심부에 건락성 괴사(caseous necrosis)를 동반하는 경우가 많습니다. 이러한 소견은 결핵(Tuberculosis)에서 가장 특징적으로 관찰됩니다.",
+            "wrong_answer_explanations": {
+              "1번": "나병(leprosy)도 육아종을 형성하지만, 결핵과는 다른 형태학적 특징을 보일 수 있습니다.",
+              "3번": "이물질 육아종은 이물질 주변에 육아종을 형성합니다.",
+              "4번": "크론병(Crohn disease)은 비건락성 육아종을 특징으로 합니다.",
+              "5번": "사르코이드증(sarcoidosis)도 비건락성 육아종을 형성합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 25,
+        "questions": [
+          {
+            "question_number": "56",
+            "question_numbers_on_page": [
+              "56",
+              "57",
+              "58",
+              "59"
+            ],
+            "question_text": "만성 염증의 형태학적 소견에 대한 설명 중 틀린 것은?\n1) 대식세포(Macrophage)에 의한 육아종성 염증 (Granulomatous inflammation)\n2) 세정맥의 울혈 (Congestion)과 부종 (Edema)\n3) 신생혈관의 증식과 섬유화 (Fibrosis)로 대체되는 치유반응\n4) 지속적 손상인자나 염증세포에 의해 유발되는 조직 손상\n5) 림프구 (Lymphocytes), 형질세포 (Plasma cells), 대식세포 (Macrophage)와 같은 단핵세포 (Mononuclear cells) 침윤",
+            "answer": "2)",
+            "explanation": "세정맥의 울혈(Congestion)과 부종(Edema)은 주로 급성 염증 반응이나 혈류역동학적 장애의 특징적인 소견입니다. 만성 염증에서는 이러한 급성 소견보다는 단핵세포 침윤, 조직 파괴, 신생혈관 형성 및 섬유화가 주된 형태학적 특징입니다.",
+            "wrong_answer_explanations": {
+              "1번": "대식세포에 의한 육아종성 염증은 만성 염증의 특징적인 형태 중 하나입니다.",
+              "3번": "만성 염증에서는 조직 손상 후 신생혈관 형성(angiogenesis)과 섬유화(fibrosis)를 통한 치유 반응이 동반됩니다.",
+              "4번": "만성 염증은 지속적인 손상 인자나 염증 세포에 의해 유발되는 조직 손상을 특징으로 합니다.",
+              "5번": "림프구, 형질세포, 대식세포와 같은 단핵세포의 침윤은 만성 염증의 가장 중요한 조직학적 특징입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 6,
+                "relevance_reason": "강의자료 6페이지에서 'inflammation' 섹션에 'Acute inflammation'과 'Chronic inflammation'을 구분하고, 'increased hydrostatic pressure'와 'inflammation'이 'edema'를 유발한다고 설명합니다. 이는 울혈과 부종이 급성 염증 및 혈류역동학적 장애와 더 밀접하게 관련됨을 시사합니다.",
+                "relevance_score": 9
+              },
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 12,
+                "relevance_reason": "강의자료 12페이지에서 'Hyperemia and Congestion'을 설명하며 울혈(Congestion)이 'a passive process resulting from impaired outflow from a tissue'라고 정의합니다. 이는 울혈이 급성 혈류역동학적 장애의 특징임을 강조합니다.",
+                "relevance_score": 8
+              }
+            ]
+          },
+          {
+            "question_number": "57",
+            "question_numbers_on_page": [
+              "56",
+              "57",
+              "58",
+              "59"
+            ],
+            "question_text": "그림에서 까만색 동그라미로 표시한 세포를 적으시오 (주관식)",
+            "answer": "호산구; Eosinophils; Eosinophil",
+            "explanation": "제시된 그림에서 검은색 동그라미로 표시된 세포는 호산구(Eosinophils)입니다. 호산구는 특징적인 붉은색 과립을 가진 백혈구로, 주로 알레르기 반응이나 기생충 감염 시 증가합니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "58",
+            "question_numbers_on_page": [
+              "56",
+              "57",
+              "58",
+              "59"
+            ],
+            "question_text": "해당 설명에 부합하는 세포를 적으시오 (주관식)\n- 결합조직 (Connective tissues)에 광범위하게 분포\n- 급성과 만성염증에 모두 관여\n- IgE 항체 (Antibody)에 Fc 부분과 결합하는 수용체FcɛRI을 발현함\n- 탈과립되면서 히스타민 (Histamine)과 프로스타글란딘 (Prostaglandins) 같은 매개체를 분비함\n음\n아나필락시스 쇼크 (Anaphylactic shock)를 일으킬 수 있",
+            "answer": "비만세포; Mast cells; Mast cell",
+            "explanation": "제시된 설명은 비만세포(Mast cells)의 특징입니다. 비만세포는 결합 조직에 분포하며, IgE 수용체를 발현하여 알레르기 반응 시 탈과립을 통해 히스타민, 프로스타글란딘 등을 분비하여 급성 및 만성 염증, 아나필락시스 쇼크를 유발할 수 있습니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "59",
+            "question_numbers_on_page": [
+              "56",
+              "57",
+              "58",
+              "59"
+            ],
+            "question_text": "다음 설명에 해당하는 세포는?",
+            "answer": "4) 대식세포 (Macrophages)",
+            "explanation": "제시된 설명은 대식세포(Macrophages)의 특징입니다. 대식세포는 염증 반응을 증폭하거나 제한할 수 있는 사이토카인을 분비하고, 성장 인자를 자극하며, 결합 조직을 리모델링하는 효소를 생성합니다. 또한 만성 염증 및 조직 복구에 중요한 역할을 하며, 골수의 조혈모세포에서 유래합니다.",
+            "wrong_answer_explanations": {
+              "1번": "호산구는 주로 알레르기 및 기생충 반응에 관여합니다.",
+              "2번": "호중구는 급성 염증의 주요 세포입니다.",
+              "3번": "단핵구는 혈액 내 대식세포의 전구 세포입니다.",
+              "5번": "형질세포는 B 림프구에서 분화하여 항체를 생산합니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 26,
+        "questions": [
+          {
+            "question_number": "60",
+            "question_numbers_on_page": [
+              "60",
+              "61",
+              "62"
+            ],
+            "question_text": "조직 손상 후 완전한 수복이 되는데 가장 중요한 사항은?\n1) 실질세포 (Parenchymal cells)\n2) 평활근세포 (Smooth muscle cells)\n3) 근섬유모세포 (Myofibroblast)\n4) 혈관내피세포 (vascular endothelial cells)\n5) 기존의 구조적 틀 (structural framework)",
+            "answer": "5) 기존의 구조적 틀 (structural framework)",
+            "explanation": "조직 손상 후 완전한 수복(complete resolution)이 이루어지기 위해서는 손상되지 않은 기존의 구조적 틀(structural framework), 즉 세포외 기질(ECM)의 보존이 가장 중요합니다. 이 틀이 유지되어야 실질세포가 증식하여 원래의 구조와 기능을 회복할 수 있습니다.",
+            "wrong_answer_explanations": {
+              "1번": "실질세포의 증식은 중요하지만, 틀이 없으면 정상적인 구조를 형성할 수 없습니다.",
+              "2번": "평활근세포는 조직 복구에 직접적인 주역은 아닙니다.",
+              "3번": "근섬유모세포는 흉터 형성에 관여합니다.",
+              "4번": "혈관내피세포는 신생혈관 형성에 중요하지만, 완전한 수복의 가장 중요한 요소는 아닙니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "61",
+            "question_numbers_on_page": [
+              "60",
+              "61",
+              "62"
+            ],
+            "question_text": "산화질소 (Nitric oxide)는 자극에 의해 혈관이 확장되고 ()의 유도에 의해 기존 혈관의 투과성이 증가된다. ( ) 는?\n1) FGFR (fibroblast growth factor receptor)\n2) VEGF (vascular endothelial growth factor)\n3) EGFR (Epidermal growth factor receptor)\n4) TGF-β\n5) PDGF (Platelet derived growth factor)",
+            "answer": "2) VEGF (vascular endothelial growth factor)",
+            "explanation": "산화질소(Nitric oxide)는 혈관을 확장시키고, 혈관내피성장인자(VEGF)는 혈관 신생(angiogenesis)을 유도하며 기존 혈관의 투과성을 증가시키는 데 중요한 역할을 합니다.",
+            "wrong_answer_explanations": {
+              "1번": "FGFR은 섬유아세포 성장 인자 수용체입니다.",
+              "3번": "EGFR은 상피세포 성장 인자 수용체입니다.",
+              "4번": "TGF-β는 섬유화 및 염증 조절에 관여합니다.",
+              "5번": "PDGF는 혈소판 유래 성장 인자로 세포 증식 및 이동에 관여합니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 33,
+                "relevance_reason": "강의자료 33페이지에서 'Endothelium Antithrombotic Properties' 중 하나로 'nitric oxide'를 언급하며 혈관내피세포의 기능과 관련성을 제시합니다. 이는 산화질소의 혈관 조절 역할과 간접적으로 관련됩니다.",
+                "relevance_score": 5
+              }
+            ]
+          },
+          {
+            "question_number": "62",
+            "question_numbers_on_page": [
+              "60",
+              "61",
+              "62"
+            ],
+            "question_text": "피부창상의 치유에서 일차유합 (First Intention) 과 달리 이차유합 (Second Intention)에 의한 치유과정에서의 중요한 특징은?\n1) 염증반응 (Inflammatory response)\n2) 혈전형성 (Blood clot formation)\n3) 신생혈관 (neovascularization) 형성\n4) 육아조직 (granulation tissue) 형성\n5) 상처수축 (Wound contraction)",
+            "answer": "5) 상처수축 (Wound contraction)",
+            "explanation": "이차유합(Second Intention)은 광범위한 조직 손상이나 감염이 있을 때 발생하며, 일차유합과 달리 육아조직 형성 및 상처 수축(wound contraction)이 두드러지게 나타납니다. 상처 수축은 근섬유모세포에 의해 매개되어 상처 가장자리를 당겨 상처 크기를 줄이는 과정입니다.",
+            "wrong_answer_explanations": {
+              "1번": "염증 반응은 일차유합과 이차유합 모두에서 발생합니다.",
+              "2번": "혈전 형성은 상처 치유의 초기 단계에 모두 발생합니다.",
+              "3번": "신생혈관 형성(neovascularization)은 육아조직 형성의 일부로, 일차유합과 이차유합 모두에서 관찰됩니다.",
+              "4번": "육아조직 형성(granulation tissue formation)은 이차유합에서 더 광범위하게 나타나지만, 상처 수축이 이차유합의 가장 특징적인 차이점입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 27,
+        "questions": [
+          {
+            "question_number": "63",
+            "question_numbers_on_page": [
+              "63",
+              "64",
+              "65",
+              "66"
+            ],
+            "question_text": "그림에서 가장 많이 관찰되는 세포는?",
+            "answer": "5) 형질세포 (Plasma cells)",
+            "explanation": "제시된 현미경 사진은 형질세포(Plasma cells)의 특징적인 형태를 보여줍니다. 형질세포는 편심성 핵, 시계바퀴 모양의 염색질, 풍부한 호염기성 세포질을 가지며, 항체 생산에 관여합니다.",
+            "wrong_answer_explanations": {
+              "1번": "호중구는 다엽성 핵을 가집니다.",
+              "2번": "호산구는 붉은색 과립을 가집니다.",
+              "3번": "비만세포는 큰 과립을 가집니다.",
+              "4번": "대식세포는 신장 모양의 핵과 풍부한 세포질을 가집니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "64",
+            "question_numbers_on_page": [
+              "63",
+              "64",
+              "65",
+              "66"
+            ],
+            "question_text": "염증반응에서 백혈구 (leukocyte)의 상피세포에 부착과 혈관을 통한 이주를 촉진함으로써 백혈구 동원에 핵심적인 역할을 하며, 발열 (Fever)와 관련있는 매개체는?\n1) ROS (reactive oxygen species)\n2) C3 & C5\n3) TNF & IL-6\n4) 브라디키닌 (Bradykinin)\n5) 프로스타글란딘 (Prostaglandin)",
+            "answer": "3) TNF & IL-6",
+            "explanation": "종양괴사인자(TNF)와 인터루킨-6(IL-6)은 백혈구의 내피세포 부착 및 혈관 외 유출을 촉진하여 백혈구 동원에 핵심적인 역할을 하는 주요 사이토카인입니다. 또한 이들은 발열(fever)을 유발하는 내인성 발열원(endogenous pyrogens)으로 작용합니다.",
+            "wrong_answer_explanations": {
+              "1번": "활성산소종(ROS)은 세포 손상에 관여합니다.",
+              "2번": "C3 및 C5는 보체 활성화 산물로, 염증 반응에 관여하지만 발열의 주된 매개체는 아닙니다.",
+              "4번": "브라디키닌은 혈관 확장 및 통증 유발에 관여합니다.",
+              "5번": "프로스타글란딘은 발열을 유발하지만, 백혈구 부착 및 이주 촉진에는 TNF와 IL-6가 더 핵심적입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "65",
+            "question_numbers_on_page": [
+              "63",
+              "64",
+              "65",
+              "66"
+            ],
+            "question_text": "The main phases of cutaneous wound healing are (), formation of granulation tissue, and extracellular matrix (ECM) remodeling. () 안에 들어갈 말을 적어라",
+            "answer": "염증; Inflammation",
+            "explanation": "피부 상처 치유의 주요 단계는 염증(Inflammation), 육아조직 형성(granulation tissue formation), 그리고 세포외 기질(ECM) 재형성입니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "66",
+            "question_numbers_on_page": [
+              "63",
+              "64",
+              "65",
+              "66"
+            ],
+            "question_text": "다음중 Hyperplasia의 성격이 다른 것을 고르시오.\n1) Endometrial hyperplasia\n2) Compensatory hyperplasia after parial hepatectomy\n3) Hormonal stimulation seen in breast develpoment at puberty\n4) Antigenic stimulation seen in lymphoid hyperplasia\n5) Cardiac muscle in hypertension",
+            "answer": "5) Cardiac muscle in hypertension",
+            "explanation": "심장 근육은 분열하지 않는 영구 세포이므로, 고혈압에 의한 심장 근육의 크기 증가는 세포 수 증가(hyperplasia)가 아닌 세포 크기 증가(hypertrophy)입니다. 나머지 보기들은 모두 세포 수 증가를 특징으로 하는 증식(hyperplasia)의 예시입니다.",
+            "wrong_answer_explanations": {
+              "1번": "자궁내막 증식증은 호르몬 자극에 의한 자궁내막 세포 수 증가입니다.",
+              "2번": "부분 간 절제술 후 보상성 증식은 남아있는 간세포의 증식에 의한 간 재생입니다.",
+              "3번": "사춘기 유방 발달 시 호르몬 자극에 의한 유선 세포의 증식입니다.",
+              "4번": "림프절 증식증은 항원 자극에 의한 림프구 수 증가입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 28,
+        "questions": [
+          {
+            "question_number": "67",
+            "question_numbers_on_page": [
+              "67",
+              "68"
+            ],
+            "question_text": "다음 그림의 B 와 같은 변화가 있을 때 전자 현미경적으로 보일 수 있는 소견이 아닌 것을 한 개 고르시오.",
+            "answer": "5) Markedly swollen mitochondria containing electron-dense deposits, expected to contain precipitated calcium and proteins",
+            "explanation": "제시된 그림의 B는 가역적 세포 손상(reversible cell injury) 중 세포 부종(cell swelling)을 나타냅니다. 5번 보기는 비가역적 세포 손상(irreversible cell injury) 또는 괴사(necrosis)의 특징적인 전자 현미경 소견으로, 미토콘드리아의 심한 부종과 전자 밀도 침착물(칼슘 및 단백질 침전)은 세포 사멸이 임박했거나 이미 발생했음을 시사합니다.",
+            "wrong_answer_explanations": {
+              "1번": "세포막 변화(blebbing, microvilli 소실)는 가역적 손상에서 나타날 수 있습니다.",
+              "2번": "핵 변화(과립 및 섬유성 요소의 분리)는 가역적 손상에서 나타날 수 있습니다.",
+              "3번": "세포질 내 '미엘린 소체(myelin figures)' 축적은 손상된 세포막에서 유래한 인지질로 구성되며 가역적 손상에서 관찰될 수 있습니다.",
+              "4번": "ER 확장 및 리보솜 분리는 가역적 손상에서 나타날 수 있습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "68",
+            "question_numbers_on_page": [
+              "67",
+              "68"
+            ],
+            "question_text": "다음 그림 C와 같은 변화에서 나타나는 특징이 아닌 것을 한 개 고르시오.",
+            "answer": "5) Chromatin condensation",
+            "explanation": "제시된 그림의 C는 비가역적 세포 손상, 즉 괴사(necrosis)를 나타냅니다. 괴사 시에는 세포 내용물의 변성, 세포막 손상으로 인한 내용물 유출, 국소 염증 반응, 효소적 소화 등이 발생합니다. 반면, 염색질 응축(chromatin condensation)은 아포프토시스(apoptosis)의 특징적인 핵 변화입니다.",
+            "wrong_answer_explanations": {
+              "1번": "세포 단백질의 변성(denaturation)은 괴사의 특징입니다.",
+              "2번": "손상된 막을 통한 세포 내용물의 유출은 괴사의 특징입니다.",
+              "3번": "괴사된 세포에 대한 국소 염증 반응은 흔히 관찰됩니다.",
+              "4번": "치명적으로 손상된 세포의 효소적 소화는 괴사의 특징입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 29,
+        "questions": [
+          {
+            "question_number": "69",
+            "question_numbers_on_page": [
+              "69",
+              "70"
+            ],
+            "question_text": "세포자멸사(apoptosis) 진행에 중심적인 역할을 하는 것을 그림에서 골라 명칭을 적으시오\n(답안 예시: 1번, nucleus)",
+            "answer": "1번 mitochondria",
+            "explanation": "세포자멸사(apoptosis)의 내인성 경로(intrinsic pathway)에서 미토콘드리아(mitochondria)는 사이토크롬 c(cytochrome c)와 같은 전-아포프토시스(pro-apoptotic) 단백질을 방출하여 캐스페이스(caspase) 활성화를 유도하는 중심적인 역할을 합니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "70",
+            "question_numbers_on_page": [
+              "69",
+              "70"
+            ],
+            "question_text": "다음은 괴사와 세포 자멸사의 특징을 비교한 표이다. 빈 칸 A에 들어갈 특징을 보이는 그림을 고르시오.",
+            "answer": "2)",
+            "explanation": "표에서 빈 칸 A는 아포프토시스(Apoptosis)의 'Cell size' 특징인 'Reduced (shrinkage)'를 나타냅니다. 2번 그림은 세포가 수축하고 핵이 응축되는 아포프토시스의 특징적인 형태를 보여줍니다.",
+            "wrong_answer_explanations": {
+              "1번": "1번 그림은 정상 세포에 가깝습니다.",
+              "3번": "3번 그림은 핵이 파괴되고 세포가 부어오르는 괴사 소견에 가깝습니다.",
+              "4번": "4번 그림은 세포가 부어오르고 핵이 용해되는 괴사 소견에 가깝습니다.",
+              "5번": "5번 그림은 세포가 부어오르고 핵이 용해되는 괴사 소견에 가깝습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 32,
+        "questions": [
+          {
+            "question_number": "71",
+            "question_numbers_on_page": [
+              "71",
+              "72"
+            ],
+            "question_text": "다음 빈 칸 C에 들어갈 특징을 적으시오.",
+            "answer": "Plasma membrane",
+            "explanation": "표에서 빈 칸 C는 괴사(Necrosis)의 'Nucleus' 특징인 'Disrupted'와 함께 'Cellular contents'가 'Enzymatic digestion; may leak out of cell'로 설명되어 있습니다. 이는 세포막(Plasma membrane)의 손상과 파괴를 의미합니다. 괴사 시 세포막의 완전성이 상실되어 세포 내용물이 외부로 유출됩니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "72",
+            "question_numbers_on_page": [
+              "71",
+              "72"
+            ],
+            "question_text": "다음 그림과 같은 조직소견에 대한 설명으로 옳은 것을 고르시오",
+            "answer": "4) 죽은 조직의 구조적 형태는 며칠간 유지된다.",
+            "explanation": "제시된 그림은 응고 괴사(Coagulative necrosis)의 특징적인 소견을 보여줍니다. 응고 괴사에서는 세포의 윤곽과 조직의 기본적인 구조적 형태가 며칠 동안 유지됩니다. 이는 단백질 변성으로 인한 효소의 자가소화 억제 때문입니다.",
+            "wrong_answer_explanations": {
+              "1번": "응고 괴사는 동맥이나 정맥 순환의 과다 흐름과는 직접적인 관련이 없습니다.",
+              "2번": "죽은 세포가 액체성 용액으로 변하는 것은 액화 괴사(liquefactive necrosis)의 특징입니다.",
+              "3번": "중추신경계 세포의 저산소성 손상은 주로 액화 괴사를 유발합니다.",
+              "5번": "팔다리(특히 하지)의 혈류 공급 문제로 인한 괴사에 세균 감염이 동반되는 것은 괴저 괴사(gangrenous necrosis)입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 33,
+        "questions": [
+          {
+            "question_number": "73",
+            "question_numbers_on_page": [
+              "73"
+            ],
+            "question_text": "60세 남자가 갑작스런 흉통으로 병원에 왔으나 곧 사망하였다. 환자는 3-4일 전에 계단을 오를 때 가슴 통증이 있었다고 하였다. 환자의 심장 부검을 통해 제작한 심근 조직 현미경 소견이다. 화살표 한 부위의 병리 소견에 대한 설명으로 적절한 것을 고르시오.",
+            "answer": "2) Increased eosinophilia in H&E stains, attributable in part to the loss of nuclear DNA and in part to accumulation of denatured cytoplasmic proteins.",
+            "explanation": "제시된 심근 조직 현미경 소견은 심근 경색 후 발생하는 응고 괴사(coagulative necrosis)를 보여줍니다. 응고 괴사된 심근 세포는 핵이 소실되거나 변성되고, 세포질은 호산성(eosinophilic)으로 변하며, 변성된 세포질 단백질이 축적됩니다. 이는 H&E 염색에서 붉게 염색되는 특징을 보입니다.",
+            "wrong_answer_explanations": {
+              "1번": "DNA 소실은 핵의 변화를 의미하지만, 세포질의 호산성 증가와 변성 단백질 축적이 더 포괄적인 설명입니다.",
+              "3번": "세포질이 공포화되고 '좀먹은(moth-eaten)' 양상을 보이는 것은 주로 액화 괴사에서 관찰됩니다.",
+              "4번": "전자 현미경 소견은 더 미세한 변화를 설명하며, 제시된 내용은 괴사 전반의 특징을 포함합니다.",
+              "5번": "세포 크기 감소, 세포질 밀도 증가, 호산성 증가는 아포프토시스(apoptosis)의 특징에 가깝습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 34,
+        "questions": [
+          {
+            "question_number": "74",
+            "question_numbers_on_page": [
+              "74",
+              "75",
+              "76"
+            ],
+            "question_text": "세포 손상에 대한 내용으로 맞는 것을 고르시오.\n1) 고농도 산소에서 세포 손상이 유발되는 반면 저농도 산소에서는 세포 재생이 유발된다.\n2) 형태학적 변화가 먼저 발생한 이후에 분자적, 생화학적 변화가 유발된다.\n3) 괴사에서 유해자극이 중단되면 세포는 회복할 수 있다.\n4) 가역성 세포 손상의 특징적 형태변화는 세포종창이다.\n5) 비만은 세포 손상을 유발하지만 영양 결핍은 세포 손상과 관련이 없다.",
+            "answer": "4) 가역성 세포 손상의 특징적 형태변화는 세포종창이다.",
+            "explanation": "가역적 세포 손상(reversible cell injury)의 가장 흔하고 특징적인 형태학적 변화는 세포 부종(cell swelling) 또는 세포 종창(cellular hydropic swelling)입니다. 이는 세포 내 수분 축적으로 인해 세포가 팽창하는 것입니다.",
+            "wrong_answer_explanations": {
+              "1번": "저농도 산소는 세포 손상을 유발할 수 있으며, 세포 재생과 직접적인 관련은 없습니다.",
+              "2번": "세포 손상 시 분자적, 생화학적 변화가 형태학적 변화보다 먼저 발생합니다.",
+              "3번": "괴사는 비가역적 세포 손상이므로, 유해 자극이 중단되어도 세포는 회복할 수 없습니다.",
+              "5번": "비만뿐만 아니라 영양 결핍(예: 단백질-에너지 영양실조)도 세포 손상과 관련이 있습니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "75",
+            "question_numbers_on_page": [
+              "74",
+              "75",
+              "76"
+            ],
+            "question_text": "다음 그림의 A-B-C에 들어가는 것으로 맞게 짝지어 진 것을 고르시오.",
+            "answer": "2) BAX_BCL2_TNF receptor",
+            "explanation": "제시된 그림은 세포자멸사(apoptosis)의 내인성(intrinsic) 및 외인성(extrinsic) 경로를 보여줍니다. A는 BCL2 family sensors (예: BH3-only protein)에 의해 활성화되는 BAX/BAK를, B는 BCL2 family regulators (예: BCL2)를, C는 Extrinsic pathway의 시작인 Death receptor-ligand interactions (예: TNF receptor)를 나타냅니다. 따라서 2번 보기가 가장 적절합니다.",
+            "wrong_answer_explanations": {
+              "1번": "BAX_BAK_BH3-only protein은 A에 해당하지만, B와 C가 틀립니다.",
+              "3번": "BCL2_BAX_EGF receptor는 틀린 조합입니다.",
+              "4번": "BCL2_cytosolic ca2+_GH receptor는 틀린 조합입니다.",
+              "5번": "BAK_BAX_TNF receptor는 틀린 조합입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "76",
+            "question_numbers_on_page": [
+              "74",
+              "75",
+              "76"
+            ],
+            "question_text": "다음 그림에서 나타내고 있는 과정에 대한 설명으로 옳은 것을 고르시오.",
+            "answer": "4) an adaptive response that is enhanced during nutrient deprivation, allowing the cell to cannibalize itself to survive.",
+            "explanation": "제시된 그림은 자가포식(Autophagy) 과정을 보여줍니다. 자가포식은 영양 결핍 시 세포가 스스로 구성 요소를 분해하여 생존에 필요한 에너지를 얻는 적응 반응입니다.",
+            "wrong_answer_explanations": {
+              "1번": "RIPK1 유전자에 의해 조절되는 것은 주로 괴사성 세포 사멸(necroptosis)입니다.",
+              "2번": "TNFR1 리간드 및 바이러스 DNA/RNA에 의해 유발되는 것은 괴사성 세포 사멸 또는 파이로프토시스(pyroptosis)일 수 있습니다.",
+              "3번": "캐스페이스-1 활성화는 파이로프토시스와 관련이 깊습니다.",
+              "5번": "철 의존성 지질 과산화에 의해 유도되는 세포 사멸 경로는 페로프토시스(ferroptosis)입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 35,
+        "questions": [
+          {
+            "question_number": "77",
+            "question_numbers_on_page": [
+              "77",
+              "78",
+              "79"
+            ],
+            "question_text": "다음 A에 해당하는 가장 알맞은 현상을 고르시오.",
+            "answer": "3) Necroptosis",
+            "explanation": "제시된 설명은 괴사(necrosis)와 형태학적으로 유사하지만 유전적으로 조절되는 세포 사멸 형태이며, TNFR1 리간드 및 바이러스 DNA/RNA에 의해 유발되고, 캐스페이스 비의존적이며 RIPK1-RIPK3 복합체에 의존하는 세포 사멸 경로인 괴사성 세포 사멸(Necroptosis)에 대한 설명입니다.",
+            "wrong_answer_explanations": {
+              "1번": "아포프토시스는 세포 수축과 캐스페이스 의존성을 특징으로 합니다.",
+              "2번": "자가용해(Autolysis)는 효소에 의한 세포의 자가 소화로, 생체 내에서 발생하는 괴사와는 다릅니다.",
+              "4번": "파이로프토시스(Pyroptosis)는 캐스페이스-1 의존적이며 염증 반응을 동반하는 세포 사멸입니다.",
+              "5번": "페로프토시스(Ferroptosis)는 철 의존성 지질 과산화에 의해 유도되는 세포 사멸입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "78",
+            "question_numbers_on_page": [
+              "77",
+              "78",
+              "79"
+            ],
+            "question_text": "다음 그림 A,B,C에 들어갈 명칭을 각각 적으시오.",
+            "answer": "Heterochromatin, Euchromatin, Nucleosome",
+            "explanation": "제시된 그림은 염색질(chromatin)의 구조를 보여줍니다. A는 이질염색질(Heterochromatin), B는 진정염색질(Euchromatin)을 나타내며, C는 DNA가 히스톤 단백질에 감겨 형성된 뉴클레오솜(Nucleosome)을 나타냅니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "79",
+            "question_numbers_on_page": [
+              "77",
+              "78",
+              "79"
+            ],
+            "question_text": "다음 중 옳은 설명을 한 개 고르시오.\n1) SNPs are variants at several nucleotide positions and are almost always biallelic\n2) Roughly 10% of SNPs occur in coding regions, which is about what would be expected by chance, since coding regions comprise about 15% of the genome.\n3) SNPs located in coding regions can occur within genomic regulatory elements, thereby altering gene expression; in such instances, SNPs influence disease susceptibility directly\n4) Approximately 5% of CNVs involve gene-coding sequences; thus CNVs may underlie a large portion of human phenotypic diversity\n5) SNPs occur across the genome—within exons, introns, intergenic regions, and coding regions.",
+            "answer": "5)",
+            "explanation": "단일 염기 다형성(SNPs)은 게놈 전체에 걸쳐 존재하며, 엑손, 인트론, 유전자간 영역(intergenic regions) 및 코딩 영역(coding regions) 등 다양한 위치에서 발견됩니다.",
+            "wrong_answer_explanations": {
+              "1번": "SNPs는 단일 염기 위치에서의 변이이며, 대부분 이형대립유전자(biallelic) 형태를 가집니다.",
+              "2번": "코딩 영역은 게놈의 약 1.5%를 차지하므로, 10%의 SNP가 코딩 영역에 존재한다는 것은 우연히 예상되는 것보다 훨씬 높은 수치입니다.",
+              "3번": "코딩 영역에 위치한 SNP는 유전자 발현에 영향을 미치지 않을 수도 있습니다. 유전자 발현에 영향을 미치는 SNP는 주로 조절 요소(regulatory elements)에 위치합니다.",
+              "4번": "CNV(Copy Number Variations)는 유전자 코딩 서열을 포함할 수 있으며, 인간 표현형 다양성의 상당 부분을 설명할 수 있습니다. 5%는 대략적인 수치입니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 36,
+        "questions": [
+          {
+            "question_number": "80",
+            "question_numbers_on_page": [
+              "80",
+              "81"
+            ],
+            "question_text": "다음 사진과 설명에 해당하는 괴사를 고르시오.\n1) characterized by digestion of the dead cells, resulting in transformation of the tissue into a viscous liquid\n2) It is seen in focal bacterial or, occasionally, fungal infections\n3) hypoxic death of cells within the central nervous system often manifests as this form of necrosis",
+            "answer": "3) Liquefactive necrosis",
+            "explanation": "제시된 설명은 죽은 세포가 소화되어 점성 액체로 변하고, 국소 세균 또는 곰팡이 감염에서 관찰되며, 중추신경계 세포의 저산소성 사멸이 이 형태로 나타나는 액화 괴사(Liquefactive necrosis)의 특징입니다. 사진은 뇌의 액화 괴사 소견을 보여줍니다.",
+            "wrong_answer_explanations": {
+              "1번": "건락성 괴사(Caseous necrosis)는 치즈 같은 외형을 가집니다.",
+              "2번": "괴저 괴사(Gangrenous necrosis)는 허혈성 응고 괴사에 세균 감염이 동반된 형태입니다.",
+              "4번": "지방 괴사(Fat necrosis)는 지방 조직의 파괴를 특징으로 합니다.",
+              "5번": "섬유소양 괴사(Fibrinoid necrosis)는 혈관 벽에 섬유소와 단백질이 침착되는 것입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "81",
+            "question_numbers_on_page": [
+              "80",
+              "81"
+            ],
+            "question_text": "세포 손상의 기전에 대한 설명 중 틀린 것을 고르시오.\n1) Increased permeability of cellular membranes: may affect plasma membrane, lysosomal membranes, mitochondrial membranes; typically culminates in necrosis\n2) The cellular response to injurious stimuli depends on the nature of the injury, its duration, and its severity.\n3) Any injurious stimulus may simultaneously trigger multiple interconnected mechanisms that damage cells.\n4) Leakage of mitochondrial proteins due to channel formation by pro-apoptotic BAX and BAK is the initial step in necrosis\n5) The consequences of cell injury depend on the type, state, and adaptability of the injured cell.",
+            "answer": "4)",
+            "explanation": "BAX와 BAK에 의한 채널 형성을 통한 미토콘드리아 단백질 유출은 주로 아포프토시스(apoptosis)의 내인성 경로에서 중요한 단계이며, 괴사(necrosis)의 초기 단계는 아닙니다. 괴사는 주로 세포막의 직접적인 손상이나 ATP 고갈로 시작됩니다.",
+            "wrong_answer_explanations": {
+              "1번": "세포막, 리소좀막, 미토콘드리아막의 투과성 증가는 세포 손상의 중요한 기전이며, 종종 괴사로 이어집니다.",
+              "2번": "세포의 손상 자극에 대한 반응은 손상의 성격, 지속 시간, 심각도에 따라 달라집니다.",
+              "3번": "하나의 손상 자극도 세포 손상을 유발하는 여러 상호 연결된 기전을 동시에 활성화할 수 있습니다.",
+              "5번": "세포 손상의 결과는 손상된 세포의 유형, 상태 및 적응 능력에 따라 달라집니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 37,
+        "questions": [
+          {
+            "question_number": "82",
+            "question_numbers_on_page": [
+              "82",
+              "83"
+            ],
+            "question_text": "Stem cell의 특징에 대한 설명으로 옳은 것을 고르시오.\n1) The bone marrow contains a population of mesenchymal stem cells. These are multipotent cells that can differentiate into a variety of stromal cells including chondrocytes (cartilage), osteocytes (bone), adipocytes (fat), and myocytes (muscle).\n2) During development, pluripotent stem cells can give rise to the full range of differentiated tissues\n3) Adult stem cells only have the capacity to replace damaged cells and maintain cell populations within or outside the tissues where they reside.\n4) Embryonic stem (ES) cells are the most differentiated. They are present in the inner cell mass of the blastocyst, have virtually limitless cell renewal capacity, and can give rise to every cell in the body; they are thus said to be totipotent\n5) Tissue stem cells (also called adult stem cells) are found in intimate association with the differentiated cells of a given tissue. They are normally protected within specialized tissue microenvironments called stem cell niches.",
+            "answer": "5)",
+            "explanation": "조직 줄기세포(성체 줄기세포)는 특정 조직 내에서 분화된 세포와 밀접하게 연관되어 있으며, 특화된 줄기세포 틈새(stem cell niches) 내에서 보호됩니다. 이 틈새는 줄기세포의 자기 재생 및 분화를 조절하는 미세 환경을 제공합니다.",
+            "wrong_answer_explanations": {
+              "1번": "골수에는 중간엽 줄기세포(mesenchymal stem cells)가 있으며, 이들은 연골세포, 골세포, 지방세포 등으로 분화할 수 있지만, 근세포(myocytes)로의 분화는 제한적일 수 있습니다.",
+              "2번": "전능성 줄기세포(totipotent stem cells)는 모든 종류의 분화된 조직을 형성할 수 있습니다. 다능성 줄기세포(pluripotent stem cells)는 배아의 세 배엽에서 유래하는 모든 세포 유형으로 분화할 수 있지만, 태반 외 조직은 형성하지 못합니다.",
+              "3번": "성체 줄기세포는 손상된 세포를 대체하고 조직 내 세포 집단을 유지하는 능력 외에도, 특정 조건 하에서는 조직 외부로 이동하여 다른 조직의 세포로 분화할 수도 있습니다.",
+              "4번": "배아 줄기세포(ES cells)는 '가장 분화된' 것이 아니라 '미분화된' 상태이며, 전능성(pluripotent)을 가집니다. 전능성은 모든 세포 유형으로 분화할 수 있는 능력을 의미합니다. 'totipotent'는 태반까지 포함한 완전한 개체를 형성할 수 있는 능력입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "83",
+            "question_numbers_on_page": [
+              "82",
+              "83"
+            ],
+            "question_text": "다음 설명 중 long noncoding RNA(lcRNA)의 역할을 설명한 것이 아닌 것을 한 가지 고르시오.\n1) IncRNAs can facilitate transcription factor binding and thus promote gene activation.\n2) IncRNAs can preemptively bind transcription factors to inhibit transcription\n3) Histone and DNA modification by acetylases or methylases (or deacetylases and demethylases) may be directed by IncRNA binding\n4) IncRNAs can act as scaffolds to stabilize secondary or tertiary structures and multisubunit complexes that influence chromatin architecture or gene activity.\n5) Synthetic IncRNAsare also being studied as potential therapeutic agents to silence pathogenic genes (e.g., oncogenes that drive neoplastic transformation).",
+            "answer": "5)",
+            "explanation": "합성 lncRNA가 병원성 유전자(예: 종양 유전자)를 침묵시키는 잠재적인 치료제로 연구되고 있다는 것은 lncRNA의 '응용' 또는 '치료적 가능성'에 대한 설명이지, 자연적으로 존재하는 lncRNA의 '역할'에 대한 설명은 아닙니다.",
+            "wrong_answer_explanations": {
+              "1번": "lncRNA는 전사 인자 결합을 촉진하여 유전자 활성화를 유도할 수 있습니다.",
+              "2번": "lncRNA는 전사 인자에 선제적으로 결합하여 전사를 억제할 수 있습니다.",
+              "3번": "lncRNA 결합에 의해 아세틸화효소 또는 메틸화효소(또는 탈아세틸화효소 및 탈메틸화효소)에 의한 히스톤 및 DNA 변형이 유도될 수 있습니다.",
+              "4번": "lncRNA는 크로마틴 구조나 유전자 활성에 영향을 미치는 2차 또는 3차 구조 및 다중 소단위 복합체를 안정화하는 스캐폴드(scaffold) 역할을 할 수 있습니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 38,
+        "questions": [
+          {
+            "question_number": "84",
+            "question_numbers_on_page": [
+              "84",
+              "85"
+            ],
+            "question_text": "세포바깥 바탕질(Extracellular matrix)의 역할에 대한 설명으로 옳은 것을 고르시오.(3개)\n1) 세포신호전달을 위한 화학적 조절자 역할\n2) 수용체를 통한 신호를 통해 세포증식을 조절\n3) 정상조직의 구조를 유지하기 위한 지지대의 역할\n4) 조직의 미세환경 형성\n5) 조직손상이나 염증시에 활성화되어 이용될 수 있는 혈구세포의 저장소 역할",
+            "answer": "1), 2), 3)",
+            "explanation": "세포외 기질(Extracellular matrix, ECM)은 세포 신호 전달을 위한 화학적 조절자 역할을 하며, 수용체를 통한 신호를 통해 세포 증식을 조절하고, 정상 조직의 구조를 유지하는 지지대 역할을 합니다. 또한 조직의 미세환경을 형성하고, 조직 손상이나 염증 시 혈구세포의 이동 및 활성화에 관여하지만, 혈구세포의 저장소 역할은 아닙니다.",
+            "wrong_answer_explanations": {
+              "4번": "조직의 미세환경 형성도 ECM의 중요한 역할입니다. (문제에서 3개를 고르라고 했으므로 1,2,3번이 더 핵심적인 역할로 간주될 수 있습니다.)",
+              "5번": "ECM은 혈구세포의 저장소가 아니라, 혈구세포가 이동하고 상호작용하는 환경을 제공합니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 27,
+                "relevance_reason": "강의자료 27페이지에서 'subendothelial extracellular matrix (ECM)+platelet adherance & activation'을 언급하며 ECM이 혈소판 부착 및 활성화에 중요한 역할을 함을 제시합니다. 이는 ECM의 구조적 지지 및 세포 상호작용 역할과 간접적으로 관련됩니다.",
+                "relevance_score": 4
+              },
+              {
+                "lesson_filename": "0425_3,4,6교시_윤길숙 체액 및 혈류역동장애_신호준 .pdf",
+                "lesson_page": 36,
+                "relevance_reason": "강의자료 36페이지에서 'platelets encounter ECM constituents that are normally sequestered beneath an intact endothelium; collagen (most important), proteoglycans, fibronectin, and other adhesive glycoproteins.'를 통해 ECM이 세포 부착 및 조직 통합성에 기여함을 설명합니다.",
+                "relevance_score": 4
+              }
+            ]
+          },
+          {
+            "question_number": "85",
+            "question_numbers_on_page": [
+              "84",
+              "85"
+            ],
+            "question_text": "다음이 설명하고 있는 인자를 그림에서 골라 맞게 연결된 것을 고르시오.",
+            "answer": "1) A- microtubule",
+            "explanation": "제시된 설명은 '분자 모터 단백질의 계류선 역할', '자매 염색분체 분리 매개', '원발성 섬모의 핵심 형성', '운동성 섬모 또는 편모의 핵심 형성' 등을 언급하고 있습니다. 이는 모두 미세소관(microtubule)의 기능에 해당합니다. 그림에서 A는 세포 내 미세소관 구조를 가리킵니다.",
+            "wrong_answer_explanations": {
+              "2번": "B는 액틴 필라멘트(actin filament)를 가리킵니다.",
+              "3번": "J는 기저막(basement membrane)을 가리킵니다.",
+              "4번": "K는 인테그린(Integrin)을 가리킵니다.",
+              "5번": "E는 세포 부착 단백질(adhesion protein)을 가리킵니다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      }
+    ],
+    "summary": {
+      "total_jokbo_pages": 35,
+      "total_questions": 85,
+      "total_related_slides": 14
+    }
+  }
+}

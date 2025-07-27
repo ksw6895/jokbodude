@@ -1,0 +1,247 @@
+{
+  "timestamp": "20250728_015200",
+  "mode": "chunk_p41-45",
+  "jokbo_file": "240527 본1 인체병리학총론_정답.pdf",
+  "lesson_file": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+  "response_text": "{\n    \"jokbo_pages\": [\n        {\n            \"jokbo_page\": 7,\n            \"questions\": [\n                {\n                    \"question_number\": \"15\",\n                    \"question_numbers_on_page\": [\n                        \"14\",\n                        \"15\",\n                        \"16\"\n                    ],\n                    \"question_text\": \"다음설명은 Mendelian Disorders 에 대한 설명이다. (D) 에 알맞은 것을 하나 고르시오.\\n* Although gene expression is usually described as dominant or recessive, in some cases, both of the alleles of a gene pair may be fully expressed in the heterozygote-a condition called ( A ).\\n* A single mutant gene may lead to many end effects, termed ( B ); conversely, mutations at several genetic loci may produce the same trait ( C ).\\n* It should be noted that not all nucleotide changes produce genes that cause disease. When such a DNA change occurs in at least 1% of the population, it is called a ( D ).\",\n                    \"answer\": \"4) polymorphism\",\n                    \"explanation\": \"유전적 다형성(polymorphism)은 어떤 DNA 변화가 집단의 최소 1% 이상에서 나타날 때를 지칭하는 용어입니다. 이는 질병을 유발하지 않는 유전적 변이를 포함하며, 개인 간의 유전적 차이를 설명하는 핵심 개념입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Codominance(공동우성)는 이형접합자에서 두 대립유전자가 모두 완전히 발현되는 현상입니다.\",\n                        \"2번\": \"Pleiotropism(다면발현)은 하나의 돌연변이 유전자가 여러 신체 부위에 다양한 효과를 나타내는 현상입니다.\",\n                        \"3번\": \"genetic heterogeneity(유전적 이질성)는 여러 다른 유전자 좌의 돌연변이가 동일한 형질이나 질병을 유발하는 현상입니다.\",\n                        \"5번\": \"Genomic imprinting(유전체 각인)은 부모 중 한쪽으로부터 물려받은 대립유전자만 선택적으로 발현되는 현상입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 43,\n                            \"relevance_reason\": \"강의자료 43페이지의 'Precision Medicine'은 '개인의 유전자, 환경, 생활 방식의 차이를 고려하는' 접근법이라고 설명하며, 유전적 변이의 중요성을 강조합니다. 문제의 'polymorphism'은 이러한 개인별 유전적 변이의 핵심 개념 중 하나로, 중간 정도의 관련성이 있습니다.\",\n                            \"relevance_score\": 6\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 8,\n            \"questions\": [\n                {\n                    \"question_number\": \"18\",\n                    \"question_numbers_on_page\": [\n                        \"16\",\n                        \"17\",\n                        \"18\"\n                    ],\n                    \"question_text\": \"다음 <그림>을 보고, (A)에 알맞은 진단기법을 하나 고르시오.\",\n                    \"answer\": \"2) Fluorescence in situ hybridization\",\n                    \"explanation\": \"제시된 그림은 특정 염색체 위치(22q11.2)의 결실을 확인하기 위해 형광 표지된 탐침(probe)을 사용한 Fluorescence in situ hybridization (FISH) 기법을 보여줍니다. 이는 대표적인 분자세포유전학적 검사법으로, 종양 진단에서 특정 유전자의 증폭이나 결실, 전좌 등을 확인하는 데 사용됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Southern hybridization은 특정 DNA 서열을 검출하는 분자생물학 기법이지만, 그림처럼 염색체 상에서 위치를 시각화하지는 않습니다.\",\n                        \"3번\": \"G-banding은 염색체를 염색하여 띠 패턴을 관찰하는 고전적인 핵형 분석법으로, 그림과 같은 형광 신호를 사용하지 않습니다.\",\n                        \"4번\": \"Western blot은 특정 단백질을 검출하는 기법입니다.\",\n                        \"5번\": \"Northern hybridization은 특정 RNA 서열을 검출하는 기법입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 45,\n                            \"relevance_reason\": \"강의자료 45페이지에서 종양 진단 방법 중 하나로 '분자병리검사'를 명시하고 있습니다. FISH는 대표적인 분자병리검사 기법 중 하나이므로 직접적으로 관련됩니다.\",\n                            \"relevance_score\": 10\n                        },\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 46,\n                            \"relevance_reason\": \"강의자료 46페이지의 Key Concepts에서 'Molecular analyses'가 진단, 예후, 유전 소인 진단에 사용된다고 명시하고 있습니다. FISH는 이러한 분자 분석의 구체적인 예시에 해당합니다.\",\n                            \"relevance_score\": 9\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 13,\n            \"questions\": [\n                {\n                    \"question_number\": \"31\",\n                    \"question_numbers_on_page\": [\n                        \"30\",\n                        \"31\",\n                        \"32\"\n                    ],\n                    \"question_text\": \"다음은 소아에게 호발하는 악성 종양들의 조직학적 소견이다. 이의 조직학적 특성에 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"1) 이러한 형태를 “소원형세포종 (small blue round cell tumor)”이라고도 부른다.\",\n                    \"explanation\": \"제시된 그림들은 신경모세포종, 횡문근육종, 윌름스 종양 등 소아 악성 종양에서 공통적으로 보이는 조직학적 특징을 나타냅니다. 이들은 분화도가 낮고, 핵은 짙게 염색되며 세포질이 적어 작고 둥근 파란 세포(small blue round cell)들이 밀집된 형태를 보여 '소원형세포종'으로 통칭됩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"2번\": \"완전히 분화된(differentiated) 소견이 아니라 미분화된(undifferentiated) 소견을 보입니다.\",\n                        \"3번\": \"악성 종양이므로 양성 종양과 구별이 되며, 침습적 성장과 전이 가능성이 있습니다.\",\n                        \"4번\": \"세포질이 적고 핵이 상대적으로 크므로 N/C ratio(핵-세포질 비율)가 높은 것이 특징입니다.\",\n                        \"5번\": \"Neuroblastoma(신경모세포종)는 대표적인 소원형세포종으로, 그림과 유사한 조직학적 특성을 보입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 45,\n                            \"relevance_reason\": \"강의자료 45페이지는 종양 진단을 위한 '조직검사(biopsy)'와 '세포검사(Cytology)'를 설명합니다. 이 문제는 이러한 검사를 통해 얻은 조직학적 소견을 해석하는 것으로, 종양 진단의 핵심 과정과 직접적으로 관련됩니다.\",\n                            \"relevance_score\": 9\n                        },\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 46,\n                            \"relevance_reason\": \"강의자료 46페이지는 'Immunohistochemistry'가 종양의 진단과 분류에 도움을 준다고 설명합니다. 소원형세포종들은 형태학적으로 유사하여 감별 진단을 위해 면역조직화학염색이 필수적이므로, 내용상 깊은 관련이 있습니다.\",\n                            \"relevance_score\": 8\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 15,\n            \"questions\": [\n                {\n                    \"question_number\": \"34\",\n                    \"question_numbers_on_page\": [\n                        \"33\",\n                        \"34\",\n                        \"35\"\n                    ],\n                    \"question_text\": \"1. 6개월된 소아의 부신 (adrenal gland)에서 5cm 크기의 종양이 관찰되었으며, 육안 조직 소견은 다음과 같다. 임상 양상과 육안소견으로 미루어 볼 때, 가장 가능성이 높은 진단에 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"5) MYCN amplification이 있는 경우는 나쁜 예후와 관련이 있다.\",\n                    \"explanation\": \"소아의 부신에서 발생한 종양으로, 신경모세포종(Neuroblastoma)일 가능성이 높습니다. 신경모세포종에서 MYCN 유전자의 증폭(amplification)은 매우 중요한 예후 인자로, 증폭이 있는 경우 예후가 나쁩니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"신경모세포종은 부신 수질(adrenal medulla)이나 교감신경절에서 유래하며, 부신 피질(cortex) 유래가 아닙니다.\",\n                        \"2번\": \"대표적인 소아 종양으로, 성인보다 소아에 훨씬 자주 호발합니다.\",\n                        \"3번\": \"대부분은 산발성(sporadic)으로 발생하지만, 약 1-2%에서는 가족성 유전 경향을 보입니다.\",\n                        \"4번\": \"부교감신경절(Parasympathetic ganglia)이 아닌 교감신경계(sympathetic ganglia)에서 호발합니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 46,\n                            \"relevance_reason\": \"강의자료 46페이지에서 'Molecular analyses are used to determine ... prognosis'라고 명시하고 있습니다. 문제에서 다루는 'MYCN amplification'은 신경모세포종의 예후를 결정하는 대표적인 분자 분석 지표이므로 직접적으로 관련됩니다.\",\n                            \"relevance_score\": 10\n                        },\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 45,\n                            \"relevance_reason\": \"강의자료 45페이지의 '분자병리검사'는 MYCN amplification을 검사하는 상위 개념으로, 종양 진단 과정의 일부로 직접 관련됩니다.\",\n                            \"relevance_score\": 9\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"35\",\n                    \"question_numbers_on_page\": [\n                        \"33\",\n                        \"34\",\n                        \"35\"\n                    ],\n                    \"question_text\": \"39주에 출생한 남아의 눈에서 다음과 같은 소견이 관찰되었다 (상단 그림). 이 환아는, 생후 38개월에 우측 신장에 12cm 크기의 종괴가 관찰이 되었으며, 적출 후 시행한 현미경 검사에서의 조직학적 소견은 다음과 같다 (하단 그림). 이 환아에서 발생한 종양에 대한 설명중 옳은 것은?\",\n                    \"answer\": \"4) 반대편 신장에서도 해당 종양이 발생할 가능성이 있다.\",\n                    \"explanation\": \"눈의 홍채없음증(aniridia)과 신장 종양(윌름스 종양, Wilms tumor)이 동반된 WAGR 증후군을 시사합니다. 이는 WT1 유전자의 생식세포 돌연변이(germline mutation)와 관련이 있습니다. 생식세포 돌연변이가 있는 경우, 양측성(bilateral)으로 종양이 발생할 위험이 높습니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"WAGR 증후군은 WT1 유전자 이상과 관련이 있습니다. WT2 유전자는 다른 질환과 연관됩니다.\",\n                        \"2번\": \"반신비대(Hemihypertrophy)는 벡위드-비데만 증후군(Beckwith-Wiedemann syndrome)과 관련이 있으며, 이 또한 윌름스 종양의 위험을 높이지만, 홍채없음증과는 직접적인 관련이 적습니다.\",\n                        \"3번\": \"생식세포 돌연변이(germline mutation)가 원인이므로 체성변이(somatic mutation)만 있는 경우가 아닙니다.\",\n                        \"5번\": \"윌름스 종양에서 TP53 변이가 동반되는 경우(anaplastic histology)는 예후가 매우 나쁩니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 46,\n                            \"relevance_reason\": \"강의자료 46페이지에서 분자 분석이 'hereditary predisposition to cancer'를 진단하는 데 사용된다고 설명합니다. 이 문제는 WT1 유전자 변이라는 유전 소인에 의해 발생한 윌름스 종양에 관한 것으로, 강의 내용과 직접적으로 일치합니다.\",\n                            \"relevance_score\": 9\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 16,\n            \"questions\": [\n                {\n                    \"question_number\": \"36\",\n                    \"question_numbers_on_page\": [\n                        \"35\",\n                        \"36\"\n                    ],\n                    \"question_text\": \"다음 종양에 대한 설명중 옳은 것은?\",\n                    \"answer\": \"2) Childhood일때는 sacrococcygeal location이 가장 호발 위치이다.\",\n                    \"explanation\": \"제시된 그림은 여러 조직 형태가 섞여 있는 기형종(Teratoma)의 육안 소견입니다. 기형종은 생식세포 종양의 일종으로, 소아기에는 천미골(sacrococcygeal) 부위에서 가장 흔하게 발생합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"기형종은 대부분 양성이지만, 악성(미성숙 기형종 또는 다른 악성 생식세포 종양과 혼합)일 수도 있습니다.\",\n                        \"3번\": \"성숙 기형종은 3개의 배엽(외배엽, 중배엽, 내배엽)에서 유래한 다양한 조직들을 모두 포함하는 것이 특징입니다.\",\n                        \"4번\": \"악성화는 나이가 들수록, 특히 성인 남성의 고환에서 발생한 경우에 더 흔합니다.\",\n                        \"5번\": \"만 2세 이전이 아닌, 신생아 및 영아기에 주로 발생합니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 44,\n                            \"relevance_reason\": \"강의자료 44페이지의 종양표지자 표에서 'Human chorionic gonadotropin (HCG)'이 'nonseminomatous testicular tumors'의 표지자라고 나와있습니다. 기형종은 생식세포 종양(germ cell tumor)의 일종이며, 일부 기형종은 다른 비정상피종성 종양 성분과 섞여 HCG를 생성할 수 있습니다. 따라서 종양의 종류라는 측면에서 중간 정도의 관련성이 있습니다.\",\n                            \"relevance_score\": 6\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 35,\n            \"questions\": [\n                {\n                    \"question_number\": \"79\",\n                    \"question_numbers_on_page\": [\n                        \"76\",\n                        \"77\",\n                        \"78\",\n                        \"79\"\n                    ],\n                    \"question_text\": \"다음 중 옳은 설명을 한 개 고르시오.\",\n                    \"answer\": \"5) SNPs occur across the genome—within exons, introns, intergenic regions, and coding regions.\",\n                    \"explanation\": \"SNP(단일염기다형성)는 유전체 전반에 걸쳐 발견되며, 유전자를 코딩하는 엑손(exon) 뿐만 아니라 인트론(intron), 유전자간 영역(intergenic region) 등 모든 곳에서 나타날 수 있습니다. 5번 보기가 가장 포괄적이고 정확한 설명입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"SNPs는 단일(single) 뉴클레오타이드 위치에서의 변이를 의미하며, 거의 항상 두 가지 대립유전자(biallelic) 형태를 가집니다. 이 설명 자체는 맞지만 5번이 더 포괄적입니다.\",\n                        \"2번\": \"코딩 영역은 전체 유전체의 약 1.5%를 차지하므로, SNP의 10%가 코딩 영역에서 발견된다는 것은 우연보다 훨씬 높은 비율이며, 이는 잘못된 설명입니다.\",\n                        \"3번\": \"코딩 영역 내의 SNP는 단백질 서열을 바꿀 수 있고, 조절 영역(regulatory elements) 내의 SNP는 유전자 발현을 변경할 수 있습니다. 이 설명은 맞지만 5번이 더 포괄적입니다.\",\n                        \"4번\": \"CNV(복제수변이)의 약 5%가 유전자 코딩 서열을 포함한다는 것은 맞지만, 이것이 SNP에 대한 설명은 아닙니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 43,\n                            \"relevance_reason\": \"강의자료 43페이지는 'Precision Medicine'이 '개인의 유전자 변이(individual variations in genes)'를 고려한다고 설명합니다. SNP는 이러한 유전 변이의 가장 흔한 형태로, 정밀의료의 기본 개념과 직접적으로 관련됩니다.\",\n                            \"relevance_score\": 9\n                        },\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 46,\n                            \"relevance_reason\": \"강의자료 46페이지는 'Molecular profiling of tumors by DNA sequencing'을 언급합니다. DNA 시퀀싱은 SNP를 포함한 다양한 유전 변이를 찾아내는 핵심 기술이므로, 문제 내용과 기술적으로 직접 관련됩니다.\",\n                            \"relevance_score\": 8\n                        }\n                    ]\n                }\n            ]\n        }\n    ],\n    \"summary\": {\n        \"total_jokbo_pages\": 6,\n        \"total_questions\": 7,\n        \"total_related_slides\": 11\n    }\n}",
+  "response_length": 13890,
+  "parsed_successfully": true,
+  "parsed_data": {
+    "jokbo_pages": [
+      {
+        "jokbo_page": 7,
+        "questions": [
+          {
+            "question_number": "15",
+            "question_numbers_on_page": [
+              "14",
+              "15",
+              "16"
+            ],
+            "question_text": "다음설명은 Mendelian Disorders 에 대한 설명이다. (D) 에 알맞은 것을 하나 고르시오.\n* Although gene expression is usually described as dominant or recessive, in some cases, both of the alleles of a gene pair may be fully expressed in the heterozygote-a condition called ( A ).\n* A single mutant gene may lead to many end effects, termed ( B ); conversely, mutations at several genetic loci may produce the same trait ( C ).\n* It should be noted that not all nucleotide changes produce genes that cause disease. When such a DNA change occurs in at least 1% of the population, it is called a ( D ).",
+            "answer": "4) polymorphism",
+            "explanation": "유전적 다형성(polymorphism)은 어떤 DNA 변화가 집단의 최소 1% 이상에서 나타날 때를 지칭하는 용어입니다. 이는 질병을 유발하지 않는 유전적 변이를 포함하며, 개인 간의 유전적 차이를 설명하는 핵심 개념입니다.",
+            "wrong_answer_explanations": {
+              "1번": "Codominance(공동우성)는 이형접합자에서 두 대립유전자가 모두 완전히 발현되는 현상입니다.",
+              "2번": "Pleiotropism(다면발현)은 하나의 돌연변이 유전자가 여러 신체 부위에 다양한 효과를 나타내는 현상입니다.",
+              "3번": "genetic heterogeneity(유전적 이질성)는 여러 다른 유전자 좌의 돌연변이가 동일한 형질이나 질병을 유발하는 현상입니다.",
+              "5번": "Genomic imprinting(유전체 각인)은 부모 중 한쪽으로부터 물려받은 대립유전자만 선택적으로 발현되는 현상입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 43,
+                "relevance_reason": "강의자료 43페이지의 'Precision Medicine'은 '개인의 유전자, 환경, 생활 방식의 차이를 고려하는' 접근법이라고 설명하며, 유전적 변이의 중요성을 강조합니다. 문제의 'polymorphism'은 이러한 개인별 유전적 변이의 핵심 개념 중 하나로, 중간 정도의 관련성이 있습니다.",
+                "relevance_score": 6
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 8,
+        "questions": [
+          {
+            "question_number": "18",
+            "question_numbers_on_page": [
+              "16",
+              "17",
+              "18"
+            ],
+            "question_text": "다음 <그림>을 보고, (A)에 알맞은 진단기법을 하나 고르시오.",
+            "answer": "2) Fluorescence in situ hybridization",
+            "explanation": "제시된 그림은 특정 염색체 위치(22q11.2)의 결실을 확인하기 위해 형광 표지된 탐침(probe)을 사용한 Fluorescence in situ hybridization (FISH) 기법을 보여줍니다. 이는 대표적인 분자세포유전학적 검사법으로, 종양 진단에서 특정 유전자의 증폭이나 결실, 전좌 등을 확인하는 데 사용됩니다.",
+            "wrong_answer_explanations": {
+              "1번": "Southern hybridization은 특정 DNA 서열을 검출하는 분자생물학 기법이지만, 그림처럼 염색체 상에서 위치를 시각화하지는 않습니다.",
+              "3번": "G-banding은 염색체를 염색하여 띠 패턴을 관찰하는 고전적인 핵형 분석법으로, 그림과 같은 형광 신호를 사용하지 않습니다.",
+              "4번": "Western blot은 특정 단백질을 검출하는 기법입니다.",
+              "5번": "Northern hybridization은 특정 RNA 서열을 검출하는 기법입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 45,
+                "relevance_reason": "강의자료 45페이지에서 종양 진단 방법 중 하나로 '분자병리검사'를 명시하고 있습니다. FISH는 대표적인 분자병리검사 기법 중 하나이므로 직접적으로 관련됩니다.",
+                "relevance_score": 10
+              },
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 46,
+                "relevance_reason": "강의자료 46페이지의 Key Concepts에서 'Molecular analyses'가 진단, 예후, 유전 소인 진단에 사용된다고 명시하고 있습니다. FISH는 이러한 분자 분석의 구체적인 예시에 해당합니다.",
+                "relevance_score": 9
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 13,
+        "questions": [
+          {
+            "question_number": "31",
+            "question_numbers_on_page": [
+              "30",
+              "31",
+              "32"
+            ],
+            "question_text": "다음은 소아에게 호발하는 악성 종양들의 조직학적 소견이다. 이의 조직학적 특성에 대한 설명 중 옳은 것은?",
+            "answer": "1) 이러한 형태를 “소원형세포종 (small blue round cell tumor)”이라고도 부른다.",
+            "explanation": "제시된 그림들은 신경모세포종, 횡문근육종, 윌름스 종양 등 소아 악성 종양에서 공통적으로 보이는 조직학적 특징을 나타냅니다. 이들은 분화도가 낮고, 핵은 짙게 염색되며 세포질이 적어 작고 둥근 파란 세포(small blue round cell)들이 밀집된 형태를 보여 '소원형세포종'으로 통칭됩니다.",
+            "wrong_answer_explanations": {
+              "2번": "완전히 분화된(differentiated) 소견이 아니라 미분화된(undifferentiated) 소견을 보입니다.",
+              "3번": "악성 종양이므로 양성 종양과 구별이 되며, 침습적 성장과 전이 가능성이 있습니다.",
+              "4번": "세포질이 적고 핵이 상대적으로 크므로 N/C ratio(핵-세포질 비율)가 높은 것이 특징입니다.",
+              "5번": "Neuroblastoma(신경모세포종)는 대표적인 소원형세포종으로, 그림과 유사한 조직학적 특성을 보입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 45,
+                "relevance_reason": "강의자료 45페이지는 종양 진단을 위한 '조직검사(biopsy)'와 '세포검사(Cytology)'를 설명합니다. 이 문제는 이러한 검사를 통해 얻은 조직학적 소견을 해석하는 것으로, 종양 진단의 핵심 과정과 직접적으로 관련됩니다.",
+                "relevance_score": 9
+              },
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 46,
+                "relevance_reason": "강의자료 46페이지는 'Immunohistochemistry'가 종양의 진단과 분류에 도움을 준다고 설명합니다. 소원형세포종들은 형태학적으로 유사하여 감별 진단을 위해 면역조직화학염색이 필수적이므로, 내용상 깊은 관련이 있습니다.",
+                "relevance_score": 8
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 15,
+        "questions": [
+          {
+            "question_number": "34",
+            "question_numbers_on_page": [
+              "33",
+              "34",
+              "35"
+            ],
+            "question_text": "1. 6개월된 소아의 부신 (adrenal gland)에서 5cm 크기의 종양이 관찰되었으며, 육안 조직 소견은 다음과 같다. 임상 양상과 육안소견으로 미루어 볼 때, 가장 가능성이 높은 진단에 대한 설명 중 옳은 것은?",
+            "answer": "5) MYCN amplification이 있는 경우는 나쁜 예후와 관련이 있다.",
+            "explanation": "소아의 부신에서 발생한 종양으로, 신경모세포종(Neuroblastoma)일 가능성이 높습니다. 신경모세포종에서 MYCN 유전자의 증폭(amplification)은 매우 중요한 예후 인자로, 증폭이 있는 경우 예후가 나쁩니다.",
+            "wrong_answer_explanations": {
+              "1번": "신경모세포종은 부신 수질(adrenal medulla)이나 교감신경절에서 유래하며, 부신 피질(cortex) 유래가 아닙니다.",
+              "2번": "대표적인 소아 종양으로, 성인보다 소아에 훨씬 자주 호발합니다.",
+              "3번": "대부분은 산발성(sporadic)으로 발생하지만, 약 1-2%에서는 가족성 유전 경향을 보입니다.",
+              "4번": "부교감신경절(Parasympathetic ganglia)이 아닌 교감신경계(sympathetic ganglia)에서 호발합니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 46,
+                "relevance_reason": "강의자료 46페이지에서 'Molecular analyses are used to determine ... prognosis'라고 명시하고 있습니다. 문제에서 다루는 'MYCN amplification'은 신경모세포종의 예후를 결정하는 대표적인 분자 분석 지표이므로 직접적으로 관련됩니다.",
+                "relevance_score": 10
+              },
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 45,
+                "relevance_reason": "강의자료 45페이지의 '분자병리검사'는 MYCN amplification을 검사하는 상위 개념으로, 종양 진단 과정의 일부로 직접 관련됩니다.",
+                "relevance_score": 9
+              }
+            ]
+          },
+          {
+            "question_number": "35",
+            "question_numbers_on_page": [
+              "33",
+              "34",
+              "35"
+            ],
+            "question_text": "39주에 출생한 남아의 눈에서 다음과 같은 소견이 관찰되었다 (상단 그림). 이 환아는, 생후 38개월에 우측 신장에 12cm 크기의 종괴가 관찰이 되었으며, 적출 후 시행한 현미경 검사에서의 조직학적 소견은 다음과 같다 (하단 그림). 이 환아에서 발생한 종양에 대한 설명중 옳은 것은?",
+            "answer": "4) 반대편 신장에서도 해당 종양이 발생할 가능성이 있다.",
+            "explanation": "눈의 홍채없음증(aniridia)과 신장 종양(윌름스 종양, Wilms tumor)이 동반된 WAGR 증후군을 시사합니다. 이는 WT1 유전자의 생식세포 돌연변이(germline mutation)와 관련이 있습니다. 생식세포 돌연변이가 있는 경우, 양측성(bilateral)으로 종양이 발생할 위험이 높습니다.",
+            "wrong_answer_explanations": {
+              "1번": "WAGR 증후군은 WT1 유전자 이상과 관련이 있습니다. WT2 유전자는 다른 질환과 연관됩니다.",
+              "2번": "반신비대(Hemihypertrophy)는 벡위드-비데만 증후군(Beckwith-Wiedemann syndrome)과 관련이 있으며, 이 또한 윌름스 종양의 위험을 높이지만, 홍채없음증과는 직접적인 관련이 적습니다.",
+              "3번": "생식세포 돌연변이(germline mutation)가 원인이므로 체성변이(somatic mutation)만 있는 경우가 아닙니다.",
+              "5번": "윌름스 종양에서 TP53 변이가 동반되는 경우(anaplastic histology)는 예후가 매우 나쁩니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 46,
+                "relevance_reason": "강의자료 46페이지에서 분자 분석이 'hereditary predisposition to cancer'를 진단하는 데 사용된다고 설명합니다. 이 문제는 WT1 유전자 변이라는 유전 소인에 의해 발생한 윌름스 종양에 관한 것으로, 강의 내용과 직접적으로 일치합니다.",
+                "relevance_score": 9
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 16,
+        "questions": [
+          {
+            "question_number": "36",
+            "question_numbers_on_page": [
+              "35",
+              "36"
+            ],
+            "question_text": "다음 종양에 대한 설명중 옳은 것은?",
+            "answer": "2) Childhood일때는 sacrococcygeal location이 가장 호발 위치이다.",
+            "explanation": "제시된 그림은 여러 조직 형태가 섞여 있는 기형종(Teratoma)의 육안 소견입니다. 기형종은 생식세포 종양의 일종으로, 소아기에는 천미골(sacrococcygeal) 부위에서 가장 흔하게 발생합니다.",
+            "wrong_answer_explanations": {
+              "1번": "기형종은 대부분 양성이지만, 악성(미성숙 기형종 또는 다른 악성 생식세포 종양과 혼합)일 수도 있습니다.",
+              "3번": "성숙 기형종은 3개의 배엽(외배엽, 중배엽, 내배엽)에서 유래한 다양한 조직들을 모두 포함하는 것이 특징입니다.",
+              "4번": "악성화는 나이가 들수록, 특히 성인 남성의 고환에서 발생한 경우에 더 흔합니다.",
+              "5번": "만 2세 이전이 아닌, 신생아 및 영아기에 주로 발생합니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 44,
+                "relevance_reason": "강의자료 44페이지의 종양표지자 표에서 'Human chorionic gonadotropin (HCG)'이 'nonseminomatous testicular tumors'의 표지자라고 나와있습니다. 기형종은 생식세포 종양(germ cell tumor)의 일종이며, 일부 기형종은 다른 비정상피종성 종양 성분과 섞여 HCG를 생성할 수 있습니다. 따라서 종양의 종류라는 측면에서 중간 정도의 관련성이 있습니다.",
+                "relevance_score": 6
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 35,
+        "questions": [
+          {
+            "question_number": "79",
+            "question_numbers_on_page": [
+              "76",
+              "77",
+              "78",
+              "79"
+            ],
+            "question_text": "다음 중 옳은 설명을 한 개 고르시오.",
+            "answer": "5) SNPs occur across the genome—within exons, introns, intergenic regions, and coding regions.",
+            "explanation": "SNP(단일염기다형성)는 유전체 전반에 걸쳐 발견되며, 유전자를 코딩하는 엑손(exon) 뿐만 아니라 인트론(intron), 유전자간 영역(intergenic region) 등 모든 곳에서 나타날 수 있습니다. 5번 보기가 가장 포괄적이고 정확한 설명입니다.",
+            "wrong_answer_explanations": {
+              "1번": "SNPs는 단일(single) 뉴클레오타이드 위치에서의 변이를 의미하며, 거의 항상 두 가지 대립유전자(biallelic) 형태를 가집니다. 이 설명 자체는 맞지만 5번이 더 포괄적입니다.",
+              "2번": "코딩 영역은 전체 유전체의 약 1.5%를 차지하므로, SNP의 10%가 코딩 영역에서 발견된다는 것은 우연보다 훨씬 높은 비율이며, 이는 잘못된 설명입니다.",
+              "3번": "코딩 영역 내의 SNP는 단백질 서열을 바꿀 수 있고, 조절 영역(regulatory elements) 내의 SNP는 유전자 발현을 변경할 수 있습니다. 이 설명은 맞지만 5번이 더 포괄적입니다.",
+              "4번": "CNV(복제수변이)의 약 5%가 유전자 코딩 서열을 포함한다는 것은 맞지만, 이것이 SNP에 대한 설명은 아닙니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 43,
+                "relevance_reason": "강의자료 43페이지는 'Precision Medicine'이 '개인의 유전자 변이(individual variations in genes)'를 고려한다고 설명합니다. SNP는 이러한 유전 변이의 가장 흔한 형태로, 정밀의료의 기본 개념과 직접적으로 관련됩니다.",
+                "relevance_score": 9
+              },
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 46,
+                "relevance_reason": "강의자료 46페이지는 'Molecular profiling of tumors by DNA sequencing'을 언급합니다. DNA 시퀀싱은 SNP를 포함한 다양한 유전 변이를 찾아내는 핵심 기술이므로, 문제 내용과 기술적으로 직접 관련됩니다.",
+                "relevance_score": 8
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": {
+      "total_jokbo_pages": 6,
+      "total_questions": 7,
+      "total_related_slides": 11
+    }
+  }
+}

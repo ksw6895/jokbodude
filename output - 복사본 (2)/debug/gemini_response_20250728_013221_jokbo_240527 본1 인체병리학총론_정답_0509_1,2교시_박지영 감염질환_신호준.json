@@ -1,0 +1,149 @@
+{
+  "timestamp": "20250728_013221",
+  "mode": "chunk_p81-94",
+  "jokbo_file": "240527 본1 인체병리학총론_정답.pdf",
+  "lesson_file": "0509_1,2교시_박지영 감염질환_신호준.pdf",
+  "response_text": "{\n    \"jokbo_pages\": [\n        {\n            \"jokbo_page\": 24,\n            \"questions\": [\n                {\n                    \"question_number\": \"54\",\n                    \"question_numbers_on_page\": [\n                        \"54\",\n                        \"55\"\n                    ],\n                    \"question_text\": \"급성염증의 형태학적 양상 중에 하나로세포의 손상에 의해 형성된 공간 또는 복막 (peritoneum), 흉막 (pleura), 심막 (pericardium)에 의해 둘러싸인 체강 (body cavities)으로 세포수가 적은 체액의 삼출이 뚜렷한 것을 설명하는 것은?\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"문제는 급성 염증의 형태 중 하나로, 체강 내에 단백질 농도가 낮고 세포 성분이 거의 없는 묽은 액체(삼출액)가 고이는 경우를 설명하고 있습니다. 이는 장액성 염증(Serous inflammation)의 특징적인 소견입니다. 피부의 물집이 대표적인 예입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"궤양(Ulcer)은 기관의 표면에서 상피세포의 탈락으로 인해 조직의 결손이 생긴 것을 의미합니다.\",\n                        \"3번\": \"화농성염증(Purulent inflammation)은 다량의 고름(농) 즉, 호중구, 괴사된 세포, 부종액으로 구성된 삼출물이 특징입니다.\",\n                        \"4번\": \"완전 용해(Complete resolution)는 염증 반응의 결과 중 하나로, 조직이 손상 없이 원래 상태로 완전히 회복되는 것을 의미합니다.\",\n                        \"5번\": \"섬유소성염증(Fibrinous inflammation)은 혈관 투과성이 심하여 섬유소원(fibrinogen)과 같은 큰 분자가 혈관 밖으로 나와 섬유소(fibrin)로 변환되어 조직에 침착되는 염증입니다.\"\n                    },\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"55\",\n                    \"question_numbers_on_page\": [\n                        \"54\",\n                        \"55\"\n                    ],\n                    \"question_text\": \"아래 H&E 소견을 보일 수 있는 대표적인 질환은?\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"제시된 현미경 사진은 중앙에 분홍색의 무구조성 물질인 건락성 괴사(caseous necrosis)가 있고, 그 주위를 상피모양세포와 림프구가 둘러싸고 있는 육아종(granuloma)의 전형적인 모습입니다. 이러한 건락성 육아종은 결핵(Tuberculosis)의 가장 특징적인 병리학적 소견입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"나병(leprosy)은 육아종을 형성할 수 있으나, 전형적인 건락성 괴사는 드뭅니다.\",\n                        \"3번\": \"이물질(Foreign body) 반응은 이물질 주변으로 다핵거대세포를 포함하는 육아종을 형성하지만, 건락성 괴사는 동반하지 않습니다.\",\n                        \"4번\": \"크론병(Crohn disease)은 비건락성 육아종(non-caseating granuloma)이 특징입니다.\",\n                        \"5번\": \"사르코이드증(sarcoidosis) 역시 뚜렷한 비건락성 육아종을 특징으로 하는 질환입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0509_1,2교시_박지영 감염질환_신호준.pdf\",\n                            \"lesson_page\": 2,\n                            \"relevance_reason\": \"강의자료 2페이지의 A 그림은 결핵의 특징적인 조직 소견인 건락성 괴사를 동반한 육아종을 보여주며, 이는 문제에 제시된 H&E 이미지와 사실상 동일한 병변을 나타냅니다. 중앙의 분홍색 무형의 괴사 부위와 주변의 염증세포 침윤이 일치합니다.\",\n                            \"relevance_score\": 11\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 25,\n            \"questions\": [\n                {\n                    \"question_number\": \"56\",\n                    \"question_numbers_on_page\": [\n                        \"56\",\n                        \"57\",\n                        \"58\",\n                        \"59\"\n                    ],\n                    \"question_text\": \"만성 염증의 형태학적 소견에 대한 설명 중 틀린 것은?\",\n                    \"answer\": \"2\",\n                    \"explanation\": \"만성 염증은 림프구, 형질세포, 대식세포와 같은 단핵세포의 침윤, 조직 손상, 그리고 신생혈관 생성 및 섬유화와 같은 치유 반응이 동시에 나타나는 것이 특징입니다. 세정맥의 울혈(Congestion)과 부종(Edema)은 혈관 확장과 투과성 증가로 인해 발생하는 급성 염증의 주된 특징입니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"대식세포에 의한 육아종성 염증은 만성 염증의 특징적인 형태 중 하나입니다.\",\n                        \"3번\": \"신생혈관의 증식과 섬유화는 만성 염증에서 손상된 조직을 복구하려는 치유 반응의 일부입니다.\",\n                        \"4번\": \"지속적인 손상 인자나 염증세포에 의해 조직 손상이 일어나는 것은 만성 염증의 핵심 요소입니다.\",\n                        \"5번\": \"림프구, 형질세포, 대식세포와 같은 단핵세포의 침윤은 만성 염증의 현미경적 특징입니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0509_1,2교시_박지영 감염질환_신호준.pdf\",\n                            \"lesson_page\": 2,\n                            \"relevance_reason\": \"문제의 보기 1번에서 '육아종성 염증'을 언급하고 있으며, 이는 만성 염증의 중요한 형태입니다. 강의자료 2페이지는 육아종성 염증의 대표적인 예시인 결핵의 조직 소견을 상세히 보여주므로, 문제의 개념을 이해하는 데 직접적으로 관련됩니다.\",\n                            \"relevance_score\": 9\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"57\",\n                    \"question_numbers_on_page\": [\n                        \"56\",\n                        \"57\",\n                        \"58\",\n                        \"59\"\n                    ],\n                    \"question_text\": \"그림에서 까만색 동그라미로 표시한 세포를 적으시오 (주관식)\",\n                    \"answer\": \"호산구; Eosinophils; Eosinophil\",\n                    \"explanation\": \"그림에서 보이는 세포는 분엽된 핵과 풍부한 호산성(붉은색) 과립을 가진 세포질을 특징으로 하는 호산구(Eosinophil)입니다. 알레르기 반응이나 기생충 감염 시에 주로 관찰됩니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"58\",\n                    \"question_numbers_on_page\": [\n                        \"56\",\n                        \"57\",\n                        \"58\",\n                        \"59\"\n                    ],\n                    \"question_text\": \"해당 설명에 부합하는 세포를 적으시오 (주관식)\",\n                    \"answer\": \"비만세포; Mast cells; Mast cell\",\n                    \"explanation\": \"설명된 내용은 비만세포(Mast cell)의 특징입니다. 비만세포는 결합조직에 분포하며, 세포 표면에 IgE 항체에 대한 수용체(FcεRI)를 가지고 있습니다. 항원-항체 반응으로 탈과립되면 히스타민, 프로스타글란딘 등을 분비하여 즉시형 과민반응(아나필락시스 쇼크 등)을 유발합니다.\",\n                    \"wrong_answer_explanations\": {},\n                    \"related_lesson_slides\": []\n                },\n                {\n                    \"question_number\": \"59\",\n                    \"question_numbers_on_page\": [\n                        \"56\",\n                        \"57\",\n                        \"58\",\n                        \"59\"\n                    ],\n                    \"question_text\": \"다음 설명에 해당하는 세포는?\",\n                    \"answer\": \"4\",\n                    \"explanation\": \"설명된 내용은 대식세포(Macrophage)의 기능입니다. 대식세포는 골수의 조혈모세포에서 유래하며, 염증 반응을 조절하는 사이토카인과 조직 복구를 위한 성장인자를 분비합니다. 또한 염증 후 조직 리모델링에 중요한 역할을 합니다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"호산구(Eosinophils)는 주로 알레르기 반응과 기생충 감염에 관여합니다.\",\n                        \"2번\": \"호중구(Neutrophils)는 급성 염증의 주요 세포로, 세균 탐식 작용이 주된 기능입니다.\",\n                        \"3번\": \"단핵구(Monocytes)는 혈액 내에 존재하는 대식세포의 전구세포입니다.\",\n                        \"5번\": \"형질세포(Plasma cells)는 항체를 생산하여 체액성 면역을 담당합니다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0509_1,2교시_박지영 감염질환_신호준.pdf\",\n                            \"lesson_page\": 2,\n                            \"relevance_reason\": \"문제에서 설명하는 대식세포는 강의자료 2페이지의 결핵 육아종을 구성하는 핵심 세포(상피모양세포, 다핵거대세포)입니다. 강의자료는 문제의 세포가 질병 상황에서 어떤 역할을 하는지 구체적인 시각 자료를 제공하여 높은 관련성을 가집니다.\",\n                            \"relevance_score\": 8\n                        }\n                    ]\n                }\n            ]\n        }\n    ],\n    \"summary\": {\n        \"total_jokbo_pages\": 2,\n        \"total_questions\": 6,\n        \"total_related_slides\": 3\n    }\n}",
+  "response_length": 7188,
+  "parsed_successfully": true,
+  "parsed_data": {
+    "jokbo_pages": [
+      {
+        "jokbo_page": 24,
+        "questions": [
+          {
+            "question_number": "54",
+            "question_numbers_on_page": [
+              "54",
+              "55"
+            ],
+            "question_text": "급성염증의 형태학적 양상 중에 하나로세포의 손상에 의해 형성된 공간 또는 복막 (peritoneum), 흉막 (pleura), 심막 (pericardium)에 의해 둘러싸인 체강 (body cavities)으로 세포수가 적은 체액의 삼출이 뚜렷한 것을 설명하는 것은?",
+            "answer": "2",
+            "explanation": "문제는 급성 염증의 형태 중 하나로, 체강 내에 단백질 농도가 낮고 세포 성분이 거의 없는 묽은 액체(삼출액)가 고이는 경우를 설명하고 있습니다. 이는 장액성 염증(Serous inflammation)의 특징적인 소견입니다. 피부의 물집이 대표적인 예입니다.",
+            "wrong_answer_explanations": {
+              "1번": "궤양(Ulcer)은 기관의 표면에서 상피세포의 탈락으로 인해 조직의 결손이 생긴 것을 의미합니다.",
+              "3번": "화농성염증(Purulent inflammation)은 다량의 고름(농) 즉, 호중구, 괴사된 세포, 부종액으로 구성된 삼출물이 특징입니다.",
+              "4번": "완전 용해(Complete resolution)는 염증 반응의 결과 중 하나로, 조직이 손상 없이 원래 상태로 완전히 회복되는 것을 의미합니다.",
+              "5번": "섬유소성염증(Fibrinous inflammation)은 혈관 투과성이 심하여 섬유소원(fibrinogen)과 같은 큰 분자가 혈관 밖으로 나와 섬유소(fibrin)로 변환되어 조직에 침착되는 염증입니다."
+            },
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "55",
+            "question_numbers_on_page": [
+              "54",
+              "55"
+            ],
+            "question_text": "아래 H&E 소견을 보일 수 있는 대표적인 질환은?",
+            "answer": "2",
+            "explanation": "제시된 현미경 사진은 중앙에 분홍색의 무구조성 물질인 건락성 괴사(caseous necrosis)가 있고, 그 주위를 상피모양세포와 림프구가 둘러싸고 있는 육아종(granuloma)의 전형적인 모습입니다. 이러한 건락성 육아종은 결핵(Tuberculosis)의 가장 특징적인 병리학적 소견입니다.",
+            "wrong_answer_explanations": {
+              "1번": "나병(leprosy)은 육아종을 형성할 수 있으나, 전형적인 건락성 괴사는 드뭅니다.",
+              "3번": "이물질(Foreign body) 반응은 이물질 주변으로 다핵거대세포를 포함하는 육아종을 형성하지만, 건락성 괴사는 동반하지 않습니다.",
+              "4번": "크론병(Crohn disease)은 비건락성 육아종(non-caseating granuloma)이 특징입니다.",
+              "5번": "사르코이드증(sarcoidosis) 역시 뚜렷한 비건락성 육아종을 특징으로 하는 질환입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0509_1,2교시_박지영 감염질환_신호준.pdf",
+                "lesson_page": 2,
+                "relevance_reason": "강의자료 2페이지의 A 그림은 결핵의 특징적인 조직 소견인 건락성 괴사를 동반한 육아종을 보여주며, 이는 문제에 제시된 H&E 이미지와 사실상 동일한 병변을 나타냅니다. 중앙의 분홍색 무형의 괴사 부위와 주변의 염증세포 침윤이 일치합니다.",
+                "relevance_score": 11
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "jokbo_page": 25,
+        "questions": [
+          {
+            "question_number": "56",
+            "question_numbers_on_page": [
+              "56",
+              "57",
+              "58",
+              "59"
+            ],
+            "question_text": "만성 염증의 형태학적 소견에 대한 설명 중 틀린 것은?",
+            "answer": "2",
+            "explanation": "만성 염증은 림프구, 형질세포, 대식세포와 같은 단핵세포의 침윤, 조직 손상, 그리고 신생혈관 생성 및 섬유화와 같은 치유 반응이 동시에 나타나는 것이 특징입니다. 세정맥의 울혈(Congestion)과 부종(Edema)은 혈관 확장과 투과성 증가로 인해 발생하는 급성 염증의 주된 특징입니다.",
+            "wrong_answer_explanations": {
+              "1번": "대식세포에 의한 육아종성 염증은 만성 염증의 특징적인 형태 중 하나입니다.",
+              "3번": "신생혈관의 증식과 섬유화는 만성 염증에서 손상된 조직을 복구하려는 치유 반응의 일부입니다.",
+              "4번": "지속적인 손상 인자나 염증세포에 의해 조직 손상이 일어나는 것은 만성 염증의 핵심 요소입니다.",
+              "5번": "림프구, 형질세포, 대식세포와 같은 단핵세포의 침윤은 만성 염증의 현미경적 특징입니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0509_1,2교시_박지영 감염질환_신호준.pdf",
+                "lesson_page": 2,
+                "relevance_reason": "문제의 보기 1번에서 '육아종성 염증'을 언급하고 있으며, 이는 만성 염증의 중요한 형태입니다. 강의자료 2페이지는 육아종성 염증의 대표적인 예시인 결핵의 조직 소견을 상세히 보여주므로, 문제의 개념을 이해하는 데 직접적으로 관련됩니다.",
+                "relevance_score": 9
+              }
+            ]
+          },
+          {
+            "question_number": "57",
+            "question_numbers_on_page": [
+              "56",
+              "57",
+              "58",
+              "59"
+            ],
+            "question_text": "그림에서 까만색 동그라미로 표시한 세포를 적으시오 (주관식)",
+            "answer": "호산구; Eosinophils; Eosinophil",
+            "explanation": "그림에서 보이는 세포는 분엽된 핵과 풍부한 호산성(붉은색) 과립을 가진 세포질을 특징으로 하는 호산구(Eosinophil)입니다. 알레르기 반응이나 기생충 감염 시에 주로 관찰됩니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "58",
+            "question_numbers_on_page": [
+              "56",
+              "57",
+              "58",
+              "59"
+            ],
+            "question_text": "해당 설명에 부합하는 세포를 적으시오 (주관식)",
+            "answer": "비만세포; Mast cells; Mast cell",
+            "explanation": "설명된 내용은 비만세포(Mast cell)의 특징입니다. 비만세포는 결합조직에 분포하며, 세포 표면에 IgE 항체에 대한 수용체(FcεRI)를 가지고 있습니다. 항원-항체 반응으로 탈과립되면 히스타민, 프로스타글란딘 등을 분비하여 즉시형 과민반응(아나필락시스 쇼크 등)을 유발합니다.",
+            "wrong_answer_explanations": {},
+            "related_lesson_slides": []
+          },
+          {
+            "question_number": "59",
+            "question_numbers_on_page": [
+              "56",
+              "57",
+              "58",
+              "59"
+            ],
+            "question_text": "다음 설명에 해당하는 세포는?",
+            "answer": "4",
+            "explanation": "설명된 내용은 대식세포(Macrophage)의 기능입니다. 대식세포는 골수의 조혈모세포에서 유래하며, 염증 반응을 조절하는 사이토카인과 조직 복구를 위한 성장인자를 분비합니다. 또한 염증 후 조직 리모델링에 중요한 역할을 합니다.",
+            "wrong_answer_explanations": {
+              "1번": "호산구(Eosinophils)는 주로 알레르기 반응과 기생충 감염에 관여합니다.",
+              "2번": "호중구(Neutrophils)는 급성 염증의 주요 세포로, 세균 탐식 작용이 주된 기능입니다.",
+              "3번": "단핵구(Monocytes)는 혈액 내에 존재하는 대식세포의 전구세포입니다.",
+              "5번": "형질세포(Plasma cells)는 항체를 생산하여 체액성 면역을 담당합니다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0509_1,2교시_박지영 감염질환_신호준.pdf",
+                "lesson_page": 2,
+                "relevance_reason": "문제에서 설명하는 대식세포는 강의자료 2페이지의 결핵 육아종을 구성하는 핵심 세포(상피모양세포, 다핵거대세포)입니다. 강의자료는 문제의 세포가 질병 상황에서 어떤 역할을 하는지 구체적인 시각 자료를 제공하여 높은 관련성을 가집니다.",
+                "relevance_score": 8
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": {
+      "total_jokbo_pages": 2,
+      "total_questions": 6,
+      "total_related_slides": 3
+    }
+  }
+}

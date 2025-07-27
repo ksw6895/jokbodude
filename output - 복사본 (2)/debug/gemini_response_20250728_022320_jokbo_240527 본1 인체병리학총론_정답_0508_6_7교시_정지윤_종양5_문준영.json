@@ -1,0 +1,102 @@
+{
+  "timestamp": "20250728_022320",
+  "mode": "chunk_p1-40",
+  "jokbo_file": "240527 본1 인체병리학총론_정답.pdf",
+  "lesson_file": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+  "response_text": "{\n    \"jokbo_pages\": [\n        {\n            \"jokbo_page\": 15,\n            \"questions\": [\n                {\n                    \"question_number\": \"34\",\n                    \"question_numbers_on_page\": [\n                        \"33\",\n                        \"34\",\n                        \"35\"\n                    ],\n                    \"question_text\": \"1. 6개월된 소아의 부신 (adrenal gland)에서 5cm 크기의 종양이 관찰되었으며, 육안 조직 소견은 다음과 같다. 임상 양상과 육안소견으로 미루어 볼 때, 가장 가능성이 높은 진단에 대한 설명 중 옳은 것은?\",\n                    \"answer\": \"5) MYCN amplification이 있는 경우는 나쁜 예후와 관련이 있다.\",\n                    \"explanation\": \"사진은 소아의 부신에서 발생한 신경모세포종(Neuroblastoma)의 육안 소견을 보여준다. 신경모세포종은 소아에서 가장 흔한 부신 수질의 악성 종양이다. 이 종양의 예후를 결정하는 중요한 인자 중 하나는 MYCN 유전자의 증폭 여부이며, MYCN 증폭이 있는 경우 매우 나쁜 예후와 관련이 있다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"신경모세포종은 부신 수질(adrenal medulla)이나 교감신경절(sympathetic ganglia)에서 유래하는 종양으로, 부신 피질(adrenal cortex)에서 유래하지 않는다.\",\n                        \"2번\": \"신경모세포종은 영유아기에 주로 발생하는 대표적인 소아 종양으로, 성인에서는 매우 드물다.\",\n                        \"3번\": \"대부분은 산발성(sporadic)으로 발생하지만, 약 1-2%에서는 가족성으로 발생하며 유전적 소인이 관여한다.\",\n                        \"4번\": \"부교감신경절(Parasympathetic ganglia)이 아닌 교감신경계(sympathetic nervous system)에서 호발한다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 30,\n                            \"relevance_reason\": \"강의 슬라이드에서 악성 종양의 예후(Prognosis)를 설명하며 'Amplification of N-MYC gene (neuroblastoma) → poor prognosis'라고 명시적으로 언급하고 있어, 문제의 정답 내용과 직접적으로 일치한다.\",\n                            \"relevance_score\": 10\n                        }\n                    ]\n                },\n                {\n                    \"question_number\": \"35\",\n                    \"question_numbers_on_page\": [\n                        \"33\",\n                        \"34\",\n                        \"35\"\n                    ],\n                    \"question_text\": \"39주에 출생한 남아의 눈에서 다음과 같은 소견이 관찰되었다 (상단 그림). 이 환아는, 생후 38개월에 우측 신장에 12cm 크기의 종괴가 관찰이 되었으며, 적출 후 시행한 현미경 검사에서의 조직학적 소견은 다음과 같다 (하단 그림). 이 환아에서 발생한 종양에 대한 설명중 옳은 것은?\",\n                    \"answer\": \"4) 반대편 신장에서도 해당 종양이 발생할 가능성이 있다.\",\n                    \"explanation\": \"상단 그림은 홍채결여(aniridia)를 보여주며, 하단 그림은 윌름종양(Wilms tumor)의 전형적인 삼상성(triphasic) 조직 소견(아세포, 상피, 기질)을 나타낸다. 홍채결여는 WAGR 증후군(Wilms tumor, Aniridia, Genitourinary anomalies, Retardation)의 일부로 나타날 수 있으며, 이 증후군과 관련된 윌름종양은 양측성으로 발생할 위험이 높다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"윌름종양은 WT1 유전자 이상과 관련이 깊다. WT2 유전자는 윌름종양과 관련된 다른 유전자 좌위를 지칭하는 오래된 용어이다.\",\n                        \"2번\": \"반신비대(Hemihypertrophy)는 벡위드-비데만 증후군(Beckwith-Wiedemann syndrome)과 관련이 있으며, 이 증후군 역시 윌름종양의 위험을 높이지만, 문제에서 제시된 홍채결여와는 직접적인 관련이 적다.\",\n                        \"3\" : \"윌름종양은 생식세포 변이(germline mutation)에 의한 유전성(familial) 증후군의 일부로 발생할 수 있으며, 이 경우 양측성 발생 위험이 높다. 체성 변이(somatic mutation)는 주로 산발성, 단측성 종양의 원인이다.\",\n                        \"5번\": \"TP53 변이는 윌름종양에서 나쁜 예후와 관련된 인자 중 하나이다. 따라서 좋은 예후와 관련이 있다는 설명은 틀렸다.\"\n                    },\n                    \"related_lesson_slides\": []\n                }\n            ]\n        },\n        {\n            \"jokbo_page\": 9,\n            \"questions\": [\n                {\n                    \"question_number\": \"18\",\n                    \"question_numbers_on_page\": [\n                        \"18\",\n                        \"19\",\n                        \"20\"\n                    ],\n                    \"question_text\": \"다음 <그림>을 보고, (A)에 알맞은 진단기법을 하나 고르시오.\",\n                    \"answer\": \"2) Fluorescence in situ hybridization\",\n                    \"explanation\": \"제시된 그림은 형광 물질이 부착된 DNA 탐침(probe)을 사용하여 특정 염색체나 유전자의 위치, 수적 이상, 구조적 이상(결실, 증폭 등)을 세포나 조직 내에서 직접 확인하는 기법인 형광동소보합법(Fluorescence in situ hybridization, FISH)을 보여준다. 그림 설명에서도 22q11.2 결실을 확인하는 과정을 묘사하고 있다.\",\n                    \"wrong_answer_explanations\": {\n                        \"1번\": \"Southern hybridization은 특정 DNA 서열을 검출하기 위해 DNA를 전기영동 후 막에 옮겨 탐침과 반응시키는 기법으로, 현미경으로 염색체를 직접 관찰하지 않는다.\",\n                        \"3번\": \"G-banding은 염색체를 염색하여 특징적인 띠(band) 패턴을 관찰하는 고전적인 핵형 분석법이다.\",\n                        \"4번\": \"Western blot은 특정 단백질을 검출하는 기법이다.\",\n                        \"5번\": \"Northern hybridization은 특정 RNA 서열을 검출하는 기법이다.\"\n                    },\n                    \"related_lesson_slides\": [\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 29,\n                            \"relevance_reason\": \"강의 슬라이드의 'Molecular and Cytogenetic Diagnostics' 섹션에서 암 진단을 위한 전위(translocation) 검출 방법으로 'FISH'를 명시적으로 언급하고 있다.\",\n                            \"relevance_score\": 9\n                        },\n                        {\n                            \"lesson_filename\": \"0508_6_7교시_정지윤_종양5_문준영.pdf\",\n                            \"lesson_page\": 32,\n                            \"relevance_reason\": \"강의 슬라이드에 유방암에서 HER2 유전자 증폭을 확인하는 FISH 검사 이미지가 예시로 제시되어 있어, 문제의 진단 기법과 직접적으로 관련된다.\",\n                            \"relevance_score\": 10\n                        }\n                    ]\n                }\n            ]\n        }\n    ],\n    \"summary\": {\n        \"total_jokbo_pages\": 39,\n        \"total_questions\": 85,\n        \"total_related_slides\": 3\n    }\n}",
+  "response_length": 5337,
+  "parsed_successfully": true,
+  "parsed_data": {
+    "jokbo_pages": [
+      {
+        "jokbo_page": 15,
+        "questions": [
+          {
+            "question_number": "34",
+            "question_numbers_on_page": [
+              "33",
+              "34",
+              "35"
+            ],
+            "question_text": "1. 6개월된 소아의 부신 (adrenal gland)에서 5cm 크기의 종양이 관찰되었으며, 육안 조직 소견은 다음과 같다. 임상 양상과 육안소견으로 미루어 볼 때, 가장 가능성이 높은 진단에 대한 설명 중 옳은 것은?",
+            "answer": "5) MYCN amplification이 있는 경우는 나쁜 예후와 관련이 있다.",
+            "explanation": "사진은 소아의 부신에서 발생한 신경모세포종(Neuroblastoma)의 육안 소견을 보여준다. 신경모세포종은 소아에서 가장 흔한 부신 수질의 악성 종양이다. 이 종양의 예후를 결정하는 중요한 인자 중 하나는 MYCN 유전자의 증폭 여부이며, MYCN 증폭이 있는 경우 매우 나쁜 예후와 관련이 있다.",
+            "wrong_answer_explanations": {
+              "1번": "신경모세포종은 부신 수질(adrenal medulla)이나 교감신경절(sympathetic ganglia)에서 유래하는 종양으로, 부신 피질(adrenal cortex)에서 유래하지 않는다.",
+              "2번": "신경모세포종은 영유아기에 주로 발생하는 대표적인 소아 종양으로, 성인에서는 매우 드물다.",
+              "3번": "대부분은 산발성(sporadic)으로 발생하지만, 약 1-2%에서는 가족성으로 발생하며 유전적 소인이 관여한다.",
+              "4번": "부교감신경절(Parasympathetic ganglia)이 아닌 교감신경계(sympathetic nervous system)에서 호발한다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 30,
+                "relevance_reason": "강의 슬라이드에서 악성 종양의 예후(Prognosis)를 설명하며 'Amplification of N-MYC gene (neuroblastoma) → poor prognosis'라고 명시적으로 언급하고 있어, 문제의 정답 내용과 직접적으로 일치한다.",
+                "relevance_score": 10
+              }
+            ]
+          },
+          {
+            "question_number": "35",
+            "question_numbers_on_page": [
+              "33",
+              "34",
+              "35"
+            ],
+            "question_text": "39주에 출생한 남아의 눈에서 다음과 같은 소견이 관찰되었다 (상단 그림). 이 환아는, 생후 38개월에 우측 신장에 12cm 크기의 종괴가 관찰이 되었으며, 적출 후 시행한 현미경 검사에서의 조직학적 소견은 다음과 같다 (하단 그림). 이 환아에서 발생한 종양에 대한 설명중 옳은 것은?",
+            "answer": "4) 반대편 신장에서도 해당 종양이 발생할 가능성이 있다.",
+            "explanation": "상단 그림은 홍채결여(aniridia)를 보여주며, 하단 그림은 윌름종양(Wilms tumor)의 전형적인 삼상성(triphasic) 조직 소견(아세포, 상피, 기질)을 나타낸다. 홍채결여는 WAGR 증후군(Wilms tumor, Aniridia, Genitourinary anomalies, Retardation)의 일부로 나타날 수 있으며, 이 증후군과 관련된 윌름종양은 양측성으로 발생할 위험이 높다.",
+            "wrong_answer_explanations": {
+              "1번": "윌름종양은 WT1 유전자 이상과 관련이 깊다. WT2 유전자는 윌름종양과 관련된 다른 유전자 좌위를 지칭하는 오래된 용어이다.",
+              "2번": "반신비대(Hemihypertrophy)는 벡위드-비데만 증후군(Beckwith-Wiedemann syndrome)과 관련이 있으며, 이 증후군 역시 윌름종양의 위험을 높이지만, 문제에서 제시된 홍채결여와는 직접적인 관련이 적다.",
+              "3": "윌름종양은 생식세포 변이(germline mutation)에 의한 유전성(familial) 증후군의 일부로 발생할 수 있으며, 이 경우 양측성 발생 위험이 높다. 체성 변이(somatic mutation)는 주로 산발성, 단측성 종양의 원인이다.",
+              "5번": "TP53 변이는 윌름종양에서 나쁜 예후와 관련된 인자 중 하나이다. 따라서 좋은 예후와 관련이 있다는 설명은 틀렸다."
+            },
+            "related_lesson_slides": []
+          }
+        ]
+      },
+      {
+        "jokbo_page": 9,
+        "questions": [
+          {
+            "question_number": "18",
+            "question_numbers_on_page": [
+              "18",
+              "19",
+              "20"
+            ],
+            "question_text": "다음 <그림>을 보고, (A)에 알맞은 진단기법을 하나 고르시오.",
+            "answer": "2) Fluorescence in situ hybridization",
+            "explanation": "제시된 그림은 형광 물질이 부착된 DNA 탐침(probe)을 사용하여 특정 염색체나 유전자의 위치, 수적 이상, 구조적 이상(결실, 증폭 등)을 세포나 조직 내에서 직접 확인하는 기법인 형광동소보합법(Fluorescence in situ hybridization, FISH)을 보여준다. 그림 설명에서도 22q11.2 결실을 확인하는 과정을 묘사하고 있다.",
+            "wrong_answer_explanations": {
+              "1번": "Southern hybridization은 특정 DNA 서열을 검출하기 위해 DNA를 전기영동 후 막에 옮겨 탐침과 반응시키는 기법으로, 현미경으로 염색체를 직접 관찰하지 않는다.",
+              "3번": "G-banding은 염색체를 염색하여 특징적인 띠(band) 패턴을 관찰하는 고전적인 핵형 분석법이다.",
+              "4번": "Western blot은 특정 단백질을 검출하는 기법이다.",
+              "5번": "Northern hybridization은 특정 RNA 서열을 검출하는 기법이다."
+            },
+            "related_lesson_slides": [
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 29,
+                "relevance_reason": "강의 슬라이드의 'Molecular and Cytogenetic Diagnostics' 섹션에서 암 진단을 위한 전위(translocation) 검출 방법으로 'FISH'를 명시적으로 언급하고 있다.",
+                "relevance_score": 9
+              },
+              {
+                "lesson_filename": "0508_6_7교시_정지윤_종양5_문준영.pdf",
+                "lesson_page": 32,
+                "relevance_reason": "강의 슬라이드에 유방암에서 HER2 유전자 증폭을 확인하는 FISH 검사 이미지가 예시로 제시되어 있어, 문제의 진단 기법과 직접적으로 관련된다.",
+                "relevance_score": 10
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "summary": {
+      "total_jokbo_pages": 39,
+      "total_questions": 85,
+      "total_related_slides": 3
+    }
+  }
+}
