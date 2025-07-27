@@ -174,13 +174,81 @@ class PDFProcessor:
         for attempt in range(max_retries):
             try:
                 response = self.model.generate_content(content)
-                return response
+                
+                # Check if response is complete JSON
+                try:
+                    json.loads(response.text)
+                    return response
+                except json.JSONDecodeError as json_error:
+                    # If this is the last attempt, return the incomplete response
+                    if attempt == max_retries - 1:
+                        print(f"  경고: 불완전한 JSON 응답 (길이: {len(response.text)})")
+                        return response
+                    else:
+                        print(f"  재시도 {attempt + 1}/{max_retries}: 불완전한 JSON 응답 감지 (길이: {len(response.text)})")
+                        wait_time = backoff_factor ** attempt
+                        time.sleep(wait_time)
+                        continue
+                        
             except Exception as e:
                 if attempt == max_retries - 1:
                     raise
                 wait_time = backoff_factor ** attempt
-                print(f"  Retry {attempt + 1}/{max_retries} after {wait_time}s: {str(e)[:50]}...")
+                print(f"  재시도 {attempt + 1}/{max_retries} after {wait_time}s: {str(e)[:50]}...")
                 time.sleep(wait_time)
+    
+    def parse_partial_json(self, response_text: str, mode: str = "jokbo-centric") -> Dict[str, Any]:
+        """Try to parse partial JSON response and salvage what's possible"""
+        print(f"  부분 JSON 파싱 시도 중... (응답 길이: {len(response_text)})")
+        
+        if mode == "jokbo-centric":
+            # Try to extract complete jokbo_pages entries
+            try:
+                # Find the last complete "questions" array closing
+                # Look for pattern: }]}]} which typically ends a complete page entry
+                import re
+                
+                # Find all complete page objects
+                pages = []
+                page_pattern = r'\{\s*"jokbo_page"\s*:\s*\d+\s*,\s*"questions"\s*:\s*\[.*?\]\s*\}'
+                
+                # Try to find the jokbo_pages array start
+                jokbo_pages_start = response_text.find('"jokbo_pages"')
+                if jokbo_pages_start == -1:
+                    return {"error": "No jokbo_pages found", "partial": True}
+                
+                # Extract the content after jokbo_pages
+                content_after_pages = response_text[jokbo_pages_start:]
+                
+                # Try progressive closing of brackets
+                for i in range(len(content_after_pages), max(0, len(content_after_pages) - 10000), -100):
+                    test_json = '{' + content_after_pages[:i]
+                    
+                    # Count open brackets and try to close them
+                    open_braces = test_json.count('{') - test_json.count('}')
+                    open_brackets = test_json.count('[') - test_json.count(']')
+                    
+                    # Add closing brackets
+                    test_json += ']' * open_brackets + '}' * open_braces
+                    
+                    try:
+                        parsed = json.loads(test_json)
+                        if "jokbo_pages" in parsed and len(parsed["jokbo_pages"]) > 0:
+                            print(f"  부분 파싱 성공! {len(parsed['jokbo_pages'])}개 페이지 복구")
+                            parsed["partial"] = True
+                            parsed["recovered_pages"] = len(parsed["jokbo_pages"])
+                            return parsed
+                    except:
+                        continue
+                
+                return {"error": "Failed to parse even partially", "partial": True}
+                
+            except Exception as e:
+                print(f"  부분 파싱 실패: {str(e)}")
+                return {"error": str(e), "partial": True}
+        
+        # For other modes, return error
+        return {"error": "Partial parsing not implemented for this mode", "partial": True}
     
     def save_api_response(self, response_text: str, jokbo_filename: str, lesson_filename: str = None, mode: str = "lesson-centric"):
         """Save Gemini API response to a file for debugging"""
@@ -577,8 +645,13 @@ class PDFProcessor:
         try:
             result = json.loads(response.text)
             return result
-        except json.JSONDecodeError:
-            print(f"Failed to parse JSON response: {response.text}")
+        except json.JSONDecodeError as e:
+            print(f"  JSON 파싱 실패: {str(e)}")
+            # Try partial parsing for jokbo-centric mode
+            partial_result = self.parse_partial_json(response.text, "jokbo-centric")
+            if "error" not in partial_result or partial_result.get("jokbo_pages"):
+                print(f"  부분 파싱으로 일부 데이터 복구 성공")
+                return partial_result
             return {"error": "Failed to parse response"}
     
     def _analyze_jokbo_with_lesson_chunk(self, jokbo_file, lesson_chunk_path: str, 
@@ -652,12 +725,27 @@ class PDFProcessor:
                                     print(f"DEBUG: Page {page_num} appears to be absolute (exceeds chunk size {chunk_page_count}), keeping as-is for chunk p{start_page}-{end_page}")
             return result
         except json.JSONDecodeError as e:
-            print(f"Failed to parse JSON response for chunk p{start_page}-{end_page}: {e}")
-            # Try to save the problematic response for debugging
-            debug_file = self.debug_dir / f"failed_json_chunk_p{start_page}-{end_page}.txt"
-            with open(debug_file, 'w', encoding='utf-8') as f:
-                f.write(response.text)
-            return {"error": "Failed to parse response"}
+            print(f"  JSON 파싱 실패 (청크 p{start_page}-{end_page}): {str(e)}")
+            # Try partial parsing
+            partial_result = self.parse_partial_json(cleaned_text, "jokbo-centric")
+            if "error" not in partial_result or partial_result.get("jokbo_pages"):
+                print(f"  부분 파싱으로 청크 데이터 일부 복구")
+                # Still need to adjust page numbers for chunk offset
+                if "jokbo_pages" in partial_result:
+                    for page_info in partial_result["jokbo_pages"]:
+                        for question in page_info.get("questions", []):
+                            for slide in question.get("related_lesson_slides", []):
+                                if "lesson_page" in slide:
+                                    page_num = slide["lesson_page"]
+                                    chunk_page_count = end_page - start_page + 1
+                                    if page_num <= chunk_page_count:
+                                        slide["lesson_page"] = page_num + (start_page - 1)
+                return partial_result
+            else:
+                debug_file = self.debug_dir / f"failed_json_chunk_p{start_page}-{end_page}.txt"
+                with open(debug_file, 'w', encoding='utf-8') as f:
+                    f.write(response.text)
+                return {"error": "Failed to parse response"}
     
     def _merge_jokbo_centric_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Merge results from multiple chunks for jokbo-centric mode"""
@@ -901,8 +989,13 @@ class PDFProcessor:
                 result = json.loads(response.text)
                 print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 분석 완료 - {lesson_filename}")
                 return result
-            except json.JSONDecodeError:
-                print(f"Failed to parse JSON response: {response.text}")
+            except json.JSONDecodeError as e:
+                print(f"  JSON 파싱 실패: {str(e)}")
+                # Try partial parsing for jokbo-centric mode
+                partial_result = self.parse_partial_json(response.text, "jokbo-centric")
+                if "error" not in partial_result or partial_result.get("jokbo_pages"):
+                    print(f"  부분 파싱으로 일부 데이터 복구 성공")
+                    return partial_result
                 return {"error": "Failed to parse response"}
         
         # Large file, process in chunks
@@ -1008,11 +1101,27 @@ class PDFProcessor:
                                     print(f"DEBUG: Page {page_num} appears to be absolute (exceeds chunk size {chunk_page_count}), keeping as-is for chunk p{start_page}-{end_page}")
             return result
         except json.JSONDecodeError as e:
-            print(f"Failed to parse JSON response for chunk p{start_page}-{end_page}: {e}")
-            debug_file = self.debug_dir / f"failed_json_chunk_p{start_page}-{end_page}.txt"
-            with open(debug_file, 'w', encoding='utf-8') as f:
-                f.write(response.text)
-            return {"error": "Failed to parse response"}
+            print(f"  JSON 파싱 실패 (청크 p{start_page}-{end_page}): {str(e)}")
+            # Try partial parsing
+            partial_result = self.parse_partial_json(cleaned_text, "jokbo-centric")
+            if "error" not in partial_result or partial_result.get("jokbo_pages"):
+                print(f"  부분 파싱으로 청크 데이터 일부 복구")
+                # Still need to adjust page numbers for chunk offset
+                if "jokbo_pages" in partial_result:
+                    for page_info in partial_result["jokbo_pages"]:
+                        for question in page_info.get("questions", []):
+                            for slide in question.get("related_lesson_slides", []):
+                                if "lesson_page" in slide:
+                                    page_num = slide["lesson_page"]
+                                    chunk_page_count = end_page - start_page + 1
+                                    if page_num <= chunk_page_count:
+                                        slide["lesson_page"] = page_num + (start_page - 1)
+                return partial_result
+            else:
+                debug_file = self.debug_dir / f"failed_json_chunk_p{start_page}-{end_page}.txt"
+                with open(debug_file, 'w', encoding='utf-8') as f:
+                    f.write(response.text)
+                return {"error": "Failed to parse response"}
     
     def analyze_lessons_for_jokbo_parallel(self, lesson_paths: List[str], jokbo_path: str, max_workers: int = 3) -> Dict[str, Any]:
         """Analyze multiple lesson PDFs against one jokbo PDF using parallel processing (jokbo-centric)"""
