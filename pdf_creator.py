@@ -193,7 +193,8 @@ class PDFCreator:
             summary_text += f"관련 슬라이드 수: {summary['total_related_slides']}\n"
             summary_text += f"총 관련 문제 수: {summary.get('total_questions', 'N/A')}\n\n"
             summary_text += f"주요 주제: {', '.join(summary['key_topics'])}\n\n"
-            summary_text += f"학습 권장사항:\n{summary['study_recommendations']}"
+            if 'study_recommendations' in summary:
+                summary_text += f"학습 권장사항:\n{summary['study_recommendations']}"
             
             # Use CJK font for summary page
             font = fitz.Font("cjk")
@@ -372,7 +373,8 @@ class PDFCreator:
             summary_text += f"족보 페이지 수: {summary['total_jokbo_pages']}\n"
             summary_text += f"총 문제 수: {summary.get('total_questions', 'N/A')}\n"
             summary_text += f"관련 강의 슬라이드 수: {summary.get('total_related_slides', 'N/A')}\n\n"
-            summary_text += f"학습 권장사항:\n{summary['study_recommendations']}"
+            if 'study_recommendations' in summary:
+                summary_text += f"학습 권장사항:\n{summary['study_recommendations']}"
             
             # Use CJK font for summary page
             font = fitz.Font("cjk")
