@@ -10,6 +10,7 @@ from typing import List, Tuple
 from config import create_model
 from pdf_processor import PDFProcessor
 from pdf_creator import PDFCreator
+from error_handler import ErrorHandler
 
 
 def find_pdf_files(directory: str, pattern: str = "*.pdf") -> List[Path]:
@@ -57,9 +58,7 @@ def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], o
         return True
         
     except Exception as e:
-        print(f"  처리 중 오류 발생: {str(e)}")
-        import traceback
-        traceback.print_exc()
+        ErrorHandler.log_exception("PDF 처리", e, debug=True)
         return False
 
 
@@ -102,9 +101,7 @@ def process_jokbo_with_all_lessons(jokbo_path: Path, lesson_paths: List[Path], o
         return True
         
     except Exception as e:
-        print(f"  처리 중 오류 발생: {str(e)}")
-        import traceback
-        traceback.print_exc()
+        ErrorHandler.log_exception("PDF 처리", e, debug=True)
         return False
 
 

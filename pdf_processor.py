@@ -19,6 +19,9 @@ from constants import (
     JOKBO_CENTRIC_TASK, JOKBO_CENTRIC_OUTPUT_FORMAT,
     MAX_CONNECTIONS_PER_QUESTION, RELEVANCE_SCORE_THRESHOLD
 )
+from validators import PDFValidator
+from pdf_processor_helpers import PDFProcessorHelpers
+from error_handler import ErrorHandler
 
 if TYPE_CHECKING:
     from google.generativeai.types import file_types
@@ -40,10 +43,10 @@ class PDFProcessor:
                 genai.delete_file(file.name)
                 print(f"  Deleted uploaded file: {file.display_name}")
             except Exception as e:
-                print(f"  Failed to delete file {file.display_name}: {e}")
+                ErrorHandler.handle_file_error("delete", Path(file.display_name), e)
     
     def get_pdf_page_count(self, pdf_path: str) -> int:
-        """Get total page count of a PDF file
+        """Get total page count of a PDF file (cached)
         
         Args:
             pdf_path: Path to the PDF file
@@ -52,48 +55,15 @@ class PDFProcessor:
             Total number of pages in the PDF
         """
         if pdf_path not in self.pdf_page_counts:
-            with fitz.open(pdf_path) as doc:
-                self.pdf_page_counts[pdf_path] = len(doc)
+            self.pdf_page_counts[pdf_path] = PDFValidator.get_pdf_page_count(pdf_path)
         return self.pdf_page_counts[pdf_path]
     
     def validate_and_adjust_page_number(self, page_num: int, start_page: int, end_page: int, 
                                       total_pages: int, chunk_path: str) -> Optional[int]:
-        """Validate and adjust page number with retry logic
-        
-        Args:
-            page_num: The page number to validate/adjust
-            start_page: Start page of the chunk
-            end_page: End page of the chunk
-            total_pages: Total pages in the PDF
-            chunk_path: Path identifier for debugging
-            
-        Returns:
-            Adjusted page number or None if invalid
-        """
-        chunk_page_count = end_page - start_page + 1
-        
-        # Case 1: Page number is within chunk range (1 to chunk_page_count)
-        # This is likely a chunk-relative page number
-        if 1 <= page_num <= chunk_page_count:
-            adjusted = page_num + (start_page - 1)
-            print(f"  페이지 조정: 청크 상대값 {page_num} → 절대값 {adjusted} (청크 p{start_page}-{end_page})")
-            return adjusted
-        
-        # Case 2: Page number is within the actual chunk's absolute range
-        # This is likely already an absolute page number
-        if start_page <= page_num <= end_page:
-            print(f"  페이지 유지: 절대값 {page_num} (청크 범위 p{start_page}-{end_page} 내)")
-            return page_num
-        
-        # Case 3: Page number is within total PDF range but outside chunk
-        # This might be a mistaken reference or API error
-        if 1 <= page_num <= total_pages:
-            print(f"  경고: 페이지 {page_num}은 청크 p{start_page}-{end_page} 범위 밖이지만 PDF 전체 범위 내 - 재분석 필요")
-            return None
-        
-        # Case 4: Page number is completely invalid
-        print(f"  오류: 잘못된 페이지 번호 {page_num} (PDF 전체 {total_pages}페이지 초과) - 재분석 필요")
-        return None
+        """Validate and adjust page number with retry logic (wrapper for validator)"""
+        return PDFValidator.validate_and_adjust_page_number(
+            page_num, start_page, end_page, total_pages, chunk_path
+        )
     
     def split_pdf_for_analysis(self, pdf_path: str, max_pages: int = 40) -> List[Tuple[str, int, int]]:
         """Split PDF into smaller chunks for analysis
@@ -293,7 +263,45 @@ class PDFProcessor:
                             parsed["partial"] = True
                             parsed["recovered_pages"] = len(parsed["jokbo_pages"])
                             return parsed
-                    except:
+                    except json.JSONDecodeError:
+                        continue
+                
+                return {"error": "Failed to parse even partially", "partial": True}
+                
+            except Exception as e:
+                print(f"  부분 파싱 실패: {str(e)}")
+                return {"error": str(e), "partial": True}
+        
+        elif mode == "lesson-centric":
+            # Try to extract complete related_slides entries
+            try:
+                # Try to find the related_slides array start
+                related_slides_start = response_text.find('"related_slides"')
+                if related_slides_start == -1:
+                    return {"error": "No related_slides found", "partial": True}
+                
+                # Extract the content after related_slides
+                content_after_slides = response_text[related_slides_start:]
+                
+                # Try progressive closing of brackets
+                for i in range(len(content_after_slides), max(0, len(content_after_slides) - 10000), -100):
+                    test_json = '{' + content_after_slides[:i]
+                    
+                    # Count open brackets and try to close them
+                    open_braces = test_json.count('{') - test_json.count('}')
+                    open_brackets = test_json.count('[') - test_json.count(']')
+                    
+                    # Add closing brackets
+                    test_json += ']' * open_brackets + '}' * open_braces
+                    
+                    try:
+                        parsed = json.loads(test_json)
+                        if "related_slides" in parsed and len(parsed["related_slides"]) > 0:
+                            print(f"  부분 파싱 성공! {len(parsed['related_slides'])}개 슬라이드 복구")
+                            parsed["partial"] = True
+                            parsed["recovered_slides"] = len(parsed["related_slides"])
+                            return parsed
+                    except json.JSONDecodeError:
                         continue
                 
                 return {"error": "Failed to parse even partially", "partial": True}
@@ -303,7 +311,7 @@ class PDFProcessor:
                 return {"error": str(e), "partial": True}
         
         # For other modes, return error
-        return {"error": "Partial parsing not implemented for this mode", "partial": True}
+        return {"error": f"Partial parsing not implemented for mode: {mode}", "partial": True}
     
     def save_api_response(self, response_text: str, jokbo_filename: str, lesson_filename: str = None, mode: str = "lesson-centric"):
         """Save Gemini API response to a file for debugging"""
@@ -424,25 +432,18 @@ class PDFProcessor:
             if "related_slides" in result:
                 for slide in result["related_slides"]:
                     if "related_jokbo_questions" in slide:
-                        valid_questions = []
-                        for question in slide["related_jokbo_questions"]:
-                            # Force correct filename
-                            question["jokbo_filename"] = jokbo_filename
-                            
-                            # Validate page number
-                            jokbo_page = question.get("jokbo_page", 0)
-                            if jokbo_page < 1 or jokbo_page > total_jokbo_pages:
-                                print(f"  경고: 잘못된 페이지 번호 감지 - 문제 {question.get('question_number', '?')}번, 페이지 {jokbo_page} (족보 총 {total_jokbo_pages}페이지)")
-                                print(f"  → 이 문제는 강의자료에 포함된 문제일 가능성이 높습니다. 제외합니다.")
-                                continue
-                            
-                            valid_questions.append(question)
-                        
-                        slide["related_jokbo_questions"] = valid_questions
+                        slide["related_jokbo_questions"] = PDFValidator.filter_valid_questions(
+                            slide["related_jokbo_questions"], total_jokbo_pages, jokbo_filename
+                        )
             
             return result
-        except json.JSONDecodeError:
-            print(f"Failed to parse JSON response: {response.text}")
+        except json.JSONDecodeError as e:
+            print(f"  JSON 파싱 실패: {str(e)}")
+            # Try partial parsing for lesson-centric mode
+            partial_result = self.parse_partial_json(response.text, "lesson-centric")
+            if "error" not in partial_result or partial_result.get("related_slides"):
+                print(f"  부분 파싱으로 일부 데이터 복구 성공")
+                return partial_result
             return {"error": "Failed to parse response"}
     
     def analyze_single_jokbo_with_lesson_preloaded(self, jokbo_path: str, lesson_file) -> Dict[str, Any]:
@@ -500,26 +501,19 @@ class PDFProcessor:
             if "related_slides" in result:
                 for slide in result["related_slides"]:
                     if "related_jokbo_questions" in slide:
-                        valid_questions = []
-                        for question in slide["related_jokbo_questions"]:
-                            # Force correct filename
-                            question["jokbo_filename"] = jokbo_filename
-                            
-                            # Validate page number
-                            jokbo_page = question.get("jokbo_page", 0)
-                            if jokbo_page < 1 or jokbo_page > total_jokbo_pages:
-                                print(f"  경고: 잘못된 페이지 번호 감지 - 문제 {question.get('question_number', '?')}번, 페이지 {jokbo_page} (족보 총 {total_jokbo_pages}페이지)")
-                                print(f"  → 이 문제는 강의자료에 포함된 문제일 가능성이 높습니다. 제외합니다.")
-                                continue
-                            
-                            valid_questions.append(question)
-                        
-                        slide["related_jokbo_questions"] = valid_questions
+                        slide["related_jokbo_questions"] = PDFValidator.filter_valid_questions(
+                            slide["related_jokbo_questions"], total_jokbo_pages, jokbo_filename
+                        )
             
             print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 분석 완료 - {jokbo_filename}")
             return result
-        except json.JSONDecodeError:
-            print(f"Failed to parse JSON response: {response.text}")
+        except json.JSONDecodeError as e:
+            print(f"  JSON 파싱 실패: {str(e)}")
+            # Try partial parsing for lesson-centric mode
+            partial_result = self.parse_partial_json(response.text, "lesson-centric")
+            if "error" not in partial_result or partial_result.get("related_slides"):
+                print(f"  부분 파싱으로 일부 데이터 복구 성공")
+                return partial_result
             return {"error": "Failed to parse response"}
     
     def analyze_pdfs_for_lesson(self, jokbo_paths: List[str], lesson_path: str) -> Dict[str, Any]:
@@ -647,8 +641,8 @@ class PDFProcessor:
             for temp_file in temp_files:
                 try:
                     os.unlink(temp_file)
-                except:
-                    pass
+                except (OSError, IOError) as e:
+                    print(f"Failed to delete temp file: {e}")
     
     def _analyze_single_lesson_with_jokbo_original(self, lesson_path: str, jokbo_path: str) -> Dict[str, Any]:
         """Original implementation for small files"""
@@ -1091,8 +1085,8 @@ class PDFProcessor:
             for temp_file in temp_files:
                 try:
                     os.unlink(temp_file)
-                except:
-                    pass
+                except (OSError, IOError) as e:
+                    print(f"Failed to delete temp file: {e}")
     
     def _analyze_jokbo_with_lesson_chunk_preloaded(self, jokbo_file, lesson_chunk_path: str, 
                                                    jokbo_filename: str, lesson_filename: str,
@@ -1119,26 +1113,16 @@ class PDFProcessor:
         chunk_display_name = f"강의자료_{lesson_filename}_p{start_page}-{end_page}"
         lesson_chunk_file = self.upload_pdf(lesson_chunk_path, chunk_display_name)
         
-        # 프롬프트 구성 (페이지 범위 명시)
-        intro = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF의 일부분을 비교 분석합니다.
-
-중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
-중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요.
-중요: 현재 분석하는 강의자료는 전체의 {start_page}-{end_page} 페이지 부분입니다."""
-        
+        # Build prompt using helper
         output_format = JOKBO_CENTRIC_OUTPUT_FORMAT.format(
             jokbo_filename=jokbo_filename,
             lesson_filename=lesson_filename
         )
         
-        prompt = f"""{intro}
-
-{JOKBO_CENTRIC_TASK}
-        
-{COMMON_WARNINGS}
-        
-{output_format}
-        """
+        prompt = PDFProcessorHelpers.build_chunk_prompt(
+            jokbo_filename, lesson_filename, start_page, end_page,
+            JOKBO_CENTRIC_TASK, COMMON_WARNINGS, output_format
+        )
         
         # Prepare content for model
         content = [prompt, jokbo_file, lesson_chunk_file]
@@ -1146,48 +1130,18 @@ class PDFProcessor:
         response = self.generate_content_with_retry(content)
         
         # Save API response for debugging
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        debug_filename = f"gemini_response_{timestamp}_chunk_p{start_page}-{end_page}_{lesson_filename}.json"
         self.save_api_response(response.text, jokbo_filename, lesson_filename, f"chunk_p{start_page}-{end_page}")
-        
-        # Don't delete here - return file reference for main thread to delete
-        # self.delete_file_safe(lesson_chunk_file)
         
         try:
             # Clean up common JSON errors from Gemini
-            cleaned_text = response.text
-            # Fix incorrectly quoted keys like "4"번" -> "4번"
-            import re
-            cleaned_text = re.sub(r'"(\d+)"번"', r'"\1번"', cleaned_text)
-            
+            cleaned_text = PDFProcessorHelpers.clean_json_text(response.text)
             result = json.loads(cleaned_text)
             
             # Process page numbers with validation and potential retry
-            retry_needed = False
-            invalid_questions = set()
-            
-            if "jokbo_pages" in result:
-                for page_info in result["jokbo_pages"]:
-                    for question in page_info.get("questions", []):
-                        question_num = question.get("question_number", "Unknown")
-                        has_invalid_page = False
-                        
-                        for slide in question.get("related_lesson_slides", []):
-                            if "lesson_page" in slide:
-                                page_num = slide["lesson_page"]
-                                adjusted_page = self.validate_and_adjust_page_number(
-                                    page_num, start_page, end_page, lesson_total_pages, 
-                                    f"Q{question_num}"
-                                )
-                                
-                                if adjusted_page is None:
-                                    has_invalid_page = True
-                                    retry_needed = True
-                                else:
-                                    slide["lesson_page"] = adjusted_page
-                        
-                        if has_invalid_page:
-                            invalid_questions.add(question_num)
+            retry_needed, invalid_questions = PDFProcessorHelpers.validate_question_pages(
+                result, start_page, end_page, lesson_total_pages, 
+                self.validate_and_adjust_page_number
+            )
             
             # If retry is needed and we have retries left
             if retry_needed and max_retries > 0:
@@ -1201,13 +1155,7 @@ class PDFProcessor:
             
             # If still have invalid pages after all retries, remove those questions
             if retry_needed:
-                print(f"  경고: 재시도 후에도 잘못된 페이지 번호 - 문제 {', '.join(invalid_questions)} 제외")
-                if "jokbo_pages" in result:
-                    for page_info in result["jokbo_pages"]:
-                        page_info["questions"] = [
-                            q for q in page_info.get("questions", [])
-                            if q.get("question_number") not in invalid_questions
-                        ]
+                PDFProcessorHelpers.remove_invalid_questions(result, invalid_questions)
             
             return result, lesson_chunk_file
         except json.JSONDecodeError as e:
@@ -1216,39 +1164,13 @@ class PDFProcessor:
             partial_result = self.parse_partial_json(cleaned_text, "jokbo-centric")
             if "error" not in partial_result or partial_result.get("jokbo_pages"):
                 print(f"  부분 파싱으로 청크 데이터 일부 복구")
-                # Apply same page validation logic to partial results
-                if "jokbo_pages" in partial_result:
-                    invalid_questions = set()
-                    for page_info in partial_result["jokbo_pages"]:
-                        for question in page_info.get("questions", []):
-                            question_num = question.get("question_number", "Unknown")
-                            has_invalid_page = False
-                            
-                            for slide in question.get("related_lesson_slides", []):
-                                if "lesson_page" in slide:
-                                    page_num = slide["lesson_page"]
-                                    adjusted_page = self.validate_and_adjust_page_number(
-                                        page_num, start_page, end_page, lesson_total_pages,
-                                        f"Q{question_num}"
-                                    )
-                                    
-                                    if adjusted_page is None:
-                                        has_invalid_page = True
-                                        invalid_questions.add(question_num)
-                                    else:
-                                        slide["lesson_page"] = adjusted_page
-                            
-                            if has_invalid_page:
-                                invalid_questions.add(question_num)
-                    
-                    # Remove questions with invalid pages
-                    if invalid_questions:
-                        print(f"  부분 파싱 결과에서 잘못된 페이지 번호 문제 제외: {', '.join(invalid_questions)}")
-                        for page_info in partial_result["jokbo_pages"]:
-                            page_info["questions"] = [
-                                q for q in page_info.get("questions", [])
-                                if q.get("question_number") not in invalid_questions
-                            ]
+                # Apply validation to partial results
+                retry_needed, invalid_questions = PDFProcessorHelpers.validate_question_pages(
+                    partial_result, start_page, end_page, lesson_total_pages,
+                    self.validate_and_adjust_page_number
+                )
+                if invalid_questions:
+                    PDFProcessorHelpers.remove_invalid_questions(partial_result, invalid_questions)
                 
                 return partial_result, lesson_chunk_file
             else:
@@ -1344,8 +1266,8 @@ class PDFProcessor:
                 # Ensure cleanup happens
                 try:
                     thread_processor.__del__()
-                except:
-                    pass
+                except (OSError, IOError) as e:
+                    print(f"Failed to delete temp file: {e}")
         
         # Process all chunks in parallel
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] {len(all_chunks)}개 청크 병렬 처리 시작 (max_workers={max_workers})")
@@ -1537,8 +1459,8 @@ class PDFProcessor:
                 # Ensure cleanup happens
                 try:
                     thread_processor.__del__()
-                except:
-                    pass
+                except (OSError, IOError) as e:
+                    print(f"Failed to delete temp file: {e}")
         
         # Process jokbo files in parallel
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] {len(jokbo_paths)}개 족보 파일 병렬 처리 시작 (max_workers={max_workers})")

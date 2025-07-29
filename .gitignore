@@ -21,7 +21,7 @@ jokbo/
 lesson/
 output/
 *.pdf
-
+claude/
 # Zone.Identifier 파일
 *.Zone.Identifier
 

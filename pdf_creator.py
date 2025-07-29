@@ -14,6 +14,7 @@ import tempfile
 import os
 from datetime import datetime
 import threading
+from validators import PDFValidator
 
 class PDFCreator:
     def __init__(self):
@@ -57,9 +58,12 @@ class PDFCreator:
             self.log_debug(f"  ERROR: Jokbo file not found: {jokbo_path}")
             return None
             
-        jokbo_pdf = self.get_jokbo_pdf(str(jokbo_path))
+        # Check page validity with thread-safe access
+        with self.pdf_lock:
+            jokbo_pdf = self.get_jokbo_pdf(str(jokbo_path))
+            pdf_page_count = len(jokbo_pdf)
         
-        if jokbo_page > len(jokbo_pdf) or jokbo_page < 1:
+        if jokbo_page > pdf_page_count or jokbo_page < 1:
             print(f"Warning: Page {jokbo_page} does not exist in {jokbo_filename}")
             return None
         
@@ -73,18 +77,18 @@ class PDFCreator:
             if question_numbers_on_page and question_num_str in question_numbers_on_page:
                 self.log_debug(f"  Found in question_numbers_on_page")
                 # Check if current question is the last one on the page
-                if question_num_str == question_numbers_on_page[-1] and jokbo_page < len(jokbo_pdf):
+                if question_num_str == question_numbers_on_page[-1] and jokbo_page < pdf_page_count:
                     # This is the last question on the page, include next page
                     jokbo_end_page = jokbo_page + 1
                     print(f"  DEBUG: Question {question_number} is last in {question_numbers_on_page} on page {jokbo_page}")
-                    print(f"  DEBUG: Including next page {jokbo_end_page} (PDF has {len(jokbo_pdf)} pages)")
+                    print(f"  DEBUG: Including next page {jokbo_end_page} (PDF has {pdf_page_count} pages)")
                     self.log_debug(f"  LAST QUESTION: Including next page {jokbo_end_page}")
                 else:
                     jokbo_end_page = jokbo_page
                     print(f"  DEBUG: Question {question_number} on page {jokbo_page}, not last or no next page")
                     self.log_debug(f"  NOT LAST: Using single page {jokbo_end_page}")
             # Fallback to is_last_question_on_page flag
-            elif is_last_question_on_page and jokbo_page < len(jokbo_pdf):
+            elif is_last_question_on_page and jokbo_page < pdf_page_count:
                 # Automatically include the next page
                 jokbo_end_page = jokbo_page + 1
                 print(f"  Question {question_number} is last on page {jokbo_page}, including next page")
@@ -94,14 +98,19 @@ class PDFCreator:
                 self.log_debug(f"  NO CONDITIONS MET: Using single page")
         
         # Validate end page
-        if jokbo_end_page > len(jokbo_pdf) or jokbo_end_page < jokbo_page:
+        if jokbo_end_page > pdf_page_count or jokbo_end_page < jokbo_page:
             print(f"Warning: Invalid end page {jokbo_end_page}, using single page")
             jokbo_end_page = jokbo_page
         
         # Extract the full page(s) containing the question
         self.log_debug(f"  Final extraction: pages {jokbo_page} to {jokbo_end_page} (0-indexed: {jokbo_page-1} to {jokbo_end_page-1})")
         question_doc = fitz.open()
-        question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_end_page-1)
+        
+        # Thread-safe PDF access for extraction
+        with self.pdf_lock:
+            jokbo_pdf = self.get_jokbo_pdf(str(jokbo_path))
+            question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_end_page-1)
+        
         self.log_debug(f"  Extracted document has {len(question_doc)} pages")
         
         return question_doc
@@ -248,9 +257,12 @@ class PDFCreator:
             return
         
         doc = fitz.open()
-        # Use the cached PDF mechanism to ensure consistency
-        jokbo_pdf = self.get_jokbo_pdf(jokbo_path)
         jokbo_filename = Path(jokbo_path).name
+        
+        # Get PDF page count thread-safely
+        with self.pdf_lock:
+            jokbo_pdf = self.get_jokbo_pdf(jokbo_path)
+            jokbo_page_count = len(jokbo_pdf)
         
         # Track which questions have been processed to avoid duplicates
         processed_questions = set()
@@ -258,7 +270,7 @@ class PDFCreator:
         for page_info in analysis_result.get("jokbo_pages", []):
             jokbo_page_num = page_info["jokbo_page"]
             
-            if jokbo_page_num <= len(jokbo_pdf):
+            if jokbo_page_num <= jokbo_page_count:
                 # Process each question on this page
                 for question in page_info.get("questions", []):
                     related_slides = question.get("related_lesson_slides", [])
@@ -302,12 +314,10 @@ class PDFCreator:
                             # Validate page number
                             lesson_path = Path(lesson_dir) / lesson_filename
                             if lesson_path.exists():
-                                with fitz.open(str(lesson_path)) as temp_pdf:
-                                    max_pages = len(temp_pdf)
-                                    if lesson_page > max_pages:
-                                        print(f"Warning: Page {lesson_page} does not exist in {lesson_filename} (max: {max_pages})")
-                                        self.log_debug(f"  WARNING: Page {lesson_page} > max {max_pages} in {lesson_filename}")
-                                        continue
+                                max_pages = PDFValidator.get_pdf_page_count(str(lesson_path))
+                                if not PDFValidator.validate_page_number(lesson_page, max_pages, lesson_filename):
+                                    self.log_debug(f"  WARNING: Page {lesson_page} > max {max_pages} in {lesson_filename}")
+                                    continue
                             
                             slide_doc = self.extract_lesson_slide(
                                 lesson_filename,
