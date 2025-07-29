@@ -16,6 +16,13 @@ COMMON_WARNINGS = """**매우 중요한 주의사항**:
 - 만약 문제 번호가 명확하지 않으면 "번호없음"이라고 표시하세요
 - jokbo_page는 반드시 **문제의 첫 부분이 나타나는** PDF 페이지 번호를 정확히 기입하세요
 
+**페이지 번호 작성 규칙**:
+- lesson_page는 반드시 강의자료 PDF 파일의 실제 페이지 번호를 사용하세요
+- PDF 뷰어에 표시되는 페이지 번호를 그대로 사용하세요 (1페이지부터 시작)
+- 페이지 번호는 0부터 시작하는 인덱스가 아닙니다
+- 예: PDF 뷰어에서 "55/100"으로 표시되면 lesson_page는 55입니다
+- jokbo_page도 동일한 규칙을 따릅니다 (PDF 뷰어에 표시되는 실제 페이지 번호)
+
 **question_numbers_on_page 필드 작성 필수**:
 - 각 jokbo_page에 있는 모든 문제 번호를 question_numbers_on_page 배열에 순서대로 나열하세요
 - 예시: 한 페이지에 13번, 14번, 15번 문제가 있다면 → "question_numbers_on_page": ["13", "14", "15"]
@@ -109,7 +116,7 @@ JOKBO_CENTRIC_OUTPUT_FORMAT = """출력 형식:
 {{
     "jokbo_pages": [
         {{
-            "jokbo_page": 족보페이지번호,
+            "jokbo_page": 족보페이지번호,  // PDF 뷰어에 표시되는 실제 페이지 번호 (1부터 시작)
             "questions": [
                 {{
                     "question_number": 문제번호,
@@ -126,7 +133,7 @@ JOKBO_CENTRIC_OUTPUT_FORMAT = """출력 형식:
                     "related_lesson_slides": [
                         {{
                             "lesson_filename": "{lesson_filename}",
-                            "lesson_page": 강의페이지번호,
+                            "lesson_page": 강의페이지번호,  // PDF 뷰어에 표시되는 실제 페이지 번호 (1부터 시작)
                             "relevance_reason": "관련성 이유",
                             "relevance_score": 1-11
                         }}
