@@ -129,6 +129,7 @@ ls output/debug/
 
 - **Chunking Strategy**: Large PDFs split into 40-page chunks (configurable)
 - **Thread Safety**: PDF cache protected by threading.Lock
+- **Session Management**: Single session ID shared across all threads in parallel processing
 - **Retry Logic**: 3 attempts with exponential backoff for API calls
 - **Debug Support**: All API responses saved with timestamps
 - **Memory Management**: Explicit cleanup in destructors
@@ -153,7 +154,24 @@ ls output/debug/
   - Top 2 connections per question (configurable via MAX_CONNECTIONS_PER_QUESTION)
   - Minimum score threshold filtering (default: 5)
 
-## 최근 개선사항 (Recent Improvements - 2025-07-28)
+## 최근 개선사항 (Recent Improvements - 2025-08-01)
+
+### 1. 세션 격리 개선 - 병렬 처리 시 단일 세션 사용
+- **문제**: 병렬 처리 시 각 스레드가 새로운 세션을 생성하여 불필요한 세션 디렉토리 생성
+- **해결**: PDFProcessor 생성자에 선택적 session_id 매개변수 추가
+- **효과**: 
+  - 이전: 메인 프로세스 1개 + 스레드별 세션 3개 = 총 4개 세션
+  - 현재: 모든 스레드가 메인 프로세스의 세션 ID 공유 = 총 1개 세션
+- **구현**:
+  ```python
+  # 메인 프로세서
+  main_processor = PDFProcessor(model)
+  
+  # 스레드에서 세션 ID 공유
+  thread_processor = PDFProcessor(model, session_id=main_processor.session_id)
+  ```
+
+## 이전 개선사항 (2025-07-28)
 
 ### 1. 병렬 처리 모드 대규모 개선
 - **Critical Bug Fix**: 족보 중심 병렬 모드에서 `all_connections` 미정의 버그 수정

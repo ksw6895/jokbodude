@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from google.generativeai.types import file_types
 
 class PDFProcessor:
-    def __init__(self, model):
+    def __init__(self, model, session_id=None):
         self.model = model
         self.uploaded_files = []
         # Create debug directory if it doesn't exist
@@ -40,11 +40,20 @@ class PDFProcessor:
         self.pdf_page_counts = {}
         
         # 세션 식별자 시스템
-        self.session_id = self._generate_session_id()
+        if session_id:
+            # 기존 세션 ID 사용
+            self.session_id = session_id
+        else:
+            # 새 세션 ID 생성
+            self.session_id = self._generate_session_id()
+            
         self.session_dir = Path("output/temp/sessions") / self.session_id
         self.chunk_results_dir = self.session_dir / "chunk_results"
         self.chunk_results_dir.mkdir(parents=True, exist_ok=True)
-        print(f"세션 ID: {self.session_id}")
+        
+        # 세션 ID 출력 (새로 생성된 경우에만)
+        if not session_id:
+            print(f"세션 ID: {self.session_id}")
     
     def _generate_session_id(self) -> str:
         """세션 ID 생성 (타임스탬프 + 랜덤 문자)"""
@@ -1258,8 +1267,8 @@ class PDFProcessor:
             
             print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 처리 시작 - {lesson_filename} (p{start_page}-{end_page})")
             
-            # Create a new PDFProcessor instance for this thread
-            thread_processor = PDFProcessor(self.model)
+            # Create a new PDFProcessor instance for this thread with parent session ID
+            thread_processor = PDFProcessor(self.model, session_id=self.session_id)
             
             try:
                 # Extract pages to temporary file if needed
@@ -1426,8 +1435,8 @@ class PDFProcessor:
             thread_id = threading.current_thread().ident
             print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 처리 시작 - {Path(jokbo_path).name}")
             
-            # Create a new PDFProcessor instance for this thread
-            thread_processor = PDFProcessor(self.model)
+            # Create a new PDFProcessor instance for this thread with parent session ID
+            thread_processor = PDFProcessor(self.model, session_id=self.session_id)
             
             try:
                 result = thread_processor.analyze_single_jokbo_with_lesson_preloaded(jokbo_path, lesson_file)
