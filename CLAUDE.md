@@ -150,13 +150,30 @@ ls output/debug/
 - Command: `python main.py --mode jokbo-centric`
 - Best for: Exam preparation, understanding question sources
 - Features:
-  - Relevance scoring (1-11, with 11 for identical diagrams)
+  - Relevance scoring (1-100, 5점 단위로 부여)
   - Top 2 connections per question (configurable via MAX_CONNECTIONS_PER_QUESTION)
-  - Minimum score threshold filtering (default: 5)
+  - Minimum score threshold filtering (default: 50점)
 
 ## 최근 개선사항 (Recent Improvements - 2025-08-01)
 
-### 1. 세션 격리 개선 - 병렬 처리 시 단일 세션 사용
+### 1. 관련성 점수 체계 개선 (1-11 → 1-100점)
+- **문제**: 기존 1-11점 체계가 너무 단순하고, 동일한 그림이 아닌데도 11점을 받는 경우 발생
+- **해결**: 100점 만점 체계로 변경, 5점 단위로만 점수 부여
+- **새로운 점수 기준**:
+  - **90-100점**: 핵심 출제 슬라이드
+    - 100점: 슬라이드 내용이 그대로 문제로 출제
+    - 95점: 동일한 그림/도표가 존재 ⭐
+    - 90점: 이 슬라이드만 보면 문제를 100% 맞힐 수 있음 🎯
+  - **70-85점**: 직접적으로 관련된 슬라이드
+  - **50-65점**: 중간 정도 관련된 슬라이드
+  - **25-45점**: 간접적으로 관련된 슬라이드
+  - **5-20점**: 거의 무관한 슬라이드
+- **장점**:
+  - 더 세밀한 관련성 평가 가능
+  - 5점 단위로 점수를 제한하여 일관성 향상
+  - 최소 기준점을 50점으로 높여 더 관련성 높은 슬라이드만 선별
+
+### 2. 세션 격리 개선 - 병렬 처리 시 단일 세션 사용
 - **문제**: 병렬 처리 시 각 스레드가 새로운 세션을 생성하여 불필요한 세션 디렉토리 생성
 - **해결**: PDFProcessor 생성자에 선택적 session_id 매개변수 추가
 - **효과**: 
@@ -227,11 +244,10 @@ ls output/debug/
    - 한글 텍스트 렌더링을 위한 CJK 폰트 사용
 
 2. **족보 중심 모드 개선**
-   - 각 문제별 관련 강의 슬라이드에 relevance_score (1-11) 추가
-   - 특수 점수 11점: 족보와 강의자료에 동일한 그림/도표가 있는 경우 ⭐
+   - 각 문제별 관련 강의 슬라이드에 relevance_score 추가
    - 관련성 점수 기반으로 상위 2개 연결만 선택하여 표시
-   - 최소 점수 기준(5점) 미만 연결은 자동 제외
-   - PDF 출력에 관련성 점수 표시 (11점은 특별 표시)
+   - 최소 점수 기준 미만 연결은 자동 제외
+   - PDF 출력에 관련성 점수 표시
 
 3. **코드 구조 개선**
    - constants.py 파일 추가하여 프롬프트 상수화
