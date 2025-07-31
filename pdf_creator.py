@@ -256,6 +256,15 @@ class PDFCreator:
             print(f"Cannot create PDF due to analysis error: {analysis_result['error']}")
             return
         
+        # Debug: 분석 결과 확인
+        jokbo_pages = analysis_result.get("jokbo_pages", [])
+        total_questions = sum(len(page.get("questions", [])) for page in jokbo_pages)
+        print(f"  PDF 생성 시작: {len(jokbo_pages)}개 페이지, {total_questions}개 문제")
+        
+        if not jokbo_pages:
+            print(f"  경고: jokbo_pages가 비어있습니다. PDF를 생성할 내용이 없습니다.")
+            return
+        
         doc = fitz.open()
         jokbo_filename = Path(jokbo_path).name
         
@@ -264,119 +273,148 @@ class PDFCreator:
             jokbo_pdf = self.get_jokbo_pdf(jokbo_path)
             jokbo_page_count = len(jokbo_pdf)
         
+        # Collect all questions with their page info
+        all_questions = []
+        for page_info in analysis_result.get("jokbo_pages", []):
+            jokbo_page_num = page_info["jokbo_page"]
+            if jokbo_page_num <= jokbo_page_count:
+                for question in page_info.get("questions", []):
+                    if question.get("related_lesson_slides", []):
+                        # Add page number to question for later use
+                        question["_jokbo_page_num"] = jokbo_page_num
+                        all_questions.append(question)
+        
+        # Sort questions by question number
+        def get_question_number_for_sort(question):
+            """Extract numeric value from question number for sorting"""
+            question_num = question.get("question_number", "Unknown")
+            if question_num == "Unknown" or question_num == "번호없음":
+                return float('inf')  # Put unknown numbers at the end
+            try:
+                # Extract numeric part from strings like "21", "21번", etc.
+                import re
+                match = re.search(r'(\d+)', str(question_num))
+                if match:
+                    return int(match.group(1))
+                return float('inf')
+            except:
+                return float('inf')
+        
+        all_questions.sort(key=get_question_number_for_sort)
+        
+        # Show sorted order
+        print(f"  문제 번호 순서대로 정렬됨: {[q.get('question_number', 'Unknown') for q in all_questions[:10]]}{'...' if len(all_questions) > 10 else ''}")
+        
         # Track which questions have been processed to avoid duplicates
         processed_questions = set()
         
-        for page_info in analysis_result.get("jokbo_pages", []):
-            jokbo_page_num = page_info["jokbo_page"]
+        # Process questions in sorted order
+        for question in all_questions:
+            question_num = question.get("question_number", "Unknown")
+            jokbo_page_num = question["_jokbo_page_num"]
+            related_slides = question.get("related_lesson_slides", [])
             
-            if jokbo_page_num <= jokbo_page_count:
-                # Process each question on this page
-                for question in page_info.get("questions", []):
-                    related_slides = question.get("related_lesson_slides", [])
-                    question_num = question.get("question_number", "Unknown")
+            # Only process questions that haven't been processed
+            if question_num not in processed_questions:
+                processed_questions.add(question_num)
+                
+                # Determine if this is the last question on the page
+                is_last_question = False
+                question_numbers = question.get("question_numbers_on_page", [])
+                self.log_debug(f"Processing Q{question_num}: question_numbers = {question_numbers}")
+                if question_numbers and str(question_num) == question_numbers[-1]:
+                    is_last_question = True
+                    print(f"DEBUG: Question {question_num} is last on page {jokbo_page_num}, questions: {question_numbers}")
+                    self.log_debug(f"  Q{question_num} is LAST on page {jokbo_page_num}")
+                else:
+                    self.log_debug(f"  Q{question_num} is NOT last on page {jokbo_page_num}")
+                
+                # Extract the question pages (handles multi-page questions)
+                question_doc = self.extract_jokbo_question(
+                    jokbo_filename,
+                    jokbo_page_num,
+                    question_num,
+                    question.get("question_text", ""),
+                    str(Path(jokbo_path).parent),
+                    None,  # jokbo_end_page not available in jokbo-centric mode yet
+                    is_last_question,
+                    question_numbers
+                )
+                if question_doc:
+                    doc.insert_pdf(question_doc)
+                    question_doc.close()
+                
+                # Add related lesson slides for this specific question
+                for slide_info in related_slides:
+                    lesson_page = slide_info["lesson_page"]
+                    lesson_filename = slide_info["lesson_filename"]
                     
-                    # Only process questions that have related lesson slides and haven't been processed
-                    if related_slides and question_num not in processed_questions:
-                        processed_questions.add(question_num)
-                        
-                        # Determine if this is the last question on the page
-                        is_last_question = False
-                        question_numbers = question.get("question_numbers_on_page", [])
-                        self.log_debug(f"Processing Q{question_num}: question_numbers = {question_numbers}")
-                        if question_numbers and str(question_num) == question_numbers[-1]:
-                            is_last_question = True
-                            print(f"DEBUG: Question {question_num} is last on page {jokbo_page_num}, questions: {question_numbers}")
-                            self.log_debug(f"  Q{question_num} is LAST on page {jokbo_page_num}")
-                        else:
-                            self.log_debug(f"  Q{question_num} is NOT last on page {jokbo_page_num}")
-                        
-                        # Extract the question pages (handles multi-page questions)
-                        question_doc = self.extract_jokbo_question(
-                            jokbo_filename,
-                            jokbo_page_num,
-                            question_num,
-                            question.get("question_text", ""),
-                            str(Path(jokbo_path).parent),
-                            None,  # jokbo_end_page not available in jokbo-centric mode yet
-                            is_last_question,
-                            question_numbers
-                        )
-                        if question_doc:
-                            doc.insert_pdf(question_doc)
-                            question_doc.close()
-                        
-                        # Add related lesson slides for this specific question
-                        for slide_info in related_slides:
-                            lesson_page = slide_info["lesson_page"]
-                            lesson_filename = slide_info["lesson_filename"]
-                            
-                            # Validate page number
-                            lesson_path = Path(lesson_dir) / lesson_filename
-                            if lesson_path.exists():
-                                max_pages = PDFValidator.get_pdf_page_count(str(lesson_path))
-                                if not PDFValidator.validate_page_number(lesson_page, max_pages, lesson_filename):
-                                    self.log_debug(f"  WARNING: Page {lesson_page} > max {max_pages} in {lesson_filename}")
-                                    continue
-                            
-                            slide_doc = self.extract_lesson_slide(
-                                lesson_filename,
-                                lesson_page,
-                                lesson_dir
-                            )
-                            if slide_doc:
-                                doc.insert_pdf(slide_doc)
-                                slide_doc.close()
-                        
-                        # Add explanation page
-                        explanation_page = doc.new_page()
-                        
-                        # Create text content
-                        text_content = f"=== 문제 {question['question_number']} 해설 ===\n\n"
-                        text_content += f"[출처: {jokbo_filename} - {jokbo_page_num}페이지]\n\n"
-                        text_content += f"정답: {question['answer']}\n\n"
-                        
-                        if question.get('explanation'):
-                            text_content += f"해설:\n{question['explanation']}\n\n"
-                        
-                        # 오답 설명 추가
-                        if question.get('wrong_answer_explanations'):
-                            text_content += "오답 설명:\n"
-                            for choice, explanation in question['wrong_answer_explanations'].items():
-                                text_content += f"  {choice}: {explanation}\n"
-                            text_content += "\n"
-                        
-                        text_content += "관련 강의 슬라이드:\n"
-                        for i, slide_info in enumerate(related_slides, 1):
-                            score = slide_info.get('relevance_score', 0)
-                            if score == 11:
-                                score_text = "11/10 ⭐ 동일한 그림/도표"
-                            else:
-                                score_text = f"{score}/10"
-                            text_content += f"{i}. {slide_info['lesson_filename']} - {slide_info['lesson_page']}페이지 (관련성 점수: {score_text})\n"
-                            text_content += f"   관련성 이유: {slide_info['relevance_reason']}\n"
-                        text_content += "\n"
-                        
-                        # 선택된 연결 개수에 따른 메시지
-                        if len(related_slides) == 1:
-                            text_content += "💡 이 문제와 가장 관련성이 높은 강의자료입니다."
-                        else:
-                            text_content += "💡 이 문제와 가장 관련성이 높은 상위 2개의 강의자료입니다."
-                        
-                        # Use CJK font for Korean text
-                        font = fitz.Font("cjk")
-                        fontname = "F1"
-                        explanation_page.insert_font(fontname=fontname, fontbuffer=font.buffer)
-                        
-                        # Insert text into the page
-                        text_rect = fitz.Rect(50, 50, explanation_page.rect.width - 50, explanation_page.rect.height - 50)
-                        explanation_page.insert_textbox(
-                            text_rect,
-                            text_content,
-                            fontsize=11,
-                            fontname=fontname,
-                            align=fitz.TEXT_ALIGN_LEFT
-                        )
+                    # Validate page number
+                    lesson_path = Path(lesson_dir) / lesson_filename
+                    if lesson_path.exists():
+                        max_pages = PDFValidator.get_pdf_page_count(str(lesson_path))
+                        if not PDFValidator.validate_page_number(lesson_page, max_pages, lesson_filename):
+                            self.log_debug(f"  WARNING: Page {lesson_page} > max {max_pages} in {lesson_filename}")
+                            continue
+                    
+                    slide_doc = self.extract_lesson_slide(
+                        lesson_filename,
+                        lesson_page,
+                        lesson_dir
+                    )
+                    if slide_doc:
+                        doc.insert_pdf(slide_doc)
+                        slide_doc.close()
+                
+                # Add explanation page
+                explanation_page = doc.new_page()
+                
+                # Create text content
+                text_content = f"=== 문제 {question['question_number']} 해설 ===\n\n"
+                text_content += f"[출처: {jokbo_filename} - {jokbo_page_num}페이지]\n\n"
+                text_content += f"정답: {question['answer']}\n\n"
+                
+                if question.get('explanation'):
+                    text_content += f"해설:\n{question['explanation']}\n\n"
+                
+                # 오답 설명 추가
+                if question.get('wrong_answer_explanations'):
+                    text_content += "오답 설명:\n"
+                    for choice, explanation in question['wrong_answer_explanations'].items():
+                        text_content += f"  {choice}: {explanation}\n"
+                    text_content += "\n"
+                
+                text_content += "관련 강의 슬라이드:\n"
+                for i, slide_info in enumerate(related_slides, 1):
+                    score = slide_info.get('relevance_score', 0)
+                    if score == 11:
+                        score_text = "11/10 ⭐ 동일한 그림/도표"
+                    else:
+                        score_text = f"{score}/10"
+                    text_content += f"{i}. {slide_info['lesson_filename']} - {slide_info['lesson_page']}페이지 (관련성 점수: {score_text})\n"
+                    text_content += f"   관련성 이유: {slide_info['relevance_reason']}\n"
+                text_content += "\n"
+                
+                # 선택된 연결 개수에 따른 메시지
+                if len(related_slides) == 1:
+                    text_content += "💡 이 문제와 가장 관련성이 높은 강의자료입니다."
+                else:
+                    text_content += "💡 이 문제와 가장 관련성이 높은 상위 2개의 강의자료입니다."
+                
+                # Use CJK font for Korean text
+                font = fitz.Font("cjk")
+                fontname = "F1"
+                explanation_page.insert_font(fontname=fontname, fontbuffer=font.buffer)
+                
+                # Insert text into the page
+                text_rect = fitz.Rect(50, 50, explanation_page.rect.width - 50, explanation_page.rect.height - 50)
+                explanation_page.insert_textbox(
+                    text_rect,
+                    text_content,
+                    fontsize=11,
+                    fontname=fontname,
+                    align=fitz.TEXT_ALIGN_LEFT
+                )
         
         if analysis_result.get("summary"):
             summary_page = doc.new_page()

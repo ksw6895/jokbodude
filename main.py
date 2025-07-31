@@ -90,7 +90,14 @@ def process_jokbo_with_all_lessons(jokbo_path: Path, lesson_paths: List[Path], o
         output_path = output_dir / output_filename
         
         print("  필터링된 PDF 생성 중...")
-        creator.create_jokbo_centric_pdf(str(jokbo_path), analysis_result, str(output_path), lesson_dir)
+        try:
+            creator.create_jokbo_centric_pdf(str(jokbo_path), analysis_result, str(output_path), lesson_dir)
+            print(f"  PDF 생성 완료: {output_path}")
+        except Exception as pdf_e:
+            print(f"  PDF 생성 중 오류 발생: {str(pdf_e)}")
+            import traceback
+            traceback.print_exc()
+            return False
         
         if analysis_result.get("summary"):
             summary = analysis_result["summary"]

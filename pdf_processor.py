@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 from datetime import datetime
 import os
+import shutil
 try:
     from tqdm import tqdm
     TQDM_AVAILABLE = True
@@ -1177,12 +1178,24 @@ class PDFProcessor:
                 debug_file = self.debug_dir / f"failed_json_chunk_p{start_page}-{end_page}.txt"
                 with open(debug_file, 'w', encoding='utf-8') as f:
                     f.write(response.text)
-                return {"error": "Failed to parse response"}, lesson_chunk_file
+                # Delete the chunk file before returning
+                self.delete_file_safe(lesson_chunk_file)
+                return {"error": "Failed to parse response"}, None
     
     def analyze_lessons_for_jokbo_parallel(self, lesson_paths: List[str], jokbo_path: str, max_workers: int = 3) -> Dict[str, Any]:
         """Analyze multiple lesson PDFs against one jokbo PDF using parallel processing (jokbo-centric)"""
         
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] 병렬 처리 시작 (족보 중심)")
+        
+        # 임시 파일 디렉토리 설정
+        temp_dir = Path("output/temp/chunk_results")
+        state_file = Path("output/temp/processing_state.json")
+        
+        # 이전 처리 상태 확인
+        previous_state = self.load_processing_state(state_file)
+        if previous_state:
+            print(f"  이전 처리 상태 발견: {previous_state.get('processed_chunks', 0)}개 청크 완료")
+            # TODO: 재시작 로직 구현
         
         # Delete all uploaded files before starting
         print("  기존 업로드 파일 정리 중...")
@@ -1192,10 +1205,8 @@ class PDFProcessor:
         # Pre-upload jokbo file once
         jokbo_file = self.upload_pdf(jokbo_path, f"족보_{Path(jokbo_path).name}")
         
-        all_jokbo_pages = {}
-        all_connections = {}  # Fix: Initialize all_connections
-        total_related_slides = 0
         lock = threading.Lock()
+        processed_chunks = 0
         
         # Prepare all chunks from all lesson files
         all_chunks = []
@@ -1258,10 +1269,24 @@ class PDFProcessor:
                     except:
                         pass
                 
-                return (lesson_path, result, uploaded_file)
+                # 결과를 임시 파일로 저장
+                saved_path = thread_processor.save_chunk_result(chunk_info, result, temp_dir)
+                print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 결과 저장 - {Path(saved_path).name}")
+                
+                # 성공 시 처리 상태 업데이트
+                with lock:
+                    nonlocal processed_chunks
+                    processed_chunks += 1
+                
+                # Note: uploaded_file is already deleted in _analyze_jokbo_with_lesson_chunk_preloaded
+                # 메모리에서는 결과를 반환하지 않음 (파일로 저장했으므로)
+                return (lesson_path, saved_path, None)
             except Exception as e:
                 print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 오류 발생 - {str(e)}")
-                return (lesson_path, {"error": str(e)}, None)
+                # 오류도 파일로 저장
+                error_result = {"error": str(e), "chunk_info": chunk_info}
+                saved_path = thread_processor.save_chunk_result(chunk_info, error_result, temp_dir)
+                return (lesson_path, saved_path, None)
             finally:
                 # Ensure cleanup happens
                 try:
@@ -1291,19 +1316,17 @@ class PDFProcessor:
             for future in as_completed(future_to_chunk):
                 chunk_info = future_to_chunk[future]
                 try:
-                    lesson_path, result, uploaded_file = future.result()
+                    lesson_path, saved_path, uploaded_file = future.result()
                     
-                    # Collect uploaded file for cleanup
-                    if uploaded_file:
-                        with lock:
-                            uploaded_files_to_delete.append(uploaded_file)
-                    
-                    if "error" in result:
-                        print(f"    [{datetime.now().strftime('%H:%M:%S')}] 오류 발생: {result['error']}")
-                    else:
-                        # Store chunk results by lesson file
-                        with lock:
-                            lesson_results[lesson_path].append(result)
+                    # 처리 상태 저장 (중간 저장)
+                    if processed_chunks % 10 == 0:  # 10개마다 상태 저장
+                        state_info = {
+                            "jokbo_path": jokbo_path,
+                            "total_chunks": len(all_chunks),
+                            "processed_chunks": processed_chunks,
+                            "timestamp": datetime.now().isoformat()
+                        }
+                        self.save_processing_state(state_info, state_file)
                 
                 except Exception as e:
                     lesson_filename = chunk_info['lesson_filename']
@@ -1315,95 +1338,39 @@ class PDFProcessor:
             if TQDM_AVAILABLE:
                 pbar.close()
         
-        # Now merge results from all chunks
-        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 청크 결과 병합 중...")
+        # 최종 처리 상태 저장
+        final_state = {
+            "jokbo_path": jokbo_path,
+            "total_chunks": len(all_chunks),
+            "processed_chunks": processed_chunks,
+            "status": "completed",
+            "timestamp": datetime.now().isoformat()
+        }
+        self.save_processing_state(final_state, state_file)
         
-        # First merge chunks by lesson file
-        for lesson_path, chunk_results in lesson_results.items():
-            if chunk_results:
-                # Merge chunks for this lesson file
-                merged_lesson_result = self._merge_jokbo_centric_results(chunk_results)
-                
-                # Now merge into the overall results
-                for page_info in merged_lesson_result.get("jokbo_pages", []):
-                    jokbo_page = page_info["jokbo_page"]
-                    if jokbo_page not in all_jokbo_pages:
-                        all_jokbo_pages[jokbo_page] = {
-                            "jokbo_page": jokbo_page,
-                            "questions": []
-                        }
-                    
-                    # Process each question on this page
-                    for question in page_info.get("questions", []):
-                        question_id = f"{jokbo_page}_{question['question_number']}"
-                        
-                        # 문제가 처음 발견된 경우
-                        if question_id not in all_connections:
-                            all_connections[question_id] = {
-                                "question_data": {
-                                    "jokbo_page": jokbo_page,
-                                    "question_number": question["question_number"],
-                                    "question_text": question["question_text"],
-                                    "answer": question["answer"],
-                                    "explanation": question["explanation"],
-                                    "wrong_answer_explanations": question.get("wrong_answer_explanations", {}),
-                                    "question_numbers_on_page": question.get("question_numbers_on_page", [])
-                                },
-                                "connections": []
-                            }
-                        
-                        # 관련 슬라이드 연결 추가 (점수 포함)
-                        for slide in question.get("related_lesson_slides", []):
-                            all_connections[question_id]["connections"].append(slide)
+        # 파일 기반 병합
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 임시 파일에서 청크 결과 병합 중...")
+        merge_result = self.load_and_merge_chunk_results(temp_dir)
         
-        # 각 문제에 대해 상위 2개 연결만 선택
-        final_pages = {}
-        total_questions = 0
-        filtered_total_slides = 0
+        if "error" in merge_result:
+            print(f"  병합 오류: {merge_result['error']}")
+            return {"error": merge_result['error']}
         
-        for question_id, data in all_connections.items():
-            question_data = data["question_data"]
-            connections = data["connections"]
-            
-            # relevance_score로 정렬하고 상위 2개만 선택
-            sorted_connections = sorted(
-                connections,
-                key=lambda x: x.get("relevance_score", 0),
-                reverse=True
-            )[:MAX_CONNECTIONS_PER_QUESTION]
-            
-            # 최소 점수 기준을 충족하는 연결만 유지
-            filtered_connections = [
-                conn for conn in sorted_connections
-                if conn.get("relevance_score", 0) >= RELEVANCE_SCORE_THRESHOLD
-            ]
-            
-            if filtered_connections:  # 관련 슬라이드가 있는 경우만 포함
-                jokbo_page = question_data["jokbo_page"]
-                if jokbo_page not in final_pages:
-                    final_pages[jokbo_page] = {
-                        "jokbo_page": jokbo_page,
-                        "questions": []
-                    }
-                
-                question_entry = question_data.copy()
-                question_entry["related_lesson_slides"] = filtered_connections
-                final_pages[jokbo_page]["questions"].append(question_entry)
-                
-                total_questions += 1
-                filtered_total_slides += len(filtered_connections)
+        all_connections = merge_result["all_connections"]
+        print(f"  병합 완료: {len(all_connections)}개 문제")
         
-        # Convert dict to list and sort by page number
-        final_pages_list = list(final_pages.values())
-        final_pages_list.sort(key=lambda x: x["jokbo_page"])
+        # 최종 필터링 및 정렬
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 최종 필터링 및 문제 번호순 정렬 중...")
+        final_result = self.apply_final_filtering_and_sorting(all_connections)
         
-        # 모든 업로드된 청크 파일 삭제
+        # 디버그 정보 출력
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 최종 결과: {final_result['summary']['total_jokbo_pages']}개 페이지, {final_result['summary']['total_questions']}개 문제, {final_result['summary']['total_related_slides']}개 연결")
+        if final_result['summary']['total_questions'] == 0:
+            print(f"  경고: 필터링 후 관련 강의 슬라이드가 없습니다. (THRESHOLD={RELEVANCE_SCORE_THRESHOLD})")
+        
+        # 모든 업로드된 청크 파일 삭제 (이미 삭제되었을 수 있으므로 무시)
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] 업로드된 청크 파일 삭제 중...")
-        for uploaded_file in uploaded_files_to_delete:
-            try:
-                self.delete_file_safe(uploaded_file)
-            except Exception as e:
-                print(f"  청크 파일 삭제 실패: {str(e)}")
+        # 청크 파일들은 이미 각 스레드에서 삭제되었으므로 이 단계는 건너뜀
         
         # 족보 파일 삭제 (중심 파일이므로 모든 처리가 끝난 후 한 번만 삭제)
         try:
@@ -1412,6 +1379,11 @@ class PDFProcessor:
             print(f"  족보 파일 삭제 실패: {str(e)}")
             # 중심 파일 제외 정리 시도
             self.cleanup_except_center_file(jokbo_file.display_name)
+        
+        # 결과 크기 확인
+        import sys
+        result_size = sys.getsizeof(final_pages_list)
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 결과 데이터 크기: {result_size / 1024 / 1024:.2f} MB")
         
         return {
             "jokbo_pages": final_pages_list,
@@ -1555,3 +1527,207 @@ class PDFProcessor:
                 "study_recommendations": "각 슬라이드별로 관련된 족보 문제들을 중점적으로 학습하세요."
             }
         }
+    def save_chunk_result(self, chunk_info: Dict[str, Any], result: Dict[str, Any], temp_dir: Path) -> str:
+        """청크 처리 결과를 임시 파일로 저장
+        
+        Args:
+            chunk_info: 청크 정보 (lesson_filename, start_page, end_page 등)
+            result: 처리 결과
+            temp_dir: 임시 파일 저장 디렉토리
+            
+        Returns:
+            저장된 파일 경로
+        """
+        # 임시 디렉토리 생성
+        temp_dir.mkdir(parents=True, exist_ok=True)
+        
+        # 파일명 생성
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"chunk_{chunk_info['lesson_filename']}_p{chunk_info['start_page']}-{chunk_info['end_page']}_{timestamp}.json"
+        filepath = temp_dir / filename
+        
+        # 결과 저장
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump({
+                'chunk_info': chunk_info,
+                'result': result,
+                'timestamp': timestamp
+            }, f, ensure_ascii=False, indent=2)
+        
+        return str(filepath)
+    
+    def load_and_merge_chunk_results(self, temp_dir: Path) -> Dict[str, Any]:
+        """임시 파일들을 순차적으로 읽어 병합
+        
+        Args:
+            temp_dir: 임시 파일이 저장된 디렉토리
+            
+        Returns:
+            병합된 결과
+        """
+        if not temp_dir.exists():
+            return {"error": "임시 디렉토리가 존재하지 않습니다"}
+        
+        # 모든 청크 파일 읽기
+        chunk_files = sorted(temp_dir.glob("chunk_*.json"))
+        if not chunk_files:
+            return {"error": "처리된 청크 파일이 없습니다"}
+        
+        print(f"  {len(chunk_files)}개 청크 파일 병합 중...")
+        
+        all_jokbo_pages = {}
+        all_connections = {}
+        
+        # 각 파일을 순차적으로 읽어 병합
+        for idx, chunk_file in enumerate(chunk_files):
+            print(f"  [{idx+1}/{len(chunk_files)}] {chunk_file.name} 병합 중...")
+            
+            with open(chunk_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                chunk_result = data['result']
+            
+            # 에러가 있는 청크는 건너뛰기
+            if "error" in chunk_result:
+                print(f"    오류 청크 건너뛰기: {chunk_result['error']}")
+                continue
+            
+            # 결과 병합
+            for page_info in chunk_result.get("jokbo_pages", []):
+                jokbo_page = page_info["jokbo_page"]
+                if jokbo_page not in all_jokbo_pages:
+                    all_jokbo_pages[jokbo_page] = {
+                        "jokbo_page": jokbo_page,
+                        "questions": []
+                    }
+                
+                # 각 문제 처리
+                for question in page_info.get("questions", []):
+                    question_id = f"{jokbo_page}_{question['question_number']}"
+                    
+                    if question_id not in all_connections:
+                        all_connections[question_id] = {
+                            "question_data": {
+                                "jokbo_page": jokbo_page,
+                                "question_number": question["question_number"],
+                                "question_text": question["question_text"],
+                                "answer": question["answer"],
+                                "explanation": question["explanation"],
+                                "wrong_answer_explanations": question.get("wrong_answer_explanations", {}),
+                                "question_numbers_on_page": question.get("question_numbers_on_page", [])
+                            },
+                            "connections": []
+                        }
+                    
+                    # 관련 슬라이드 추가
+                    for slide in question.get("related_lesson_slides", []):
+                        all_connections[question_id]["connections"].append(slide)
+        
+        return {
+            "all_connections": all_connections,
+            "total_chunks": len(chunk_files),
+            "processed_chunks": len(chunk_files)
+        }
+    
+    def apply_final_filtering_and_sorting(self, all_connections: Dict[str, Any]) -> Dict[str, Any]:
+        """최종 필터링 (상위 2개, 5점 이상) 및 문제 번호순 정렬
+        
+        Args:
+            all_connections: 모든 문제와 연결 정보
+            
+        Returns:
+            필터링 및 정렬된 최종 결과
+        """
+        # 상위 2개 연결 선택 및 점수 필터링
+        filtered_questions = []
+        
+        for question_id, data in all_connections.items():
+            question_data = data["question_data"]
+            connections = data["connections"]
+            
+            # relevance_score로 정렬하고 상위 2개만 선택
+            sorted_connections = sorted(
+                connections,
+                key=lambda x: x.get("relevance_score", 0),
+                reverse=True
+            )[:MAX_CONNECTIONS_PER_QUESTION]
+            
+            # 최소 점수 기준을 충족하는 연결만 유지
+            filtered_connections = [
+                conn for conn in sorted_connections
+                if conn.get("relevance_score", 0) >= RELEVANCE_SCORE_THRESHOLD
+            ]
+            
+            if filtered_connections:
+                question_entry = question_data.copy()
+                question_entry["related_lesson_slides"] = filtered_connections
+                filtered_questions.append(question_entry)
+        
+        # 문제 번호로 정렬 (숫자로 변환하여 정렬)
+        filtered_questions.sort(
+            key=lambda q: int(q.get("question_number", "0")) 
+            if q.get("question_number", "0").isdigit() else 0
+        )
+        
+        # 정렬된 문제들을 페이지별로 재구성
+        sorted_pages = {}
+        for question in filtered_questions:
+            jokbo_page = question.get("jokbo_page", 0)
+            if jokbo_page not in sorted_pages:
+                sorted_pages[jokbo_page] = {
+                    "jokbo_page": jokbo_page,
+                    "questions": []
+                }
+            sorted_pages[jokbo_page]["questions"].append(question)
+        
+        # 페이지 번호로 정렬
+        final_pages_list = list(sorted_pages.values())
+        final_pages_list.sort(key=lambda x: x["jokbo_page"])
+        
+        # 통계 계산
+        total_questions = len(filtered_questions)
+        total_slides = sum(len(q.get("related_lesson_slides", [])) for q in filtered_questions)
+        
+        return {
+            "jokbo_pages": final_pages_list,
+            "summary": {
+                "total_jokbo_pages": len(final_pages_list),
+                "total_questions": total_questions,
+                "total_related_slides": total_slides,
+                "study_recommendations": "각 족보 문제별로 가장 관련성이 높은 강의 슬라이드를 중점적으로 학습하세요."
+            }
+        }
+    
+    def save_processing_state(self, state_info: Dict[str, Any], state_file: Path):
+        """처리 상태 저장
+        
+        Args:
+            state_info: 저장할 상태 정보
+            state_file: 상태 파일 경로
+        """
+        state_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(state_file, 'w', encoding='utf-8') as f:
+            json.dump(state_info, f, ensure_ascii=False, indent=2)
+    
+    def load_processing_state(self, state_file: Path) -> Optional[Dict[str, Any]]:
+        """이전 처리 상태 복원
+        
+        Args:
+            state_file: 상태 파일 경로
+            
+        Returns:
+            상태 정보 또는 None
+        """
+        if state_file.exists():
+            with open(state_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return None
+    
+    def cleanup_temp_files(self, temp_dir: Path):
+        """임시 파일 정리
+        
+        Args:
+            temp_dir: 임시 파일 디렉토리
+        """
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir)
+            print(f"  임시 파일 정리 완료: {temp_dir}")
