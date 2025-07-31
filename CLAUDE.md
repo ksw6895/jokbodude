@@ -311,6 +311,19 @@ ls output/debug/
 - Useful for quota management and cleanup
 - Interactive selection or bulk deletion
 
+### cleanup_sessions.py
+- Interactive session management tool
+- Shows session size, age, and status
+- Selective or bulk deletion options
+- Command: `python cleanup_sessions.py`
+
+### recover_from_chunks.py
+- Recovers interrupted PDF generation from chunk files
+- Session-aware recovery support
+- Commands:
+  - `python recover_from_chunks.py --list-sessions`
+  - `python recover_from_chunks.py --session SESSION_ID`
+
 ### Test Scripts
 - `test_jokbo_centric_debug.py`: Tests jokbo-centric processing
 - `test_fix_verification.py`: Verifies bug fixes

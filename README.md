@@ -123,34 +123,55 @@ python main.py
 모든 족보와 강의자료를 분석합니다.
 
 #### 🎯 분석 모드
-| 모드 | 명령어 | 설명 |
-|------|--------|------|
-| 강의자료 중심 (기본) | `python main.py` | 각 강의자료에 대해 관련 족보 문제 매칭 |
-| 족보 중심 | `python main.py --mode jokbo-centric` | 각 족보 문제에 대해 관련 강의 슬라이드 매칭 |
+
+**--mode lesson-centric (기본값)**
+- **설명**: 각 강의자료에서 족보와 관련된 부분만 추출합니다
+- **결과물**: 강의 슬라이드 → 관련 족보 문제 → AI 해설 순서로 구성
+- **추천 대상**: 강의 내용을 중심으로 공부하고 싶은 학생
+- **예시**: `python main.py` 또는 `python main.py --mode lesson-centric`
+
+**--mode jokbo-centric**
+- **설명**: 각 족보 문제에 대해 관련된 강의 슬라이드를 찾아줍니다
+- **결과물**: 족보 문제 → 관련 강의 슬라이드 → AI 해설 순서로 구성
+- **추천 대상**: 시험 직전, 문제 위주로 공부하고 싶은 학생
+- **예시**: `python main.py --mode jokbo-centric`
 
 #### 🤖 AI 모델 선택
-| 모델 | 명령어 | 특징 | 추천 사용 케이스 |
-|------|--------|------|-----------------|
-| Gemini 2.5 Pro | `python main.py` | 최고 품질 | 정확도가 중요한 경우 |
-| Gemini 2.5 Flash | `python main.py --model flash` | 빠른 속도, 적절한 품질 | 일반적인 사용 |
-| Gemini 2.5 Flash-lite | `python main.py --model flash-lite --thinking-budget 0` | 최고 속도, 최저 비용 | 대량 처리, 비용 절감 |
+| 옵션 | 설명 | 특징 | 추천 사용 케이스 |
+|------|------|------|-----------------|
+| `--model pro` (기본값) | Gemini 2.5 Pro 모델 사용 | 최고 품질, 정확한 분석 | 중요한 시험 준비 |
+| `--model flash` | Gemini 2.5 Flash 모델 사용 | 2배 빠른 속도, 50% 저렴 | 일반적인 사용 |
+| `--model flash-lite` | Gemini 2.5 Flash-lite 모델 사용 | 4배 빠른 속도, 90% 저렴 | 대량 처리, 비용 절감 |
+| `--thinking-budget N` | Flash/Flash-lite 추론 깊이 조절 | 0=비활성화, -1=자동 | 속도/품질 조절 |
 
 #### ⚡ 성능 옵션
-```bash
-# 병렬 처리로 더 빠르게 (개선된 안정성)
-python main.py --parallel
 
-# 진행 상황 표시와 함께 병렬 처리
-python main.py --parallel  # tqdm 진행률 표시 자동 활성화
+**--parallel**
+- **설명**: 여러 파일을 동시에 처리하여 속도를 향상시킵니다
+- **특징**: tqdm 진행률 표시 자동 활성화
+- **예시**: `python main.py --parallel`
 
-# 특정 강의자료만 처리
-python main.py --single-lesson "lesson/특정강의.pdf"
-```
+**--single-lesson FILE**
+- **설명**: 모든 강의자료 대신 특정 파일 하나만 처리합니다
+- **사용 시기**: 특정 과목이나 주차만 빠르게 분석하고 싶을 때
+- **예시**: `python main.py --single-lesson "lesson/병리학_3주차.pdf"`
 
 #### 📁 파일 경로 설정
-```bash
-python main.py --jokbo-dir "내족보폴더" --lesson-dir "내강의폴더" --output-dir "결과폴더"
-```
+
+**--jokbo-dir DIR**
+- **설명**: 족보 PDF 파일들이 있는 폴더 경로 지정
+- **기본값**: `jokbo`
+- **예시**: `python main.py --jokbo-dir "D:/내문서/2024족보"`
+
+**--lesson-dir DIR**  
+- **설명**: 강의자료 PDF 파일들이 있는 폴더 경로 지정
+- **기본값**: `lesson`
+- **예시**: `python main.py --lesson-dir "C:/강의자료/병리학"`
+
+**--output-dir DIR**
+- **설명**: 분석 결과 PDF가 저장될 폴더 경로 지정
+- **기본값**: `output`
+- **예시**: `python main.py --output-dir "./시험준비자료"`
 
 ### 🎨 고급 사용법
 
@@ -272,6 +293,41 @@ A: 처음에는 기본 Pro 모델로 시작하고, 비용이 부담되면 Flash�
 
 **Q: 여러 페이지에 걸친 문제가 잘려서 나옵니다**  
 A: 최신 버전에서는 페이지 마지막 문제를 자동으로 감지하여 다음 페이지까지 포함합니다!
+
+**Q: 처리 중 중단됐는데 처음부터 다시 해야 하나요?**  
+A: 아니요! `python recover_from_chunks.py --list-sessions`로 세션을 찾아 복원할 수 있습니다.
+
+## 🔧 유틸리티 도구
+
+### cleanup_sessions.py - 세션 관리
+```bash
+# 대화형 모드
+python cleanup_sessions.py
+
+# N일 이상 된 세션 삭제
+python cleanup_sessions.py --days 7
+
+# 모든 세션 삭제
+python cleanup_sessions.py --all
+```
+
+### recover_from_chunks.py - PDF 복원
+```bash
+# 복원 가능한 세션 목록
+python recover_from_chunks.py --list-sessions
+
+# 특정 세션 복원
+python recover_from_chunks.py --session 20250801_123456_abc123
+
+# 호환성 모드 (기존 방식)
+python recover_from_chunks.py
+```
+
+### cleanup_gemini_files.py - Gemini 파일 관리
+```bash
+# 업로드된 파일 목록 확인 및 삭제
+python cleanup_gemini_files.py
+```
 
 ## 🆕 최근 개선사항 (2025-07-28)
 

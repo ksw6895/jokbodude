@@ -11,6 +11,7 @@ from pathlib import Path
 from datetime import datetime
 import re
 from typing import Dict, Any, List
+import argparse
 
 # 상위 디렉토리의 모듈 임포트
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -146,9 +147,14 @@ def apply_filtering_and_sorting(all_connections: Dict[str, Any]) -> Dict[str, An
     }
 
 
-def extract_jokbo_info_from_state() -> str:
+def extract_jokbo_info_from_state(session_dir: Path = None) -> str:
     """processing_state.json에서 족보 경로 추출"""
-    state_file = Path("output/temp/processing_state.json")
+    # 세션 디렉토리가 주어지면 그 안의 processing_state.json 사용
+    if session_dir:
+        state_file = session_dir / "processing_state.json"
+    else:
+        # 기본값: 이전 방식 (호환성)
+        state_file = Path("output/temp/processing_state.json")
     
     if state_file.exists():
         try:
@@ -164,9 +170,73 @@ def extract_jokbo_info_from_state() -> str:
     return None
 
 
+def list_recoverable_sessions():
+    """복원 가능한 세션 목록 표시"""
+    sessions_dir = Path("output/temp/sessions")
+    if not sessions_dir.exists():
+        print("세션 디렉토리가 없습니다.")
+        return
+    
+    recoverable = []
+    for session_dir in sessions_dir.iterdir():
+        if session_dir.is_dir():
+            chunk_dir = session_dir / "chunk_results"
+            state_file = session_dir / "processing_state.json"
+            
+            if chunk_dir.exists() and state_file.exists():
+                chunk_count = len(list(chunk_dir.glob('*.json')))
+                if chunk_count > 0:
+                    # 상태 파일 읽기
+                    try:
+                        with open(state_file, 'r', encoding='utf-8') as f:
+                            state = json.load(f)
+                            status = state.get('status', 'unknown')
+                            jokbo_path = state.get('jokbo_path', 'N/A')
+                            
+                            recoverable.append({
+                                'session_id': session_dir.name,
+                                'chunk_count': chunk_count,
+                                'status': status,
+                                'jokbo': Path(jokbo_path).name if jokbo_path != 'N/A' else 'N/A',
+                                'created': datetime.fromtimestamp(session_dir.stat().st_mtime)
+                            })
+                    except:
+                        pass
+    
+    if not recoverable:
+        print("복원 가능한 세션이 없습니다.")
+        return
+    
+    print(f"\n{'\uc138\uc158 ID':<30} {'\uc0c1\ud0dc':<10} {'\uccad\ud06c':<6} {'\uc871\ubcf4':<20} {'\uc0dd\uc131 \uc2dc\uac04'}")
+    print("=" * 80)
+    for session in recoverable:
+        print(f"{session['session_id']:<30} {session['status']:<10} {session['chunk_count']:<6} "
+              f"{session['jokbo']:<20} {session['created'].strftime('%Y-%m-%d %H:%M:%S')}")
+
+
 def main():
     """메인 함수"""
-    chunk_dir = Path("output/temp/chunk_results")
+    parser = argparse.ArgumentParser(description='청크 파일에서 PDF 복원')
+    parser.add_argument('--session', type=str, help='복원할 세션 ID')
+    parser.add_argument('--list-sessions', action='store_true', help='복원 가능한 세션 목록')
+    
+    args = parser.parse_args()
+    
+    if args.list_sessions:
+        list_recoverable_sessions()
+        return 0
+    
+    # 세션 디렉토리 결정
+    if args.session:
+        session_dir = Path("output/temp/sessions") / args.session
+        if not session_dir.exists():
+            print(f"오류: 세션 디렉토리가 없습니다: {session_dir}")
+            return 1
+        chunk_dir = session_dir / "chunk_results"
+    else:
+        # 기본값: 이전 방식 (호환성)
+        chunk_dir = Path("output/temp/chunk_results")
+        session_dir = None
     
     if not chunk_dir.exists():
         print(f"오류: 청크 디렉토리가 없습니다: {chunk_dir}")
@@ -193,7 +263,7 @@ def main():
         return 1
     
     # 4. 족보 파일 경로 추출
-    jokbo_path_str = extract_jokbo_info_from_state()
+    jokbo_path_str = extract_jokbo_info_from_state(session_dir)
     if not jokbo_path_str:
         print("오류: 족보 파일 경로를 찾을 수 없습니다.")
         return 1

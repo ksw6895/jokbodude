@@ -3,9 +3,11 @@
 import os
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 import argparse
 from typing import List, Tuple
+import shutil
+import json
 
 from config import create_model
 from pdf_processor import PDFProcessor
@@ -18,6 +20,129 @@ def find_pdf_files(directory: str, pattern: str = "*.pdf") -> List[Path]:
     path = Path(directory)
     pdf_files = list(path.glob(pattern))
     return [f for f in pdf_files if not f.name.endswith('.Zone.Identifier')]
+
+
+def list_sessions():
+    """모든 세션 목록을 표시"""
+    sessions_dir = Path("output/temp/sessions")
+    if not sessions_dir.exists():
+        print("세션 디렉토리가 없습니다.")
+        return
+    
+    sessions = []
+    for session_dir in sessions_dir.iterdir():
+        if session_dir.is_dir():
+            state_file = session_dir / "processing_state.json"
+            chunk_dir = session_dir / "chunk_results"
+            
+            # 세션 정보 수집
+            session_info = {
+                'id': session_dir.name,
+                'path': session_dir,
+                'created': datetime.fromtimestamp(session_dir.stat().st_mtime),
+                'state_exists': state_file.exists(),
+                'chunk_count': len(list(chunk_dir.glob('*.json'))) if chunk_dir.exists() else 0,
+                'size': sum(f.stat().st_size for f in session_dir.rglob('*') if f.is_file())
+            }
+            
+            # processing_state.json 읽기
+            if state_file.exists():
+                try:
+                    with open(state_file, 'r', encoding='utf-8') as f:
+                        state = json.load(f)
+                        session_info['status'] = state.get('status', 'unknown')
+                        session_info['jokbo_path'] = state.get('jokbo_path', 'N/A')
+                except:
+                    session_info['status'] = 'error'
+                    session_info['jokbo_path'] = 'N/A'
+            
+            sessions.append(session_info)
+    
+    if not sessions:
+        print("세션이 없습니다.")
+        return
+    
+    # 생성 시간순 정렬
+    sessions.sort(key=lambda x: x['created'], reverse=True)
+    
+    # 테이블 형태로 출력
+    print(f"\n{'세션 ID':<30} {'상태':<10} {'생성 시간':<20} {'청크':<6} {'크기':<10} {'족보 파일'}")
+    print("=" * 100)
+    for session in sessions:
+        size_mb = session['size'] / (1024 * 1024)
+        print(f"{session['id']:<30} {session['status']:<10} {session['created'].strftime('%Y-%m-%d %H:%M:%S'):<20} "
+              f"{session['chunk_count']:<6} {size_mb:.1f}MB{':<10'} {Path(session['jokbo_path']).name if session['jokbo_path'] != 'N/A' else 'N/A'}")
+    
+    print(f"\n총 {len(sessions)}개 세션, 총 크기: {sum(s['size'] for s in sessions) / (1024 * 1024):.1f}MB")
+
+
+def cleanup_sessions(days_old=None, cleanup_all=False):
+    """세션 정리"""
+    sessions_dir = Path("output/temp/sessions")
+    if not sessions_dir.exists():
+        print("세션 디렉토리가 없습니다.")
+        return
+    
+    now = datetime.now()
+    cleaned = 0
+    total_size = 0
+    
+    for session_dir in sessions_dir.iterdir():
+        if session_dir.is_dir():
+            # 생성 시간 확인
+            created = datetime.fromtimestamp(session_dir.stat().st_mtime)
+            age_days = (now - created).days
+            
+            should_delete = cleanup_all or (days_old and age_days >= days_old)
+            
+            if should_delete:
+                # 크기 계산
+                size = sum(f.stat().st_size for f in session_dir.rglob('*') if f.is_file())
+                total_size += size
+                
+                # 삭제
+                shutil.rmtree(session_dir)
+                cleaned += 1
+                print(f"삭제됨: {session_dir.name} ({age_days}일 전, {size / (1024 * 1024):.1f}MB)")
+    
+    if cleaned > 0:
+        print(f"\n총 {cleaned}개 세션 삭제됨, {total_size / (1024 * 1024):.1f}MB 공간 확보")
+    else:
+        print("삭제할 세션이 없습니다.")
+
+
+def auto_cleanup_old_sessions(keep_days: int):
+    """프로그램 시작 시 오래된 세션 자동 정리"""
+    sessions_dir = Path("output/temp/sessions")
+    if not sessions_dir.exists():
+        return
+    
+    now = datetime.now()
+    for session_dir in sessions_dir.iterdir():
+        if session_dir.is_dir():
+            created = datetime.fromtimestamp(session_dir.stat().st_mtime)
+            age_days = (now - created).days
+            
+            if age_days > keep_days:
+                try:
+                    shutil.rmtree(session_dir)
+                    print(f"오래된 세션 자동 삭제: {session_dir.name} ({age_days}일 전)")
+                except:
+                    pass
+
+
+def handle_session_cleanup(args):
+    """세션 정리 명령 처리"""
+    if args.list_sessions:
+        list_sessions()
+    elif args.cleanup:
+        print("모든 세션을 삭제하시겠습니까? (y/N): ", end='')
+        if input().lower() == 'y':
+            cleanup_sessions(cleanup_all=True)
+    elif args.cleanup_old:
+        cleanup_sessions(days_old=args.cleanup_old)
+    
+    return 0
 
 
 def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], output_dir: Path, jokbo_dir: str, model, use_parallel: bool = False) -> bool:
@@ -125,8 +250,20 @@ def main():
                        help="Gemini 모델 선택 (기본값: pro)")
     parser.add_argument("--thinking-budget", type=int, default=None,
                        help="Flash/Flash-lite 모델의 thinking budget (0-24576, -1은 자동)")
+    # 청크 정리 옵션 추가
+    parser.add_argument('--cleanup', action='store_true', help='모든 임시 세션 파일 정리')
+    parser.add_argument('--cleanup-old', type=int, help='N일 이상 된 세션 정리')
+    parser.add_argument('--list-sessions', action='store_true', help='모든 세션 목록 표시')
+    parser.add_argument('--keep-days', type=int, default=7, help='자동 정리 시 보관 기간 (기본값: 7일)')
     
     args = parser.parse_args()
+    
+    # 세션 정리 기능 처리
+    if args.cleanup or args.cleanup_old or args.list_sessions:
+        return handle_session_cleanup(args)
+    
+    # 시작 시 오래된 세션 자동 정리 (--keep-days 설정 사용)
+    auto_cleanup_old_sessions(args.keep_days)
     
     # Create model with specified configuration
     model = create_model(args.model, args.thinking_budget)

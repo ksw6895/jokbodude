@@ -23,6 +23,8 @@ from constants import (
 from validators import PDFValidator
 from pdf_processor_helpers import PDFProcessorHelpers
 from error_handler import ErrorHandler
+import random
+import string
 
 if TYPE_CHECKING:
     from google.generativeai.types import file_types
@@ -36,6 +38,19 @@ class PDFProcessor:
         self.debug_dir.mkdir(parents=True, exist_ok=True)
         # Cache for PDF page counts
         self.pdf_page_counts = {}
+        
+        # 세션 식별자 시스템
+        self.session_id = self._generate_session_id()
+        self.session_dir = Path("output/temp/sessions") / self.session_id
+        self.chunk_results_dir = self.session_dir / "chunk_results"
+        self.chunk_results_dir.mkdir(parents=True, exist_ok=True)
+        print(f"세션 ID: {self.session_id}")
+    
+    def _generate_session_id(self) -> str:
+        """세션 ID 생성 (타임스탬프 + 랜덤 문자)"""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+        return f"{timestamp}_{random_suffix}"
     
     def __del__(self):
         """Clean up uploaded files when object is destroyed"""
@@ -1270,7 +1285,7 @@ class PDFProcessor:
                         pass
                 
                 # 결과를 임시 파일로 저장
-                saved_path = thread_processor.save_chunk_result(chunk_info, result, temp_dir)
+                saved_path = thread_processor.save_chunk_result(chunk_info, result, thread_processor.chunk_results_dir)
                 print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 결과 저장 - {Path(saved_path).name}")
                 
                 # 성공 시 처리 상태 업데이트
@@ -1285,7 +1300,7 @@ class PDFProcessor:
                 print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 오류 발생 - {str(e)}")
                 # 오류도 파일로 저장
                 error_result = {"error": str(e), "chunk_info": chunk_info}
-                saved_path = thread_processor.save_chunk_result(chunk_info, error_result, temp_dir)
+                saved_path = thread_processor.save_chunk_result(chunk_info, error_result, thread_processor.chunk_results_dir)
                 return (lesson_path, saved_path, None)
             finally:
                 # Ensure cleanup happens
@@ -1344,13 +1359,14 @@ class PDFProcessor:
             "total_chunks": len(all_chunks),
             "processed_chunks": processed_chunks,
             "status": "completed",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "session_id": self.session_id
         }
         self.save_processing_state(final_state, state_file)
         
         # 파일 기반 병합
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] 임시 파일에서 청크 결과 병합 중...")
-        merge_result = self.load_and_merge_chunk_results(temp_dir)
+        merge_result = self.load_and_merge_chunk_results(self.chunk_results_dir)
         
         if "error" in merge_result:
             print(f"  병합 오류: {merge_result['error']}")
@@ -1530,6 +1546,10 @@ class PDFProcessor:
         Returns:
             저장된 파일 경로
         """
+        # 디렉토리가 Path 객체가 아닌 경우 변환
+        if not isinstance(temp_dir, Path):
+            temp_dir = Path(temp_dir)
+        
         # 임시 디렉토리 생성
         temp_dir.mkdir(parents=True, exist_ok=True)
         
