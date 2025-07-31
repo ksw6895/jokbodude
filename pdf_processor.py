@@ -1382,18 +1382,10 @@ class PDFProcessor:
         
         # 결과 크기 확인
         import sys
-        result_size = sys.getsizeof(final_pages_list)
+        result_size = sys.getsizeof(final_result["jokbo_pages"])
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] 결과 데이터 크기: {result_size / 1024 / 1024:.2f} MB")
         
-        return {
-            "jokbo_pages": final_pages_list,
-            "summary": {
-                "total_jokbo_pages": len(final_pages_list),
-                "total_questions": total_questions,
-                "total_related_slides": filtered_total_slides,
-                "study_recommendations": "각 족보 문제별로 가장 관련성이 높은 강의 슬라이드를 중점적으로 학습하세요."
-            }
-        }
+        return final_result
     
     def analyze_pdfs_for_lesson_parallel(self, jokbo_paths: List[str], lesson_path: str, max_workers: int = 3) -> Dict[str, Any]:
         """Analyze multiple jokbo PDFs against one lesson PDF using parallel processing"""

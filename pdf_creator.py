@@ -58,10 +58,9 @@ class PDFCreator:
             self.log_debug(f"  ERROR: Jokbo file not found: {jokbo_path}")
             return None
             
-        # Check page validity with thread-safe access
-        with self.pdf_lock:
-            jokbo_pdf = self.get_jokbo_pdf(str(jokbo_path))
-            pdf_page_count = len(jokbo_pdf)
+        # Check page validity
+        jokbo_pdf = self.get_jokbo_pdf(str(jokbo_path))  # get_jokbo_pdf already handles locking
+        pdf_page_count = len(jokbo_pdf)
         
         if jokbo_page > pdf_page_count or jokbo_page < 1:
             print(f"Warning: Page {jokbo_page} does not exist in {jokbo_filename}")
@@ -106,10 +105,9 @@ class PDFCreator:
         self.log_debug(f"  Final extraction: pages {jokbo_page} to {jokbo_end_page} (0-indexed: {jokbo_page-1} to {jokbo_end_page-1})")
         question_doc = fitz.open()
         
-        # Thread-safe PDF access for extraction
-        with self.pdf_lock:
-            jokbo_pdf = self.get_jokbo_pdf(str(jokbo_path))
-            question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_end_page-1)
+        # Extract pages
+        jokbo_pdf = self.get_jokbo_pdf(str(jokbo_path))  # get_jokbo_pdf already handles locking
+        question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_end_page-1)
         
         self.log_debug(f"  Extracted document has {len(question_doc)} pages")
         
@@ -269,9 +267,8 @@ class PDFCreator:
         jokbo_filename = Path(jokbo_path).name
         
         # Get PDF page count thread-safely
-        with self.pdf_lock:
-            jokbo_pdf = self.get_jokbo_pdf(jokbo_path)
-            jokbo_page_count = len(jokbo_pdf)
+        jokbo_pdf = self.get_jokbo_pdf(jokbo_path)  # get_jokbo_pdf already handles locking
+        jokbo_page_count = len(jokbo_pdf)
         
         # Collect all questions with their page info
         all_questions = []
