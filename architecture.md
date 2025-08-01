@@ -1,6 +1,80 @@
-# PDF Processing System Architecture (시스템 아키텍처)
+# Architecture Documentation / 아키텍처 문서
 
-## 시스템 개요 (System Overview)
+## 개요 / Overview
+
+### 시스템 소개 / System Introduction
+
+**한국어**
+JokboDude는 의과대학 병리학 과목의 효과적인 학습을 위해 설계된 AI 기반 PDF 처리 시스템입니다. 이 시스템은 과거 시험 문제(족보)와 강의 자료를 분석하여, 학생들이 시험 준비에 필요한 핵심 내용만을 필터링한 맞춤형 학습 자료를 생성합니다.
+
+주요 특징:
+- Google Gemini AI API를 활용한 지능형 콘텐츠 분석
+- 족보 문제와 강의 슬라이드 간의 관련성 자동 매칭
+- 100점 만점 체계의 정밀한 관련성 점수 산출
+- 병렬 처리를 통한 고속 분석
+- 두 가지 분석 모드 지원 (강의 중심/족보 중심)
+
+**English**
+JokboDude is an AI-powered PDF processing system designed for effective learning in medical school pathology courses. The system analyzes past exam questions (jokbo) and lecture materials to generate customized study materials by filtering only the essential content needed for exam preparation.
+
+Key Features:
+- Intelligent content analysis using Google Gemini AI API
+- Automatic matching between exam questions and lecture slides
+- Precise relevance scoring on a 100-point scale
+- High-speed analysis through parallel processing
+- Support for two analysis modes (lesson-centric/jokbo-centric)
+
+## 시스템 아키텍처 / System Architecture
+
+### 전체 구조도 / Overall Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "입력 소스 / Input Sources"
+        A[족보 PDF<br/>Exam PDFs] 
+        B[강의자료 PDF<br/>Lecture PDFs]
+    end
+    
+    subgraph "메인 컨트롤러 / Main Controller"
+        C[main.py<br/>진입점 및 오케스트레이션<br/>Entry Point & Orchestration]
+    end
+    
+    subgraph "코어 프로세싱 / Core Processing"
+        D[PDFProcessor<br/>AI 분석 엔진<br/>AI Analysis Engine]
+        E[PDFCreator<br/>PDF 생성기<br/>PDF Generator]
+    end
+    
+    subgraph "AI 서비스 / AI Service"
+        F[Google Gemini API<br/>구글 제미나이 API]
+    end
+    
+    subgraph "유틸리티 / Utilities"
+        G[Validators<br/>검증기]
+        H[Error Handler<br/>오류 처리기]
+        I[Config<br/>설정 관리]
+        J[Constants<br/>상수 정의]
+    end
+    
+    subgraph "출력 / Output"
+        K[필터링된 PDF<br/>Filtered PDF]
+        L[디버그 로그<br/>Debug Logs]
+    end
+    
+    A --> C
+    B --> C
+    C --> D
+    C --> E
+    D <--> F
+    D --> G
+    D --> H
+    D --> I
+    D --> J
+    E --> G
+    E --> K
+    D --> L
+```
+
+### 기존 시스템 개요도 / Legacy System Overview
 
 ```mermaid
 graph TD
@@ -54,6 +128,103 @@ graph TD
     style J fill:#c8e6c9
     style K fill:#ffecb3
 ```
+
+### 데이터 흐름도 / Data Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant User as 사용자/User
+    participant Main as main.py
+    participant Processor as PDFProcessor
+    participant Gemini as Gemini API
+    participant Creator as PDFCreator
+    participant Output as 출력 파일/Output
+    
+    User->>Main: 명령 실행<br/>Execute Command
+    Main->>Main: 파일 스캔<br/>Scan Files
+    Main->>Processor: PDF 분석 요청<br/>Request Analysis
+    
+    loop 각 파일 조합<br/>For Each File Combination
+        Processor->>Gemini: 파일 업로드<br/>Upload Files
+        Processor->>Gemini: 분석 요청<br/>Analysis Request
+        Gemini->>Processor: JSON 응답<br/>JSON Response
+        Processor->>Processor: 결과 병합<br/>Merge Results
+    end
+    
+    Processor->>Main: 분석 결과<br/>Analysis Results
+    Main->>Creator: PDF 생성 요청<br/>Generate PDF
+    Creator->>Output: 필터링된 PDF<br/>Filtered PDF
+    Creator->>Main: 완료<br/>Complete
+    Main->>User: 결과 출력<br/>Output Results
+```
+
+## 핵심 컴포넌트 / Core Components
+
+### 1. main.py - 메인 엔트리 포인트 / Main Entry Point
+
+**한국어**
+- **역할**: 전체 프로그램의 진입점 및 워크플로우 오케스트레이션
+- **주요 기능**:
+  - 명령줄 인자 파싱 (argparse 사용)
+  - 처리 모드 선택 (강의 중심 vs 족보 중심)
+  - PDF 파일 검색 및 필터링 (Zone.Identifier 파일 제외)
+  - 병렬/순차 처리 라우팅
+  - 세션 관리 기능 (임시 파일 정리)
+  - 진행 상황 모니터링
+
+**English**
+- **Role**: Program entry point and workflow orchestration
+- **Key Functions**:
+  - Command-line argument parsing (using argparse)
+  - Processing mode selection (lesson-centric vs jokbo-centric)
+  - PDF file discovery and filtering (excluding Zone.Identifier files)
+  - Parallel/sequential processing routing
+  - Session management (temporary file cleanup)
+  - Progress monitoring
+
+### 2. PDFProcessor - AI 분석 엔진 / AI Analysis Engine
+
+**한국어**
+- **역할**: Gemini API와의 통신 및 AI 기반 콘텐츠 분석
+- **주요 기능**:
+  - 파일 업로드/삭제 관리
+  - 대용량 PDF 청킹 (40페이지 단위 분할)
+  - 병렬 처리 지원 (ThreadPoolExecutor 사용)
+  - 지수 백오프 재시도 로직
+  - JSON 응답 파싱 및 부분 복구
+  - 세션 기반 실행 격리
+  - 스레드 안전 PDF 캐싱
+
+**English**
+- **Role**: Communication with Gemini API and AI-based content analysis
+- **Key Functions**:
+  - File upload/deletion management
+  - Large PDF chunking (40-page units)
+  - Parallel processing support (using ThreadPoolExecutor)
+  - Exponential backoff retry logic
+  - JSON response parsing and partial recovery
+  - Session-based execution isolation
+  - Thread-safe PDF caching
+
+### 3. PDFCreator - PDF 생성기 / PDF Generator
+
+**한국어**
+- **역할**: 분석 결과를 기반으로 필터링된 PDF 생성
+- **주요 기능**:
+  - 다중 페이지 문제 추출
+  - CJK 폰트를 사용한 한글 텍스트 렌더링
+  - 설명 페이지 자동 생성
+  - 스레드 안전 PDF 캐싱
+  - 문제 번호순 정렬
+
+**English**
+- **Role**: Generate filtered PDFs based on analysis results
+- **Key Functions**:
+  - Multi-page question extraction
+  - Korean text rendering using CJK fonts
+  - Automatic explanation page generation
+  - Thread-safe PDF caching
+  - Question number-based sorting
 
 ## 상세 데이터 흐름 (Detailed Data Flow)
 
@@ -319,6 +490,87 @@ GENERATION_CONFIG = {
 }
 ```
 
+## 처리 모드 / Processing Modes
+
+### 강의 중심 모드 / Lesson-Centric Mode
+
+```mermaid
+graph LR
+    A[강의자료<br/>Lecture Material] --> B[분석<br/>Analysis]
+    C[모든 족보<br/>All Jokbos] --> B
+    B --> D[관련 문제 그룹화<br/>Group Related Questions]
+    D --> E[필터링된 PDF<br/>Filtered PDF]
+    
+    style A fill:#f9f,stroke:#333,stroke-width:4px
+    style C fill:#bbf,stroke:#333,stroke-width:2px
+```
+
+**한국어**
+- **목적**: 특정 강의 주제 학습에 최적화
+- **프로세스**: 각 강의자료를 기준으로 모든 족보와 비교
+- **출력**: 강의 슬라이드 → 관련 시험 문제 → AI 해설
+- **사용 시나리오**: 수업 내용 복습, 특정 주제 심화 학습
+
+**English**
+- **Purpose**: Optimized for studying specific lecture topics
+- **Process**: Compare each lecture material against all jokbos
+- **Output**: Lecture slide → Related exam questions → AI explanations
+- **Use Cases**: Lecture review, deep dive into specific topics
+
+### 족보 중심 모드 / Jokbo-Centric Mode
+
+```mermaid
+graph LR
+    A[족보<br/>Jokbo] --> B[분석<br/>Analysis]
+    C[모든 강의자료<br/>All Lectures] --> B
+    B --> D[관련 슬라이드 매칭<br/>Match Related Slides]
+    D --> E[점수 기반 필터링<br/>Score-based Filtering]
+    E --> F[필터링된 PDF<br/>Filtered PDF]
+    
+    style A fill:#f9f,stroke:#333,stroke-width:4px
+    style C fill:#bbf,stroke:#333,stroke-width:2px
+```
+
+**한국어**
+- **목적**: 시험 준비에 최적화
+- **프로세스**: 각 족보를 기준으로 모든 강의자료와 비교
+- **출력**: 시험 문제 → 관련 강의 슬라이드 → AI 해설
+- **특징**:
+  - 100점 만점 관련성 점수 시스템
+  - 문제당 상위 2개 연결만 선택
+  - 최소 50점 이상 연결만 포함
+
+**English**
+- **Purpose**: Optimized for exam preparation
+- **Process**: Compare each jokbo against all lecture materials
+- **Output**: Exam question → Related lecture slides → AI explanations
+- **Features**:
+  - 100-point relevance scoring system
+  - Top 2 connections per question
+  - Minimum 50-point threshold filtering
+
+## 관련성 점수 체계 / Relevance Scoring System
+
+```mermaid
+graph TB
+    subgraph "점수 체계 / Scoring System"
+        A[90-100점<br/>핵심 출제] 
+        B[70-85점<br/>직접 관련]
+        C[50-65점<br/>중간 관련]
+        D[25-45점<br/>간접 관련]
+        E[5-20점<br/>거의 무관]
+    end
+    
+    A --> F[95점: 동일한 그림/도표 ⭐]
+    A --> G[90점: 100% 정답 가능 🎯]
+    
+    style A fill:#f96,stroke:#333,stroke-width:2px
+    style B fill:#fa6,stroke:#333,stroke-width:2px
+    style C fill:#ff6,stroke:#333,stroke-width:2px
+    style D fill:#ffc,stroke:#333,stroke-width:2px
+    style E fill:#fff,stroke:#333,stroke-width:2px
+```
+
 ## Operating Modes (작동 모드)
 
 ### 1. Lesson-Centric Mode (강의자료 중심 - 기본값)
@@ -444,10 +696,12 @@ GENERATION_CONFIG = {
    e. Generate jokbo-centric PDF
 ```
 
-## Utility Tools (유틸리티)
+## 유틸리티 도구 / Utility Tools
 
-### cleanup_gemini_files.py
-- **목적**: Gemini API 업로드 파일 관리 도구
+### cleanup_gemini_files.py - API 파일 관리 / API File Management
+
+**한국어**
+- **목적**: Gemini API에 업로드된 파일 관리
 - **기능**:
   - 업로드된 모든 파일 목록 조회
   - 파일별 상세 정보 표시 (크기, 상태, 생성시간)
@@ -457,4 +711,264 @@ GENERATION_CONFIG = {
   - 프로그램 오류로 인한 잔여 파일 정리
   - API 할당량 관리
   - 디버깅 후 클린업
+
+**English**
+- **Purpose**: Manage files uploaded to Gemini API
+- **Features**:
+  - List all uploaded files
+  - Display detailed file information (size, status, creation time)
+  - Selective or bulk deletion
+  - Interactive interface
+- **Use Cases**:
+  - Clean up residual files from program errors
+  - API quota management
+  - Post-debugging cleanup
+
+### cleanup_sessions.py - 세션 관리 / Session Management
+
+**한국어**
+- **목적**: 임시 세션 파일 관리 및 정리
+- **기능**:
+  - 세션 목록 표시 (크기, 생성일, 상태)
+  - 오래된 세션 자동 정리
+  - 선택적 또는 일괄 삭제
+- **명령어**:
+  ```bash
+  python cleanup_sessions.py           # 대화형 모드
+  python main.py --list-sessions      # 세션 목록
+  python main.py --cleanup-old 7      # 7일 이상 된 세션 삭제
+  ```
+
+**English**
+- **Purpose**: Manage and clean up temporary session files
+- **Features**:
+  - Display session list (size, creation date, status)
+  - Automatic cleanup of old sessions
+  - Selective or bulk deletion
+- **Commands**:
+  ```bash
+  python cleanup_sessions.py           # Interactive mode
+  python main.py --list-sessions      # List sessions
+  python main.py --cleanup-old 7      # Delete sessions older than 7 days
+  ```
+
+### recover_from_chunks.py - 중단된 작업 복구 / Interrupted Work Recovery
+
+**한국어**
+- **목적**: 중단된 PDF 생성 작업 복구
+- **기능**:
+  - 청크 파일에서 결과 복구
+  - 세션별 복구 지원
+  - 중단 지점부터 재시작
+- **명령어**:
+  ```bash
+  python recover_from_chunks.py --list-sessions    # 복구 가능한 세션 목록
+  python recover_from_chunks.py --session SESSION_ID  # 특정 세션 복구
+  ```
+
+**English**
+- **Purpose**: Recover interrupted PDF generation tasks
+- **Features**:
+  - Recover results from chunk files
+  - Session-aware recovery support
+  - Resume from interruption point
+- **Commands**:
+  ```bash
+  python recover_from_chunks.py --list-sessions    # List recoverable sessions
+  python recover_from_chunks.py --session SESSION_ID  # Recover specific session
+  ```
+
+## 성능 최적화 / Performance Optimizations
+
+### 병렬 처리 아키텍처 / Parallel Processing Architecture
+
+```mermaid
+graph TB
+    subgraph "메인 프로세스 / Main Process"
+        A[메인 PDFProcessor<br/>세션 ID 생성]
+    end
+    
+    subgraph "스레드 풀 / Thread Pool"
+        B[Thread 1<br/>PDFProcessor]
+        C[Thread 2<br/>PDFProcessor]
+        D[Thread 3<br/>PDFProcessor]
+    end
+    
+    A -->|세션 ID 공유| B
+    A -->|세션 ID 공유| C
+    A -->|세션 ID 공유| D
+    
+    B --> E[청크 결과 1]
+    C --> F[청크 결과 2]
+    D --> G[청크 결과 3]
+    
+    E --> H[결과 병합<br/>Result Merge]
+    F --> H
+    G --> H
 ```
+
+**한국어**
+- **단일 세션 사용**: 모든 스레드가 동일한 세션 ID 공유
+- **파일 기반 중간 저장**: 메모리 사용량 최소화
+- **청크 단위 처리**: 대용량 파일을 40페이지 단위로 분할
+- **캐싱 메커니즘**: PDF 객체 재사용으로 I/O 감소
+- **진행률 표시**: tqdm을 통한 실시간 진행 상황 모니터링
+
+**English**
+- **Single Session Usage**: All threads share the same session ID
+- **File-based Intermediate Storage**: Minimize memory usage
+- **Chunk-based Processing**: Split large files into 40-page units
+- **Caching Mechanism**: Reduce I/O through PDF object reuse
+- **Progress Display**: Real-time progress monitoring via tqdm
+
+## 디렉토리 구조 / Directory Structure
+
+```
+jokbodude/
+├── jokbo/                    # 족보 PDF 파일 / Exam PDF files
+├── lesson/                   # 강의자료 PDF 파일 / Lecture PDF files
+├── output/                   # 출력 디렉토리 / Output directory
+│   ├── debug/               # 디버그 로그 / Debug logs
+│   └── temp/                # 임시 파일 / Temporary files
+│       └── sessions/        # 세션별 디렉토리 / Session directories
+├── main.py                  # 메인 진입점 / Main entry point
+├── pdf_processor.py         # AI 분석 엔진 / AI analysis engine
+├── pdf_creator.py           # PDF 생성기 / PDF generator
+├── config.py               # 설정 관리 / Configuration
+├── constants.py            # 상수 정의 / Constants
+├── validators.py           # 검증 유틸리티 / Validation utilities
+├── pdf_processor_helpers.py # 헬퍼 함수 / Helper functions
+└── error_handler.py        # 오류 처리 / Error handling
+```
+
+## 환경 설정 / Environment Setup
+
+### 필수 환경 변수 / Required Environment Variables
+
+```bash
+GEMINI_API_KEY=your_api_key_here  # Google Gemini API 키 / API Key
+MAX_PAGES_PER_CHUNK=40            # 청크당 최대 페이지 수 / Max pages per chunk
+```
+
+### 모델 선택 옵션 / Model Selection Options
+
+```mermaid
+graph LR
+    A[Gemini 2.5 Pro] -->|최고 품질<br/>Best Quality| B[고비용<br/>High Cost]
+    C[Gemini 2.5 Flash] -->|균형<br/>Balanced| D[중간 비용<br/>Medium Cost]
+    E[Gemini 2.5 Flash-lite] -->|최고 속도<br/>Fastest| F[저비용<br/>Low Cost]
+```
+
+## API 상호작용 / API Interactions
+
+### Gemini API 통신 흐름 / Gemini API Communication Flow
+
+```mermaid
+sequenceDiagram
+    participant P as PDFProcessor
+    participant G as Gemini API
+    participant F as File Storage
+    
+    P->>G: 파일 업로드<br/>Upload File
+    G->>F: 저장<br/>Store
+    G->>P: 파일 ID<br/>File ID
+    
+    P->>G: 분석 요청 + 프롬프트<br/>Analysis Request + Prompt
+    G->>G: AI 처리<br/>AI Processing
+    G->>P: JSON 응답<br/>JSON Response
+    
+    P->>G: 파일 삭제<br/>Delete File
+    G->>F: 삭제<br/>Remove
+    G->>P: 확인<br/>Confirm
+```
+
+## 주요 설계 결정 / Key Design Decisions
+
+### 1. 청킹 전략 / Chunking Strategy
+
+**한국어**
+- **결정**: 40페이지 단위 분할 (환경 변수로 조정 가능)
+- **이유**: Gemini API 제한 및 메모리 효율성 고려
+- **영향**: 대용량 PDF 처리 가능, 부분 실패 시 재시도 용이
+
+**English**
+- **Decision**: 40-page unit splitting (configurable via environment variable)
+- **Rationale**: Gemini API limits and memory efficiency
+- **Impact**: Enable large PDF processing, easy retry on partial failures
+
+### 2. 스레드 안전성 / Thread Safety
+
+**한국어**
+- **결정**: threading.Lock을 사용한 PDF 캐시 보호
+- **이유**: 병렬 처리 시 동시 접근 문제 방지
+- **구현**: PDFCreator의 get_jokbo_pdf 메서드에 락 적용
+
+**English**
+- **Decision**: PDF cache protection using threading.Lock
+- **Rationale**: Prevent concurrent access issues during parallel processing
+- **Implementation**: Lock applied to PDFCreator's get_jokbo_pdf method
+
+### 3. 세션 관리 / Session Management
+
+**한국어**
+- **결정**: 타임스탬프 + 랜덤 문자열 기반 세션 ID
+- **이유**: 처리 격리 및 디버깅 용이성
+- **특징**: 병렬 처리 시 단일 세션 공유로 리소스 효율성 향상
+
+**English**
+- **Decision**: Session ID based on timestamp + random string
+- **Rationale**: Processing isolation and debugging ease
+- **Feature**: Resource efficiency through single session sharing in parallel processing
+
+### 4. 오류 처리 전략 / Error Handling Strategy
+
+```mermaid
+graph TB
+    A[API 호출<br/>API Call] --> B{성공?<br/>Success?}
+    B -->|Yes| C[결과 처리<br/>Process Result]
+    B -->|No| D[재시도 대기<br/>Wait for Retry]
+    D --> E{재시도 횟수?<br/>Retry Count?}
+    E -->|< 3| A
+    E -->|>= 3| F[부분 파싱 시도<br/>Try Partial Parse]
+    F --> G{복구 가능?<br/>Recoverable?}
+    G -->|Yes| H[부분 결과 사용<br/>Use Partial Result]
+    G -->|No| I[오류 반환<br/>Return Error]
+```
+
+## 향후 고려사항 / Future Considerations
+
+### 확장성 / Scalability
+
+**한국어**
+- Context Caching 구현으로 API 비용 절감
+- 비동기 처리 (async/await) 도입 검토
+- 분산 처리 시스템으로 확장 가능성
+- 웹 기반 인터페이스 추가
+
+**English**
+- Cost reduction through Context Caching implementation
+- Consider introducing asynchronous processing (async/await)
+- Potential expansion to distributed processing system
+- Addition of web-based interface
+
+### 성능 개선 / Performance Improvements
+
+**한국어**
+- GPU 가속 PDF 렌더링
+- 더 정교한 캐싱 메커니즘
+- 증분 처리 (변경된 파일만 재처리)
+- 실시간 진행률 웹소켓 지원
+
+**English**
+- GPU-accelerated PDF rendering
+- More sophisticated caching mechanisms
+- Incremental processing (reprocess only changed files)
+- Real-time progress via WebSocket support
+
+## 결론 / Conclusion
+
+**한국어**
+JokboDude는 의과대학생들의 효과적인 시험 준비를 위해 설계된 강력한 AI 기반 학습 도구입니다. 모듈화된 아키텍처, 병렬 처리 능력, 그리고 정교한 관련성 점수 시스템을 통해 학습 효율성을 극대화합니다. 시스템의 확장 가능한 설계는 향후 다양한 기능 추가와 성능 개선을 용이하게 합니다.
+
+**English**
+JokboDude is a powerful AI-based learning tool designed for effective exam preparation for medical students. Through its modular architecture, parallel processing capabilities, and sophisticated relevance scoring system, it maximizes learning efficiency. The system's scalable design facilitates future feature additions and performance improvements.
