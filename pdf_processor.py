@@ -2267,8 +2267,8 @@ class PDFProcessor:
         print("\n  API 사용 통계:")
         api_status = api_manager.get_status()
         for api_name, status in api_status.items():
-            print(f"    {api_name}: 사용 횟수={status['usage_count']}, 마지막 사용={status['last_used']}, "
-                  f"상태={'사용 가능' if status['available'] else f\"쿨다운 ({status['cooldown_remaining']})\"}") 
+            state_msg = '사용 가능' if status['available'] else f"쿨다운 ({status['cooldown_remaining']})"
+            print(f"    {api_name}: 사용 횟수={status['usage_count']}, 마지막 사용={status['last_used']}, 상태={state_msg}") 
         
         # 모든 청크 결과 파일 로드 및 병합
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] 청크 결과 병합 중...")
