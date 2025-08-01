@@ -167,6 +167,77 @@ def extract_jokbo_info_from_state(session_dir: Path = None) -> str:
         except Exception as e:
             print(f"처리 상태 파일 읽기 실패: {str(e)}")
     
+    # processing_state.json이 없는 경우 청크 파일에서 족보 정보 추출 시도
+    if session_dir:
+        print("처리 상태 파일이 없습니다. 청크 파일에서 족보 정보를 추출합니다...")
+        
+        # debug 디렉토리에서 세션 시간 이후의 파일을 확인하여 족보 파일명 추출
+        debug_dir = Path("output/debug")
+        session_id = session_dir.name  # 예: 20250801_104650_nmc321
+        session_date = session_id.split('_')[0]  # 20250801
+        session_hour = int(session_id.split('_')[1][:2])  # 10
+        session_minute = int(session_id.split('_')[1][2:4])  # 46
+        
+        # 세션 시간 이후의 debug 파일 찾기
+        jokbo_candidates = set()
+        if debug_dir.exists():
+            # 세션 시간 이후의 모든 파일 검사
+            for debug_file in debug_dir.glob(f"*{session_date}_*.json"):
+                # 파일 시간 추출
+                try:
+                    file_parts = debug_file.name.split('_')
+                    if len(file_parts) >= 3:
+                        file_time = file_parts[2][:6]  # 예: 110632
+                        file_hour = int(file_time[:2])
+                        file_minute = int(file_time[2:4])
+                        
+                        # 세션 시작 이후의 파일인지 확인
+                        if (file_hour > session_hour) or (file_hour == session_hour and file_minute >= session_minute):
+                            # 족보 파일명 추출
+                            if "_jokbo_" in debug_file.name:
+                                parts = debug_file.name.split("_jokbo_")
+                                if len(parts) > 1:
+                                    # 족보 부분 추출 (예: "240530 본1 인체병리학총론_정답")
+                                    remaining = parts[1]
+                                    # 첫 번째 언더스코어 이전까지가 족보 번호
+                                    jokbo_num_end = remaining.find('_')
+                                    if jokbo_num_end > 0:
+                                        jokbo_num = remaining[:jokbo_num_end]  # "240530"
+                                        # 정답 포함 여부 확인
+                                        if "인체병리학총론_정답" in remaining:
+                                            jokbo_candidates.add(f"{jokbo_num} 본1 인체병리학총론_정답")
+                                        elif "인체 병리학 총론_정답포함" in remaining:
+                                            jokbo_candidates.add(f"{jokbo_num} 본1 인체 병리학 총론_정답포함")
+                                        elif "인체병리학_정답" in remaining:
+                                            jokbo_candidates.add(f"{jokbo_num} 본1 인체병리학_정답")
+                except:
+                    continue
+        
+        # 찾은 족보 후보 중에서 실제 존재하는 파일 확인
+        jokbo_dir = Path("jokbo")
+        if jokbo_candidates and jokbo_dir.exists():
+            for candidate in jokbo_candidates:
+                for jokbo_file in jokbo_dir.glob("*.pdf"):
+                    if candidate in jokbo_file.name:
+                        print(f"\n세션에서 사용된 족보 파일 발견: {jokbo_file.name}")
+                        return str(jokbo_file)
+        
+        # 족보를 찾지 못한 경우 사용자에게 선택 요청
+        print("\n청크 파일에서 족보 정보를 찾을 수 없습니다.")
+        if jokbo_dir.exists():
+            jokbo_files = list(jokbo_dir.glob("*.pdf"))
+            if jokbo_files:
+                print("\n사용 가능한 족보 파일:")
+                for i, jf in enumerate(jokbo_files, 1):
+                    print(f"{i}. {jf.name}")
+                
+                # 사용자 입력 대신 가장 최근 족보 사용 (파일명 기준)
+                # 보통 날짜가 큰 것이 최신
+                sorted_files = sorted(jokbo_files, key=lambda x: x.name, reverse=True)
+                default_jokbo = sorted_files[0]
+                print(f"\n기본값으로 사용: {default_jokbo.name}")
+                return str(default_jokbo)
+    
     return None
 
 

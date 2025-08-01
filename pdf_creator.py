@@ -385,9 +385,9 @@ class PDFCreator:
                 for i, slide_info in enumerate(related_slides, 1):
                     score = slide_info.get('relevance_score', 0)
                     if score >= 95:
-                        score_text = f"{score}/100 ⭐ 동일한 그림/도표"
+                        score_text = f"{score}/100 ⭐"
                     elif score >= 90:
-                        score_text = f"{score}/100 🎯 핵심 출제 슬라이드"
+                        score_text = f"{score}/100 🎯"
                     else:
                         score_text = f"{score}/100"
                     text_content += f"{i}. {slide_info['lesson_filename']} - {slide_info['lesson_page']}페이지 (관련성 점수: {score_text})\n"
