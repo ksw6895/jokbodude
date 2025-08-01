@@ -55,30 +55,30 @@ Key Features:
 ```mermaid
 graph TB
     subgraph "사용자 레이어 / User Layer"
-        U1[의대생<br/>Medical Student]
-        U2[교수/조교<br/>Professor/TA]
+        U1[의대생 / Medical Student]
+        U2[교수/조교 / Professor/TA]
     end
     
     subgraph "인터페이스 레이어 / Interface Layer"
-        CLI[명령줄 인터페이스<br/>Command Line Interface]
+        CLI[명령줄 인터페이스 / Command Line Interface]
     end
     
     subgraph "애플리케이션 레이어 / Application Layer"
-        MAIN[main.py<br/>오케스트레이터<br/>Orchestrator]
-        PROC[PDFProcessor<br/>분석 엔진<br/>Analysis Engine]
-        CREA[PDFCreator<br/>생성 엔진<br/>Generation Engine]
+        MAIN[main.py - 오케스트레이터 / Orchestrator]
+        PROC[PDFProcessor - 분석 엔진 / Analysis Engine]
+        CREA[PDFCreator - 생성 엔진 / Generation Engine]
     end
     
     subgraph "AI 서비스 레이어 / AI Service Layer"
-        GEMINI[Google Gemini API<br/>gemini-2.5-pro/flash/flash-lite]
+        GEMINI[Google Gemini API - gemini-2.5-pro/flash/flash-lite]
     end
     
     subgraph "데이터 레이어 / Data Layer"
-        IN1[강의 PDF<br/>Lecture PDFs]
-        IN2[족보 PDF<br/>Exam PDFs]
-        OUT1[필터링된 PDF<br/>Filtered PDFs]
-        OUT2[디버그 로그<br/>Debug Logs]
-        OUT3[세션 데이터<br/>Session Data]
+        IN1[강의 PDF / Lecture PDFs]
+        IN2[족보 PDF / Exam PDFs]
+        OUT1[필터링된 PDF / Filtered PDFs]
+        OUT2[디버그 로그 / Debug Logs]
+        OUT3[세션 데이터 / Session Data]
     end
     
     U1 --> CLI
@@ -104,33 +104,33 @@ graph TB
 ```mermaid
 graph TB
     subgraph "입력 소스 / Input Sources"
-        A[족보 PDF<br/>Exam PDFs] 
-        B[강의자료 PDF<br/>Lecture PDFs]
+        A[족보 PDF / Exam PDFs] 
+        B[강의자료 PDF / Lecture PDFs]
     end
     
     subgraph "메인 컨트롤러 / Main Controller"
-        C[main.py<br/>진입점 및 오케스트레이션<br/>Entry Point & Orchestration]
+        C[main.py - 진입점 및 오케스트레이션 / Entry Point & Orchestration]
     end
     
     subgraph "코어 프로세싱 / Core Processing"
-        D[PDFProcessor<br/>AI 분석 엔진<br/>AI Analysis Engine]
-        E[PDFCreator<br/>PDF 생성기<br/>PDF Generator]
+        D[PDFProcessor - AI 분석 엔진 / AI Analysis Engine]
+        E[PDFCreator - PDF 생성기 / PDF Generator]
     end
     
     subgraph "AI 서비스 / AI Service"
-        F[Google Gemini API<br/>구글 제미나이 API]
+        F[Google Gemini API / 구글 제미나이 API]
     end
     
     subgraph "유틸리티 / Utilities"
-        G[Validators<br/>검증기]
-        H[Error Handler<br/>오류 처리기]
-        I[Config<br/>설정 관리]
-        J[Constants<br/>상수 정의]
+        G[Validators / 검증기]
+        H[Error Handler / 오류 처리기]
+        I[Config / 설정 관리]
+        J[Constants / 상수 정의]
     end
     
     subgraph "출력 / Output"
-        K[필터링된 PDF<br/>Filtered PDF]
-        L[디버그 로그<br/>Debug Logs]
+        K[필터링된 PDF / Filtered PDF]
+        L[디버그 로그 / Debug Logs]
     end
     
     A --> C
@@ -155,35 +155,35 @@ graph TB
         direction TB
         
         subgraph "Entry Point"
-            MAIN[main.py<br/>━━━━━━━━━━<br/>• 명령줄 파싱<br/>• 모드 라우팅<br/>• 세션 관리]
+            MAIN[main.py | 명령줄 파싱, 모드 라우팅, 세션 관리]
         end
         
         subgraph "Processing Modes"
-            LC[강의 중심 모드<br/>Lesson-Centric<br/>━━━━━━━━━━<br/>• 강의별 분석<br/>• 관련 문제 추출]
-            JC[족보 중심 모드<br/>Jokbo-Centric<br/>━━━━━━━━━━<br/>• 문제별 분석<br/>• 관련 슬라이드 매칭]
+            LC[강의 중심 모드 Lesson-Centric | 강의별 분석, 관련 문제 추출]
+            JC[족보 중심 모드 Jokbo-Centric | 문제별 분석, 관련 슬라이드 매칭]
         end
         
         subgraph "Core Engines"
-            PROC[PDFProcessor<br/>━━━━━━━━━━<br/>• 파일 업로드<br/>• AI 분석<br/>• 청킹 처리<br/>• 결과 병합]
-            CREA[PDFCreator<br/>━━━━━━━━━━<br/>• 페이지 추출<br/>• 설명 생성<br/>• PDF 병합<br/>• 캐시 관리]
+            PROC[PDFProcessor | 파일 업로드, AI 분석, 청킹 처리, 결과 병합]
+            CREA[PDFCreator | 페이지 추출, 설명 생성, PDF 병합, 캐시 관리]
         end
         
         subgraph "Support Modules"
-            VAL[Validators<br/>━━━━━━━━━━<br/>• 페이지 검증<br/>• 범위 조정]
-            HELP[Helpers<br/>━━━━━━━━━━<br/>• JSON 파싱<br/>• 결과 병합]
-            ERR[ErrorHandler<br/>━━━━━━━━━━<br/>• 예외 처리<br/>• 로깅]
-            CONST[Constants<br/>━━━━━━━━━━<br/>• 프롬프트<br/>• 설정값]
+            VAL[Validators | 페이지 검증, 범위 조정]
+            HELP[Helpers | JSON 파싱, 결과 병합]
+            ERR[ErrorHandler | 예외 처리, 로깅]
+            CONST[Constants | 프롬프트, 설정값]
         end
     end
     
     subgraph "External Services"
-        GEM[Gemini API<br/>━━━━━━━━━━<br/>• 파일 저장소<br/>• AI 모델<br/>• JSON 응답]
+        GEM[Gemini API | 파일 저장소, AI 모델, JSON 응답]
     end
     
     subgraph "Data Storage"
-        CACHE[PDF 캐시<br/>━━━━━━━━━━<br/>• 스레드 안전<br/>• 메모리 효율]
-        SESS[세션 저장소<br/>━━━━━━━━━━<br/>• 청크 결과<br/>• 처리 상태]
-        DEBUG[디버그 로그<br/>━━━━━━━━━━<br/>• API 응답<br/>• 오류 추적]
+        CACHE[PDF 캐시 | 스레드 안전, 메모리 효율]
+        SESS[세션 저장소 | 청크 결과, 처리 상태]
+        DEBUG[디버그 로그 | API 응답, 오류 추적]
     end
     
     MAIN --> LC
@@ -211,29 +211,29 @@ graph TB
 ```mermaid
 graph TD
     subgraph "📥 입력 (Input)"
-        A1["📚 강의자료 PDFs<br/>(Lesson Materials)"]
-        A2["📋 족보 PDFs<br/>(Past Exams)"]
+        A1["📚 강의자료 PDFs (Lesson Materials)"]
+        A2["📋 족보 PDFs (Past Exams)"]
     end
     
     subgraph "⚙️ 처리 과정 (Processing)"
-        B["🎯 main.py<br/>진입점"] 
+        B["🎯 main.py 진입점"] 
         C["🔍 PDF 파일 검색"]
-        D["🔄 처리 모드 선택<br/>(강의/족보 중심)"]
-        E["🤖 pdf_processor.py<br/>AI 분석 엔진"]
-        F["☁️ Gemini API<br/>gemini-2.5-pro"]
-        G["📊 분석 및 매칭<br/>문제 ↔ 슬라이드"]
+        D["🔄 처리 모드 선택 (강의/족보 중심)"]
+        E["🤖 pdf_processor.py AI 분석 엔진"]
+        F["☁️ Gemini API gemini-2.5-pro"]
+        G["📊 분석 및 매칭 문제 ↔ 슬라이드"]
         H["🔀 결과 병합"]
-        I["📝 pdf_creator.py<br/>PDF 생성기"]
+        I["📝 pdf_creator.py PDF 생성기"]
     end
     
     subgraph "📤 출력 (Output)"
-        J["✅ 필터링된 PDFs<br/>(학습 자료)"]
-        K["🐛 디버그 로그<br/>(API 응답)"]
+        J["✅ 필터링된 PDFs (학습 자료)"]
+        K["🐛 디버그 로그 (API 응답)"]
     end
     
     subgraph "🔧 설정 (Configuration)"
         L["⚙️ config.py"]
-        M["🔐 .env<br/>(API 키)"]
+        M["🔐 .env (API 키)"]
     end
     
     A1 --> B
@@ -266,7 +266,7 @@ graph TD
 ```mermaid
 sequenceDiagram
     autonumber
-    participant User as 👤 사용자<br/>User
+    participant User as 👤 사용자 / User
     participant CLI as 🖥️ CLI
     participant Main as 🎯 main.py
     participant Processor as 🤖 PDFProcessor
@@ -316,31 +316,31 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Start([시작 / Start]) --> SelectMode[모드 선택<br/>Mode Selection]
-    SelectMode --> LessonMode[강의 중심 모드<br/>Lesson-Centric Mode]
+    Start([시작 / Start]) --> SelectMode[모드 선택 / Mode Selection]
+    SelectMode --> LessonMode[강의 중심 모드 / Lesson-Centric Mode]
     
-    LessonMode --> ScanFiles[파일 스캔<br/>━━━━━━━━━<br/>• lesson/*.pdf<br/>• jokbo/*.pdf]
+    LessonMode --> ScanFiles[파일 스캔 - lesson/*.pdf, jokbo/*.pdf]
     
-    ScanFiles --> ForEachLesson{각 강의자료에 대해<br/>For Each Lesson}
+    ScanFiles --> ForEachLesson{각 강의자료에 대해 / For Each Lesson}
     
-    ForEachLesson --> UploadLesson[강의자료 업로드<br/>Upload Lesson]
-    UploadLesson --> ForEachJokbo{각 족보에 대해<br/>For Each Jokbo}
+    ForEachLesson --> UploadLesson[강의자료 업로드 / Upload Lesson]
+    UploadLesson --> ForEachJokbo{각 족보에 대해 / For Each Jokbo}
     
-    ForEachJokbo --> UploadJokbo[족보 업로드<br/>Upload Jokbo]
-    UploadJokbo --> AnalyzeAI[AI 분석<br/>━━━━━━━━━<br/>• 관련 문제 찾기<br/>• 중요도 점수<br/>• 오답 해설]
+    ForEachJokbo --> UploadJokbo[족보 업로드 / Upload Jokbo]
+    UploadJokbo --> AnalyzeAI[AI 분석 - 관련 문제 찾기, 중요도 점수, 오답 해설]
     
-    AnalyzeAI --> SaveDebug[디버그 저장<br/>Save Debug]
-    SaveDebug --> DeleteJokbo[족보 삭제<br/>Delete Jokbo]
-    DeleteJokbo --> AccumulateResults[결과 누적<br/>Accumulate]
+    AnalyzeAI --> SaveDebug[디버그 저장 / Save Debug]
+    SaveDebug --> DeleteJokbo[족보 삭제 / Delete Jokbo]
+    DeleteJokbo --> AccumulateResults[결과 누적 / Accumulate]
     
-    AccumulateResults --> MoreJokbo{더 많은 족보?<br/>More Jokbos?}
+    AccumulateResults --> MoreJokbo{더 많은 족보? / More Jokbos?}
     MoreJokbo -->|Yes| ForEachJokbo
-    MoreJokbo -->|No| MergeResults[결과 병합<br/>Merge Results]
+    MoreJokbo -->|No| MergeResults[결과 병합 / Merge Results]
     
-    MergeResults --> CreatePDF[PDF 생성<br/>━━━━━━━━━<br/>• 슬라이드 추출<br/>• 문제 포함<br/>• 해설 추가]
+    MergeResults --> CreatePDF[PDF 생성 - 슬라이드 추출, 문제 포함, 해설 추가]
     
-    CreatePDF --> SavePDF[PDF 저장<br/>filtered_*.pdf]
-    SavePDF --> MoreLessons{더 많은 강의?<br/>More Lessons?}
+    CreatePDF --> SavePDF[PDF 저장 - filtered_*.pdf]
+    SavePDF --> MoreLessons{더 많은 강의? / More Lessons?}
     
     MoreLessons -->|Yes| ForEachLesson
     MoreLessons -->|No| End([완료 / Complete])
@@ -356,45 +356,45 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([시작 / Start]) --> SelectMode[모드 선택<br/>Mode Selection]
-    SelectMode --> JokboMode[족보 중심 모드<br/>Jokbo-Centric Mode]
+    Start([시작 / Start]) --> SelectMode[모드 선택 / Mode Selection]
+    SelectMode --> JokboMode[족보 중심 모드 / Jokbo-Centric Mode]
     
-    JokboMode --> ScanFiles[파일 스캔<br/>━━━━━━━━━<br/>• jokbo/*.pdf<br/>• lesson/*.pdf]
+    JokboMode --> ScanFiles[파일 스캔 - jokbo/*.pdf, lesson/*.pdf]
     
-    ScanFiles --> ForEachJokbo{각 족보에 대해<br/>For Each Jokbo}
+    ScanFiles --> ForEachJokbo{각 족보에 대해 / For Each Jokbo}
     
-    ForEachJokbo --> CheckChunks{큰 파일?<br/>Large File?}
-    CheckChunks -->|Yes| SplitChunks[청크 분할<br/>Split into Chunks<br/>(40 pages)]
-    CheckChunks -->|No| UploadJokbo[족보 업로드<br/>Upload Jokbo]
+    ForEachJokbo --> CheckChunks{큰 파일? / Large File?}
+    CheckChunks -->|Yes| SplitChunks[청크 분할 - Split into Chunks (40 pages)]
+    CheckChunks -->|No| UploadJokbo[족보 업로드 / Upload Jokbo]
     
-    SplitChunks --> ForEachChunk{각 청크에 대해<br/>For Each Chunk}
+    SplitChunks --> ForEachChunk{각 청크에 대해 / For Each Chunk}
     ForEachChunk --> UploadJokbo
     
-    UploadJokbo --> ForEachLesson{각 강의자료에 대해<br/>For Each Lesson}
+    UploadJokbo --> ForEachLesson{각 강의자료에 대해 / For Each Lesson}
     
-    ForEachLesson --> UploadLesson[강의자료 업로드<br/>Upload Lesson]
-    UploadLesson --> AnalyzeAI[AI 분석<br/>━━━━━━━━━<br/>• 관련 슬라이드<br/>• 관련성 점수<br/>• 상위 2개 선택]
+    ForEachLesson --> UploadLesson[강의자료 업로드 / Upload Lesson]
+    UploadLesson --> AnalyzeAI[AI 분석 - 관련 슬라이드, 관련성 점수, 상위 2개 선택]
     
-    AnalyzeAI --> ScoreFilter{점수 >= 50?<br/>Score >= 50?}
-    ScoreFilter -->|Yes| SaveDebug[디버그 저장<br/>Save Debug]
-    ScoreFilter -->|No| SkipQuestion[문제 제외<br/>Skip Question]
+    AnalyzeAI --> ScoreFilter{점수 >= 50? / Score >= 50?}
+    ScoreFilter -->|Yes| SaveDebug[디버그 저장 / Save Debug]
+    ScoreFilter -->|No| SkipQuestion[문제 제외 / Skip Question]
     
-    SaveDebug --> DeleteLesson[강의자료 삭제<br/>Delete Lesson]
-    DeleteLesson --> AccumulateResults[결과 누적<br/>Accumulate]
+    SaveDebug --> DeleteLesson[강의자료 삭제 / Delete Lesson]
+    DeleteLesson --> AccumulateResults[결과 누적 / Accumulate]
     SkipQuestion --> DeleteLesson
     
-    AccumulateResults --> MoreLessons{더 많은 강의?<br/>More Lessons?}
+    AccumulateResults --> MoreLessons{더 많은 강의? / More Lessons?}
     MoreLessons -->|Yes| ForEachLesson
-    MoreLessons -->|No| ChunkComplete[청크 완료<br/>Chunk Complete]
+    MoreLessons -->|No| ChunkComplete[청크 완료 / Chunk Complete]
     
-    ChunkComplete --> MoreChunks{더 많은 청크?<br/>More Chunks?}
+    ChunkComplete --> MoreChunks{더 많은 청크? / More Chunks?}
     MoreChunks -->|Yes| ForEachChunk
-    MoreChunks -->|No| MergeChunks[청크 병합<br/>Merge Chunks]
+    MoreChunks -->|No| MergeChunks[청크 병합 / Merge Chunks]
     
-    MergeChunks --> CreatePDF[PDF 생성<br/>━━━━━━━━━<br/>• 문제 페이지<br/>• 관련 슬라이드<br/>• 점수 표시]
+    MergeChunks --> CreatePDF[PDF 생성 - 문제 페이지, 관련 슬라이드, 점수 표시]
     
-    CreatePDF --> SavePDF[PDF 저장<br/>jokbo_centric_*.pdf]
-    SavePDF --> MoreJokbos{더 많은 족보?<br/>More Jokbos?}
+    CreatePDF --> SavePDF[PDF 저장 - jokbo_centric_*.pdf]
+    SavePDF --> MoreJokbos{더 많은 족보? / More Jokbos?}
     
     MoreJokbos -->|Yes| ForEachJokbo
     MoreJokbos -->|No| End([완료 / Complete])
@@ -483,40 +483,40 @@ flowchart TD
 graph TB
     subgraph "메인 프로세스 / Main Process"
         M1[main.py]
-        M2[메인 PDFProcessor<br/>세션 ID: 20250801_123456_abc123]
-        M3[ThreadPoolExecutor<br/>max_workers=3]
+        M2[메인 PDFProcessor | 세션 ID: 20250801_123456_abc123]
+        M3[ThreadPoolExecutor | max_workers=3]
     end
     
     subgraph "워커 스레드 풀 / Worker Thread Pool"
         subgraph "Thread 1"
-            T1[PDFProcessor<br/>동일 세션 ID 사용]
-            T1F1[족보1 처리<br/>Process Jokbo1]
+            T1[PDFProcessor - 동일 세션 ID 사용]
+            T1F1[족보1 처리 / Process Jokbo1]
             T1R[chunk_001.json]
         end
         
         subgraph "Thread 2"
-            T2[PDFProcessor<br/>동일 세션 ID 사용]
-            T2F1[족보2 처리<br/>Process Jokbo2]
+            T2[PDFProcessor - 동일 세션 ID 사용]
+            T2F1[족보2 처리 / Process Jokbo2]
             T2R[chunk_002.json]
         end
         
         subgraph "Thread 3"
-            T3[PDFProcessor<br/>동일 세션 ID 사용]
-            T3F1[족보3 처리<br/>Process Jokbo3]
+            T3[PDFProcessor - 동일 세션 ID 사용]
+            T3F1[족보3 처리 / Process Jokbo3]
             T3R[chunk_003.json]
         end
     end
     
     subgraph "공유 리소스 / Shared Resources"
-        SESS[세션 디렉토리<br/>output/temp/sessions/<br/>20250801_123456_abc123/]
+        SESS[세션 디렉토리 - output/temp/sessions/20250801_123456_abc123/]
         CHUNK[chunk_results/]
-        CACHE[PDF 캐시<br/>threading.Lock 보호]
-        PROGRESS[tqdm 진행률<br/>Progress Bar]
+        CACHE[PDF 캐시 - threading.Lock 보호]
+        PROGRESS[tqdm 진행률 / Progress Bar]
     end
     
     subgraph "결과 병합 / Result Merging"
-        MERGE[결과 병합기<br/>Result Merger]
-        FINAL[최종 분석 결과<br/>Final Analysis]
+        MERGE[결과 병합기 / Result Merger]
+        FINAL[최종 분석 결과 / Final Analysis]
     end
     
     M1 --> M2
@@ -651,32 +651,32 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Start([대용량 PDF<br/>Large PDF]) --> Check{페이지 수 > 40?<br/>Pages > 40?}
+    Start([대용량 PDF / Large PDF]) --> Check{페이지 수 > 40? / Pages > 40?}
     
-    Check -->|No| Direct[직접 처리<br/>Direct Processing]
-    Check -->|Yes| Split[청크 분할<br/>Split into Chunks]
+    Check -->|No| Direct[직접 처리 / Direct Processing]
+    Check -->|Yes| Split[청크 분할 / Split into Chunks]
     
-    Split --> Calc[청크 계산<br/>━━━━━━━━━<br/>• 총 페이지: 180<br/>• 청크 크기: 40<br/>• 청크 수: 5]
+    Split --> Calc[청크 계산 - 총 페이지: 180, 청크 크기: 40, 청크 수: 5]
     
-    Calc --> Chunk1[청크 1<br/>Pages 1-40]
-    Calc --> Chunk2[청크 2<br/>Pages 41-80]
-    Calc --> Chunk3[청크 3<br/>Pages 81-120]
-    Calc --> Chunk4[청크 4<br/>Pages 121-160]
-    Calc --> Chunk5[청크 5<br/>Pages 161-180]
+    Calc --> Chunk1[청크 1 - Pages 1-40]
+    Calc --> Chunk2[청크 2 - Pages 41-80]
+    Calc --> Chunk3[청크 3 - Pages 81-120]
+    Calc --> Chunk4[청크 4 - Pages 121-160]
+    Calc --> Chunk5[청크 5 - Pages 161-180]
     
-    Chunk1 --> Process1[AI 분석<br/>chunk_p1-40.json]
-    Chunk2 --> Process2[AI 분석<br/>chunk_p41-80.json]
-    Chunk3 --> Process3[AI 분석<br/>chunk_p81-120.json]
-    Chunk4 --> Process4[AI 분석<br/>chunk_p121-160.json]
-    Chunk5 --> Process5[AI 분석<br/>chunk_p161-180.json]
+    Chunk1 --> Process1[AI 분석 - chunk_p1-40.json]
+    Chunk2 --> Process2[AI 분석 - chunk_p41-80.json]
+    Chunk3 --> Process3[AI 분석 - chunk_p81-120.json]
+    Chunk4 --> Process4[AI 분석 - chunk_p121-160.json]
+    Chunk5 --> Process5[AI 분석 - chunk_p161-180.json]
     
-    Process1 --> Merge[결과 병합<br/>━━━━━━━━━<br/>• 페이지 조정<br/>• 중복 제거<br/>• 정렬]
+    Process1 --> Merge[결과 병합 - 페이지 조정, 중복 제거, 정렬]
     Process2 --> Merge
     Process3 --> Merge
     Process4 --> Merge
     Process5 --> Merge
     
-    Direct --> Final[최종 결과<br/>Final Result]
+    Direct --> Final[최종 결과 / Final Result]
     Merge --> Final
     
     style Start fill:#e3f2fd
@@ -690,20 +690,20 @@ flowchart TD
 ```mermaid
 graph LR
     subgraph "청크 결과 파일 / Chunk Result Files"
-        C1[chunk_p1-40.json<br/>━━━━━━━━━<br/>• 문제 1-15<br/>• 페이지 조정 필요]
-        C2[chunk_p41-80.json<br/>━━━━━━━━━<br/>• 문제 16-30<br/>• 페이지 조정 필요]
-        C3[chunk_p81-120.json<br/>━━━━━━━━━<br/>• 문제 31-45<br/>• 페이지 조정 필요]
+        C1[chunk_p1-40.json | 문제 1-15, 페이지 조정 필요]
+        C2[chunk_p41-80.json | 문제 16-30, 페이지 조정 필요]
+        C3[chunk_p81-120.json | 문제 31-45, 페이지 조정 필요]
     end
     
     subgraph "병합 프로세스 / Merging Process"
-        LOAD[파일 로드<br/>Load Files]
-        ADJUST[페이지 조정<br/>━━━━━━━━━<br/>chunk_start + page - 1]
-        VALIDATE[검증<br/>━━━━━━━━━<br/>• 범위 확인<br/>• 중복 체크]
-        COMBINE[결합<br/>━━━━━━━━━<br/>• 정렬<br/>• 병합]
+        LOAD[파일 로드 / Load Files]
+        ADJUST[페이지 조정 - chunk_start + page - 1]
+        VALIDATE[검증 - 범위 확인, 중복 체크]
+        COMBINE[결합 - 정렬, 병합]
     end
     
     subgraph "최종 결과 / Final Result"
-        FINAL[통합 결과<br/>━━━━━━━━━<br/>• 모든 문제<br/>• 올바른 페이지<br/>• 정렬됨]
+        FINAL[통합 결과 - 모든 문제, 올바른 페이지, 정렬됨]
     end
     
     C1 --> LOAD
@@ -725,28 +725,28 @@ graph LR
 ```mermaid
 graph TB
     subgraph "📥 입력 파일 (Input Files)"
-        A1["📚 lesson/<br/>강의자료 PDFs"]
-        A2["📋 jokbo/<br/>족보 PDFs"]
+        A1["📚 lesson/ 강의자료 PDFs"]
+        A2["📋 jokbo/ 족보 PDFs"]
     end
     
     subgraph "⚙️ 핵심 컴포넌트 (Core Components)"
-        B1["🎯 main.py<br/>━━━━━━━━━━━━<br/>• 전체 조정<br/>• 모드 선택<br/>• 진행 추적"]
-        B2["⚙️ config.py<br/>━━━━━━━━━━━━<br/>• API 설정<br/>• 모델: gemini-2.5-pro<br/>• Temperature: 0.3"]
-        B3["🤖 pdf_processor.py<br/>━━━━━━━━━━━━<br/>• 업로드 관리<br/>• AI 분석<br/>• 결과 병합<br/>• 디버그 로깅"]
-        B4["📝 pdf_creator.py<br/>━━━━━━━━━━━━<br/>• PDF 조작<br/>• 페이지 추출<br/>• 텍스트박스 해설<br/>• CJK 폰트 지원"]
+        B1["🎯 main.py | 전체 조정, 모드 선택, 진행 추적"]
+        B2["⚙️ config.py | API 설정, 모델: gemini-2.5-pro, Temperature: 0.3"]
+        B3["🤖 pdf_processor.py | 업로드 관리, AI 분석, 결과 병합, 디버그 로깅"]
+        B4["📝 pdf_creator.py | PDF 조작, 페이지 추출, 텍스트박스 해설, CJK 폰트 지원"]
     end
     
     subgraph "☁️ 외부 서비스 (External Services)"
-        C1["🌟 Gemini API<br/>━━━━━━━━━━━━<br/>• gemini-2.5-pro<br/>• JSON 응답<br/>• 100K 토큰"]
+        C1["🌟 Gemini API | gemini-2.5-pro, JSON 응답, 100K 토큰"]
     end
     
     subgraph "📤 출력 (Output)"
-        D1["✅ output/<br/>필터링된 PDFs"]
-        D2["🐛 output/debug/<br/>API 응답"]
+        D1["✅ output/ 필터링된 PDFs"]
+        D2["🐛 output/debug/ API 응답"]
     end
     
     subgraph "🔧 유틸리티 (Utilities)"
-        E1["🧹 cleanup_gemini_files.py<br/>━━━━━━━━━━━━<br/>• 업로드 파일 조회<br/>• 선택적 삭제<br/>• 할당량 관리"]
+        E1["🧹 cleanup_gemini_files.py | 업로드 파일 조회, 선택적 삭제, 할당량 관리"]
     end
     
     A1 -.->|읽기| B1
@@ -850,25 +850,25 @@ flowchart TD
     Mode -->|"족보 중심"| JC["📋 족보 PDF 열기"]
     
     %% 강의자료 중심 흐름
-    LC --> LC1{"📑 각 관련<br/>슬라이드에 대해"}
+    LC --> LC1{"📑 각 관련 슬라이드에 대해"}
     LC1 --> LC2["📄 강의 슬라이드 삽입"]
-    LC2 --> LC3{"❓ 관련 문제<br/>있음?"}
+    LC2 --> LC3{"❓ 관련 문제 있음?"}
     LC3 -->|"예"| LC4["📋 족보 페이지 추출"]
     LC3 -->|"아니오"| LC1
-    LC4 --> LC5["💡 텍스트박스 해설<br/>• 정답<br/>• 오답 설명<br/>• 관련성"]
+    LC4 --> LC5["💡 텍스트박스 해설 - 정답, 오답 설명, 관련성"]
     LC5 --> LC1
     
     %% 족보 중심 흐름
-    JC --> JC1{"📋 각 족보<br/>페이지에 대해"}
+    JC --> JC1{"📋 각 족보 페이지에 대해"}
     JC1 --> JC2["📄 족보 페이지 삽입"]
-    JC2 --> JC3{"📚 관련 슬라이드<br/>있음?"}
+    JC2 --> JC3{"📚 관련 슬라이드 있음?"}
     JC3 -->|"예"| JC4["📑 강의 슬라이드 추출"]
     JC3 -->|"아니오"| JC1
-    JC4 --> JC5["💡 텍스트박스 해설<br/>• 관련 슬라이드 목록<br/>• 정답 & 해설"]
+    JC4 --> JC5["💡 텍스트박스 해설 - 관련 슬라이드 목록, 정답 & 해설"]
     JC5 --> JC1
     
     %% 공통 끝
-    LC1 -->|"완료"| Summary["📊 요약 페이지 추가<br/>• 통계<br/>• 학습 권장사항"]
+    LC1 -->|"완료"| Summary["📊 요약 페이지 추가 - 통계, 학습 권장사항"]
     JC1 -->|"완료"| Summary
     Summary --> Save["💾 출력 PDF 저장"]
     Save --> End(["✅ 완료"])
@@ -933,21 +933,21 @@ sequenceDiagram
 ```mermaid
 graph TB
     subgraph "파일 관리 전략 / File Management Strategy"
-        FM1[시작 전 정리<br/>━━━━━━━━━<br/>기존 업로드<br/>파일 전체 삭제]
-        FM2[즉시 삭제<br/>━━━━━━━━━<br/>분석 완료 후<br/>바로 삭제]
-        FM3[세션별 격리<br/>━━━━━━━━━<br/>세션 ID로<br/>작업 분리]
+        FM1[시작 전 정리 - 기존 업로드 파일 전체 삭제]
+        FM2[즉시 삭제 - 분석 완료 후 바로 삭제]
+        FM3[세션별 격리 - 세션 ID로 작업 분리]
     end
     
     subgraph "성능 최적화 / Performance Optimization"
-        PO1[청킹<br/>━━━━━━━━━<br/>40페이지 단위<br/>분할 처리]
-        PO2[병렬 처리<br/>━━━━━━━━━<br/>ThreadPool<br/>동시 실행]
-        PO3[캐싱<br/>━━━━━━━━━<br/>PDF 객체<br/>재사용]
+        PO1[청킹 - 40페이지 단위 분할 처리]
+        PO2[병렬 처리 - ThreadPool 동시 실행]
+        PO3[캐싱 - PDF 객체 재사용]
     end
     
     subgraph "오류 처리 / Error Handling"
-        EH1[재시도 로직<br/>━━━━━━━━━<br/>지수 백오프<br/>최대 3회]
-        EH2[부분 복구<br/>━━━━━━━━━<br/>JSON 부분<br/>파싱 시도]
-        EH3[디버그 로깅<br/>━━━━━━━━━<br/>모든 응답<br/>파일 저장]
+        EH1[재시도 로직 - 지수 백오프 최대 3회]
+        EH2[부분 복구 - JSON 부분 파싱 시도]
+        EH3[디버그 로깅 - 모든 응답 파일 저장]
     end
     
     FM1 --> FM2
@@ -1086,22 +1086,22 @@ GENERATION_CONFIG = {
 
 ```mermaid
 flowchart TD
-    Start([문제-슬라이드 쌍<br/>Question-Slide Pair]) --> Analyze[AI 분석<br/>━━━━━━━━━<br/>• 내용 비교<br/>• 키워드 매칭<br/>• 도표/그림 확인]
+    Start([문제-슬라이드 쌍 / Question-Slide Pair]) --> Analyze[AI 분석 - 내용 비교, 키워드 매칭, 도표/그림 확인]
     
-    Analyze --> Score{점수 결정<br/>Score Decision}
+    Analyze --> Score{점수 결정 / Score Decision}
     
-    Score --> S100[100점<br/>━━━━━━━━━<br/>완전 동일<br/>텍스트/그림]
-    Score --> S95[95점<br/>━━━━━━━━━<br/>동일한 도표<br/>핵심 90%+]
-    Score --> S90[90점<br/>━━━━━━━━━<br/>문제 해결<br/>충분한 정보]
-    Score --> S85[85점<br/>━━━━━━━━━<br/>핵심 개념<br/>명확 설명]
-    Score --> S80[80점<br/>━━━━━━━━━<br/>주요 정보<br/>70%+ 포함]
-    Score --> S75[75점<br/>━━━━━━━━━<br/>직접 연관<br/>상당 부분]
-    Score --> S70[70점<br/>━━━━━━━━━<br/>중요한<br/>도움]
-    Score --> S65[65점<br/>━━━━━━━━━<br/>배경 지식<br/>설명]
-    Score --> S60[60점<br/>━━━━━━━━━<br/>같은 주제<br/>다른 깊이]
-    Score --> S55[55점<br/>━━━━━━━━━<br/>부분적<br/>도움]
-    Score --> S50[50점<br/>━━━━━━━━━<br/>최소한의<br/>관련성]
-    Score --> Lower[50점 미만<br/>━━━━━━━━━<br/>제외]
+    Score --> S100[100점 - 완전 동일 텍스트/그림]
+    Score --> S95[95점 - 동일한 도표, 핵심 90%+]
+    Score --> S90[90점 - 문제 해결 충분한 정보]
+    Score --> S85[85점 - 핵심 개념 명확 설명]
+    Score --> S80[80점 - 주요 정보 70%+ 포함]
+    Score --> S75[75점 - 직접 연관 상당 부분]
+    Score --> S70[70점 - 중요한 도움]
+    Score --> S65[65점 - 배경 지식 설명]
+    Score --> S60[60점 - 같은 주제 다른 깊이]
+    Score --> S55[55점 - 부분적 도움]
+    Score --> S50[50점 - 최소한의 관련성]
+    Score --> Lower[50점 미만 - 제외]
     
     S100 --> Filter{점수 >= 50?}
     S95 --> Filter
@@ -1116,11 +1116,11 @@ flowchart TD
     S50 --> Filter
     Lower --> Filter
     
-    Filter -->|Yes| Include[포함<br/>Include]
-    Filter -->|No| Exclude[제외<br/>Exclude]
+    Filter -->|Yes| Include[포함 / Include]
+    Filter -->|No| Exclude[제외 / Exclude]
     
-    Include --> TopN{상위 N개 선택<br/>Select Top N}
-    TopN --> Final[최종 선택<br/>━━━━━━━━━<br/>MAX_CONNECTIONS<br/>_PER_QUESTION = 2]
+    Include --> TopN{상위 N개 선택 / Select Top N}
+    TopN --> Final[최종 선택 - MAX_CONNECTIONS_PER_QUESTION = 2]
     
     style S100 fill:#ff6b6b
     style S95 fill:#ff8787
@@ -1142,23 +1142,23 @@ flowchart TD
 ```mermaid
 graph TB
     subgraph "95-100점 예시 / 95-100 Points Examples"
-        E100["100점 예시<br/>━━━━━━━━━<br/>슬라이드: 'Apoptosis의 특징'<br/>문제: 'Apoptosis의 특징은?'<br/>→ 완전 일치"]
-        E95["95점 예시<br/>━━━━━━━━━<br/>슬라이드: 염증 과정 도표<br/>문제: 동일 도표 제시<br/>→ 그림 일치"]
+        E100["100점 예시 - 슬라이드: 'Apoptosis의 특징', 문제: 'Apoptosis의 특징은?' → 완전 일치"]
+        E95["95점 예시 - 슬라이드: 염증 과정 도표, 문제: 동일 도표 제시 → 그림 일치"]
     end
     
     subgraph "70-90점 예시 / 70-90 Points Examples"
-        E85["85점 예시<br/>━━━━━━━━━<br/>슬라이드: 세포 손상 기전<br/>문제: 특정 손상 기전<br/>→ 핵심 개념 포함"]
-        E75["75점 예시<br/>━━━━━━━━━<br/>슬라이드: 종양 분류<br/>문제: 특정 종양 특징<br/>→ 직접 관련"]
+        E85["85점 예시 - 슬라이드: 세포 손상 기전, 문제: 특정 손상 기전 → 핵심 개념 포함"]
+        E75["75점 예시 - 슬라이드: 종양 분류, 문제: 특정 종양 특징 → 직접 관련"]
     end
     
     subgraph "50-65점 예시 / 50-65 Points Examples"
-        E60["60점 예시<br/>━━━━━━━━━<br/>슬라이드: 면역 반응 개요<br/>문제: 특정 면역 세포<br/>→ 배경 지식"]
-        E50["50점 예시<br/>━━━━━━━━━<br/>슬라이드: 병리학 개론<br/>문제: 세부 질환<br/>→ 최소 관련"]
+        E60["60점 예시 - 슬라이드: 면역 반응 개요, 문제: 특정 면역 세포 → 배경 지식"]
+        E50["50점 예시 - 슬라이드: 병리학 개론, 문제: 세부 질환 → 최소 관련"]
     end
     
     subgraph "25-45점 예시 (제외됨) / 25-45 Points Examples (Excluded)"
-        E40["40점 예시<br/>━━━━━━━━━<br/>슬라이드: 순환계 질환<br/>문제: 호흡기 질환<br/>→ 다른 시스템"]
-        E25["25점 예시<br/>━━━━━━━━━<br/>슬라이드: 병리학 소개<br/>문제: 구체적 치료법<br/>→ 거의 무관"]
+        E40["40점 예시 - 슬라이드: 순환계 질환, 문제: 호흡기 질환 → 다른 시스템"]
+        E25["25점 예시 - 슬라이드: 병리학 소개, 문제: 구체적 치료법 → 거의 무관"]
     end
     
     style E100 fill:#ff6b6b
@@ -1177,10 +1177,10 @@ graph TB
 
 ```mermaid
 graph LR
-    A[강의자료<br/>Lecture Material] --> B[분석<br/>Analysis]
-    C[모든 족보<br/>All Jokbos] --> B
-    B --> D[관련 문제 그룹화<br/>Group Related Questions]
-    D --> E[필터링된 PDF<br/>Filtered PDF]
+    A[강의자료 / Lecture Material] --> B[분석 / Analysis]
+    C[모든 족보 / All Jokbos] --> B
+    B --> D[관련 문제 그룹화 / Group Related Questions]
+    D --> E[필터링된 PDF / Filtered PDF]
     
     style A fill:#f9f,stroke:#333,stroke-width:4px
     style C fill:#bbf,stroke:#333,stroke-width:2px
@@ -1202,11 +1202,11 @@ graph LR
 
 ```mermaid
 graph LR
-    A[족보<br/>Jokbo] --> B[분석<br/>Analysis]
-    C[모든 강의자료<br/>All Lectures] --> B
-    B --> D[관련 슬라이드 매칭<br/>Match Related Slides]
-    D --> E[점수 기반 필터링<br/>Score-based Filtering]
-    E --> F[필터링된 PDF<br/>Filtered PDF]
+    A[족보 / Jokbo] --> B[분석 / Analysis]
+    C[모든 강의자료 / All Lectures] --> B
+    B --> D[관련 슬라이드 매칭 / Match Related Slides]
+    D --> E[점수 기반 필터링 / Score-based Filtering]
+    E --> F[필터링된 PDF / Filtered PDF]
     
     style A fill:#f9f,stroke:#333,stroke-width:4px
     style C fill:#bbf,stroke:#333,stroke-width:2px
@@ -1235,11 +1235,11 @@ graph LR
 ```mermaid
 graph TB
     subgraph "점수 체계 / Scoring System"
-        A[90-100점<br/>핵심 출제] 
-        B[70-85점<br/>직접 관련]
-        C[50-65점<br/>중간 관련]
-        D[25-45점<br/>간접 관련]
-        E[5-20점<br/>거의 무관]
+        A[90-100점 - 핵심 출제] 
+        B[70-85점 - 직접 관련]
+        C[50-65점 - 중간 관련]
+        D[25-45점 - 간접 관련]
+        E[5-20점 - 거의 무관]
     end
     
     A --> F[95점: 동일한 그림/도표 ⭐]
@@ -1259,9 +1259,9 @@ graph TB
 ```mermaid
 graph TB
     subgraph "디버그 데이터 수집 / Debug Data Collection"
-        API[API 응답<br/>━━━━━━━━━<br/>• 원본 JSON<br/>• 타임스탬프<br/>• 파일 정보]
-        ERROR[오류 정보<br/>━━━━━━━━━<br/>• 예외 스택<br/>• 컨텍스트<br/>• 재시도 횟수]
-        PERF[성능 메트릭<br/>━━━━━━━━━<br/>• 처리 시간<br/>• 메모리 사용<br/>• API 호출수]
+        API[API 응답 - 원본 JSON, 타임스탬프, 파일 정보]
+        ERROR[오류 정보 - 예외 스택, 컨텍스트, 재시도 횟수]
+        PERF[성능 메트릭 - 처리 시간, 메모리 사용, API 호출수]
     end
     
     subgraph "저장 위치 / Storage Locations"
@@ -1276,9 +1276,9 @@ graph TB
     end
     
     subgraph "모니터링 도구 / Monitoring Tools"
-        TQDM[tqdm 진행률<br/>━━━━━━━━━<br/>• 실시간 진행<br/>• ETA 표시<br/>• 처리 속도]
-        CONSOLE[콘솔 출력<br/>━━━━━━━━━<br/>• 세션 ID<br/>• 처리 상태<br/>• 오류 메시지]
-        FILES[파일 모니터링<br/>━━━━━━━━━<br/>• 청크 생성<br/>• 결과 병합<br/>• 최종 출력]
+        TQDM[tqdm 진행률 - 실시간 진행, ETA 표시, 처리 속도]
+        CONSOLE[콘솔 출력 - 세션 ID, 처리 상태, 오류 메시지]
+        FILES[파일 모니터링 - 청크 생성, 결과 병합, 최종 출력]
     end
     
     API --> DEBUG_DIR
@@ -1296,7 +1296,7 @@ graph TB
 ```mermaid
 graph LR
     subgraph "API 응답 파일 / API Response File"
-        JSON["gemini_response_20250801_133104_*.json<br/>━━━━━━━━━━━━━━━━━━━━<br/>{
+        JSON["gemini_response_20250801_133104_*.json | {
   'timestamp': '2025-08-01 13:31:04',
   'lesson_file': 'lesson1.pdf',
   'jokbo_file': 'exam1.pdf',
@@ -1308,11 +1308,11 @@ graph LR
     end
     
     subgraph "실패 JSON 파일 / Failed JSON File"
-        FAIL["failed_json_chunk_p31-60.txt<br/>━━━━━━━━━━━━━━━━━━━━<br/>원본 응답 텍스트<br/>파싱 실패 원인<br/>부분 복구 시도 결과"]
+        FAIL["failed_json_chunk_p31-60.txt | 원본 응답 텍스트, 파싱 실패 원인, 부분 복구 시도 결과"]
     end
     
     subgraph "처리 상태 파일 / Processing State File"
-        STATE["processing_state.json<br/>━━━━━━━━━━━━━━━━━━━━<br/>{
+        STATE["processing_state.json | {
   'status': 'processing',
   'mode': 'jokbo-centric',
   'jokbo_path': 'jokbo/exam1.pdf',
@@ -1460,23 +1460,23 @@ graph LR
 ```mermaid
 graph TB
     subgraph "오류 유형 / Error Types"
-        E1[파일 오류<br/>━━━━━━━━━<br/>• 파일 없음<br/>• 권한 문제<br/>• 손상된 PDF]
-        E2[API 오류<br/>━━━━━━━━━<br/>• 네트워크<br/>• 할당량 초과<br/>• 타임아웃]
-        E3[파싱 오류<br/>━━━━━━━━━<br/>• JSON 형식<br/>• 필드 누락<br/>• 타입 불일치]
-        E4[처리 오류<br/>━━━━━━━━━<br/>• 메모리 부족<br/>• 청크 실패<br/>• 병합 오류]
+        E1[파일 오류 - 파일 없음, 권한 문제, 손상된 PDF]
+        E2[API 오류 - 네트워크, 할당량 초과, 타임아웃]
+        E3[파싱 오류 - JSON 형식, 필드 누락, 타입 불일치]
+        E4[처리 오류 - 메모리 부족, 청크 실패, 병합 오류]
     end
     
     subgraph "처리 전략 / Handling Strategies"
-        H1[즉시 재시도<br/>━━━━━━━━━<br/>• 네트워크 오류<br/>• 일시적 실패]
-        H2[지수 백오프<br/>━━━━━━━━━<br/>• API 제한<br/>• 서버 과부하]
-        H3[부분 복구<br/>━━━━━━━━━<br/>• JSON 파싱<br/>• 청크 복구]
-        H4[대체 처리<br/>━━━━━━━━━<br/>• 기본값 사용<br/>• 건너뛰기]
+        H1[즉시 재시도 - 네트워크 오류, 일시적 실패]
+        H2[지수 백오프 - API 제한, 서버 과부하]
+        H3[부분 복구 - JSON 파싱, 청크 복구]
+        H4[대체 처리 - 기본값 사용, 건너뛰기]
     end
     
     subgraph "복구 도구 / Recovery Tools"
-        R1[recover_from_chunks.py<br/>━━━━━━━━━━━━━━━<br/>중단된 작업 재개]
-        R2[cleanup_sessions.py<br/>━━━━━━━━━━━━━━━<br/>오류 세션 정리]
-        R3[수동 복구<br/>━━━━━━━━━━━━━━━<br/>디버그 로그 분석]
+        R1[recover_from_chunks.py - 중단된 작업 재개]
+        R2[cleanup_sessions.py - 오류 세션 정리]
+        R3[수동 복구 - 디버그 로그 분석]
     end
     
     E1 --> H4
@@ -1517,8 +1517,8 @@ sequenceDiagram
         else 실패
             A-->>R: 오류 발생
             R->>L: 오류 로깅
-            R->>R: 대기 시간 계산<br/>wait = 2^attempt 초
-            Note over R: 1차: 2초<br/>2차: 4초<br/>3차: 8초
+            R->>R: 대기 시간 계산 - wait = 2^attempt 초
+            Note over R: 1차: 2초, 2차: 4초, 3차: 8초
             R->>R: 대기
         end
     end
@@ -1622,20 +1622,20 @@ sequenceDiagram
 ```mermaid
 graph TB
     subgraph "처리 모드별 성능 / Performance by Mode"
-        SEQ[순차 처리<br/>━━━━━━━━━<br/>• 안정적<br/>• 느림<br/>• 메모리 효율적]
-        PAR[병렬 처리<br/>━━━━━━━━━<br/>• 3배 빠름<br/>• 메모리 사용↑<br/>• CPU 활용↑]
+        SEQ[순차 처리 - 안정적, 느림, 메모리 효율적]
+        PAR[병렬 처리 - 3배 빠름, 메모리 사용↑, CPU 활용↑]
     end
     
     subgraph "모델별 성능 / Performance by Model"
-        PRO[Gemini Pro<br/>━━━━━━━━━<br/>• 최고 품질<br/>• 느림<br/>• 비용 높음]
-        FLASH[Gemini Flash<br/>━━━━━━━━━<br/>• 균형<br/>• 중간 속도<br/>• 중간 비용]
-        LITE[Gemini Flash-lite<br/>━━━━━━━━━<br/>• 최고 속도<br/>• 품질 낮음<br/>• 비용 낮음]
+        PRO[Gemini Pro - 최고 품질, 느림, 비용 높음]
+        FLASH[Gemini Flash - 균형, 중간 속도, 중간 비용]
+        LITE[Gemini Flash-lite - 최고 속도, 품질 낮음, 비용 낮음]
     end
     
     subgraph "최적화 기법 / Optimization Techniques"
-        CACHE[PDF 캐싱<br/>━━━━━━━━━<br/>• I/O 감소<br/>• 메모리 트레이드오프]
-        CHUNK[청킹<br/>━━━━━━━━━<br/>• 대용량 처리<br/>• 부분 실패 복구]
-        POOL[스레드 풀<br/>━━━━━━━━━<br/>• CPU 활용<br/>• 동시성 제어]
+        CACHE[PDF 캐싱 - I/O 감소, 메모리 트레이드오프]
+        CHUNK[청킹 - 대용량 처리, 부분 실패 복구]
+        POOL[스레드 풀 - CPU 활용, 동시성 제어]
     end
     
     SEQ -.-> CACHE
@@ -1655,23 +1655,23 @@ graph TB
 ```mermaid
 graph LR
     subgraph "테스트 환경 / Test Environment"
-        TEST["설정<br/>━━━━━━━━━<br/>• 족보: 5개 (각 20페이지)<br/>• 강의: 10개 (각 50페이지)<br/>• 총 분석: 50개 조합"]
+        TEST["설정 - 족보: 5개 (각 20페이지), 강의: 10개 (각 50페이지), 총 분석: 50개 조합"]
     end
     
     subgraph "순차 처리 / Sequential"
-        S_TIME[처리 시간<br/>━━━━━━━━━<br/>45분]
-        S_MEM[메모리<br/>━━━━━━━━━<br/>~500MB]
-        S_CPU[CPU<br/>━━━━━━━━━<br/>25%]
+        S_TIME[처리 시간 - 45분]
+        S_MEM[메모리 - ~500MB]
+        S_CPU[CPU - 25%]
     end
     
     subgraph "병렬 처리 (3 workers) / Parallel"
-        P_TIME[처리 시간<br/>━━━━━━━━━<br/>15분]
-        P_MEM[메모리<br/>━━━━━━━━━<br/>~1.5GB]
-        P_CPU[CPU<br/>━━━━━━━━━<br/>75%]
+        P_TIME[처리 시간 - 15분]
+        P_MEM[메모리 - ~1.5GB]
+        P_CPU[CPU - 75%]
     end
     
     subgraph "최적화 결과 / Optimization Results"
-        RESULT["개선 효과<br/>━━━━━━━━━<br/>• 시간: 67% 감소<br/>• 처리량: 3배 증가<br/>• 효율성: 크게 향상"]
+        RESULT["개선 효과 - 시간: 67% 감소, 처리량: 3배 증가, 효율성: 크게 향상"]
     end
     
     TEST --> S_TIME
@@ -1697,28 +1697,28 @@ graph LR
 flowchart TD
     Start([병렬 처리 시작]) --> CheckMode{처리 모드?}
     
-    CheckMode -->|강의 중심| LC_Pre[강의 파일 사전 업로드<br/>Pre-upload Lesson]
-    CheckMode -->|족보 중심| JC_Pre[족보 파일 사전 업로드<br/>Pre-upload Jokbo]
+    CheckMode -->|강의 중심| LC_Pre[강의 파일 사전 업로드 / Pre-upload Lesson]
+    CheckMode -->|족보 중심| JC_Pre[족보 파일 사전 업로드 / Pre-upload Jokbo]
     
-    LC_Pre --> CreatePool1[ThreadPoolExecutor 생성<br/>max_workers=3]
-    JC_Pre --> CreatePool2[ThreadPoolExecutor 생성<br/>max_workers=3]
+    LC_Pre --> CreatePool1[ThreadPoolExecutor 생성 - max_workers=3]
+    JC_Pre --> CreatePool2[ThreadPoolExecutor 생성 - max_workers=3]
     
-    CreatePool1 --> LC_Distribute[작업 분배<br/>━━━━━━━━━<br/>각 족보를 스레드에 할당]
-    CreatePool2 --> JC_Distribute[작업 분배<br/>━━━━━━━━━<br/>각 강의를 스레드에 할당]
+    CreatePool1 --> LC_Distribute[작업 분배 - 각 족보를 스레드에 할당]
+    CreatePool2 --> JC_Distribute[작업 분배 - 각 강의를 스레드에 할당]
     
-    LC_Distribute --> LC_Process[병렬 처리<br/>━━━━━━━━━<br/>• 공유 세션 ID<br/>• 독립 분석<br/>• 청크 저장]
-    JC_Distribute --> JC_Process[병렬 처리<br/>━━━━━━━━━<br/>• 공유 세션 ID<br/>• 독립 분석<br/>• 청크 저장]
+    LC_Distribute --> LC_Process[병렬 처리 - 공유 세션 ID, 독립 분석, 청크 저장]
+    JC_Distribute --> JC_Process[병렬 처리 - 공유 세션 ID, 독립 분석, 청크 저장]
     
-    LC_Process --> Progress1[진행률 표시<br/>tqdm 업데이트]
-    JC_Process --> Progress2[진행률 표시<br/>tqdm 업데이트]
+    LC_Process --> Progress1[진행률 표시 - tqdm 업데이트]
+    JC_Process --> Progress2[진행률 표시 - tqdm 업데이트]
     
-    Progress1 --> Collect1[결과 수집<br/>as_completed()]
-    Progress2 --> Collect2[결과 수집<br/>as_completed()]
+    Progress1 --> Collect1[결과 수집 - as_completed()]
+    Progress2 --> Collect2[결과 수집 - as_completed()]
     
-    Collect1 --> Merge[결과 병합<br/>━━━━━━━━━<br/>• 청크 로드<br/>• 페이지 조정<br/>• 중복 제거]
+    Collect1 --> Merge[결과 병합 - 청크 로드, 페이지 조정, 중복 제거]
     Collect2 --> Merge
     
-    Merge --> Cleanup[정리 작업<br/>━━━━━━━━━<br/>• 파일 삭제<br/>• 캐시 정리<br/>• 세션 마감]
+    Merge --> Cleanup[정리 작업 - 파일 삭제, 캐시 정리, 세션 마감]
     
     Cleanup --> End([완료])
     
@@ -1752,23 +1752,23 @@ flowchart TD
 ```mermaid
 graph TB
     subgraph "입력 검증 / Input Validation"
-        IV1[파일 검증<br/>━━━━━━━━━<br/>• PDF 형식 확인<br/>• 크기 제한<br/>• 경로 검증]
-        IV2[명령 검증<br/>━━━━━━━━━<br/>• 인자 검증<br/>• 모드 확인<br/>• 범위 체크]
+        IV1[파일 검증 - PDF 형식 확인, 크기 제한, 경로 검증]
+        IV2[명령 검증 - 인자 검증, 모드 확인, 범위 체크]
     end
     
     subgraph "API 보안 / API Security"
-        AS1[API 키 관리<br/>━━━━━━━━━<br/>• 환경 변수<br/>• .env 파일<br/>• 노출 방지]
-        AS2[안전 설정<br/>━━━━━━━━━<br/>• BLOCK_NONE<br/>• 콘텐츠 필터<br/>• 안전 카테고리]
+        AS1[API 키 관리 - 환경 변수, .env 파일, 노출 방지]
+        AS2[안전 설정 - BLOCK_NONE, 콘텐츠 필터, 안전 카테고리]
     end
     
     subgraph "데이터 보호 / Data Protection"
-        DP1[세션 격리<br/>━━━━━━━━━<br/>• 고유 세션 ID<br/>• 독립 디렉토리<br/>• 접근 제어]
-        DP2[파일 정리<br/>━━━━━━━━━<br/>• 자동 삭제<br/>• 임시 파일<br/>• 업로드 정리]
+        DP1[세션 격리 - 고유 세션 ID, 독립 디렉토리, 접근 제어]
+        DP2[파일 정리 - 자동 삭제, 임시 파일, 업로드 정리]
     end
     
     subgraph "오류 안전성 / Error Safety"
-        ES1[예외 처리<br/>━━━━━━━━━<br/>• 전역 핸들러<br/>• 컨텍스트 보존<br/>• 복구 가능]
-        ES2[리소스 관리<br/>━━━━━━━━━<br/>• 자동 정리<br/>• 메모리 해제<br/>• 락 해제]
+        ES1[예외 처리 - 전역 핸들러, 컨텍스트 보존, 복구 가능]
+        ES2[리소스 관리 - 자동 정리, 메모리 해제, 락 해제]
     end
     
     IV1 --> AS1
@@ -1811,21 +1811,21 @@ jokbodude/
 ```mermaid
 graph TB
     subgraph "현재 시스템 / Current System"
-        CURR[JokboDude v2.0<br/>━━━━━━━━━━━<br/>• CLI 기반<br/>• 로컬 처리<br/>• 파일 시스템]
+        CURR[JokboDude v2.0 - CLI 기반, 로컬 처리, 파일 시스템]
     end
     
     subgraph "확장 가능 영역 / Extensible Areas"
-        EXT1[인터페이스<br/>━━━━━━━━━<br/>• Web UI<br/>• REST API<br/>• 모바일 앱]
-        EXT2[처리 엔진<br/>━━━━━━━━━<br/>• 분산 처리<br/>• GPU 가속<br/>• 클라우드]
-        EXT3[AI 모델<br/>━━━━━━━━━<br/>• 다중 모델<br/>• 커스텀 모델<br/>• 앙상블]
-        EXT4[저장소<br/>━━━━━━━━━<br/>• 클라우드<br/>• 데이터베이스<br/>• 캐시 서버]
+        EXT1[인터페이스 - Web UI, REST API, 모바일 앱]
+        EXT2[처리 엔진 - 분산 처리, GPU 가속, 클라우드]
+        EXT3[AI 모델 - 다중 모델, 커스텀 모델, 앙상블]
+        EXT4[저장소 - 클라우드, 데이터베이스, 캐시 서버]
     end
     
     subgraph "모듈화 설계 / Modular Design"
-        MOD1[플러그인<br/>아키텍처]
-        MOD2[의존성<br/>주입]
-        MOD3[인터페이스<br/>추상화]
-        MOD4[설정<br/>외부화]
+        MOD1[플러그인 아키텍처]
+        MOD2[의존성 주입]
+        MOD3[인터페이스 추상화]
+        MOD4[설정 외부화]
     end
     
     CURR --> EXT1
@@ -1851,19 +1851,19 @@ graph TB
 ```mermaid
 graph LR
     subgraph "코드 품질 / Code Quality"
-        CQ1[명확한 구조<br/>━━━━━━━━━<br/>• 모듈 분리<br/>• 단일 책임<br/>• DRY 원칙]
-        CQ2[문서화<br/>━━━━━━━━━<br/>• 코드 주석<br/>• API 문서<br/>• 아키텍처]
-        CQ3[테스트<br/>━━━━━━━━━<br/>• 단위 테스트<br/>• 통합 테스트<br/>• 디버그 도구]
+        CQ1[명확한 구조 - 모듈 분리, 단일 책임, DRY 원칙]
+        CQ2[문서화 - 코드 주석, API 문서, 아키텍처]
+        CQ3[테스트 - 단위 테스트, 통합 테스트, 디버그 도구]
     end
     
     subgraph "버전 관리 / Version Control"
-        VC1[Git 전략<br/>━━━━━━━━━<br/>• 기능 브랜치<br/>• 의미있는 커밋<br/>• 태그 관리]
-        VC2[변경 이력<br/>━━━━━━━━━<br/>• CHANGELOG<br/>• 릴리스 노트<br/>• 마이그레이션]
+        VC1[Git 전략 - 기능 브랜치, 의미있는 커밋, 태그 관리]
+        VC2[변경 이력 - CHANGELOG, 릴리스 노트, 마이그레이션]
     end
     
     subgraph "모니터링 / Monitoring"
-        MON1[로그 관리<br/>━━━━━━━━━<br/>• 구조화 로그<br/>• 로그 레벨<br/>• 순환 정책]
-        MON2[성능 추적<br/>━━━━━━━━━<br/>• 처리 시간<br/>• 리소스 사용<br/>• 오류율]
+        MON1[로그 관리 - 구조화 로그, 로그 레벨, 순환 정책]
+        MON2[성능 추적 - 처리 시간, 리소스 사용, 오류율]
     end
     
     CQ1 --> VC1
@@ -1891,9 +1891,9 @@ MAX_PAGES_PER_CHUNK=40            # 청크당 최대 페이지 수 / Max pages p
 
 ```mermaid
 graph LR
-    A[Gemini 2.5 Pro] -->|최고 품질<br/>Best Quality| B[고비용<br/>High Cost]
-    C[Gemini 2.5 Flash] -->|균형<br/>Balanced| D[중간 비용<br/>Medium Cost]
-    E[Gemini 2.5 Flash-lite] -->|최고 속도<br/>Fastest| F[저비용<br/>Low Cost]
+    A[Gemini 2.5 Pro] -->|최고 품질 / Best Quality| B[고비용 / High Cost]
+    C[Gemini 2.5 Flash] -->|균형 / Balanced| D[중간 비용 / Medium Cost]
+    E[Gemini 2.5 Flash-lite] -->|최고 속도 / Fastest| F[저비용 / Low Cost]
 ```
 
 ## API 상호작용 / API Interactions
@@ -1906,17 +1906,17 @@ sequenceDiagram
     participant G as Gemini API
     participant F as File Storage
     
-    P->>G: 파일 업로드<br/>Upload File
-    G->>F: 저장<br/>Store
-    G->>P: 파일 ID<br/>File ID
+    P->>G: 파일 업로드 / Upload File
+    G->>F: 저장 / Store
+    G->>P: 파일 ID / File ID
     
-    P->>G: 분석 요청 + 프롬프트<br/>Analysis Request + Prompt
-    G->>G: AI 처리<br/>AI Processing
-    G->>P: JSON 응답<br/>JSON Response
+    P->>G: 분석 요청 + 프롬프트 / Analysis Request + Prompt
+    G->>G: AI 처리 / AI Processing
+    G->>P: JSON 응답 / JSON Response
     
-    P->>G: 파일 삭제<br/>Delete File
-    G->>F: 삭제<br/>Remove
-    G->>P: 확인<br/>Confirm
+    P->>G: 파일 삭제 / Delete File
+    G->>F: 삭제 / Remove
+    G->>P: 확인 / Confirm
 ```
 
 ## 주요 설계 결정 / Key Design Decisions
@@ -1961,15 +1961,15 @@ sequenceDiagram
 
 ```mermaid
 graph TB
-    A[API 호출<br/>API Call] --> B{성공?<br/>Success?}
-    B -->|Yes| C[결과 처리<br/>Process Result]
-    B -->|No| D[재시도 대기<br/>Wait for Retry]
-    D --> E{재시도 횟수?<br/>Retry Count?}
+    A[API 호출 / API Call] --> B{성공? / Success?}
+    B -->|Yes| C[결과 처리 / Process Result]
+    B -->|No| D[재시도 대기 / Wait for Retry]
+    D --> E{재시도 횟수? / Retry Count?}
     E -->|< 3| A
-    E -->|>= 3| F[부분 파싱 시도<br/>Try Partial Parse]
-    F --> G{복구 가능?<br/>Recoverable?}
-    G -->|Yes| H[부분 결과 사용<br/>Use Partial Result]
-    G -->|No| I[오류 반환<br/>Return Error]
+    E -->|>= 3| F[부분 파싱 시도 / Try Partial Parse]
+    F --> G{복구 가능? / Recoverable?}
+    G -->|Yes| H[부분 결과 사용 / Use Partial Result]
+    G -->|No| I[오류 반환 / Return Error]
 ```
 
 ## 향후 고려사항 / Future Considerations
@@ -2037,15 +2037,15 @@ gantt
 ```mermaid
 graph LR
     subgraph "현재 / Current"
-        C1[처리 시간<br/>15분/족보]
-        C2[메모리 사용<br/>1.5GB]
-        C3[동시 처리<br/>3개]
+        C1[처리 시간 - 15분/족보]
+        C2[메모리 사용 - 1.5GB]
+        C3[동시 처리 - 3개]
     end
     
     subgraph "목표 / Target"
-        T1[처리 시간<br/>3분/족보]
-        T2[메모리 사용<br/>500MB]
-        T3[동시 처리<br/>50개]
+        T1[처리 시간 - 3분/족보]
+        T2[메모리 사용 - 500MB]
+        T3[동시 처리 - 50개]
     end
     
     subgraph "개선 방법 / Methods"
