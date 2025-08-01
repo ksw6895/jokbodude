@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Tuple, TYPE_CHECKING, Optional
 import google.generativeai as genai
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from multiprocessing import Process, Queue
 import threading
 from datetime import datetime
 import os
@@ -23,6 +24,9 @@ from constants import (
 from validators import PDFValidator
 from pdf_processor_helpers import PDFProcessorHelpers
 from error_handler import ErrorHandler
+from prompt_builder import PromptBuilder
+from file_manager import FileManager
+from processing_config import ProcessingConfig
 import random
 import string
 
@@ -38,6 +42,8 @@ class PDFProcessor:
         self.debug_dir.mkdir(parents=True, exist_ok=True)
         # Cache for PDF page counts
         self.pdf_page_counts = {}
+        # File manager for centralized file operations
+        self.file_manager = FileManager()
         
         # 세션 식별자 시스템
         if session_id:
@@ -64,11 +70,7 @@ class PDFProcessor:
     def __del__(self):
         """Clean up uploaded files when object is destroyed"""
         for file in self.uploaded_files:
-            try:
-                genai.delete_file(file.name)
-                print(f"  Deleted uploaded file: {file.display_name}")
-            except Exception as e:
-                ErrorHandler.handle_file_error("delete", Path(file.display_name), e)
+            self.file_manager.delete_file_safe(file)
     
     def get_pdf_page_count(self, pdf_path: str) -> int:
         """Get total page count of a PDF file (cached)
@@ -90,7 +92,7 @@ class PDFProcessor:
             page_num, start_page, end_page, total_pages, chunk_path
         )
     
-    def split_pdf_for_analysis(self, pdf_path: str, max_pages: int = 40) -> List[Tuple[str, int, int]]:
+    def split_pdf_for_analysis(self, pdf_path: str, max_pages: int = ProcessingConfig.DEFAULT_CHUNK_SIZE) -> List[Tuple[str, int, int]]:
         """Split PDF into smaller chunks for analysis
         
         Args:
@@ -148,78 +150,21 @@ class PDFProcessor:
     
     def list_uploaded_files(self):
         """List all uploaded files in the account"""
-        try:
-            files = list(genai.list_files())
-            return files
-        except Exception as e:
-            print(f"  Failed to list files: {e}")
-            return []
+        return self.file_manager.list_uploaded_files()
     
     def delete_all_uploaded_files(self):
         """Delete all uploaded files from the account"""
-        files = self.list_uploaded_files()
-        deleted_count = 0
-        failed_count = 0
-        
-        for file in files:
-            try:
-                genai.delete_file(file.name)
-                deleted_count += 1
-                print(f"  Deleted file: {file.display_name}")
-            except Exception as e:
-                failed_count += 1
-                print(f"  Failed to delete file {file.display_name}: {e}")
-        
-        if deleted_count > 0:
-            print(f"  Total deleted: {deleted_count} files")
-        if failed_count > 0:
-            print(f"  Total failed: {failed_count} files")
-        
-        return deleted_count, failed_count
+        return self.file_manager.delete_all_uploaded_files()
     
     def delete_file_safe(self, file):
         """Safely delete a file with retry logic"""
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                genai.delete_file(file.name)
-                print(f"  Deleted file: {file.display_name}")
-                return True
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    print(f"  Retry {attempt + 1}/{max_retries}: Failed to delete {file.display_name}")
-                    time.sleep(2)
-                else:
-                    print(f"  Failed to delete file {file.display_name} after {max_retries} attempts: {e}")
-                    return False
+        return self.file_manager.delete_file_safe(file)
     
     def cleanup_except_center_file(self, center_file_display_name: str):
         """중심 파일을 제외한 모든 파일 삭제"""
-        files = self.list_uploaded_files()
-        deleted_count = 0
-        failed_count = 0
-        
-        for file in files:
-            # 중심 파일이 아닌 경우만 삭제
-            if file.display_name != center_file_display_name:
-                try:
-                    genai.delete_file(file.name)
-                    deleted_count += 1
-                    print(f"  Deleted non-center file: {file.display_name}")
-                except Exception as e:
-                    failed_count += 1
-                    print(f"  Failed to delete non-center file {file.display_name}: {e}")
-            else:
-                print(f"  Keeping center file: {file.display_name}")
-        
-        if deleted_count > 0:
-            print(f"  Cleaned up {deleted_count} files (kept center file)")
-        if failed_count > 0:
-            print(f"  Failed to clean up {failed_count} files")
-        
-        return deleted_count, failed_count
+        return self.file_manager.cleanup_except_center_file(center_file_display_name)
     
-    def generate_content_with_retry(self, content, max_retries=3, backoff_factor=2):
+    def generate_content_with_retry(self, content, max_retries=ProcessingConfig.MAX_RETRIES, backoff_factor=ProcessingConfig.BACKOFF_FACTOR):
         """Generate content with exponential backoff retry for parallel mode"""
         for attempt in range(max_retries):
             try:
@@ -478,6 +423,33 @@ class PDFProcessor:
         self.uploaded_files.append(uploaded_file)
         return uploaded_file
     
+    def parse_response_json(self, response_text: str, mode: str = "jokbo-centric") -> Dict[str, Any]:
+        """Centralized JSON parsing with automatic fallback to partial parsing
+        
+        Args:
+            response_text: The response text to parse
+            mode: Processing mode - either "jokbo-centric" or "lesson-centric"
+            
+        Returns:
+            Dict containing either parsed JSON or error with partial recovery attempt
+        """
+        try:
+            # First try direct JSON parsing
+            return json.loads(response_text)
+        except json.JSONDecodeError as e:
+            print(f"  JSON 파싱 오류: {str(e)}")
+            print(f"  부분 파싱 시도 중...")
+            
+            # Attempt partial parsing
+            partial_result = self.parse_partial_json(response_text, mode)
+            
+            # If partial parsing completely failed, raise the original error
+            if partial_result.get("error") and not partial_result.get("partial"):
+                raise ValueError(f"Complete JSON parsing failure: {partial_result['error']}")
+            
+            # Return the partial result (which may contain recovered data)
+            return partial_result
+    
     def analyze_single_jokbo_with_lesson(self, jokbo_path: str, lesson_path: str) -> Dict[str, Any]:
         """Analyze one jokbo PDF against one lesson PDF"""
         
@@ -489,23 +461,7 @@ class PDFProcessor:
         self.delete_all_uploaded_files()
         
         # 프롬프트 구성
-        intro = COMMON_PROMPT_INTRO.format(
-            first_file_desc="강의자료 PDF (참고용)",
-            second_file_desc=f'족보 PDF "{jokbo_filename}" (분석 대상)'
-        )
-        
-        output_format = LESSON_CENTRIC_OUTPUT_FORMAT.format(jokbo_filename=jokbo_filename)
-        
-        prompt = f"""{intro}
-
-{LESSON_CENTRIC_TASK}
-        
-{COMMON_WARNINGS}
-        
-{RELEVANCE_CRITERIA}
-        
-{output_format}
-        """
+        prompt = PromptBuilder.build_lesson_centric_prompt(jokbo_filename)
         
         # Upload lesson PDF
         lesson_file = self.upload_pdf(lesson_path, f"강의자료_{Path(lesson_path).name}")
@@ -528,7 +484,7 @@ class PDFProcessor:
         self.cleanup_except_center_file(lesson_file.display_name)
         
         try:
-            result = json.loads(response.text)
+            result = self.parse_response_json(response.text, "lesson-centric")
             
             # Get total pages in jokbo PDF
             jokbo_path = Path(jokbo_path) if isinstance(jokbo_path, str) else jokbo_path
@@ -564,23 +520,7 @@ class PDFProcessor:
         jokbo_file = self.upload_pdf(jokbo_path, f"족보_{jokbo_filename}")
         
         # 프롬프트 구성
-        intro = COMMON_PROMPT_INTRO.format(
-            first_file_desc="강의자료 PDF (참고용)",
-            second_file_desc=f'족보 PDF "{jokbo_filename}" (분석 대상)'
-        )
-        
-        output_format = LESSON_CENTRIC_OUTPUT_FORMAT.format(jokbo_filename=jokbo_filename)
-        
-        prompt = f"""{intro}
-
-{LESSON_CENTRIC_TASK}
-        
-{COMMON_WARNINGS}
-        
-{RELEVANCE_CRITERIA}
-        
-{output_format}
-        """
+        prompt = PromptBuilder.build_lesson_centric_prompt(jokbo_filename)
         
         # Prepare content with pre-uploaded lesson file
         content = [prompt, lesson_file, jokbo_file]
@@ -598,7 +538,7 @@ class PDFProcessor:
             self.cleanup_except_center_file(lesson_file.display_name)
         
         try:
-            result = json.loads(response.text)
+            result = self.parse_response_json(response.text, "lesson-centric")
             
             # Get total pages in jokbo PDF
             with fitz.open(str(jokbo_path)) as pdf:
@@ -702,7 +642,7 @@ class PDFProcessor:
         self.delete_all_uploaded_files()
         
         # Split lesson PDF if it's too large
-        max_pages_per_chunk = int(os.environ.get('MAX_PAGES_PER_CHUNK', '40'))
+        max_pages_per_chunk = ProcessingConfig.DEFAULT_CHUNK_SIZE
         lesson_chunks = self.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)
         
         if len(lesson_chunks) == 1:
@@ -813,24 +753,7 @@ class PDFProcessor:
         lesson_filename = Path(lesson_path).name
         
         # 프롬프트 구성
-        intro = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
-
-중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
-중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요."""
-        
-        output_format = JOKBO_CENTRIC_OUTPUT_FORMAT.format(
-            jokbo_filename=jokbo_filename,
-            lesson_filename=lesson_filename
-        )
-        
-        prompt = f"""{intro}
-
-{JOKBO_CENTRIC_TASK}
-        
-{COMMON_WARNINGS}
-        
-{output_format}
-        """
+        prompt = PromptBuilder.build_jokbo_centric_prompt(jokbo_filename, lesson_filename)
         
         # Upload jokbo PDF first
         jokbo_file = self.upload_pdf(jokbo_path, f"족보_{jokbo_filename}")
@@ -853,15 +776,10 @@ class PDFProcessor:
         self.cleanup_except_center_file(jokbo_file.display_name)
         
         try:
-            result = json.loads(response.text)
+            result = self.parse_response_json(response.text, "jokbo-centric")
             return result
-        except json.JSONDecodeError as e:
-            print(f"  JSON 파싱 실패: {str(e)}")
-            # Try partial parsing for jokbo-centric mode
-            partial_result = self.parse_partial_json(response.text, "jokbo-centric")
-            if "error" not in partial_result or partial_result.get("jokbo_pages"):
-                print(f"  부분 파싱으로 일부 데이터 복구 성공")
-                return partial_result
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"  Failed to parse response: {str(e)}")
             return {"error": "Failed to parse response"}
     
     def _analyze_jokbo_with_lesson_chunk(self, jokbo_file, lesson_chunk_path: str, 
@@ -893,7 +811,7 @@ class PDFProcessor:
         else:
             total_pages = lesson_total_pages
         
-        max_retries = 3
+        max_retries = ProcessingConfig.MAX_RETRIES
         retry_count = 0
         
         while retry_count < max_retries:
@@ -934,7 +852,7 @@ class PDFProcessor:
                 # Clean up common JSON errors from Gemini
                 cleaned_text = PDFProcessorHelpers.clean_json_text(response.text)
                 
-                result = json.loads(cleaned_text)
+                result = self.parse_response_json(cleaned_text, "jokbo-centric")
                 
                 # Validate and adjust page numbers
                 retry_needed, invalid_questions = PDFProcessorHelpers.validate_question_pages(
@@ -1248,7 +1166,7 @@ class PDFProcessor:
         jokbo_filename = jokbo_file.display_name.replace("족보_", "")
         
         # Split lesson PDF if it's too large
-        max_pages_per_chunk = int(os.environ.get('MAX_PAGES_PER_CHUNK', '40'))
+        max_pages_per_chunk = ProcessingConfig.DEFAULT_CHUNK_SIZE
         lesson_chunks = self.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)
         
         if len(lesson_chunks) == 1:
@@ -1287,21 +1205,15 @@ class PDFProcessor:
             
             # Delete lesson file immediately after analysis
             print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 강의자료 파일 삭제 중 - {lesson_filename}")
-            if not self.delete_file_safe(lesson_file):
-                # 삭제 실패 시 중심 파일을 제외한 모든 파일 정리
-                self.cleanup_except_center_file(jokbo_file.display_name)
+            self.delete_file_safe(lesson_file)
+            # Multi-API 모드에서는 다른 API의 파일을 정리하지 않음
             
             try:
-                result = json.loads(response.text)
+                result = self.parse_response_json(response.text, "jokbo-centric")
                 print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 분석 완료 - {lesson_filename}")
                 return result
-            except json.JSONDecodeError as e:
-                print(f"  JSON 파싱 실패: {str(e)}")
-                # Try partial parsing for jokbo-centric mode
-                partial_result = self.parse_partial_json(response.text, "jokbo-centric")
-                if "error" not in partial_result or partial_result.get("jokbo_pages"):
-                    print(f"  부분 파싱으로 일부 데이터 복구 성공")
-                    return partial_result
+            except (json.JSONDecodeError, ValueError) as e:
+                print(f"  Failed to parse response: {str(e)}")
                 return {"error": "Failed to parse response"}
         
         # Large file, process in chunks
@@ -1404,10 +1316,25 @@ class PDFProcessor:
         if finish_reason and ('MAX_TOKENS' in finish_reason or finish_reason == '2'):
             print(f"  경고: 응답이 토큰 제한으로 잘림 (청크 p{start_page}-{end_page}, 길이: {len(response.text)})")
         
+        # Comprehensive response validation
+        if not response.text or len(response.text) == 0:
+            print(f"  오류: 빈 응답 받음 (청크 p{start_page}-{end_page})")
+            # Delete the chunk file before returning
+            self.delete_file_safe(lesson_chunk_file)
+            return {"error": "Empty response received", "chunk_info": {"start": start_page, "end": end_page}}, None
+        elif len(response.text) < ProcessingConfig.MIN_RESPONSE_LENGTH:
+            print(f"  오류: 응답이 너무 짧음 (청크 p{start_page}-{end_page}, 길이: {len(response.text)})")
+            self.delete_file_safe(lesson_chunk_file)
+            return {"error": f"Response too short: {len(response.text)} chars", "chunk_info": {"start": start_page, "end": end_page}}, None
+        elif not response.text.strip().startswith('{') and not response.text.strip().startswith('['):
+            print(f"  오류: JSON 형식이 아닌 응답 (청크 p{start_page}-{end_page})")
+            self.delete_file_safe(lesson_chunk_file)
+            return {"error": "Response doesn't appear to be JSON", "chunk_info": {"start": start_page, "end": end_page}}, None
+        
         try:
             # Clean up common JSON errors from Gemini
             cleaned_text = PDFProcessorHelpers.clean_json_text(response.text)
-            result = json.loads(cleaned_text)
+            result = self.parse_response_json(cleaned_text, "jokbo-centric")
             
             # Process page numbers with validation and potential retry
             retry_needed, invalid_questions = PDFProcessorHelpers.validate_question_pages(
@@ -1472,7 +1399,7 @@ class PDFProcessor:
                     error_result["finish_reason"] = finish_reason
                 return error_result, None
     
-    def analyze_lessons_for_jokbo_parallel(self, lesson_paths: List[str], jokbo_path: str, max_workers: int = 3) -> Dict[str, Any]:
+    def analyze_lessons_for_jokbo_parallel(self, lesson_paths: List[str], jokbo_path: str, max_workers: int = ProcessingConfig.DEFAULT_THREAD_WORKERS) -> Dict[str, Any]:
         """Analyze multiple lesson PDFs against one jokbo PDF using parallel processing (jokbo-centric)"""
         
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] 병렬 처리 시작 (족보 중심)")
@@ -1500,7 +1427,7 @@ class PDFProcessor:
         
         # Prepare all chunks from all lesson files
         all_chunks = []
-        max_pages_per_chunk = int(os.environ.get('MAX_PAGES_PER_CHUNK', '40'))
+        max_pages_per_chunk = ProcessingConfig.DEFAULT_CHUNK_SIZE
         
         print(f"  강의자료 청크 준비 중...")
         for lesson_path in lesson_paths:
@@ -1678,7 +1605,7 @@ class PDFProcessor:
         
         return final_result
     
-    def analyze_pdfs_for_lesson_parallel(self, jokbo_paths: List[str], lesson_path: str, max_workers: int = 3) -> Dict[str, Any]:
+    def analyze_pdfs_for_lesson_parallel(self, jokbo_paths: List[str], lesson_path: str, max_workers: int = ProcessingConfig.DEFAULT_THREAD_WORKERS) -> Dict[str, Any]:
         """Analyze multiple jokbo PDFs against one lesson PDF using parallel processing"""
         
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] 병렬 처리 시작")
@@ -2074,6 +2001,8 @@ class PDFProcessor:
         from api_key_manager import APIKeyManager
         from config import create_model
         import google.generativeai as genai
+        from multiprocessing import Process, Queue
+        import multiprocessing
         
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] Multi-API 처리 시작 (족보 중심)")
         print(f"  사용 가능한 API 키: {len(api_keys)}개")
@@ -2091,7 +2020,7 @@ class PDFProcessor:
         
         # Prepare all chunks from all lesson files
         all_chunks = []
-        max_pages_per_chunk = int(os.environ.get('MAX_PAGES_PER_CHUNK', '40'))
+        max_pages_per_chunk = ProcessingConfig.DEFAULT_CHUNK_SIZE
         
         print(f"  강의자료 청크 준비 중...")
         for lesson_path in lesson_paths:
@@ -2118,151 +2047,75 @@ class PDFProcessor:
         processed_chunks = 0
         failed_chunks = []
         
-        def process_single_chunk_with_api(chunk_info: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
-            """Process a single chunk with an available API key"""
-            thread_id = threading.current_thread().ident
-            lesson_path = chunk_info['lesson_path']
-            lesson_filename = chunk_info['lesson_filename']
-            start_page = chunk_info['start_page']
-            end_page = chunk_info['end_page']
+        
+        # Distribute chunks evenly among APIs
+        chunks_per_api = len(all_chunks) // len(api_keys)
+        extra_chunks = len(all_chunks) % len(api_keys)
+        
+        api_assignments = []
+        chunk_start = 0
+        
+        for i, api_key in enumerate(api_keys):
+            # Distribute extra chunks to first APIs
+            chunk_count = chunks_per_api + (1 if i < extra_chunks else 0)
+            assigned_chunks = all_chunks[chunk_start:chunk_start + chunk_count]
             
-            print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 처리 시작 - {lesson_filename} (p{start_page}-{end_page})")
+            if assigned_chunks:  # Only add if there are chunks to process
+                # Pass model configuration instead of model instance
+                api_assignments.append((api_key, model_type, thinking_budget, assigned_chunks))
+                print(f"  API #{i+1} (***{api_key[-4:]}): {len(assigned_chunks)}개 청크 할당")
             
-            # Get available API and model
-            api_result = api_manager.get_available_api()
-            if not api_result:
-                # No API available, wait and retry
-                print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: API 키 대기 중...")
-                time.sleep(5)
-                api_result = api_manager.get_available_api()
-                if not api_result:
-                    error_msg = "No available API keys after retry"
-                    print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: {error_msg}")
-                    return (lesson_path, {"error": error_msg})
-            
-            api_key, model = api_result
-            
-            # Create a new PDFProcessor instance for this thread with the specific model
-            thread_processor = PDFProcessor(model, session_id=self.session_id)
-            
+            chunk_start += chunk_count
+        
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] {len(all_chunks)}개 청크를 {len(api_assignments)}개 API로 처리 시작")
+        
+        # Use multiprocessing instead of threading
+        result_queue = Queue()
+        processes = []
+        
+        # Start processes for each API
+        for api_key, model_type, thinking_budget, assigned_chunks in api_assignments:
+            p = Process(target=PDFProcessor.process_api_chunks_multiprocess,
+                       args=(api_key, model_type, thinking_budget, assigned_chunks, 
+                             jokbo_path, self.session_id, result_queue))
+            p.start()
+            processes.append(p)
+        
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] {len(processes)}개 프로세스 시작 완료 - Multi-API 처리 중...")
+        
+        # Collect results
+        total_successful = 0
+        total_failed = 0
+        results_collected = 0
+        
+        if TQDM_AVAILABLE:
+            pbar = tqdm(total=len(all_chunks), desc="청크 처리")
+        
+        # Wait for all processes to complete
+        while results_collected < len(processes):
             try:
-                # Each API uploads its own jokbo file (for isolated context)
-                print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 족보 업로드 중...")
-                jokbo_file = thread_processor.upload_pdf(jokbo_path, f"족보_{Path(jokbo_path).name}_{thread_id}")
+                successful, failed = result_queue.get(timeout=1)
+                total_successful += successful
+                total_failed += failed
+                results_collected += 1
                 
-                # Extract pages to temporary file if needed
-                if len(self.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)) > 1:
-                    temp_pdf = thread_processor.extract_pdf_pages(chunk_info['chunk_path'], start_page, end_page)
-                else:
-                    temp_pdf = chunk_info['chunk_path']
-                
-                # Analyze this chunk with retry logic
-                max_retries = 3
-                for attempt in range(max_retries):
-                    try:
-                        result, uploaded_file = thread_processor._analyze_jokbo_with_lesson_chunk_preloaded(
-                            jokbo_file, temp_pdf,
-                            jokbo_file.display_name.replace(f"족보_{thread_id}", "").replace("족보_", ""),
-                            lesson_filename,
-                            start_page, end_page,
-                            chunk_info['total_pages']
-                        )
-                        
-                        # If successful, break the retry loop
-                        break
-                        
-                    except Exception as e:
-                        error_str = str(e)
-                        if "429" in error_str or "rate" in error_str.lower() or "quota" in error_str.lower():
-                            # Rate limit detected
-                            print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: Rate limit 감지")
-                            api_manager.mark_api_rate_limited(api_key)
-                            
-                            if attempt < max_retries - 1:
-                                # Try to get another API
-                                api_result = api_manager.get_available_api()
-                                if api_result:
-                                    api_key, model = api_result
-                                    thread_processor.model = model
-                                    print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 다른 API로 재시도...")
-                                    continue
-                            
-                        # If not rate limit or last attempt, raise the error
-                        if attempt == max_retries - 1:
-                            raise
-                
-                # Clean up temp file if created
-                if temp_pdf != chunk_info['chunk_path']:
-                    try:
-                        os.unlink(temp_pdf)
-                    except:
-                        pass
-                
-                # Delete uploaded files for this chunk
-                # Each API must delete its own uploaded files
-                thread_processor.delete_file_safe(jokbo_file)
-                if uploaded_file:
-                    thread_processor.delete_file_safe(uploaded_file)
-                
-                # 결과를 임시 파일로 저장
-                saved_path = thread_processor.save_chunk_result(chunk_info, result, thread_processor.chunk_results_dir)
-                print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 결과 저장 - {Path(saved_path).name}")
-                
-                # 성공 시 처리 상태 업데이트
-                with lock:
-                    nonlocal processed_chunks
-                    processed_chunks += 1
-                
-                return (lesson_path, saved_path, None)
-                
-            except Exception as e:
-                print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 오류 발생 - {str(e)}")
-                # 오류도 파일로 저장
-                error_result = {"error": str(e), "chunk_info": chunk_info}
-                saved_path = thread_processor.save_chunk_result(chunk_info, error_result, thread_processor.chunk_results_dir)
-                
-                with lock:
-                    failed_chunks.append(chunk_info)
-                
-                return (lesson_path, saved_path, None)
-            finally:
-                # Ensure cleanup happens
-                try:
-                    thread_processor.__del__()
-                except (OSError, IOError) as e:
-                    print(f"Failed to delete temp file: {e}")
-        
-        # Process all chunks in parallel with multiple APIs
-        max_workers = min(len(api_keys), len(all_chunks))  # Use at most as many workers as API keys
-        print(f"  [{datetime.now().strftime('%H:%M:%S')}] {len(all_chunks)}개 청크 Multi-API 처리 시작 (max_workers={max_workers})")
-        
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # Submit all chunk tasks at once
-            future_to_chunk = {
-                executor.submit(process_single_chunk_with_api, chunk_info): chunk_info
-                for chunk_info in all_chunks
-            }
-            
-            print(f"  [{datetime.now().strftime('%H:%M:%S')}] 모든 작업 제출 완료 - Multi-API 처리 중...")
-            
-            # Process completed tasks with progress bar
-            if TQDM_AVAILABLE:
-                pbar = tqdm(total=len(future_to_chunk), desc="청크 처리")
-            
-            completed = 0
-            for future in as_completed(future_to_chunk):
-                try:
-                    result = future.result()
-                    # Results are already saved to files, no need to store in memory
-                except Exception as e:
-                    print(f"  작업 실행 오류: {str(e)}")
-                
-                completed += 1
                 if TQDM_AVAILABLE:
-                    pbar.update(1)
-            
-            if TQDM_AVAILABLE:
-                pbar.close()
+                    pbar.update(successful + failed)
+                    
+            except:
+                # Check if any process is still alive
+                alive_count = sum(1 for p in processes if p.is_alive())
+                if alive_count == 0 and results_collected < len(processes):
+                    # All processes died but we didn't get all results
+                    print(f"  경고: 일부 프로세스가 비정상 종료됨")
+                    break
+        
+        # Wait for all processes to finish
+        for p in processes:
+            p.join()
+        
+        if TQDM_AVAILABLE:
+            pbar.close()
         
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] 모든 청크 처리 완료")
         
@@ -2275,15 +2128,185 @@ class PDFProcessor:
         
         # 모든 청크 결과 파일 로드 및 병합
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] 청크 결과 병합 중...")
-        final_result = self.merge_chunk_results(self.chunk_results_dir)
+        final_result = self.load_and_merge_chunk_results(self.chunk_results_dir)
         
-        # 결과 크기 확인
-        import sys
-        result_size = sys.getsizeof(final_result["jokbo_pages"])
-        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 결과 데이터 크기: {result_size / 1024 / 1024:.2f} MB")
+        # Check for failed chunks and retry with different APIs
+        failed_chunk_files = []
+        for chunk_file in self.chunk_results_dir.glob("chunk_*.json"):
+            with open(chunk_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if "error" in data["result"]:
+                    # Check if it's an empty response error
+                    if "Empty response from API" in data["result"].get("error", ""):
+                        failed_chunk_files.append((chunk_file, data["chunk_info"]))
         
-        if failed_chunks:
-            print(f"  경고: {len(failed_chunks)}개 청크 처리 실패")
-            final_result["failed_chunks"] = len(failed_chunks)
+        # Retry failed chunks with different API
+        if failed_chunk_files:
+            print(f"\n  [{datetime.now().strftime('%H:%M:%S')}] {len(failed_chunk_files)}개 실패한 청크 재시도 중...")
+            retry_queue = Queue()
+            retry_chunks = [chunk_info for _, chunk_info in failed_chunk_files]
+            
+            # Get an available API for retry
+            available_api = None
+            for api_key in api_keys:
+                if api_key not in [assignment[0] for assignment in api_assignments]:
+                    available_api = api_key
+                    break
+            
+            if not available_api:
+                # Use round-robin to select API
+                available_api = api_keys[len(retry_chunks) % len(api_keys)]
+            
+            # Retry with single API
+            retry_process = Process(target=PDFProcessor.process_api_chunks_multiprocess,
+                                  args=(available_api, model_type, thinking_budget, retry_chunks,
+                                       jokbo_path, self.session_id, retry_queue))
+            retry_process.start()
+            
+            # Wait for retry results
+            retry_successful, retry_failed = retry_queue.get()
+            retry_process.join()
+            
+            print(f"  재시도 결과: 성공 {retry_successful}, 실패 {retry_failed}")
+            total_successful += retry_successful
+            total_failed = retry_failed  # Update to final failed count
+        
+        # 최종 결과 병합
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 최종 청크 결과 병합 중...")
+        final_result = self.load_and_merge_chunk_results(self.chunk_results_dir)
+        
+        # Apply final filtering and sorting
+        if "all_connections" in final_result:
+            all_connections = final_result["all_connections"]
+            print(f"  병합 완료: {len(all_connections)}개 문제")
+            
+            # 최종 필터링 및 정렬
+            print(f"  [{datetime.now().strftime('%H:%M:%S')}] 최종 필터링 및 문제 번호순 정렬 중...")
+            final_result = self.apply_final_filtering_and_sorting(all_connections)
+            
+            # 디버그 정보 출력
+            print(f"  [{datetime.now().strftime('%H:%M:%S')}] 최종 결과: {final_result['summary']['total_jokbo_pages']}개 페이지, "
+                  f"{final_result['summary']['total_questions']}개 문제, {final_result['summary']['total_related_slides']}개 연결")
+        
+        if total_failed > 0:
+            print(f"  경고: {total_failed}개 청크 최종 처리 실패")
+            final_result["failed_chunks"] = total_failed
         
         return final_result
+    
+    @staticmethod
+    def process_api_chunks_multiprocess(api_key: str, model_type: str, thinking_budget: Optional[int], 
+                                       assigned_chunks: List[Dict[str, Any]], jokbo_path: str, 
+                                       session_id: str, result_queue: Queue):
+        """Process chunks in a separate process with its own genai instance
+        
+        This function runs in a separate process to avoid genai.configure conflicts
+        """
+        import google.generativeai as genai
+        from config import create_model
+        
+        import multiprocessing
+        thread_id = multiprocessing.current_process().pid
+        api_key_suffix = api_key[-4:] if api_key else "None"
+        successful = 0
+        failed = 0
+        
+        print(f"  [Process-{thread_id}] API ***{api_key_suffix}: {len(assigned_chunks)}개 청크 처리 시작")
+        
+        # Configure API for this process
+        genai.configure(api_key=api_key)
+        
+        # Create model for this process
+        model = create_model(model_type, thinking_budget)
+        
+        # Create PDFProcessor for this process
+        processor = PDFProcessor(model, session_id=session_id)
+        
+        # Upload jokbo file once for all chunks
+        print(f"  [Process-{thread_id}] 족보 업로드 중...")
+        try:
+            jokbo_file = processor.upload_pdf(jokbo_path, f"족보_{Path(jokbo_path).name}_{api_key_suffix}")
+            jokbo_filename = Path(jokbo_path).name
+        except Exception as e:
+            print(f"  [Process-{thread_id}] 족보 업로드 실패 - {str(e)}")
+            # Save error for all chunks
+            for chunk_info in assigned_chunks:
+                error_result = {"error": f"족보 업로드 실패: {str(e)}", "chunk_info": chunk_info}
+                processor.save_chunk_result(chunk_info, error_result, processor.chunk_results_dir)
+            result_queue.put((0, len(assigned_chunks)))
+            return
+        
+        # Process each assigned chunk
+        for chunk_idx, chunk_info in enumerate(assigned_chunks):
+            lesson_path = chunk_info['lesson_path']
+            lesson_filename = chunk_info['lesson_filename']
+            start_page = chunk_info['start_page']
+            end_page = chunk_info['end_page']
+            
+            print(f"  [Process-{thread_id}] [{chunk_idx+1}/{len(assigned_chunks)}] {lesson_filename} (p{start_page}-{end_page}) 처리 중...")
+            
+            try:
+                # Extract pages to temporary file if needed
+                max_pages_per_chunk = ProcessingConfig.DEFAULT_CHUNK_SIZE
+                if len(processor.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)) > 1:
+                    temp_pdf = processor.extract_pdf_pages(chunk_info['chunk_path'], start_page, end_page)
+                else:
+                    temp_pdf = chunk_info['chunk_path']
+                
+                # Analyze this chunk
+                result, uploaded_file = processor._analyze_jokbo_with_lesson_chunk_preloaded(
+                    jokbo_file, temp_pdf,
+                    jokbo_filename,
+                    lesson_filename,
+                    start_page, end_page,
+                    chunk_info['total_pages']
+                )
+                
+                # Clean up temp file if created
+                if temp_pdf != chunk_info['chunk_path']:
+                    try:
+                        os.unlink(temp_pdf)
+                    except:
+                        pass
+                
+                # Delete only the lesson file (keep jokbo for next chunks)
+                if uploaded_file:
+                    print(f"  [Process-{thread_id}] 강의자료 파일 삭제 중...")
+                    processor.delete_file_safe(uploaded_file)
+                    if uploaded_file in processor.uploaded_files:
+                        processor.uploaded_files.remove(uploaded_file)
+                
+                # Check if result has error (including empty response)
+                if "error" in result:
+                    print(f"  [Process-{thread_id}] 청크 처리 실패: {result.get('error', 'Unknown error')}")
+                    # Save error result for potential retry
+                    saved_path = processor.save_chunk_result(chunk_info, result, processor.chunk_results_dir)
+                    failed += 1
+                else:
+                    # Save successful result
+                    saved_path = processor.save_chunk_result(chunk_info, result, processor.chunk_results_dir)
+                    print(f"  [Process-{thread_id}] 결과 저장 완료: {Path(saved_path).name}")
+                    successful += 1
+                
+            except Exception as e:
+                print(f"  [Process-{thread_id}] 오류 발생: {str(e)}")
+                # Save error result
+                error_result = {"error": str(e), "chunk_info": chunk_info}
+                processor.save_chunk_result(chunk_info, error_result, processor.chunk_results_dir)
+                failed += 1
+        
+        # Delete jokbo file after all chunks are processed
+        print(f"  [Process-{thread_id}] 모든 청크 완료, 족보 파일 삭제 중...")
+        if jokbo_file:
+            processor.delete_file_safe(jokbo_file)
+            if jokbo_file in processor.uploaded_files:
+                processor.uploaded_files.remove(jokbo_file)
+        
+        # Clean up any remaining files
+        try:
+            processor.__del__()
+        except:
+            pass
+        
+        print(f"  [Process-{thread_id}] 완료 (성공: {successful}, 실패: {failed})")
+        result_queue.put((successful, failed))

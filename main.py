@@ -9,17 +9,25 @@ from typing import List, Tuple, Optional
 import shutil
 import json
 
+import google.generativeai as genai
+
 from config import create_model
 from pdf_processor import PDFProcessor
 from pdf_creator import PDFCreator
 from error_handler import ErrorHandler
+from path_validator import PathValidator
 
 
 def find_pdf_files(directory: str, pattern: str = "*.pdf") -> List[Path]:
     """Find all PDF files in a directory"""
     path = Path(directory)
     pdf_files = list(path.glob(pattern))
-    return [f for f in pdf_files if not f.name.endswith('.Zone.Identifier')]
+    # Filter out Zone.Identifier files and validate filenames
+    valid_files = []
+    for f in pdf_files:
+        if not f.name.endswith('.Zone.Identifier') and PathValidator.validate_pdf_filename(f.name):
+            valid_files.append(f)
+    return valid_files
 
 
 def list_sessions():
@@ -52,7 +60,8 @@ def list_sessions():
                         state = json.load(f)
                         session_info['status'] = state.get('status', 'unknown')
                         session_info['jokbo_path'] = state.get('jokbo_path', 'N/A')
-                except:
+                except (json.JSONDecodeError, IOError, OSError) as e:
+                    print(f"Error reading state file: {e}")
                     session_info['status'] = 'error'
                     session_info['jokbo_path'] = 'N/A'
             
@@ -127,8 +136,8 @@ def auto_cleanup_old_sessions(keep_days: int):
                 try:
                     shutil.rmtree(session_dir)
                     print(f"오래된 세션 자동 삭제: {session_dir.name} ({age_days}일 전)")
-                except:
-                    pass
+                except (OSError, PermissionError) as e:
+                    print(f"Failed to delete session {session_dir.name}: {e}")
 
 
 def handle_session_cleanup(args):
@@ -312,7 +321,12 @@ def main():
     
     # Find lesson files
     if args.single_lesson:
-        lesson_files = [Path(args.single_lesson)]
+        # Validate single lesson path
+        single_lesson_path = Path(args.single_lesson)
+        if not PathValidator.validate_pdf_filename(single_lesson_path.name):
+            print(f"오류: 잘못된 PDF 파일명: {single_lesson_path.name}")
+            return 1
+        lesson_files = [single_lesson_path]
     else:
         lesson_files = find_pdf_files(args.lesson_dir)
     
@@ -321,6 +335,69 @@ def main():
         return 1
     
     print(f"족보 파일 {len(jokbo_files)}개, 강의자료 파일 {len(lesson_files)}개 발견")
+    
+    # 프로그램 시작 시 기존 업로드 파일 정리
+    if args.multi_api:
+        # Multi-API 모드에서는 모든 API 키에 대해 정리 수행
+        print("\nMulti-API 모드: 모든 API 키로 기존 업로드 파일 정리 중...")
+        api_keys = []
+        for i in range(10):  # 최대 10개 API 키 확인
+            api_key = os.getenv(f'GEMINI_API_KEY_{i+1}')
+            if api_key:
+                api_keys.append(api_key)
+        
+        if not api_keys:
+            # GEMINI_API_KEY_N이 없으면 기본 키 사용
+            api_key = os.getenv('GEMINI_API_KEY')
+            if api_key:
+                api_keys = [api_key]
+        
+        # 현재 API 키 백업
+        original_api_key = os.getenv('GEMINI_API_KEY')
+        
+        for i, api_key in enumerate(api_keys):
+            print(f"  API #{i+1} 정리 중...")
+            # 각 API 키로 임시 설정
+            genai.configure(api_key=api_key)
+            
+            # 업로드된 파일 목록 조회 및 삭제
+            try:
+                files = list(genai.list_files())
+                deleted = 0
+                for file in files:
+                    try:
+                        genai.delete_file(file.name)
+                        deleted += 1
+                    except Exception as e:
+                        # 403 오류 등은 무시
+                        pass
+                if deleted > 0:
+                    print(f"    {deleted}개 파일 삭제됨")
+            except Exception as e:
+                print(f"    파일 정리 중 오류: {e}")
+        
+        # 원래 API 키로 복원
+        if original_api_key:
+            genai.configure(api_key=original_api_key)
+    else:
+        # 일반 모드에서는 기본 API 키로만 정리
+        print("\n기존 업로드 파일 정리 중...")
+        try:
+            files = list(genai.list_files())
+            deleted = 0
+            for file in files:
+                try:
+                    genai.delete_file(file.name)
+                    deleted += 1
+                except Exception as e:
+                    # 403 오류 등은 무시
+                    pass
+            if deleted > 0:
+                print(f"  {deleted}개 파일 삭제됨")
+        except Exception as e:
+            print(f"  파일 정리 중 오류: {e}")
+    
+    print()  # 빈 줄 추가
     
     successful = 0
     failed = 0

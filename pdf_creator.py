@@ -294,7 +294,8 @@ class PDFCreator:
                 if match:
                     return int(match.group(1))
                 return float('inf')
-            except:
+            except (ValueError, AttributeError) as e:
+                print(f"Error parsing question number '{question_num}': {e}")
                 return float('inf')
         
         all_questions.sort(key=get_question_number_for_sort)

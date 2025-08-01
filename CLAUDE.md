@@ -42,6 +42,13 @@ python main.py --jokbo-dir "custom_jokbo" --lesson-dir "custom_lesson" --output-
 # Model selection for cost/speed optimization
 python main.py --model flash                              # Faster, cheaper
 python main.py --model flash-lite --thinking-budget 0    # Fastest, cheapest
+
+# Multi-API mode for better reliability
+python main.py --mode jokbo-centric --multi-api           # Use multiple API keys
+
+# Chunk size optimization (for large PDFs or API limits)
+export MAX_PAGES_PER_CHUNK=30                             # Reduce from default 40
+python main.py --parallel
 ```
 
 ### Testing and Debugging
@@ -154,7 +161,21 @@ ls output/debug/
   - Top 2 connections per question (configurable via MAX_CONNECTIONS_PER_QUESTION)
   - Minimum score threshold filtering (default: 50점)
 
-## 최근 개선사항 (Recent Improvements - 2025-08-01)
+## 최근 개선사항 (Recent Improvements - 2025-08-02)
+
+### 1. Multi-API 모드 버그 수정 및 개선
+- **AttributeError 수정**: `merge_chunk_results` → `load_and_merge_chunk_results` 메서드 이름 수정
+- **빈 응답 처리**: 응답 길이 0인 경우 즉시 실패로 처리하는 로직 추가
+- **실패 청크 재시도**: Multi-API 모드에서 실패한 청크를 다른 API로 재시도하는 로직 구현
+- **API 상태 관리 강화**: 
+  - 연속 실패 횟수 추적 (consecutive_failures)
+  - 3회 연속 실패 시 자동 쿨다운 (10분)
+  - 빈 응답도 실패로 카운트
+- **청크 크기 최적화 가이드**: 
+  - 환경변수 MAX_PAGES_PER_CHUNK 설정 방법 문서화
+  - 기본값 40 → 30 권장 (토큰 제한 문제 해결)
+
+## 이전 개선사항 (2025-08-01)
 
 ### 1. 관련성 점수 체계 개선 (1-11 → 1-100점)
 - **문제**: 기존 1-11점 체계가 너무 단순하고, 동일한 그림이 아닌데도 11점을 받는 경우 발생
@@ -331,6 +352,13 @@ ls output/debug/
 - Exponential backoff retry (up to 3 attempts)
 - Graceful degradation for individual file failures
 - Comprehensive error messages with context
+- Empty response detection and handling
+- Failed chunk retry with different API keys
+
+### Chunk Size Optimization
+- Default chunk size: 40 pages (configurable via MAX_PAGES_PER_CHUNK)
+- Recommended: 30 pages for better stability with token limits
+- Monitor response failures to find optimal size for your use case
 
 ### Model Selection Strategy
 - **Pro**: Best quality, use for critical analysis

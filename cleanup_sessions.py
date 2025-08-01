@@ -35,7 +35,8 @@ def get_session_info(session_dir: Path) -> Dict[str, Any]:
                 info['session_id'] = state.get('session_id', info['id'])
                 info['total_chunks'] = state.get('total_chunks', 0)
                 info['processed_chunks'] = state.get('processed_chunks', 0)
-        except:
+        except (json.JSONDecodeError, IOError, OSError) as e:
+            print(f"Error reading state file for session {info['id']}: {e}")
             info['status'] = 'error'
             info['jokbo_path'] = 'N/A'
     else:

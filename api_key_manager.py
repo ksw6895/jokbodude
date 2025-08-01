@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import threading
 import google.generativeai as genai
 from config import API_KEYS, GENERATION_CONFIG, SAFETY_SETTINGS, MODEL_NAMES
+from processing_config import ProcessingConfig
 
 
 class APIKeyManager:
@@ -35,7 +36,9 @@ class APIKeyManager:
                 'genai_client': None,
                 'model': None,
                 'usage_count': 0,
-                'last_used': None
+                'last_used': None,
+                'consecutive_failures': 0,
+                'total_failures': 0
             }
         
         # Round-robin index
@@ -137,7 +140,9 @@ class APIKeyManager:
                     'available': state['available'],
                     'usage_count': state['usage_count'],
                     'last_used': state['last_used'].strftime('%H:%M:%S') if state['last_used'] else 'Never',
-                    'cooldown_remaining': None
+                    'cooldown_remaining': None,
+                    'consecutive_failures': state['consecutive_failures'],
+                    'total_failures': state['total_failures']
                 }
                 
                 if state['cooldown_until'] and state['cooldown_until'] > current_time:
@@ -153,3 +158,36 @@ class APIKeyManager:
                 self.api_states[api_key]['available'] = True
                 self.api_states[api_key]['cooldown_until'] = None
                 print(f"  API key ending with ...{api_key[-4:]} has been reset to available")
+    
+    def get_model_for_api(self, api_key: str) -> genai.GenerativeModel:
+        """
+        Get or create a GenerativeModel for a specific API key
+        
+        Args:
+            api_key: The API key to get model for
+            
+        Returns:
+            GenerativeModel instance
+        """
+        with self.lock:
+            if api_key not in self.api_states:
+                raise ValueError(f"Unknown API key: ...{api_key[-4:]}")
+            
+            state = self.api_states[api_key]
+            
+            # Create model if not exists
+            if state['model'] is None:
+                # Configure genai with this API key temporarily
+                genai.configure(api_key=api_key)
+                
+                config = GENERATION_CONFIG.copy()
+                if self.model_type != "pro" and self.thinking_budget is not None:
+                    config["thinking_config"] = {"max_thinking_tokens": self.thinking_budget}
+                
+                state['model'] = genai.GenerativeModel(
+                    model_name=self.model_name,
+                    generation_config=config,
+                    safety_settings=SAFETY_SETTINGS,
+                )
+            
+            return state['model']
