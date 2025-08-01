@@ -100,11 +100,10 @@ class PDFProcessorHelpers:
         Returns:
             Complete prompt string
         """
-        intro = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF의 일부분을 비교 분석합니다.
+        intro = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF를 비교 분석합니다.
 
 중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
-중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요.
-중요: 현재 분석하는 강의자료는 전체의 {start_page}-{end_page} 페이지 부분입니다."""
+중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요."""
         
         prompt = f"""{intro}
 

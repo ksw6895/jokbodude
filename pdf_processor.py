@@ -225,6 +225,21 @@ class PDFProcessor:
             try:
                 response = self.model.generate_content(content)
                 
+                # Check finish reason
+                if response.candidates:
+                    finish_reason = str(response.candidates[0].finish_reason)
+                    if 'MAX_TOKENS' in finish_reason or finish_reason == '2':
+                        print(f"  경고: 응답이 토큰 제한으로 잘림 (finish_reason: {finish_reason}, 길이: {len(response.text)})")
+                        # Still return the response to salvage what we can
+                        return response
+                    elif 'SAFETY' in finish_reason or finish_reason == '3':
+                        print(f"  경고: 안전성 문제로 응답 차단 (finish_reason: {finish_reason})")
+                        if attempt < max_retries - 1:
+                            wait_time = backoff_factor ** attempt
+                            time.sleep(wait_time)
+                            continue
+                        return response
+                
                 # Check if response is complete JSON
                 try:
                     json.loads(response.text)
@@ -232,7 +247,7 @@ class PDFProcessor:
                 except json.JSONDecodeError as json_error:
                     # If this is the last attempt, return the incomplete response
                     if attempt == max_retries - 1:
-                        print(f"  경고: 불완전한 JSON 응답 (길이: {len(response.text)})")
+                        print(f"  경고: 불완전한 JSON 응답 (finish_reason: {finish_reason if 'finish_reason' in locals() else 'unknown'}, 길이: {len(response.text)})")
                         return response
                     else:
                         print(f"  재시도 {attempt + 1}/{max_retries}: 불완전한 JSON 응답 감지 (길이: {len(response.text)})")
@@ -254,47 +269,112 @@ class PDFProcessor:
         if mode == "jokbo-centric":
             # Try to extract complete jokbo_pages entries
             try:
-                # Find the last complete "questions" array closing
-                # Look for pattern: }]}]} which typically ends a complete page entry
                 import re
                 
-                # Find all complete page objects
-                pages = []
-                page_pattern = r'\{\s*"jokbo_page"\s*:\s*\d+\s*,\s*"questions"\s*:\s*\[.*?\]\s*\}'
-                
-                # Try to find the jokbo_pages array start
+                # Find the jokbo_pages array start
                 jokbo_pages_start = response_text.find('"jokbo_pages"')
                 if jokbo_pages_start == -1:
                     return {"error": "No jokbo_pages found", "partial": True}
                 
-                # Extract the content after jokbo_pages
-                content_after_pages = response_text[jokbo_pages_start:]
+                # Extract complete page objects
+                recovered_pages = []
                 
-                # Try progressive closing of brackets
-                for i in range(len(content_after_pages), max(0, len(content_after_pages) - 10000), -100):
-                    test_json = '{' + content_after_pages[:i]
-                    
-                    # Count open brackets and try to close them
-                    open_braces = test_json.count('{') - test_json.count('}')
-                    open_brackets = test_json.count('[') - test_json.count(']')
-                    
-                    # Add closing brackets
-                    test_json += ']' * open_brackets + '}' * open_braces
-                    
-                    try:
-                        parsed = json.loads(test_json)
-                        if "jokbo_pages" in parsed and len(parsed["jokbo_pages"]) > 0:
-                            print(f"  부분 파싱 성공! {len(parsed['jokbo_pages'])}개 페이지 복구")
-                            parsed["partial"] = True
-                            parsed["recovered_pages"] = len(parsed["jokbo_pages"])
-                            return parsed
-                    except json.JSONDecodeError:
+                # Find all page objects using a more robust approach
+                # Look for complete page structures
+                page_starts = []
+                for match in re.finditer(r'"jokbo_page"\s*:\s*(\d+)', response_text):
+                    page_starts.append((match.start(), match.group(1)))
+                
+                for i, (start_pos, page_num) in enumerate(page_starts):
+                    # Find the start of this page object
+                    obj_start = response_text.rfind('{', 0, start_pos)
+                    if obj_start == -1:
                         continue
+                    
+                    # Try to find the end of this page object
+                    # Look for the next page start or the end of the array
+                    if i < len(page_starts) - 1:
+                        next_start = page_starts[i + 1][0]
+                        search_end = response_text.rfind('{', 0, next_start)
+                    else:
+                        # For the last page, search to the end
+                        search_end = len(response_text)
+                    
+                    # Try to extract this page object
+                    brace_count = 0
+                    bracket_count = 0
+                    in_string = False
+                    escape_next = False
+                    obj_end = -1
+                    
+                    for j in range(obj_start, min(search_end, len(response_text))):
+                        char = response_text[j]
+                        
+                        if escape_next:
+                            escape_next = False
+                            continue
+                        
+                        if char == '\\':
+                            escape_next = True
+                            continue
+                        
+                        if char == '"' and not escape_next:
+                            in_string = not in_string
+                            continue
+                        
+                        if not in_string:
+                            if char == '{':
+                                brace_count += 1
+                            elif char == '}':
+                                brace_count -= 1
+                                if brace_count == 0:
+                                    obj_end = j + 1
+                                    break
+                            elif char == '[':
+                                bracket_count += 1
+                            elif char == ']':
+                                bracket_count -= 1
+                    
+                    if obj_end > obj_start:
+                        try:
+                            page_obj_str = response_text[obj_start:obj_end]
+                            page_obj = json.loads(page_obj_str)
+                            
+                            # Validate that this is a complete page object
+                            if "jokbo_page" in page_obj and "questions" in page_obj:
+                                # Check if questions array is complete
+                                questions = page_obj.get("questions", [])
+                                valid_questions = []
+                                
+                                for q in questions:
+                                    # A complete question should have at least these fields
+                                    if all(key in q for key in ["question_number", "question_text", "answer"]):
+                                        valid_questions.append(q)
+                                
+                                if valid_questions:
+                                    page_obj["questions"] = valid_questions
+                                    recovered_pages.append(page_obj)
+                                    print(f"  페이지 {page_num} 복구 성공: {len(valid_questions)}개 문제")
+                        except json.JSONDecodeError:
+                            # This page object is incomplete
+                            continue
                 
-                return {"error": "Failed to parse even partially", "partial": True}
+                if recovered_pages:
+                    result = {
+                        "jokbo_pages": recovered_pages,
+                        "partial": True,
+                        "recovered_pages": len(recovered_pages),
+                        "total_questions_recovered": sum(len(p.get("questions", [])) for p in recovered_pages)
+                    }
+                    print(f"  부분 파싱 성공! {len(recovered_pages)}개 페이지, 총 {result['total_questions_recovered']}개 문제 복구")
+                    return result
+                else:
+                    return {"error": "No complete pages could be recovered", "partial": True}
                 
             except Exception as e:
                 print(f"  부분 파싱 실패: {str(e)}")
+                import traceback
+                traceback.print_exc()
                 return {"error": str(e), "partial": True}
         
         elif mode == "lesson-centric":
@@ -338,7 +418,7 @@ class PDFProcessor:
         # For other modes, return error
         return {"error": f"Partial parsing not implemented for mode: {mode}", "partial": True}
     
-    def save_api_response(self, response_text: str, jokbo_filename: str, lesson_filename: str = None, mode: str = "lesson-centric"):
+    def save_api_response(self, response_text: str, jokbo_filename: str, lesson_filename: str = None, mode: str = "lesson-centric", finish_reason: str = None, response_metadata: Dict = None):
         """Save Gemini API response to a file for debugging"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
@@ -355,7 +435,9 @@ class PDFProcessor:
             "jokbo_file": jokbo_filename,
             "lesson_file": lesson_filename,
             "response_text": response_text,
-            "response_length": len(response_text)
+            "response_length": len(response_text),
+            "finish_reason": finish_reason,
+            "response_metadata": response_metadata or {}
         }
         
         try:
@@ -627,39 +709,93 @@ class PDFProcessor:
             # Small file, process normally
             return self._analyze_single_lesson_with_jokbo_original(lesson_path, jokbo_path)
         
-        # Large file, process in chunks
+        # Large file, process in chunks with session management
         print(f"  큰 강의자료를 {len(lesson_chunks)}개 조각으로 분할하여 처리합니다.")
+        print(f"  세션 ID: {self.session_id} (sequential mode)")
+        
+        # Save processing state
+        state = {
+            'session_id': self.session_id,
+            'mode': 'jokbo-centric-sequential',
+            'jokbo_path': jokbo_path,
+            'lesson_path': lesson_path,
+            'total_chunks': len(lesson_chunks),
+            'processed_chunks': 0,
+            'status': 'processing',
+            'started_at': datetime.now().isoformat()
+        }
+        self.save_processing_state(state, self.session_dir / "processing_state.json")
         
         # Upload jokbo PDF once (전체 족보는 한 번만 업로드)
         jokbo_file = self.upload_pdf(jokbo_path, f"족보_{jokbo_filename}")
         
-        all_results = []
         temp_files = []
+        chunk_results_saved = []
         
         try:
-            for chunk_path, start_page, end_page in lesson_chunks:
-                print(f"  분석 중: {lesson_filename} (페이지 {start_page}-{end_page})")
+            for idx, (chunk_path, start_page, end_page) in enumerate(lesson_chunks):
+                print(f"  분석 중: {lesson_filename} (페이지 {start_page}-{end_page}) [{idx+1}/{len(lesson_chunks)}]")
                 
                 # Extract pages to temporary file
                 temp_pdf = self.extract_pdf_pages(chunk_path, start_page, end_page)
                 temp_files.append(temp_pdf)
                 
+                # Get total pages for validation
+                lesson_total_pages = self.get_pdf_page_count(lesson_path)
+                
                 # Analyze this chunk
                 chunk_result = self._analyze_jokbo_with_lesson_chunk(
                     jokbo_file, temp_pdf, jokbo_filename, lesson_filename,
-                    start_page, end_page
+                    start_page, end_page, lesson_total_pages
                 )
                 
-                if "error" not in chunk_result:
-                    all_results.append(chunk_result)
+                # Save chunk result to file
+                chunk_info = {
+                    'lesson_path': lesson_path,
+                    'lesson_filename': lesson_filename,
+                    'start_page': start_page,
+                    'end_page': end_page,
+                    'total_pages': lesson_total_pages,
+                    'chunk_index': idx
+                }
+                
+                saved_path = self.save_chunk_result(chunk_info, chunk_result, self.chunk_results_dir)
+                chunk_results_saved.append(saved_path)
+                print(f"    청크 결과 저장: {Path(saved_path).name}")
+                
+                # Update processing state
+                state['processed_chunks'] = idx + 1
+                self.save_processing_state(state, self.session_dir / "processing_state.json")
+            
+            # Load and merge all chunk results
+            print(f"  모든 청크 처리 완료. 결과 병합 중...")
+            all_results = []
+            for saved_path in chunk_results_saved:
+                with open(saved_path, 'r', encoding='utf-8') as f:
+                    chunk_data = json.load(f)
+                    if "error" not in chunk_data['result']:
+                        all_results.append(chunk_data['result'])
             
             # Merge results from all chunks
             merged_result = self._merge_jokbo_centric_results(all_results)
+            
+            # Update state to completed
+            state['status'] = 'completed'
+            state['completed_at'] = datetime.now().isoformat()
+            self.save_processing_state(state, self.session_dir / "processing_state.json")
             
             # 오류 발생 시 중심 파일을 제외한 모든 파일 정리
             self.cleanup_except_center_file(jokbo_file.display_name)
             
             return merged_result
+            
+        except Exception as e:
+            # Update state to failed
+            state['status'] = 'failed'
+            state['error'] = str(e)
+            state['failed_at'] = datetime.now().isoformat()
+            self.save_processing_state(state, self.session_dir / "processing_state.json")
+            raise
             
         finally:
             # Clean up temporary files
@@ -730,96 +866,142 @@ class PDFProcessor:
     
     def _analyze_jokbo_with_lesson_chunk(self, jokbo_file, lesson_chunk_path: str, 
                                        jokbo_filename: str, lesson_filename: str,
-                                       start_page: int, end_page: int) -> Dict[str, Any]:
-        """Analyze jokbo with a chunk of lesson PDF"""
+                                       start_page: int, end_page: int,
+                                       lesson_total_pages: int = None) -> Dict[str, Any]:
+        """Analyze jokbo with a chunk of lesson PDF with retry logic
+        
+        Args:
+            jokbo_file: Pre-uploaded jokbo file object
+            lesson_chunk_path: Path to lesson chunk PDF
+            jokbo_filename: Original jokbo filename
+            lesson_filename: Original lesson filename
+            start_page: Start page of chunk in original PDF
+            end_page: End page of chunk in original PDF
+            lesson_total_pages: Total pages in the original lesson PDF (not chunk)
+        """
         
         # Upload lesson chunk
         chunk_display_name = f"강의자료_{lesson_filename}_p{start_page}-{end_page}"
         lesson_chunk_file = self.upload_pdf(lesson_chunk_path, chunk_display_name)
         
-        # 프롬프트 구성 (페이지 범위 명시)
-        intro = f"""당신은 병리학 교수입니다. 하나의 족보(기출문제) PDF와 하나의 강의자료 PDF의 일부분을 비교 분석합니다.
-
-중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
-중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요.
-중요: 현재 분석하는 강의자료는 전체의 {start_page}-{end_page} 페이지 부분입니다."""
+        # Use provided total pages or get from chunk (for backward compatibility)
+        if lesson_total_pages is None:
+            # This should not happen in proper usage, but keep for safety
+            print(f"  경고: lesson_total_pages가 제공되지 않아 청크 크기를 사용합니다.")
+            with fitz.open(lesson_chunk_path) as pdf:
+                total_pages = len(pdf)
+        else:
+            total_pages = lesson_total_pages
         
-        output_format = JOKBO_CENTRIC_OUTPUT_FORMAT.format(
-            jokbo_filename=jokbo_filename,
-            lesson_filename=lesson_filename
-        )
+        max_retries = 3
+        retry_count = 0
         
-        prompt = f"""{intro}
-
-{JOKBO_CENTRIC_TASK}
-        
-{COMMON_WARNINGS}
-        
-{output_format}
-        """
-        
-        # Prepare content for model
-        content = [prompt, jokbo_file, lesson_chunk_file]
-        
-        response = self.model.generate_content(content)
-        
-        # Save API response for debugging
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        debug_filename = f"gemini_response_{timestamp}_chunk_p{start_page}-{end_page}_{lesson_filename}.json"
-        self.save_api_response(response.text, jokbo_filename, lesson_filename, f"chunk_p{start_page}-{end_page}")
-        
-        # Delete lesson chunk file immediately
-        self.delete_file_safe(lesson_chunk_file)
-        
-        try:
-            # Clean up common JSON errors from Gemini
-            cleaned_text = response.text
-            # Fix incorrectly quoted keys like "4"번" -> "4번"
-            import re
-            cleaned_text = re.sub(r'"(\d+)"번"', r'"\1번"', cleaned_text)
+        while retry_count < max_retries:
+            # Build prompt using helper
+            prompt = PDFProcessorHelpers.build_chunk_prompt(
+                jokbo_filename, lesson_filename, start_page, end_page,
+                JOKBO_CENTRIC_TASK, COMMON_WARNINGS, 
+                JOKBO_CENTRIC_OUTPUT_FORMAT.format(
+                    jokbo_filename=jokbo_filename,
+                    lesson_filename=lesson_filename
+                )
+            )
             
-            result = json.loads(cleaned_text)
-            # Adjust page numbers to account for chunk offset
-            # NOTE: Gemini sometimes returns absolute page numbers even for chunks
-            if "jokbo_pages" in result:
-                for page_info in result["jokbo_pages"]:
-                    for question in page_info.get("questions", []):
-                        for slide in question.get("related_lesson_slides", []):
-                            if "lesson_page" in slide:
-                                page_num = slide["lesson_page"]
-                                # Only apply offset if the page number seems to be chunk-relative
-                                # (i.e., it's within the chunk's page count)
-                                chunk_page_count = end_page - start_page + 1
-                                if page_num <= chunk_page_count:
-                                    # This looks like a chunk-relative page number
-                                    slide["lesson_page"] = page_num + (start_page - 1)
-                                    print(f"DEBUG: Adjusted chunk-relative page {page_num} to absolute page {slide['lesson_page']} for chunk p{start_page}-{end_page}")
-                                else:
-                                    # This is already an absolute page number
-                                    print(f"DEBUG: Page {page_num} appears to be absolute (exceeds chunk size {chunk_page_count}), keeping as-is for chunk p{start_page}-{end_page}")
-            return result
-        except json.JSONDecodeError as e:
-            print(f"  JSON 파싱 실패 (청크 p{start_page}-{end_page}): {str(e)}")
-            # Try partial parsing
-            partial_result = self.parse_partial_json(cleaned_text, "jokbo-centric")
-            if "error" not in partial_result or partial_result.get("jokbo_pages"):
-                print(f"  부분 파싱으로 청크 데이터 일부 복구")
-                # Still need to adjust page numbers for chunk offset
-                if "jokbo_pages" in partial_result:
-                    for page_info in partial_result["jokbo_pages"]:
-                        for question in page_info.get("questions", []):
-                            for slide in question.get("related_lesson_slides", []):
-                                if "lesson_page" in slide:
-                                    page_num = slide["lesson_page"]
-                                    chunk_page_count = end_page - start_page + 1
-                                    if page_num <= chunk_page_count:
-                                        slide["lesson_page"] = page_num + (start_page - 1)
-                return partial_result
-            else:
+            # Prepare content for model
+            content = [prompt, jokbo_file, lesson_chunk_file]
+            
+            response = self.model.generate_content(content)
+            
+            # Get finish reason and metadata
+            finish_reason = None
+            response_metadata = {}
+            if response.candidates:
+                finish_reason = str(response.candidates[0].finish_reason)
+                response_metadata['finish_reason_raw'] = finish_reason
+                if 'MAX_TOKENS' in finish_reason or finish_reason == '2':
+                    print(f"  경고: 응답이 토큰 제한으로 잘림 (청크 p{start_page}-{end_page})")
+            
+            # Save API response for debugging
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            debug_filename = f"gemini_response_{timestamp}_chunk_p{start_page}-{end_page}_{lesson_filename}.json"
+            self.save_api_response(response.text, jokbo_filename, lesson_filename, f"chunk_p{start_page}-{end_page}", 
+                                 finish_reason=finish_reason, response_metadata=response_metadata)
+        
+            # Delete lesson chunk file immediately
+            self.delete_file_safe(lesson_chunk_file)
+            
+            try:
+                # Clean up common JSON errors from Gemini
+                cleaned_text = PDFProcessorHelpers.clean_json_text(response.text)
+                
+                result = json.loads(cleaned_text)
+                
+                # Validate and adjust page numbers
+                retry_needed, invalid_questions = PDFProcessorHelpers.validate_question_pages(
+                    result, start_page, end_page, total_pages,
+                    PDFValidator.validate_and_adjust_page_number
+                )
+                
+                if retry_needed and retry_count < max_retries - 1:
+                    retry_count += 1
+                    invalid_q_list = list(invalid_questions)
+                    print(f"  재분석 시도 (남은 횟수: {max_retries - retry_count}) - 문제 {', '.join(invalid_q_list)}에서 잘못된 페이지 번호 감지")
+                    
+                    # Delete uploaded file before retry
+                    self.delete_file_safe(lesson_chunk_file)
+                    
+                    # Re-upload for retry
+                    lesson_chunk_file = self.upload_pdf(lesson_chunk_path, chunk_display_name)
+                    continue
+                
+                # If we can't retry anymore, remove invalid questions
+                if invalid_questions:
+                    PDFProcessorHelpers.remove_invalid_questions(result, invalid_questions)
+                
+                return result
+            except json.JSONDecodeError as e:
+                print(f"  JSON 파싱 실패 (청크 p{start_page}-{end_page}): {str(e)}")
+                
+                # Check if response was truncated
+                if 'MAX_TOKENS' in finish_reason or finish_reason == '2':
+                    print(f"  응답이 토큰 제한으로 잘렸으므로 부분 파싱을 시도합니다.")
+                
+                # Try partial parsing
+                partial_result = self.parse_partial_json(response.text, "jokbo-centric")
+                
+                # Check if we recovered anything
+                if partial_result.get("jokbo_pages") or partial_result.get("partial"):
+                    recovered_count = partial_result.get("total_questions_recovered", 0)
+                    if recovered_count > 0:
+                        print(f"  부분 파싱 성공! {recovered_count}개 문제 복구")
+                        
+                        # Validate and adjust page numbers for partial result
+                        retry_needed, invalid_questions = PDFProcessorHelpers.validate_question_pages(
+                            partial_result, start_page, end_page, total_pages,
+                            PDFValidator.validate_and_adjust_page_number
+                        )
+                        if invalid_questions:
+                            PDFProcessorHelpers.remove_invalid_questions(partial_result, invalid_questions)
+                        
+                        # Mark as partial but successful
+                        partial_result["partial_recovery"] = True
+                        partial_result["original_error"] = str(e)
+                        return partial_result
+                
+                # If partial parsing also failed
+                print(f"  부분 파싱도 실패했습니다. 디버그 파일로 저장합니다.")
                 debug_file = self.debug_dir / f"failed_json_chunk_p{start_page}-{end_page}.txt"
                 with open(debug_file, 'w', encoding='utf-8') as f:
+                    f.write(f"Finish Reason: {finish_reason}\n")
+                    f.write(f"Response Length: {len(response.text)}\n")
+                    f.write(f"Parse Error: {str(e)}\n")
+                    f.write(f"---Response Text---\n")
                     f.write(response.text)
-                return {"error": "Failed to parse response"}
+                return {"error": "Failed to parse response", "finish_reason": finish_reason}
+        
+        # If all retries failed, return error
+        print(f"  모든 재분석 시도 실패 (청크 p{start_page}-{end_page})")
+        return {"error": f"Failed after {max_retries} attempts"}
     
     def _merge_jokbo_centric_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Merge results from multiple chunks for jokbo-centric mode"""
@@ -912,50 +1094,92 @@ class PDFProcessor:
     def analyze_lessons_for_jokbo(self, lesson_paths: List[str], jokbo_path: str) -> Dict[str, Any]:
         """Analyze multiple lesson PDFs against one jokbo PDF (jokbo-centric)"""
         
+        # 세션 기반 처리 상태 저장
+        print(f"  세션 ID: {self.session_id} (jokbo-centric sequential mode)")
+        
+        state = {
+            'session_id': self.session_id,
+            'mode': 'jokbo-centric-sequential-multi',
+            'jokbo_path': jokbo_path,
+            'lesson_paths': lesson_paths,
+            'total_lessons': len(lesson_paths),
+            'processed_lessons': 0,
+            'status': 'processing',
+            'started_at': datetime.now().isoformat()
+        }
+        self.save_processing_state(state, self.session_dir / "processing_state.json")
+        
         all_jokbo_pages = {}
         all_connections = {}  # {question_id: [connections with scores]}
         total_related_slides = 0
+        lesson_results_saved = []
         
         # Process each lesson file individually
-        for lesson_path in lesson_paths:
-            print(f"  분석 중: {Path(lesson_path).name}")
+        for idx, lesson_path in enumerate(lesson_paths):
+            print(f"  분석 중: {Path(lesson_path).name} [{idx+1}/{len(lesson_paths)}]")
             result = self.analyze_single_lesson_with_jokbo(lesson_path, jokbo_path)
             
             if "error" in result:
                 print(f"    오류 발생: {result['error']}")
-                continue
+                # 오류도 저장
+                error_info = {
+                    'lesson_path': lesson_path,
+                    'error': result['error']
+                }
+                saved_path = self.save_lesson_result(idx, lesson_path, error_info, self.chunk_results_dir)
+                lesson_results_saved.append(saved_path)
+            else:
+                # 성공한 결과 저장
+                saved_path = self.save_lesson_result(idx, lesson_path, result, self.chunk_results_dir)
+                lesson_results_saved.append(saved_path)
+                print(f"    강의자료 결과 저장: {Path(saved_path).name}")
             
-            # Merge results
-            for page_info in result.get("jokbo_pages", []):
-                jokbo_page = page_info["jokbo_page"]
-                if jokbo_page not in all_jokbo_pages:
-                    all_jokbo_pages[jokbo_page] = {
-                        "jokbo_page": jokbo_page,
-                        "questions": []
-                    }
+            # 처리 상태 업데이트
+            state['processed_lessons'] = idx + 1
+            self.save_processing_state(state, self.session_dir / "processing_state.json")
+        
+        # 저장된 결과들을 로드하여 병합
+        print(f"  모든 강의자료 처리 완료. 결과 병합 중...")
+        for saved_path in lesson_results_saved:
+            with open(saved_path, 'r', encoding='utf-8') as f:
+                lesson_data = json.load(f)
                 
-                # Process each question on this page
-                for question in page_info.get("questions", []):
-                    question_id = f"{jokbo_page}_{question['question_number']}"
-                    
-                    # 문제가 처음 발견된 경우
-                    if question_id not in all_connections:
-                        all_connections[question_id] = {
-                            "question_data": {
-                                "jokbo_page": jokbo_page,
-                                "question_number": question["question_number"],
-                                "question_text": question["question_text"],
-                                "answer": question["answer"],
-                                "explanation": question["explanation"],
-                                "wrong_answer_explanations": question.get("wrong_answer_explanations", {}),
-                                "question_numbers_on_page": question.get("question_numbers_on_page", [])
-                            },
-                            "connections": []
+                if "error" in lesson_data:
+                    continue
+                
+                result = lesson_data.get('result', lesson_data)
+                
+                # Merge results
+                for page_info in result.get("jokbo_pages", []):
+                    jokbo_page = page_info["jokbo_page"]
+                    if jokbo_page not in all_jokbo_pages:
+                        all_jokbo_pages[jokbo_page] = {
+                            "jokbo_page": jokbo_page,
+                            "questions": []
                         }
                     
-                    # 관련 슬라이드 연결 추가 (점수 포함)
-                    for slide in question.get("related_lesson_slides", []):
-                        all_connections[question_id]["connections"].append(slide)
+                    # Process each question on this page
+                    for question in page_info.get("questions", []):
+                        question_id = f"{jokbo_page}_{question['question_number']}"
+                        
+                        # 문제가 처음 발견된 경우
+                        if question_id not in all_connections:
+                            all_connections[question_id] = {
+                                "question_data": {
+                                    "jokbo_page": jokbo_page,
+                                    "question_number": question["question_number"],
+                                    "question_text": question["question_text"],
+                                    "answer": question["answer"],
+                                    "explanation": question["explanation"],
+                                    "wrong_answer_explanations": question.get("wrong_answer_explanations", {}),
+                                    "question_numbers_on_page": question.get("question_numbers_on_page", [])
+                                },
+                                "connections": []
+                            }
+                        
+                        # 관련 슬라이드 연결 추가 (점수 포함)
+                        for slide in question.get("related_lesson_slides", []):
+                            all_connections[question_id]["connections"].append(slide)
         
         # 각 문제에 대해 상위 2개 연결만 선택
         final_pages = {}
@@ -998,7 +1222,8 @@ class PDFProcessor:
         final_pages_list = list(final_pages.values())
         final_pages_list.sort(key=lambda x: x["jokbo_page"])
         
-        return {
+        # 최종 결과
+        result = {
             "jokbo_pages": final_pages_list,
             "summary": {
                 "total_jokbo_pages": len(final_pages_list),
@@ -1007,6 +1232,13 @@ class PDFProcessor:
                 "study_recommendations": "각 족보 문제별로 가장 관련성이 높은 강의 슬라이드를 중점적으로 학습하세요."
             }
         }
+        
+        # 처리 상태를 완료로 업데이트
+        state['status'] = 'completed'
+        state['completed_at'] = datetime.now().isoformat()
+        self.save_processing_state(state, self.session_dir / "processing_state.json")
+        
+        return result
     
     def analyze_single_lesson_with_jokbo_preloaded(self, lesson_path: str, jokbo_file) -> Dict[str, Any]:
         """Analyze one lesson PDF against pre-uploaded jokbo file (jokbo-centric) with chunk splitting"""
@@ -1075,6 +1307,9 @@ class PDFProcessor:
         # Large file, process in chunks
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 큰 강의자료를 {len(lesson_chunks)}개 조각으로 분할하여 처리합니다.")
         
+        # Get total pages of the original lesson PDF
+        lesson_total_pages = self.get_pdf_page_count(lesson_path)
+        
         all_results = []
         temp_files = []
         
@@ -1089,7 +1324,7 @@ class PDFProcessor:
                 # Analyze this chunk
                 chunk_result, uploaded_file = self._analyze_jokbo_with_lesson_chunk_preloaded(
                     jokbo_file, temp_pdf, jokbo_filename, lesson_filename,
-                    start_page, end_page
+                    start_page, end_page, lesson_total_pages
                 )
                 
                 # Don't need to track uploaded_file here since it's in the same thread
@@ -1154,8 +1389,20 @@ class PDFProcessor:
         
         response = self.generate_content_with_retry(content)
         
+        # Get finish reason and metadata
+        finish_reason = None
+        response_metadata = {}
+        if response.candidates:
+            finish_reason = str(response.candidates[0].finish_reason)
+            response_metadata['finish_reason_raw'] = finish_reason
+        
         # Save API response for debugging
-        self.save_api_response(response.text, jokbo_filename, lesson_filename, f"chunk_p{start_page}-{end_page}")
+        self.save_api_response(response.text, jokbo_filename, lesson_filename, f"chunk_p{start_page}-{end_page}",
+                             finish_reason=finish_reason, response_metadata=response_metadata)
+        
+        # Check if response was truncated
+        if finish_reason and ('MAX_TOKENS' in finish_reason or finish_reason == '2'):
+            print(f"  경고: 응답이 토큰 제한으로 잘림 (청크 p{start_page}-{end_page}, 길이: {len(response.text)})")
         
         try:
             # Clean up common JSON errors from Gemini
@@ -1185,10 +1432,14 @@ class PDFProcessor:
             return result, lesson_chunk_file
         except json.JSONDecodeError as e:
             print(f"  JSON 파싱 실패 (청크 p{start_page}-{end_page}): {str(e)}")
-            # Try partial parsing
-            partial_result = self.parse_partial_json(cleaned_text, "jokbo-centric")
-            if "error" not in partial_result or partial_result.get("jokbo_pages"):
-                print(f"  부분 파싱으로 청크 데이터 일부 복구")
+            
+            # Try smart partial parsing - extract complete question objects
+            partial_result = self.parse_partial_json(response.text, "jokbo-centric")
+            
+            # If we got some data from partial parsing
+            if partial_result.get("jokbo_pages"):
+                print(f"  부분 파싱으로 {len(partial_result['jokbo_pages'])}개 페이지 데이터 복구")
+                
                 # Apply validation to partial results
                 retry_needed, invalid_questions = PDFProcessorHelpers.validate_question_pages(
                     partial_result, start_page, end_page, lesson_total_pages,
@@ -1197,14 +1448,29 @@ class PDFProcessor:
                 if invalid_questions:
                     PDFProcessorHelpers.remove_invalid_questions(partial_result, invalid_questions)
                 
+                # Add finish_reason to result if truncated
+                if finish_reason and ('MAX_TOKENS' in finish_reason or finish_reason == '2'):
+                    partial_result['truncated'] = True
+                    partial_result['finish_reason'] = finish_reason
+                
                 return partial_result, lesson_chunk_file
             else:
+                # Complete parsing failure - save debug info
                 debug_file = self.debug_dir / f"failed_json_chunk_p{start_page}-{end_page}.txt"
                 with open(debug_file, 'w', encoding='utf-8') as f:
+                    f.write(f"Finish reason: {finish_reason}\n")
+                    f.write(f"Response length: {len(response.text)}\n")
+                    f.write("="*50 + "\n")
                     f.write(response.text)
+                
                 # Delete the chunk file before returning
                 self.delete_file_safe(lesson_chunk_file)
-                return {"error": "Failed to parse response"}, None
+                
+                # Return error with finish_reason info
+                error_result = {"error": "Failed to parse response"}
+                if finish_reason:
+                    error_result["finish_reason"] = finish_reason
+                return error_result, None
     
     def analyze_lessons_for_jokbo_parallel(self, lesson_paths: List[str], jokbo_path: str, max_workers: int = 3) -> Dict[str, Any]:
         """Analyze multiple lesson PDFs against one jokbo PDF using parallel processing (jokbo-centric)"""
@@ -1571,6 +1837,43 @@ class PDFProcessor:
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump({
                 'chunk_info': chunk_info,
+                'result': result,
+                'timestamp': timestamp
+            }, f, ensure_ascii=False, indent=2)
+        
+        return str(filepath)
+    
+    def save_lesson_result(self, lesson_idx: int, lesson_path: str, result: Dict[str, Any], temp_dir: Path) -> str:
+        """강의자료별 처리 결과를 임시 파일로 저장
+        
+        Args:
+            lesson_idx: 강의자료 인덱스
+            lesson_path: 강의자료 경로
+            result: 처리 결과
+            temp_dir: 임시 파일 저장 디렉토리
+            
+        Returns:
+            저장된 파일 경로
+        """
+        # 디렉토리가 Path 객체가 아닌 경우 변환
+        if not isinstance(temp_dir, Path):
+            temp_dir = Path(temp_dir)
+        
+        # 임시 디렉토리 생성
+        temp_dir.mkdir(parents=True, exist_ok=True)
+        
+        # 파일명 생성
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        lesson_filename = Path(lesson_path).name
+        filename = f"lesson_{lesson_idx:03d}_{lesson_filename}_{timestamp}.json"
+        filepath = temp_dir / filename
+        
+        # 결과 저장
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump({
+                'lesson_idx': lesson_idx,
+                'lesson_path': lesson_path,
+                'lesson_filename': lesson_filename,
                 'result': result,
                 'timestamp': timestamp
             }, f, ensure_ascii=False, indent=2)

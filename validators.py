@@ -46,28 +46,20 @@ class PDFValidator:
         """
         chunk_page_count = end_page - start_page + 1
         
-        # Case 1: Page number is within chunk range (1 to chunk_page_count)
-        # This is likely a chunk-relative page number
+        # AI always sees chunk PDF starting from page 1
+        # So we always need to adjust by adding offset
         if 1 <= page_num <= chunk_page_count:
             adjusted = page_num + (start_page - 1)
-            print(f"  페이지 조정: 청크 상대값 {page_num} → 절대값 {adjusted} (청크 p{start_page}-{end_page})")
-            return adjusted
-        
-        # Case 2: Page number is within the actual chunk's absolute range
-        # This is likely already an absolute page number
-        if start_page <= page_num <= end_page:
-            print(f"  페이지 유지: 절대값 {page_num} (청크 범위 p{start_page}-{end_page} 내)")
-            return page_num
-        
-        # Case 3: Page number is within total PDF range but outside chunk
-        # This might be a mistaken reference or API error
-        if 1 <= page_num <= total_pages:
-            print(f"  경고: 페이지 {page_num}은 청크 p{start_page}-{end_page} 범위 밖이지만 PDF 전체 범위 내 - 재분석 필요")
+            if adjusted <= total_pages:
+                print(f"  페이지 조정: {page_num} → {adjusted} (청크 p{start_page}-{end_page})")
+                return adjusted
+            else:
+                print(f"  오류: 조정된 페이지 {adjusted}가 전체 PDF 범위({total_pages}페이지) 초과")
+                return None
+        else:
+            # Page number is outside chunk range - this shouldn't happen
+            print(f"  오류: 페이지 {page_num}은 청크 크기({chunk_page_count}페이지) 초과 - 재분석 필요")
             return None
-        
-        # Case 4: Page number is completely invalid
-        print(f"  오류: 잘못된 페이지 번호 {page_num} (PDF 전체 {total_pages}페이지 초과) - 재분석 필요")
-        return None
     
     @staticmethod
     def filter_valid_questions(questions: List[Dict[str, Any]], total_pages: int, 

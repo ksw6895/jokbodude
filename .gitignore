@@ -22,6 +22,8 @@ lesson/
 output/
 *.pdf
 claude/
+test_jokbo/
+test_lesson/
 # Zone.Identifier 파일
 *.Zone.Identifier
 
@@ -43,3 +45,6 @@ Thumbs.db
 *.tmp
 temp/
 tmp/
+
+# 테스트 파일 (개인 데이터 참조)
+test_*.py
