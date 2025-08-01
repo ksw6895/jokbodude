@@ -2085,9 +2085,9 @@ class PDFProcessor:
         temp_dir = Path("output/temp/chunk_results")
         state_file = Path("output/temp/processing_state.json")
         
-        # Delete all uploaded files before starting
-        print("  기존 업로드 파일 정리 중...")
-        self.delete_all_uploaded_files()
+        # In Multi-API mode, each API manages its own files
+        # Do not delete all files as APIs cannot access files uploaded by other APIs
+        print("  Multi-API 모드: 각 API가 자체 파일 관리")
         
         # Prepare all chunks from all lesson files
         all_chunks = []
@@ -2199,7 +2199,10 @@ class PDFProcessor:
                         pass
                 
                 # Delete uploaded files for this chunk
+                # Each API must delete its own uploaded files
                 thread_processor.delete_file_safe(jokbo_file)
+                if uploaded_file:
+                    thread_processor.delete_file_safe(uploaded_file)
                 
                 # 결과를 임시 파일로 저장
                 saved_path = thread_processor.save_chunk_result(chunk_info, result, thread_processor.chunk_results_dir)
