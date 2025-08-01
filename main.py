@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from datetime import datetime, timedelta
 import argparse
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 import shutil
 import json
 
