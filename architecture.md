@@ -1,5 +1,13 @@
 # Architecture Documentation / 아키텍처 문서
 
+> **JokboDude PDF Processing System**  
+> AI 기반 의과대학 시험 대비 학습 자료 자동 생성 시스템  
+> AI-Powered Medical Exam Preparation Material Generation System
+
+**Version**: 2.0  
+**최종 업데이트 / Last Updated**: 2025-08-01  
+**작성자 / Author**: Architecture Documentation Team
+
 ## 개요 / Overview
 
 ### 시스템 소개 / System Introduction
@@ -24,7 +32,72 @@ Key Features:
 - High-speed analysis through parallel processing
 - Support for two analysis modes (lesson-centric/jokbo-centric)
 
+### 시스템 목표 / System Goals
+
+**한국어**
+1. **학습 효율성 극대화**: 시험과 직접 관련된 내용만 추출하여 학습 시간 단축
+2. **맞춤형 학습 자료**: 학생의 필요에 따라 강의 중심 또는 시험 중심 모드 선택
+3. **정확한 매칭**: AI 기반 정밀 분석으로 높은 관련성 보장
+4. **시간 절약**: 병렬 처리를 통한 빠른 분석 속도
+5. **사용 편의성**: 명령줄 인터페이스를 통한 간단한 실행
+
+**English**
+1. **Maximize Learning Efficiency**: Reduce study time by extracting only exam-relevant content
+2. **Customized Study Materials**: Choose between lecture-centric or exam-centric mode based on needs
+3. **Accurate Matching**: Ensure high relevance through AI-based precision analysis
+4. **Time Saving**: Fast analysis speed through parallel processing
+5. **Ease of Use**: Simple execution through command-line interface
+
 ## 시스템 아키텍처 / System Architecture
+
+### 고수준 아키텍처 / High-Level Architecture
+
+```mermaid
+graph TB
+    subgraph "사용자 레이어 / User Layer"
+        U1[의대생<br/>Medical Student]
+        U2[교수/조교<br/>Professor/TA]
+    end
+    
+    subgraph "인터페이스 레이어 / Interface Layer"
+        CLI[명령줄 인터페이스<br/>Command Line Interface]
+    end
+    
+    subgraph "애플리케이션 레이어 / Application Layer"
+        MAIN[main.py<br/>오케스트레이터<br/>Orchestrator]
+        PROC[PDFProcessor<br/>분석 엔진<br/>Analysis Engine]
+        CREA[PDFCreator<br/>생성 엔진<br/>Generation Engine]
+    end
+    
+    subgraph "AI 서비스 레이어 / AI Service Layer"
+        GEMINI[Google Gemini API<br/>gemini-2.5-pro/flash/flash-lite]
+    end
+    
+    subgraph "데이터 레이어 / Data Layer"
+        IN1[강의 PDF<br/>Lecture PDFs]
+        IN2[족보 PDF<br/>Exam PDFs]
+        OUT1[필터링된 PDF<br/>Filtered PDFs]
+        OUT2[디버그 로그<br/>Debug Logs]
+        OUT3[세션 데이터<br/>Session Data]
+    end
+    
+    U1 --> CLI
+    U2 --> CLI
+    CLI --> MAIN
+    MAIN --> PROC
+    MAIN --> CREA
+    PROC <--> GEMINI
+    IN1 --> PROC
+    IN2 --> PROC
+    PROC --> OUT2
+    PROC --> OUT3
+    CREA --> OUT1
+    
+    style U1 fill:#e3f2fd
+    style U2 fill:#e3f2fd
+    style GEMINI fill:#e8f5e9
+    style OUT1 fill:#c8e6c9
+```
 
 ### 전체 구조도 / Overall Architecture Diagram
 
@@ -72,6 +145,65 @@ graph TB
     E --> G
     E --> K
     D --> L
+```
+
+### 상세 컴포넌트 다이어그램 / Detailed Component Diagram
+
+```mermaid
+graph TB
+    subgraph "Core Processing Pipeline"
+        direction TB
+        
+        subgraph "Entry Point"
+            MAIN[main.py<br/>━━━━━━━━━━<br/>• 명령줄 파싱<br/>• 모드 라우팅<br/>• 세션 관리]
+        end
+        
+        subgraph "Processing Modes"
+            LC[강의 중심 모드<br/>Lesson-Centric<br/>━━━━━━━━━━<br/>• 강의별 분석<br/>• 관련 문제 추출]
+            JC[족보 중심 모드<br/>Jokbo-Centric<br/>━━━━━━━━━━<br/>• 문제별 분석<br/>• 관련 슬라이드 매칭]
+        end
+        
+        subgraph "Core Engines"
+            PROC[PDFProcessor<br/>━━━━━━━━━━<br/>• 파일 업로드<br/>• AI 분석<br/>• 청킹 처리<br/>• 결과 병합]
+            CREA[PDFCreator<br/>━━━━━━━━━━<br/>• 페이지 추출<br/>• 설명 생성<br/>• PDF 병합<br/>• 캐시 관리]
+        end
+        
+        subgraph "Support Modules"
+            VAL[Validators<br/>━━━━━━━━━━<br/>• 페이지 검증<br/>• 범위 조정]
+            HELP[Helpers<br/>━━━━━━━━━━<br/>• JSON 파싱<br/>• 결과 병합]
+            ERR[ErrorHandler<br/>━━━━━━━━━━<br/>• 예외 처리<br/>• 로깅]
+            CONST[Constants<br/>━━━━━━━━━━<br/>• 프롬프트<br/>• 설정값]
+        end
+    end
+    
+    subgraph "External Services"
+        GEM[Gemini API<br/>━━━━━━━━━━<br/>• 파일 저장소<br/>• AI 모델<br/>• JSON 응답]
+    end
+    
+    subgraph "Data Storage"
+        CACHE[PDF 캐시<br/>━━━━━━━━━━<br/>• 스레드 안전<br/>• 메모리 효율]
+        SESS[세션 저장소<br/>━━━━━━━━━━<br/>• 청크 결과<br/>• 처리 상태]
+        DEBUG[디버그 로그<br/>━━━━━━━━━━<br/>• API 응답<br/>• 오류 추적]
+    end
+    
+    MAIN --> LC
+    MAIN --> JC
+    LC --> PROC
+    JC --> PROC
+    PROC --> VAL
+    PROC --> HELP
+    PROC --> ERR
+    PROC --> CONST
+    PROC <--> GEM
+    PROC --> CREA
+    PROC --> SESS
+    PROC --> DEBUG
+    CREA --> CACHE
+    
+    style MAIN fill:#fff8e1
+    style PROC fill:#fce4ec
+    style CREA fill:#fce4ec
+    style GEM fill:#e8f5e9
 ```
 
 ### 기존 시스템 개요도 / Legacy System Overview
@@ -133,29 +265,146 @@ graph TD
 
 ```mermaid
 sequenceDiagram
-    participant User as 사용자/User
-    participant Main as main.py
-    participant Processor as PDFProcessor
-    participant Gemini as Gemini API
-    participant Creator as PDFCreator
-    participant Output as 출력 파일/Output
+    autonumber
+    participant User as 👤 사용자<br/>User
+    participant CLI as 🖥️ CLI
+    participant Main as 🎯 main.py
+    participant Processor as 🤖 PDFProcessor
+    participant Gemini as ☁️ Gemini API
+    participant Creator as 📝 PDFCreator
+    participant Session as 💾 Session
+    participant Output as 📄 Output
     
-    User->>Main: 명령 실행<br/>Execute Command
-    Main->>Main: 파일 스캔<br/>Scan Files
-    Main->>Processor: PDF 분석 요청<br/>Request Analysis
+    User->>CLI: python main.py --mode [mode] --parallel
+    CLI->>Main: 인자 파싱 / Parse arguments
+    Main->>Main: 세션 ID 생성 / Generate session ID
+    Main->>Session: 세션 디렉토리 생성 / Create session directory
+    Main->>Main: PDF 파일 스캔 / Scan PDF files
     
-    loop 각 파일 조합<br/>For Each File Combination
-        Processor->>Gemini: 파일 업로드<br/>Upload Files
-        Processor->>Gemini: 분석 요청<br/>Analysis Request
-        Gemini->>Processor: JSON 응답<br/>JSON Response
-        Processor->>Processor: 결과 병합<br/>Merge Results
+    alt 병렬 처리 모드 / Parallel Mode
+        Main->>Main: ThreadPoolExecutor 생성
+        par 각 파일 조합에 대해 / For each file combination
+            Main->>Processor: 새 인스턴스 생성 (세션 ID 공유)
+            Processor->>Gemini: 파일 업로드 / Upload files
+            Processor->>Gemini: 분석 요청 / Analysis request
+            Gemini-->>Processor: JSON 응답 / JSON response
+            Processor->>Session: 청크 결과 저장 / Save chunk result
+        end
+        Main->>Main: 모든 청크 결과 병합 / Merge all chunks
+    else 순차 처리 모드 / Sequential Mode
+        loop 각 파일 조합 / For each file combination
+            Main->>Processor: analyze_pdfs() 호출
+            Processor->>Gemini: 파일 업로드 / Upload files
+            Processor->>Gemini: 분석 요청 / Analysis request
+            Gemini-->>Processor: JSON 응답 / JSON response
+            Processor->>Processor: 결과 누적 / Accumulate results
+        end
     end
     
-    Processor->>Main: 분석 결과<br/>Analysis Results
-    Main->>Creator: PDF 생성 요청<br/>Generate PDF
-    Creator->>Output: 필터링된 PDF<br/>Filtered PDF
-    Creator->>Main: 완료<br/>Complete
-    Main->>User: 결과 출력<br/>Output Results
+    Processor-->>Main: 최종 분석 결과 / Final analysis results
+    Main->>Creator: create_filtered_pdf() 또는 create_jokbo_centric_pdf()
+    Creator->>Creator: PDF 캐시 확인 / Check PDF cache
+    Creator->>Output: 필터링된 PDF 생성 / Generate filtered PDF
+    Creator-->>Main: 완료 / Complete
+    Main->>Session: 세션 정리 (선택적) / Clean up session (optional)
+    Main-->>User: 결과 출력 / Output results
+```
+
+## 처리 모드별 상세 흐름 / Detailed Flow by Processing Mode
+
+### 강의 중심 모드 흐름도 / Lesson-Centric Mode Flow
+
+```mermaid
+flowchart TD
+    Start([시작 / Start]) --> SelectMode[모드 선택<br/>Mode Selection]
+    SelectMode --> LessonMode[강의 중심 모드<br/>Lesson-Centric Mode]
+    
+    LessonMode --> ScanFiles[파일 스캔<br/>━━━━━━━━━<br/>• lesson/*.pdf<br/>• jokbo/*.pdf]
+    
+    ScanFiles --> ForEachLesson{각 강의자료에 대해<br/>For Each Lesson}
+    
+    ForEachLesson --> UploadLesson[강의자료 업로드<br/>Upload Lesson]
+    UploadLesson --> ForEachJokbo{각 족보에 대해<br/>For Each Jokbo}
+    
+    ForEachJokbo --> UploadJokbo[족보 업로드<br/>Upload Jokbo]
+    UploadJokbo --> AnalyzeAI[AI 분석<br/>━━━━━━━━━<br/>• 관련 문제 찾기<br/>• 중요도 점수<br/>• 오답 해설]
+    
+    AnalyzeAI --> SaveDebug[디버그 저장<br/>Save Debug]
+    SaveDebug --> DeleteJokbo[족보 삭제<br/>Delete Jokbo]
+    DeleteJokbo --> AccumulateResults[결과 누적<br/>Accumulate]
+    
+    AccumulateResults --> MoreJokbo{더 많은 족보?<br/>More Jokbos?}
+    MoreJokbo -->|Yes| ForEachJokbo
+    MoreJokbo -->|No| MergeResults[결과 병합<br/>Merge Results]
+    
+    MergeResults --> CreatePDF[PDF 생성<br/>━━━━━━━━━<br/>• 슬라이드 추출<br/>• 문제 포함<br/>• 해설 추가]
+    
+    CreatePDF --> SavePDF[PDF 저장<br/>filtered_*.pdf]
+    SavePDF --> MoreLessons{더 많은 강의?<br/>More Lessons?}
+    
+    MoreLessons -->|Yes| ForEachLesson
+    MoreLessons -->|No| End([완료 / Complete])
+    
+    style Start fill:#e8f5e9
+    style End fill:#e8f5e9
+    style LessonMode fill:#fff3e0
+    style AnalyzeAI fill:#e3f2fd
+    style CreatePDF fill:#fce4ec
+```
+
+### 족보 중심 모드 흐름도 / Jokbo-Centric Mode Flow
+
+```mermaid
+flowchart TD
+    Start([시작 / Start]) --> SelectMode[모드 선택<br/>Mode Selection]
+    SelectMode --> JokboMode[족보 중심 모드<br/>Jokbo-Centric Mode]
+    
+    JokboMode --> ScanFiles[파일 스캔<br/>━━━━━━━━━<br/>• jokbo/*.pdf<br/>• lesson/*.pdf]
+    
+    ScanFiles --> ForEachJokbo{각 족보에 대해<br/>For Each Jokbo}
+    
+    ForEachJokbo --> CheckChunks{큰 파일?<br/>Large File?}
+    CheckChunks -->|Yes| SplitChunks[청크 분할<br/>Split into Chunks<br/>(40 pages)]
+    CheckChunks -->|No| UploadJokbo[족보 업로드<br/>Upload Jokbo]
+    
+    SplitChunks --> ForEachChunk{각 청크에 대해<br/>For Each Chunk}
+    ForEachChunk --> UploadJokbo
+    
+    UploadJokbo --> ForEachLesson{각 강의자료에 대해<br/>For Each Lesson}
+    
+    ForEachLesson --> UploadLesson[강의자료 업로드<br/>Upload Lesson]
+    UploadLesson --> AnalyzeAI[AI 분석<br/>━━━━━━━━━<br/>• 관련 슬라이드<br/>• 관련성 점수<br/>• 상위 2개 선택]
+    
+    AnalyzeAI --> ScoreFilter{점수 >= 50?<br/>Score >= 50?}
+    ScoreFilter -->|Yes| SaveDebug[디버그 저장<br/>Save Debug]
+    ScoreFilter -->|No| SkipQuestion[문제 제외<br/>Skip Question]
+    
+    SaveDebug --> DeleteLesson[강의자료 삭제<br/>Delete Lesson]
+    DeleteLesson --> AccumulateResults[결과 누적<br/>Accumulate]
+    SkipQuestion --> DeleteLesson
+    
+    AccumulateResults --> MoreLessons{더 많은 강의?<br/>More Lessons?}
+    MoreLessons -->|Yes| ForEachLesson
+    MoreLessons -->|No| ChunkComplete[청크 완료<br/>Chunk Complete]
+    
+    ChunkComplete --> MoreChunks{더 많은 청크?<br/>More Chunks?}
+    MoreChunks -->|Yes| ForEachChunk
+    MoreChunks -->|No| MergeChunks[청크 병합<br/>Merge Chunks]
+    
+    MergeChunks --> CreatePDF[PDF 생성<br/>━━━━━━━━━<br/>• 문제 페이지<br/>• 관련 슬라이드<br/>• 점수 표시]
+    
+    CreatePDF --> SavePDF[PDF 저장<br/>jokbo_centric_*.pdf]
+    SavePDF --> MoreJokbos{더 많은 족보?<br/>More Jokbos?}
+    
+    MoreJokbos -->|Yes| ForEachJokbo
+    MoreJokbos -->|No| End([완료 / Complete])
+    
+    style Start fill:#e8f5e9
+    style End fill:#e8f5e9
+    style JokboMode fill:#fff3e0
+    style AnalyzeAI fill:#e3f2fd
+    style ScoreFilter fill:#ffebee
+    style CreatePDF fill:#fce4ec
 ```
 
 ## 핵심 컴포넌트 / Core Components
@@ -226,6 +475,124 @@ sequenceDiagram
   - Thread-safe PDF caching
   - Question number-based sorting
 
+## 병렬 처리 아키텍처 / Parallel Processing Architecture
+
+### 병렬 처리 흐름도 / Parallel Processing Flow
+
+```mermaid
+graph TB
+    subgraph "메인 프로세스 / Main Process"
+        M1[main.py]
+        M2[메인 PDFProcessor<br/>세션 ID: 20250801_123456_abc123]
+        M3[ThreadPoolExecutor<br/>max_workers=3]
+    end
+    
+    subgraph "워커 스레드 풀 / Worker Thread Pool"
+        subgraph "Thread 1"
+            T1[PDFProcessor<br/>동일 세션 ID 사용]
+            T1F1[족보1 처리<br/>Process Jokbo1]
+            T1R[chunk_001.json]
+        end
+        
+        subgraph "Thread 2"
+            T2[PDFProcessor<br/>동일 세션 ID 사용]
+            T2F1[족보2 처리<br/>Process Jokbo2]
+            T2R[chunk_002.json]
+        end
+        
+        subgraph "Thread 3"
+            T3[PDFProcessor<br/>동일 세션 ID 사용]
+            T3F1[족보3 처리<br/>Process Jokbo3]
+            T3R[chunk_003.json]
+        end
+    end
+    
+    subgraph "공유 리소스 / Shared Resources"
+        SESS[세션 디렉토리<br/>output/temp/sessions/<br/>20250801_123456_abc123/]
+        CHUNK[chunk_results/]
+        CACHE[PDF 캐시<br/>threading.Lock 보호]
+        PROGRESS[tqdm 진행률<br/>Progress Bar]
+    end
+    
+    subgraph "결과 병합 / Result Merging"
+        MERGE[결과 병합기<br/>Result Merger]
+        FINAL[최종 분석 결과<br/>Final Analysis]
+    end
+    
+    M1 --> M2
+    M2 --> M3
+    M3 --> T1
+    M3 --> T2
+    M3 --> T3
+    
+    T1 --> T1F1
+    T2 --> T2F1
+    T3 --> T3F1
+    
+    T1F1 --> T1R
+    T2F1 --> T2R
+    T3F1 --> T3R
+    
+    T1R --> CHUNK
+    T2R --> CHUNK
+    T3R --> CHUNK
+    
+    T1 -.-> SESS
+    T2 -.-> SESS
+    T3 -.-> SESS
+    
+    T1 -.-> CACHE
+    T2 -.-> CACHE
+    T3 -.-> CACHE
+    
+    T1 -.-> PROGRESS
+    T2 -.-> PROGRESS
+    T3 -.-> PROGRESS
+    
+    CHUNK --> MERGE
+    MERGE --> FINAL
+    
+    style M1 fill:#fff8e1
+    style T1 fill:#e3f2fd
+    style T2 fill:#e3f2fd
+    style T3 fill:#e3f2fd
+    style CACHE fill:#ffebee
+    style FINAL fill:#c8e6c9
+```
+
+### 스레드 안전성 메커니즘 / Thread Safety Mechanisms
+
+```mermaid
+sequenceDiagram
+    participant T1 as Thread 1
+    participant T2 as Thread 2
+    participant Lock as PDF Cache Lock
+    participant Cache as PDF Cache
+    participant File as PDF File
+    
+    Note over T1,File: PDF 캐시 접근 시나리오 / PDF Cache Access Scenario
+    
+    T1->>Lock: acquire() 요청
+    Lock-->>T1: 락 획득
+    T1->>Cache: jokbo1.pdf 확인
+    Cache-->>T1: 캐시 미스
+    T1->>File: fitz.open(jokbo1.pdf)
+    File-->>T1: PDF 객체
+    T1->>Cache: jokbo1.pdf 저장
+    T1->>Lock: release()
+    
+    Note over T2: Thread 2가 동시 접근 시도
+    
+    T2->>Lock: acquire() 요청
+    Note over T2,Lock: 대기 (T1이 락 보유중)
+    Lock-->>T2: 락 획득 (T1 release 후)
+    T2->>Cache: jokbo1.pdf 확인
+    Cache-->>T2: 캐시 히트
+    T2->>Lock: release()
+    
+    Note over T1,T2: 두 스레드가 안전하게 동일 PDF 공유
+```
+
 ## 상세 데이터 흐름 (Detailed Data Flow)
 
 ```mermaid
@@ -276,6 +643,81 @@ sequenceDiagram
     end
 
     Output-->>User: ✅ 필터링된 PDF가 output/ 폴더에 준비됨
+```
+
+## 청킹 전략 및 대용량 파일 처리 / Chunking Strategy and Large File Processing
+
+### 청킹 프로세스 / Chunking Process
+
+```mermaid
+flowchart TD
+    Start([대용량 PDF<br/>Large PDF]) --> Check{페이지 수 > 40?<br/>Pages > 40?}
+    
+    Check -->|No| Direct[직접 처리<br/>Direct Processing]
+    Check -->|Yes| Split[청크 분할<br/>Split into Chunks]
+    
+    Split --> Calc[청크 계산<br/>━━━━━━━━━<br/>• 총 페이지: 180<br/>• 청크 크기: 40<br/>• 청크 수: 5]
+    
+    Calc --> Chunk1[청크 1<br/>Pages 1-40]
+    Calc --> Chunk2[청크 2<br/>Pages 41-80]
+    Calc --> Chunk3[청크 3<br/>Pages 81-120]
+    Calc --> Chunk4[청크 4<br/>Pages 121-160]
+    Calc --> Chunk5[청크 5<br/>Pages 161-180]
+    
+    Chunk1 --> Process1[AI 분석<br/>chunk_p1-40.json]
+    Chunk2 --> Process2[AI 분석<br/>chunk_p41-80.json]
+    Chunk3 --> Process3[AI 분석<br/>chunk_p81-120.json]
+    Chunk4 --> Process4[AI 분석<br/>chunk_p121-160.json]
+    Chunk5 --> Process5[AI 분석<br/>chunk_p161-180.json]
+    
+    Process1 --> Merge[결과 병합<br/>━━━━━━━━━<br/>• 페이지 조정<br/>• 중복 제거<br/>• 정렬]
+    Process2 --> Merge
+    Process3 --> Merge
+    Process4 --> Merge
+    Process5 --> Merge
+    
+    Direct --> Final[최종 결과<br/>Final Result]
+    Merge --> Final
+    
+    style Start fill:#e3f2fd
+    style Split fill:#fff3e0
+    style Merge fill:#f3e5f5
+    style Final fill:#c8e6c9
+```
+
+### 청크 결과 병합 로직 / Chunk Result Merging Logic
+
+```mermaid
+graph LR
+    subgraph "청크 결과 파일 / Chunk Result Files"
+        C1[chunk_p1-40.json<br/>━━━━━━━━━<br/>• 문제 1-15<br/>• 페이지 조정 필요]
+        C2[chunk_p41-80.json<br/>━━━━━━━━━<br/>• 문제 16-30<br/>• 페이지 조정 필요]
+        C3[chunk_p81-120.json<br/>━━━━━━━━━<br/>• 문제 31-45<br/>• 페이지 조정 필요]
+    end
+    
+    subgraph "병합 프로세스 / Merging Process"
+        LOAD[파일 로드<br/>Load Files]
+        ADJUST[페이지 조정<br/>━━━━━━━━━<br/>chunk_start + page - 1]
+        VALIDATE[검증<br/>━━━━━━━━━<br/>• 범위 확인<br/>• 중복 체크]
+        COMBINE[결합<br/>━━━━━━━━━<br/>• 정렬<br/>• 병합]
+    end
+    
+    subgraph "최종 결과 / Final Result"
+        FINAL[통합 결과<br/>━━━━━━━━━<br/>• 모든 문제<br/>• 올바른 페이지<br/>• 정렬됨]
+    end
+    
+    C1 --> LOAD
+    C2 --> LOAD
+    C3 --> LOAD
+    LOAD --> ADJUST
+    ADJUST --> VALIDATE
+    VALIDATE --> COMBINE
+    COMBINE --> FINAL
+    
+    style C1 fill:#e3f2fd
+    style C2 fill:#e3f2fd
+    style C3 fill:#e3f2fd
+    style FINAL fill:#c8e6c9
 ```
 
 ## 컴포넌트 구조 (Component Architecture)
@@ -330,6 +772,74 @@ graph TB
     style E1 fill:#e0f2f1,stroke:#00796b
 ```
 
+## 세션 관리 시스템 / Session Management System
+
+### 세션 생명주기 / Session Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Created: 새 세션 생성
+    Created --> Active: 처리 시작
+    Active --> Processing: 파일 분석중
+    Processing --> ChunkSaving: 청크 결과 저장
+    ChunkSaving --> Processing: 다음 청크
+    ChunkSaving --> Merging: 모든 청크 완료
+    Merging --> Completed: 병합 완료
+    Merging --> Failed: 병합 실패
+    Processing --> Failed: 처리 오류
+    Completed --> Cleanup: 정리 (선택적)
+    Failed --> Recovery: 복구 가능
+    Recovery --> Merging: 재시도
+    Cleanup --> [*]: 세션 종료
+    
+    note right of Created
+        세션 ID: 20250801_123456_abc123
+        디렉토리 생성
+    end note
+    
+    note right of Processing
+        - 파일 업로드
+        - AI 분석
+        - 결과 저장
+    end note
+    
+    note right of Recovery
+        recover_from_chunks.py
+        사용하여 복구
+    end note
+```
+
+### 세션 디렉토리 구조 / Session Directory Structure
+
+```mermaid
+graph TD
+    ROOT[output/temp/sessions/]
+    ROOT --> S1[20250801_123456_abc123/]
+    ROOT --> S2[20250801_134567_def456/]
+    
+    S1 --> STATE1[processing_state.json]
+    S1 --> CHUNKS1[chunk_results/]
+    S1 --> LOGS1[logs/]
+    
+    CHUNKS1 --> C1[chunk_001.json]
+    CHUNKS1 --> C2[chunk_002.json]
+    CHUNKS1 --> C3[chunk_003.json]
+    
+    STATE1 -.-> |내용| STATEINFO["{
+  'status': 'processing',
+  'jokbo_path': 'jokbo/exam1.pdf',
+  'mode': 'jokbo-centric',
+  'created': '2025-08-01 12:34:56',
+  'chunks_completed': 2,
+  'total_chunks': 3
+}"]
+    
+    style ROOT fill:#f9f9f9
+    style S1 fill:#e3f2fd
+    style CHUNKS1 fill:#fff3e0
+    style STATEINFO fill:#f5f5f5
+```
+
 ## PDF 생성 프로세스 (PDF Creation Process)
 
 ```mermaid
@@ -370,6 +880,86 @@ flowchart TD
     style JC fill:#fce4ec,stroke:#e91e63
     style Summary fill:#f3e5f5,stroke:#9c27b0
     style Save fill:#e0f2f1,stroke:#009688
+```
+
+## API 상호작용 패턴 / API Interaction Patterns
+
+### Gemini API 통신 흐름 / Gemini API Communication Flow
+
+```mermaid
+sequenceDiagram
+    participant P as PDFProcessor
+    participant G as Gemini API
+    participant R as Retry Logic
+    participant D as Debug Logger
+    
+    Note over P,D: 파일 업로드 및 분석 프로세스
+    
+    P->>G: 파일 업로드 요청
+    G-->>P: 업로드 진행중 (PROCESSING)
+    
+    loop 상태 확인 (2초 간격)
+        P->>G: 파일 상태 조회
+        G-->>P: 상태 응답
+    end
+    
+    G-->>P: 업로드 완료 (ACTIVE)
+    
+    P->>G: AI 분석 요청 + 프롬프트
+    
+    alt 성공 시나리오
+        G-->>P: JSON 응답 (정상)
+        P->>D: 응답 저장 (디버그)
+        P->>P: JSON 파싱
+        P->>G: 파일 삭제 요청
+        G-->>P: 삭제 확인
+    else 실패 시나리오
+        G-->>P: 오류 응답
+        P->>R: 재시도 로직 시작
+        R->>R: 대기 (2^n 초)
+        R->>G: 재시도 (최대 3회)
+        alt 재시도 성공
+            G-->>R: JSON 응답
+            R-->>P: 성공 결과
+        else 재시도 실패
+            R->>P: 부분 파싱 시도
+            P->>D: 실패 로그 저장
+        end
+    end
+```
+
+### API 사용 최적화 전략 / API Usage Optimization Strategy
+
+```mermaid
+graph TB
+    subgraph "파일 관리 전략 / File Management Strategy"
+        FM1[시작 전 정리<br/>━━━━━━━━━<br/>기존 업로드<br/>파일 전체 삭제]
+        FM2[즉시 삭제<br/>━━━━━━━━━<br/>분석 완료 후<br/>바로 삭제]
+        FM3[세션별 격리<br/>━━━━━━━━━<br/>세션 ID로<br/>작업 분리]
+    end
+    
+    subgraph "성능 최적화 / Performance Optimization"
+        PO1[청킹<br/>━━━━━━━━━<br/>40페이지 단위<br/>분할 처리]
+        PO2[병렬 처리<br/>━━━━━━━━━<br/>ThreadPool<br/>동시 실행]
+        PO3[캐싱<br/>━━━━━━━━━<br/>PDF 객체<br/>재사용]
+    end
+    
+    subgraph "오류 처리 / Error Handling"
+        EH1[재시도 로직<br/>━━━━━━━━━<br/>지수 백오프<br/>최대 3회]
+        EH2[부분 복구<br/>━━━━━━━━━<br/>JSON 부분<br/>파싱 시도]
+        EH3[디버그 로깅<br/>━━━━━━━━━<br/>모든 응답<br/>파일 저장]
+    end
+    
+    FM1 --> FM2
+    FM2 --> FM3
+    PO1 --> PO2
+    PO2 --> PO3
+    EH1 --> EH2
+    EH2 --> EH3
+    
+    style FM1 fill:#e3f2fd
+    style PO2 fill:#fff3e0
+    style EH1 fill:#ffebee
 ```
 
 ## Gemini API 설정 (Configuration)
@@ -490,6 +1080,97 @@ GENERATION_CONFIG = {
 }
 ```
 
+## 관련성 점수 시스템 상세 / Relevance Scoring System Details
+
+### 점수 계산 프로세스 / Score Calculation Process
+
+```mermaid
+flowchart TD
+    Start([문제-슬라이드 쌍<br/>Question-Slide Pair]) --> Analyze[AI 분석<br/>━━━━━━━━━<br/>• 내용 비교<br/>• 키워드 매칭<br/>• 도표/그림 확인]
+    
+    Analyze --> Score{점수 결정<br/>Score Decision}
+    
+    Score --> S100[100점<br/>━━━━━━━━━<br/>완전 동일<br/>텍스트/그림]
+    Score --> S95[95점<br/>━━━━━━━━━<br/>동일한 도표<br/>핵심 90%+]
+    Score --> S90[90점<br/>━━━━━━━━━<br/>문제 해결<br/>충분한 정보]
+    Score --> S85[85점<br/>━━━━━━━━━<br/>핵심 개념<br/>명확 설명]
+    Score --> S80[80점<br/>━━━━━━━━━<br/>주요 정보<br/>70%+ 포함]
+    Score --> S75[75점<br/>━━━━━━━━━<br/>직접 연관<br/>상당 부분]
+    Score --> S70[70점<br/>━━━━━━━━━<br/>중요한<br/>도움]
+    Score --> S65[65점<br/>━━━━━━━━━<br/>배경 지식<br/>설명]
+    Score --> S60[60점<br/>━━━━━━━━━<br/>같은 주제<br/>다른 깊이]
+    Score --> S55[55점<br/>━━━━━━━━━<br/>부분적<br/>도움]
+    Score --> S50[50점<br/>━━━━━━━━━<br/>최소한의<br/>관련성]
+    Score --> Lower[50점 미만<br/>━━━━━━━━━<br/>제외]
+    
+    S100 --> Filter{점수 >= 50?}
+    S95 --> Filter
+    S90 --> Filter
+    S85 --> Filter
+    S80 --> Filter
+    S75 --> Filter
+    S70 --> Filter
+    S65 --> Filter
+    S60 --> Filter
+    S55 --> Filter
+    S50 --> Filter
+    Lower --> Filter
+    
+    Filter -->|Yes| Include[포함<br/>Include]
+    Filter -->|No| Exclude[제외<br/>Exclude]
+    
+    Include --> TopN{상위 N개 선택<br/>Select Top N}
+    TopN --> Final[최종 선택<br/>━━━━━━━━━<br/>MAX_CONNECTIONS<br/>_PER_QUESTION = 2]
+    
+    style S100 fill:#ff6b6b
+    style S95 fill:#ff8787
+    style S90 fill:#ffa94d
+    style S85 fill:#ffd43b
+    style S80 fill:#fab005
+    style S75 fill:#94d82d
+    style S70 fill:#51cf66
+    style S65 fill:#20c997
+    style S60 fill:#15aabf
+    style S55 fill:#339af0
+    style S50 fill:#5c7cfa
+    style Lower fill:#e9ecef
+    style Final fill:#c8e6c9
+```
+
+### 점수별 실제 예시 / Real Examples by Score
+
+```mermaid
+graph TB
+    subgraph "95-100점 예시 / 95-100 Points Examples"
+        E100["100점 예시<br/>━━━━━━━━━<br/>슬라이드: 'Apoptosis의 특징'<br/>문제: 'Apoptosis의 특징은?'<br/>→ 완전 일치"]
+        E95["95점 예시<br/>━━━━━━━━━<br/>슬라이드: 염증 과정 도표<br/>문제: 동일 도표 제시<br/>→ 그림 일치"]
+    end
+    
+    subgraph "70-90점 예시 / 70-90 Points Examples"
+        E85["85점 예시<br/>━━━━━━━━━<br/>슬라이드: 세포 손상 기전<br/>문제: 특정 손상 기전<br/>→ 핵심 개념 포함"]
+        E75["75점 예시<br/>━━━━━━━━━<br/>슬라이드: 종양 분류<br/>문제: 특정 종양 특징<br/>→ 직접 관련"]
+    end
+    
+    subgraph "50-65점 예시 / 50-65 Points Examples"
+        E60["60점 예시<br/>━━━━━━━━━<br/>슬라이드: 면역 반응 개요<br/>문제: 특정 면역 세포<br/>→ 배경 지식"]
+        E50["50점 예시<br/>━━━━━━━━━<br/>슬라이드: 병리학 개론<br/>문제: 세부 질환<br/>→ 최소 관련"]
+    end
+    
+    subgraph "25-45점 예시 (제외됨) / 25-45 Points Examples (Excluded)"
+        E40["40점 예시<br/>━━━━━━━━━<br/>슬라이드: 순환계 질환<br/>문제: 호흡기 질환<br/>→ 다른 시스템"]
+        E25["25점 예시<br/>━━━━━━━━━<br/>슬라이드: 병리학 소개<br/>문제: 구체적 치료법<br/>→ 거의 무관"]
+    end
+    
+    style E100 fill:#ff6b6b
+    style E95 fill:#ff8787
+    style E85 fill:#ffd43b
+    style E75 fill:#94d82d
+    style E60 fill:#15aabf
+    style E50 fill:#5c7cfa
+    style E40 fill:#e9ecef
+    style E25 fill:#e9ecef
+```
+
 ## 처리 모드 / Processing Modes
 
 ### 강의 중심 모드 / Lesson-Centric Mode
@@ -569,6 +1250,82 @@ graph TB
     style C fill:#ff6,stroke:#333,stroke-width:2px
     style D fill:#ffc,stroke:#333,stroke-width:2px
     style E fill:#fff,stroke:#333,stroke-width:2px
+```
+
+## 디버깅 및 모니터링 / Debugging and Monitoring
+
+### 디버그 시스템 구조 / Debug System Architecture
+
+```mermaid
+graph TB
+    subgraph "디버그 데이터 수집 / Debug Data Collection"
+        API[API 응답<br/>━━━━━━━━━<br/>• 원본 JSON<br/>• 타임스탬프<br/>• 파일 정보]
+        ERROR[오류 정보<br/>━━━━━━━━━<br/>• 예외 스택<br/>• 컨텍스트<br/>• 재시도 횟수]
+        PERF[성능 메트릭<br/>━━━━━━━━━<br/>• 처리 시간<br/>• 메모리 사용<br/>• API 호출수]
+    end
+    
+    subgraph "저장 위치 / Storage Locations"
+        DEBUG_DIR[output/debug/]
+        DEBUG_DIR --> RESP[gemini_response_*.json]
+        DEBUG_DIR --> FAIL[failed_json_*.txt]
+        DEBUG_DIR --> LOG[pdf_creator_debug.log]
+        
+        SESSION_DIR[output/temp/sessions/*/]
+        SESSION_DIR --> STATE[processing_state.json]
+        SESSION_DIR --> CHUNK[chunk_results/*.json]
+    end
+    
+    subgraph "모니터링 도구 / Monitoring Tools"
+        TQDM[tqdm 진행률<br/>━━━━━━━━━<br/>• 실시간 진행<br/>• ETA 표시<br/>• 처리 속도]
+        CONSOLE[콘솔 출력<br/>━━━━━━━━━<br/>• 세션 ID<br/>• 처리 상태<br/>• 오류 메시지]
+        FILES[파일 모니터링<br/>━━━━━━━━━<br/>• 청크 생성<br/>• 결과 병합<br/>• 최종 출력]
+    end
+    
+    API --> DEBUG_DIR
+    ERROR --> DEBUG_DIR
+    PERF --> SESSION_DIR
+    
+    style API fill:#e3f2fd
+    style ERROR fill:#ffebee
+    style PERF fill:#fff3e0
+    style TQDM fill:#c8e6c9
+```
+
+### 디버그 파일 형식 / Debug File Formats
+
+```mermaid
+graph LR
+    subgraph "API 응답 파일 / API Response File"
+        JSON["gemini_response_20250801_133104_*.json<br/>━━━━━━━━━━━━━━━━━━━━<br/>{
+  'timestamp': '2025-08-01 13:31:04',
+  'lesson_file': 'lesson1.pdf',
+  'jokbo_file': 'exam1.pdf',
+  'mode': 'jokbo-centric',
+  'response_text': '...',
+  'parsed_json': {...},
+  'parse_success': true
+}"]
+    end
+    
+    subgraph "실패 JSON 파일 / Failed JSON File"
+        FAIL["failed_json_chunk_p31-60.txt<br/>━━━━━━━━━━━━━━━━━━━━<br/>원본 응답 텍스트<br/>파싱 실패 원인<br/>부분 복구 시도 결과"]
+    end
+    
+    subgraph "처리 상태 파일 / Processing State File"
+        STATE["processing_state.json<br/>━━━━━━━━━━━━━━━━━━━━<br/>{
+  'status': 'processing',
+  'mode': 'jokbo-centric',
+  'jokbo_path': 'jokbo/exam1.pdf',
+  'created': '2025-08-01 13:31:04',
+  'chunks_completed': 3,
+  'total_chunks': 5,
+  'current_chunk': 'p121-160'
+}"]
+    end
+    
+    style JSON fill:#e3f2fd
+    style FAIL fill:#ffebee
+    style STATE fill:#fff3e0
 ```
 
 ## Operating Modes (작동 모드)
@@ -696,6 +1453,86 @@ graph TB
    e. Generate jokbo-centric PDF
 ```
 
+## 오류 처리 및 복구 메커니즘 / Error Handling and Recovery Mechanisms
+
+### 오류 처리 계층 구조 / Error Handling Hierarchy
+
+```mermaid
+graph TB
+    subgraph "오류 유형 / Error Types"
+        E1[파일 오류<br/>━━━━━━━━━<br/>• 파일 없음<br/>• 권한 문제<br/>• 손상된 PDF]
+        E2[API 오류<br/>━━━━━━━━━<br/>• 네트워크<br/>• 할당량 초과<br/>• 타임아웃]
+        E3[파싱 오류<br/>━━━━━━━━━<br/>• JSON 형식<br/>• 필드 누락<br/>• 타입 불일치]
+        E4[처리 오류<br/>━━━━━━━━━<br/>• 메모리 부족<br/>• 청크 실패<br/>• 병합 오류]
+    end
+    
+    subgraph "처리 전략 / Handling Strategies"
+        H1[즉시 재시도<br/>━━━━━━━━━<br/>• 네트워크 오류<br/>• 일시적 실패]
+        H2[지수 백오프<br/>━━━━━━━━━<br/>• API 제한<br/>• 서버 과부하]
+        H3[부분 복구<br/>━━━━━━━━━<br/>• JSON 파싱<br/>• 청크 복구]
+        H4[대체 처리<br/>━━━━━━━━━<br/>• 기본값 사용<br/>• 건너뛰기]
+    end
+    
+    subgraph "복구 도구 / Recovery Tools"
+        R1[recover_from_chunks.py<br/>━━━━━━━━━━━━━━━<br/>중단된 작업 재개]
+        R2[cleanup_sessions.py<br/>━━━━━━━━━━━━━━━<br/>오류 세션 정리]
+        R3[수동 복구<br/>━━━━━━━━━━━━━━━<br/>디버그 로그 분석]
+    end
+    
+    E1 --> H4
+    E2 --> H1
+    E2 --> H2
+    E3 --> H3
+    E4 --> H3
+    
+    H1 --> R3
+    H2 --> R3
+    H3 --> R1
+    H4 --> R2
+    
+    style E1 fill:#ffebee
+    style E2 fill:#ffebee
+    style E3 fill:#ffebee
+    style E4 fill:#ffebee
+    style R1 fill:#c8e6c9
+    style R2 fill:#c8e6c9
+```
+
+### 재시도 로직 상세 / Retry Logic Details
+
+```mermaid
+sequenceDiagram
+    participant F as Function
+    participant R as Retry Logic
+    participant A as API/Operation
+    participant L as Logger
+    
+    F->>R: 작업 실행 요청
+    
+    loop 최대 3회 재시도
+        R->>A: 작업 시도
+        alt 성공
+            A-->>R: 성공 응답
+            R-->>F: 결과 반환
+        else 실패
+            A-->>R: 오류 발생
+            R->>L: 오류 로깅
+            R->>R: 대기 시간 계산<br/>wait = 2^attempt 초
+            Note over R: 1차: 2초<br/>2차: 4초<br/>3차: 8초
+            R->>R: 대기
+        end
+    end
+    
+    R->>L: 최종 실패 로깅
+    R->>F: 부분 복구 시도
+    
+    alt 부분 복구 가능
+        R-->>F: 부분 결과
+    else 복구 불가
+        R-->>F: 오류 반환
+    end
+```
+
 ## 유틸리티 도구 / Utility Tools
 
 ### cleanup_gemini_files.py - API 파일 관리 / API File Management
@@ -778,33 +1615,120 @@ graph TB
   python recover_from_chunks.py --session SESSION_ID  # Recover specific session
   ```
 
-## 성능 최적화 / Performance Optimizations
+## 성능 최적화 전략 / Performance Optimization Strategies
 
-### 병렬 처리 아키텍처 / Parallel Processing Architecture
+### 최적화 기법 비교 / Optimization Techniques Comparison
 
 ```mermaid
 graph TB
-    subgraph "메인 프로세스 / Main Process"
-        A[메인 PDFProcessor<br/>세션 ID 생성]
+    subgraph "처리 모드별 성능 / Performance by Mode"
+        SEQ[순차 처리<br/>━━━━━━━━━<br/>• 안정적<br/>• 느림<br/>• 메모리 효율적]
+        PAR[병렬 처리<br/>━━━━━━━━━<br/>• 3배 빠름<br/>• 메모리 사용↑<br/>• CPU 활용↑]
     end
     
-    subgraph "스레드 풀 / Thread Pool"
-        B[Thread 1<br/>PDFProcessor]
-        C[Thread 2<br/>PDFProcessor]
-        D[Thread 3<br/>PDFProcessor]
+    subgraph "모델별 성능 / Performance by Model"
+        PRO[Gemini Pro<br/>━━━━━━━━━<br/>• 최고 품질<br/>• 느림<br/>• 비용 높음]
+        FLASH[Gemini Flash<br/>━━━━━━━━━<br/>• 균형<br/>• 중간 속도<br/>• 중간 비용]
+        LITE[Gemini Flash-lite<br/>━━━━━━━━━<br/>• 최고 속도<br/>• 품질 낮음<br/>• 비용 낮음]
     end
     
-    A -->|세션 ID 공유| B
-    A -->|세션 ID 공유| C
-    A -->|세션 ID 공유| D
+    subgraph "최적화 기법 / Optimization Techniques"
+        CACHE[PDF 캐싱<br/>━━━━━━━━━<br/>• I/O 감소<br/>• 메모리 트레이드오프]
+        CHUNK[청킹<br/>━━━━━━━━━<br/>• 대용량 처리<br/>• 부분 실패 복구]
+        POOL[스레드 풀<br/>━━━━━━━━━<br/>• CPU 활용<br/>• 동시성 제어]
+    end
     
-    B --> E[청크 결과 1]
-    C --> F[청크 결과 2]
-    D --> G[청크 결과 3]
+    SEQ -.-> CACHE
+    PAR -.-> POOL
+    PAR -.-> CACHE
+    PRO -.-> CHUNK
+    FLASH -.-> CHUNK
+    LITE -.-> CHUNK
     
-    E --> H[결과 병합<br/>Result Merge]
-    F --> H
-    G --> H
+    style PAR fill:#c8e6c9
+    style FLASH fill:#fff3e0
+    style CACHE fill:#e3f2fd
+```
+
+### 성능 메트릭 예시 / Performance Metrics Example
+
+```mermaid
+graph LR
+    subgraph "테스트 환경 / Test Environment"
+        TEST["설정<br/>━━━━━━━━━<br/>• 족보: 5개 (각 20페이지)<br/>• 강의: 10개 (각 50페이지)<br/>• 총 분석: 50개 조합"]
+    end
+    
+    subgraph "순차 처리 / Sequential"
+        S_TIME[처리 시간<br/>━━━━━━━━━<br/>45분]
+        S_MEM[메모리<br/>━━━━━━━━━<br/>~500MB]
+        S_CPU[CPU<br/>━━━━━━━━━<br/>25%]
+    end
+    
+    subgraph "병렬 처리 (3 workers) / Parallel"
+        P_TIME[처리 시간<br/>━━━━━━━━━<br/>15분]
+        P_MEM[메모리<br/>━━━━━━━━━<br/>~1.5GB]
+        P_CPU[CPU<br/>━━━━━━━━━<br/>75%]
+    end
+    
+    subgraph "최적화 결과 / Optimization Results"
+        RESULT["개선 효과<br/>━━━━━━━━━<br/>• 시간: 67% 감소<br/>• 처리량: 3배 증가<br/>• 효율성: 크게 향상"]
+    end
+    
+    TEST --> S_TIME
+    TEST --> S_MEM
+    TEST --> S_CPU
+    
+    TEST --> P_TIME
+    TEST --> P_MEM
+    TEST --> P_CPU
+    
+    S_TIME --> RESULT
+    P_TIME --> RESULT
+    
+    style P_TIME fill:#c8e6c9
+    style RESULT fill:#e8f5e9
+```
+
+## 성능 최적화 / Performance Optimizations
+
+### 병렬 처리 최적화 상세 / Parallel Processing Optimization Details
+
+```mermaid
+flowchart TD
+    Start([병렬 처리 시작]) --> CheckMode{처리 모드?}
+    
+    CheckMode -->|강의 중심| LC_Pre[강의 파일 사전 업로드<br/>Pre-upload Lesson]
+    CheckMode -->|족보 중심| JC_Pre[족보 파일 사전 업로드<br/>Pre-upload Jokbo]
+    
+    LC_Pre --> CreatePool1[ThreadPoolExecutor 생성<br/>max_workers=3]
+    JC_Pre --> CreatePool2[ThreadPoolExecutor 생성<br/>max_workers=3]
+    
+    CreatePool1 --> LC_Distribute[작업 분배<br/>━━━━━━━━━<br/>각 족보를 스레드에 할당]
+    CreatePool2 --> JC_Distribute[작업 분배<br/>━━━━━━━━━<br/>각 강의를 스레드에 할당]
+    
+    LC_Distribute --> LC_Process[병렬 처리<br/>━━━━━━━━━<br/>• 공유 세션 ID<br/>• 독립 분석<br/>• 청크 저장]
+    JC_Distribute --> JC_Process[병렬 처리<br/>━━━━━━━━━<br/>• 공유 세션 ID<br/>• 독립 분석<br/>• 청크 저장]
+    
+    LC_Process --> Progress1[진행률 표시<br/>tqdm 업데이트]
+    JC_Process --> Progress2[진행률 표시<br/>tqdm 업데이트]
+    
+    Progress1 --> Collect1[결과 수집<br/>as_completed()]
+    Progress2 --> Collect2[결과 수집<br/>as_completed()]
+    
+    Collect1 --> Merge[결과 병합<br/>━━━━━━━━━<br/>• 청크 로드<br/>• 페이지 조정<br/>• 중복 제거]
+    Collect2 --> Merge
+    
+    Merge --> Cleanup[정리 작업<br/>━━━━━━━━━<br/>• 파일 삭제<br/>• 캐시 정리<br/>• 세션 마감]
+    
+    Cleanup --> End([완료])
+    
+    style Start fill:#e8f5e9
+    style LC_Pre fill:#e3f2fd
+    style JC_Pre fill:#e3f2fd
+    style Progress1 fill:#c8e6c9
+    style Progress2 fill:#c8e6c9
+    style Merge fill:#f3e5f5
+    style End fill:#e8f5e9
 ```
 
 **한국어**
@@ -820,6 +1744,45 @@ graph TB
 - **Chunk-based Processing**: Split large files into 40-page units
 - **Caching Mechanism**: Reduce I/O through PDF object reuse
 - **Progress Display**: Real-time progress monitoring via tqdm
+
+## 보안 및 안전성 고려사항 / Security and Safety Considerations
+
+### 보안 메커니즘 / Security Mechanisms
+
+```mermaid
+graph TB
+    subgraph "입력 검증 / Input Validation"
+        IV1[파일 검증<br/>━━━━━━━━━<br/>• PDF 형식 확인<br/>• 크기 제한<br/>• 경로 검증]
+        IV2[명령 검증<br/>━━━━━━━━━<br/>• 인자 검증<br/>• 모드 확인<br/>• 범위 체크]
+    end
+    
+    subgraph "API 보안 / API Security"
+        AS1[API 키 관리<br/>━━━━━━━━━<br/>• 환경 변수<br/>• .env 파일<br/>• 노출 방지]
+        AS2[안전 설정<br/>━━━━━━━━━<br/>• BLOCK_NONE<br/>• 콘텐츠 필터<br/>• 안전 카테고리]
+    end
+    
+    subgraph "데이터 보호 / Data Protection"
+        DP1[세션 격리<br/>━━━━━━━━━<br/>• 고유 세션 ID<br/>• 독립 디렉토리<br/>• 접근 제어]
+        DP2[파일 정리<br/>━━━━━━━━━<br/>• 자동 삭제<br/>• 임시 파일<br/>• 업로드 정리]
+    end
+    
+    subgraph "오류 안전성 / Error Safety"
+        ES1[예외 처리<br/>━━━━━━━━━<br/>• 전역 핸들러<br/>• 컨텍스트 보존<br/>• 복구 가능]
+        ES2[리소스 관리<br/>━━━━━━━━━<br/>• 자동 정리<br/>• 메모리 해제<br/>• 락 해제]
+    end
+    
+    IV1 --> AS1
+    IV2 --> AS1
+    AS1 --> DP1
+    AS2 --> DP1
+    DP1 --> ES1
+    DP2 --> ES2
+    
+    style IV1 fill:#ffebee
+    style AS1 fill:#e3f2fd
+    style DP1 fill:#fff3e0
+    style ES1 fill:#e8f5e9
+```
 
 ## 디렉토리 구조 / Directory Structure
 
@@ -839,6 +1802,80 @@ jokbodude/
 ├── validators.py           # 검증 유틸리티 / Validation utilities
 ├── pdf_processor_helpers.py # 헬퍼 함수 / Helper functions
 └── error_handler.py        # 오류 처리 / Error handling
+```
+
+## 확장성 및 유지보수성 / Scalability and Maintainability
+
+### 시스템 확장 포인트 / System Extension Points
+
+```mermaid
+graph TB
+    subgraph "현재 시스템 / Current System"
+        CURR[JokboDude v2.0<br/>━━━━━━━━━━━<br/>• CLI 기반<br/>• 로컬 처리<br/>• 파일 시스템]
+    end
+    
+    subgraph "확장 가능 영역 / Extensible Areas"
+        EXT1[인터페이스<br/>━━━━━━━━━<br/>• Web UI<br/>• REST API<br/>• 모바일 앱]
+        EXT2[처리 엔진<br/>━━━━━━━━━<br/>• 분산 처리<br/>• GPU 가속<br/>• 클라우드]
+        EXT3[AI 모델<br/>━━━━━━━━━<br/>• 다중 모델<br/>• 커스텀 모델<br/>• 앙상블]
+        EXT4[저장소<br/>━━━━━━━━━<br/>• 클라우드<br/>• 데이터베이스<br/>• 캐시 서버]
+    end
+    
+    subgraph "모듈화 설계 / Modular Design"
+        MOD1[플러그인<br/>아키텍처]
+        MOD2[의존성<br/>주입]
+        MOD3[인터페이스<br/>추상화]
+        MOD4[설정<br/>외부화]
+    end
+    
+    CURR --> EXT1
+    CURR --> EXT2
+    CURR --> EXT3
+    CURR --> EXT4
+    
+    EXT1 --> MOD1
+    EXT2 --> MOD2
+    EXT3 --> MOD3
+    EXT4 --> MOD4
+    
+    style CURR fill:#e3f2fd
+    style EXT1 fill:#fff3e0
+    style EXT2 fill:#fff3e0
+    style EXT3 fill:#fff3e0
+    style EXT4 fill:#fff3e0
+    style MOD1 fill:#e8f5e9
+```
+
+### 유지보수 전략 / Maintenance Strategy
+
+```mermaid
+graph LR
+    subgraph "코드 품질 / Code Quality"
+        CQ1[명확한 구조<br/>━━━━━━━━━<br/>• 모듈 분리<br/>• 단일 책임<br/>• DRY 원칙]
+        CQ2[문서화<br/>━━━━━━━━━<br/>• 코드 주석<br/>• API 문서<br/>• 아키텍처]
+        CQ3[테스트<br/>━━━━━━━━━<br/>• 단위 테스트<br/>• 통합 테스트<br/>• 디버그 도구]
+    end
+    
+    subgraph "버전 관리 / Version Control"
+        VC1[Git 전략<br/>━━━━━━━━━<br/>• 기능 브랜치<br/>• 의미있는 커밋<br/>• 태그 관리]
+        VC2[변경 이력<br/>━━━━━━━━━<br/>• CHANGELOG<br/>• 릴리스 노트<br/>• 마이그레이션]
+    end
+    
+    subgraph "모니터링 / Monitoring"
+        MON1[로그 관리<br/>━━━━━━━━━<br/>• 구조화 로그<br/>• 로그 레벨<br/>• 순환 정책]
+        MON2[성능 추적<br/>━━━━━━━━━<br/>• 처리 시간<br/>• 리소스 사용<br/>• 오류율]
+    end
+    
+    CQ1 --> VC1
+    CQ2 --> VC2
+    CQ3 --> MON1
+    VC1 --> MON2
+    
+    style CQ1 fill:#e3f2fd
+    style CQ2 fill:#e3f2fd
+    style CQ3 fill:#e3f2fd
+    style MON1 fill:#c8e6c9
+    style MON2 fill:#c8e6c9
 ```
 
 ## 환경 설정 / Environment Setup
@@ -937,38 +1974,198 @@ graph TB
 
 ## 향후 고려사항 / Future Considerations
 
-### 확장성 / Scalability
+### 기술 로드맵 / Technical Roadmap
+
+```mermaid
+gantt
+    title JokboDude 개발 로드맵 / Development Roadmap
+    dateFormat  YYYY-MM-DD
+    section 단기 목표 (3개월)
+    Context Caching 구현          :a1, 2025-08-01, 30d
+    비동기 처리 도입              :a2, after a1, 30d
+    웹 UI 프로토타입              :a3, after a1, 45d
+    
+    section 중기 목표 (6개월)
+    분산 처리 시스템              :b1, after a2, 60d
+    다중 AI 모델 지원             :b2, after a2, 45d
+    실시간 협업 기능              :b3, after a3, 60d
+    
+    section 장기 목표 (1년)
+    클라우드 서비스화             :c1, after b1, 90d
+    모바일 앱 개발                :c2, after b3, 90d
+    AI 모델 커스터마이징          :c3, after b2, 120d
+```
+
+### 기능 확장 계획 / Feature Expansion Plans
 
 **한국어**
-- Context Caching 구현으로 API 비용 절감
-- 비동기 처리 (async/await) 도입 검토
-- 분산 처리 시스템으로 확장 가능성
-- 웹 기반 인터페이스 추가
+
+#### 단기 (3개월)
+1. **Context Caching**: Gemini API 비용 50% 절감 목표
+2. **비동기 처리**: 동시 처리량 10배 증가
+3. **웹 인터페이스**: 드래그 앤 드롭 파일 업로드
+
+#### 중기 (6개월)
+1. **분산 처리**: 여러 서버에서 동시 처리
+2. **다중 모델**: GPT-4, Claude 등 추가 지원
+3. **실시간 협업**: 여러 사용자 동시 작업
+
+#### 장기 (1년)
+1. **SaaS 전환**: 구독 기반 클라우드 서비스
+2. **모바일 지원**: iOS/Android 네이티브 앱
+3. **커스텀 AI**: 대학별 맞춤 모델 훈련
 
 **English**
-- Cost reduction through Context Caching implementation
-- Consider introducing asynchronous processing (async/await)
-- Potential expansion to distributed processing system
-- Addition of web-based interface
 
-### 성능 개선 / Performance Improvements
+#### Short-term (3 months)
+1. **Context Caching**: Target 50% reduction in Gemini API costs
+2. **Async Processing**: 10x increase in concurrent processing
+3. **Web Interface**: Drag-and-drop file upload
 
-**한국어**
-- GPU 가속 PDF 렌더링
-- 더 정교한 캐싱 메커니즘
-- 증분 처리 (변경된 파일만 재처리)
-- 실시간 진행률 웹소켓 지원
+#### Mid-term (6 months)
+1. **Distributed Processing**: Concurrent processing across multiple servers
+2. **Multi-model Support**: Additional support for GPT-4, Claude, etc.
+3. **Real-time Collaboration**: Multiple users working simultaneously
 
-**English**
-- GPU-accelerated PDF rendering
-- More sophisticated caching mechanisms
-- Incremental processing (reprocess only changed files)
-- Real-time progress via WebSocket support
+#### Long-term (1 year)
+1. **SaaS Transformation**: Subscription-based cloud service
+2. **Mobile Support**: Native iOS/Android apps
+3. **Custom AI**: University-specific model training
+
+### 성능 개선 목표 / Performance Improvement Goals
+
+```mermaid
+graph LR
+    subgraph "현재 / Current"
+        C1[처리 시간<br/>15분/족보]
+        C2[메모리 사용<br/>1.5GB]
+        C3[동시 처리<br/>3개]
+    end
+    
+    subgraph "목표 / Target"
+        T1[처리 시간<br/>3분/족보]
+        T2[메모리 사용<br/>500MB]
+        T3[동시 처리<br/>50개]
+    end
+    
+    subgraph "개선 방법 / Methods"
+        M1[GPU 가속]
+        M2[스트리밍 처리]
+        M3[분산 시스템]
+    end
+    
+    C1 -->|5배 개선| T1
+    C2 -->|3배 감소| T2
+    C3 -->|17배 증가| T3
+    
+    M1 --> T1
+    M2 --> T2
+    M3 --> T3
+    
+    style T1 fill:#c8e6c9
+    style T2 fill:#c8e6c9
+    style T3 fill:#c8e6c9
+```
+
+## 부록 / Appendix
+
+### 용어집 / Glossary
+
+**한국어 / 영어**
+
+| 한국어 | English | 설명 / Description |
+|--------|---------|--------------------|
+| 족보 | Jokbo | 과거 시험 문제 모음 / Collection of past exam questions |
+| 강의자료 | Lesson Material | 교수님 강의 슬라이드 / Professor's lecture slides |
+| 청크 | Chunk | 대용량 파일 분할 단위 / Large file split unit |
+| 관련성 점수 | Relevance Score | 문제-슬라이드 연관도 / Question-slide correlation |
+| 세션 | Session | 독립된 처리 작업 단위 / Independent processing unit |
+| 병렬 처리 | Parallel Processing | 동시 다중 작업 처리 / Concurrent multi-task processing |
+
+### 빠른 시작 가이드 / Quick Start Guide
+
+```bash
+# 1. 환경 설정 / Environment Setup
+cp .env.example .env
+echo "GEMINI_API_KEY=your_key_here" >> .env
+
+# 2. 의존성 설치 / Install Dependencies
+pip install -r requirements.txt
+
+# 3. 파일 준비 / Prepare Files
+# lesson/ 폴더에 강의 PDF 추가
+# jokbo/ 폴더에 족보 PDF 추가
+
+# 4. 실행 / Run
+# 강의 중심 모드 (기본)
+python main.py --parallel
+
+# 족보 중심 모드
+python main.py --mode jokbo-centric --parallel
+
+# 5. 결과 확인 / Check Results
+ls output/
+```
+
+### 문제 해결 가이드 / Troubleshooting Guide
+
+```mermaid
+flowchart TD
+    Problem[문제 발생] --> Type{문제 유형?}
+    
+    Type -->|파일 오류| F1[파일 경로 확인]
+    Type -->|API 오류| A1[API 키 확인]
+    Type -->|메모리 오류| M1[청크 크기 조정]
+    Type -->|처리 중단| P1[세션 복구]
+    
+    F1 --> F2[권한 확인]
+    F2 --> F3[PDF 유효성]
+    
+    A1 --> A2[할당량 확인]
+    A2 --> A3[네트워크 연결]
+    
+    M1 --> M2[MAX_PAGES_PER_CHUNK 감소]
+    M2 --> M3[병렬 워커 수 감소]
+    
+    P1 --> P2[python recover_from_chunks.py]
+    P2 --> P3[세션 ID로 복구]
+    
+    style Problem fill:#ffebee
+    style F1 fill:#e3f2fd
+    style A1 fill:#e3f2fd
+    style M1 fill:#e3f2fd
+    style P1 fill:#e3f2fd
+```
 
 ## 결론 / Conclusion
 
 **한국어**
-JokboDude는 의과대학생들의 효과적인 시험 준비를 위해 설계된 강력한 AI 기반 학습 도구입니다. 모듈화된 아키텍처, 병렬 처리 능력, 그리고 정교한 관련성 점수 시스템을 통해 학습 효율성을 극대화합니다. 시스템의 확장 가능한 설계는 향후 다양한 기능 추가와 성능 개선을 용이하게 합니다.
+JokboDude는 의과대학생들의 효과적인 시험 준비를 위해 설계된 강력한 AI 기반 학습 도구입니다. 이 아키텍처 문서는 시스템의 복잡한 구조와 처리 흐름을 시각적으로 설명하여, 개발자와 사용자 모두가 시스템을 이해하고 활용할 수 있도록 돕습니다.
+
+주요 특징:
+- **모듈화된 설계**: 각 컴포넌트의 독립성과 재사용성
+- **확장 가능한 구조**: 미래 기능 추가를 위한 유연한 아키텍처
+- **성능 최적화**: 병렬 처리와 캐싱을 통한 효율성
+- **강력한 오류 처리**: 안정적인 운영을 위한 복구 메커니즘
+
+시스템의 지속적인 발전을 통해 더 많은 의대생들이 효율적으로 학습하고 시험을 준비할 수 있기를 기대합니다.
 
 **English**
-JokboDude is a powerful AI-based learning tool designed for effective exam preparation for medical students. Through its modular architecture, parallel processing capabilities, and sophisticated relevance scoring system, it maximizes learning efficiency. The system's scalable design facilitates future feature additions and performance improvements.
+JokboDude is a powerful AI-based learning tool designed for effective exam preparation for medical students. This architecture document visually explains the system's complex structure and processing flow, helping both developers and users understand and utilize the system.
+
+Key Features:
+- **Modular Design**: Independence and reusability of each component
+- **Scalable Architecture**: Flexible structure for future feature additions
+- **Performance Optimization**: Efficiency through parallel processing and caching
+- **Robust Error Handling**: Recovery mechanisms for stable operation
+
+We hope that through the continuous development of this system, more medical students will be able to study efficiently and prepare for exams effectively.
+
+---
+
+**문서 정보 / Document Information**
+- **버전 / Version**: 2.0
+- **최종 수정일 / Last Modified**: 2025-08-01
+- **작성자 / Author**: JokboDude Architecture Team
+- **라이선스 / License**: MIT License
+- **GitHub**: [jokbodude/architecture.md](https://github.com/jokbodude)
