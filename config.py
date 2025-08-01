@@ -1,15 +1,28 @@
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
-from typing import Optional
+from typing import Optional, List
 
 load_dotenv()
 
 API_KEY = os.getenv('GEMINI_API_KEY')
+API_KEYS_STR = os.getenv('GEMINI_API_KEYS')
 
-if not API_KEY:
-    raise ValueError("Please set GEMINI_API_KEY in .env file")
+# Support both single key and multiple keys
+if API_KEYS_STR:
+    # Parse comma-separated API keys
+    API_KEYS = [key.strip() for key in API_KEYS_STR.split(',') if key.strip()]
+    if not API_KEYS:
+        raise ValueError("GEMINI_API_KEYS is empty or invalid")
+    # Use the first key as default
+    API_KEY = API_KEYS[0]
+elif API_KEY:
+    # Fallback to single key
+    API_KEYS = [API_KEY]
+else:
+    raise ValueError("Please set either GEMINI_API_KEY or GEMINI_API_KEYS in .env file")
 
+# Configure with the default (first) API key
 genai.configure(api_key=API_KEY)
 
 # Base configuration

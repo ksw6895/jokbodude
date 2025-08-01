@@ -2055,3 +2055,232 @@ class PDFProcessor:
         if temp_dir.exists():
             shutil.rmtree(temp_dir)
             print(f"  임시 파일 정리 완료: {temp_dir}")
+    
+    def analyze_lessons_for_jokbo_multi_api(self, lesson_paths: List[str], jokbo_path: str, api_keys: List[str], model_type: str = "pro", thinking_budget: Optional[int] = None) -> Dict[str, Any]:
+        """Analyze multiple lesson PDFs against one jokbo PDF using multiple API keys (jokbo-centric)
+        
+        Each API key handles one chunk at a time with isolated context (jokbo + chunk only)
+        
+        Args:
+            lesson_paths: List of lesson PDF file paths
+            jokbo_path: Path to the jokbo PDF file
+            api_keys: List of Gemini API keys to use
+            model_type: Model type to use
+            thinking_budget: Thinking budget for flash models
+            
+        Returns:
+            Analysis results
+        """
+        from api_key_manager import APIKeyManager
+        from config import create_model
+        import google.generativeai as genai
+        
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] Multi-API 처리 시작 (족보 중심)")
+        print(f"  사용 가능한 API 키: {len(api_keys)}개")
+        
+        # Initialize API Key Manager
+        api_manager = APIKeyManager(api_keys, model_type, thinking_budget)
+        
+        # 임시 파일 디렉토리 설정
+        temp_dir = Path("output/temp/chunk_results")
+        state_file = Path("output/temp/processing_state.json")
+        
+        # Delete all uploaded files before starting
+        print("  기존 업로드 파일 정리 중...")
+        self.delete_all_uploaded_files()
+        
+        # Prepare all chunks from all lesson files
+        all_chunks = []
+        max_pages_per_chunk = int(os.environ.get('MAX_PAGES_PER_CHUNK', '40'))
+        
+        print(f"  강의자료 청크 준비 중...")
+        for lesson_path in lesson_paths:
+            lesson_total_pages = self.get_pdf_page_count(lesson_path)
+            lesson_chunks = self.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)
+            for chunk_path, start_page, end_page in lesson_chunks:
+                all_chunks.append({
+                    'lesson_path': lesson_path,
+                    'lesson_filename': Path(lesson_path).name,
+                    'chunk_path': chunk_path,
+                    'start_page': start_page,
+                    'end_page': end_page,
+                    'total_pages': lesson_total_pages
+                })
+        
+        print(f"  총 {len(all_chunks)}개 청크를 Multi-API로 처리합니다.")
+        
+        # Dictionary to store results by lesson file
+        lesson_results = {}
+        for lesson_path in lesson_paths:
+            lesson_results[lesson_path] = []
+        
+        lock = threading.Lock()
+        processed_chunks = 0
+        failed_chunks = []
+        
+        def process_single_chunk_with_api(chunk_info: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+            """Process a single chunk with an available API key"""
+            thread_id = threading.current_thread().ident
+            lesson_path = chunk_info['lesson_path']
+            lesson_filename = chunk_info['lesson_filename']
+            start_page = chunk_info['start_page']
+            end_page = chunk_info['end_page']
+            
+            print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 처리 시작 - {lesson_filename} (p{start_page}-{end_page})")
+            
+            # Get available API and model
+            api_result = api_manager.get_available_api()
+            if not api_result:
+                # No API available, wait and retry
+                print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: API 키 대기 중...")
+                time.sleep(5)
+                api_result = api_manager.get_available_api()
+                if not api_result:
+                    error_msg = "No available API keys after retry"
+                    print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: {error_msg}")
+                    return (lesson_path, {"error": error_msg})
+            
+            api_key, model = api_result
+            
+            # Create a new PDFProcessor instance for this thread with the specific model
+            thread_processor = PDFProcessor(model, session_id=self.session_id)
+            
+            try:
+                # Each API uploads its own jokbo file (for isolated context)
+                print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 족보 업로드 중...")
+                jokbo_file = thread_processor.upload_pdf(jokbo_path, f"족보_{Path(jokbo_path).name}_{thread_id}")
+                
+                # Extract pages to temporary file if needed
+                if len(self.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)) > 1:
+                    temp_pdf = thread_processor.extract_pdf_pages(chunk_info['chunk_path'], start_page, end_page)
+                else:
+                    temp_pdf = chunk_info['chunk_path']
+                
+                # Analyze this chunk with retry logic
+                max_retries = 3
+                for attempt in range(max_retries):
+                    try:
+                        result, uploaded_file = thread_processor._analyze_jokbo_with_lesson_chunk_preloaded(
+                            jokbo_file, temp_pdf,
+                            jokbo_file.display_name.replace(f"족보_{thread_id}", "").replace("족보_", ""),
+                            lesson_filename,
+                            start_page, end_page,
+                            chunk_info['total_pages']
+                        )
+                        
+                        # If successful, break the retry loop
+                        break
+                        
+                    except Exception as e:
+                        error_str = str(e)
+                        if "429" in error_str or "rate" in error_str.lower() or "quota" in error_str.lower():
+                            # Rate limit detected
+                            print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: Rate limit 감지")
+                            api_manager.mark_api_rate_limited(api_key)
+                            
+                            if attempt < max_retries - 1:
+                                # Try to get another API
+                                api_result = api_manager.get_available_api()
+                                if api_result:
+                                    api_key, model = api_result
+                                    thread_processor.model = model
+                                    print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 다른 API로 재시도...")
+                                    continue
+                            
+                        # If not rate limit or last attempt, raise the error
+                        if attempt == max_retries - 1:
+                            raise
+                
+                # Clean up temp file if created
+                if temp_pdf != chunk_info['chunk_path']:
+                    try:
+                        os.unlink(temp_pdf)
+                    except:
+                        pass
+                
+                # Delete uploaded files for this chunk
+                thread_processor.delete_file_safe(jokbo_file)
+                
+                # 결과를 임시 파일로 저장
+                saved_path = thread_processor.save_chunk_result(chunk_info, result, thread_processor.chunk_results_dir)
+                print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 결과 저장 - {Path(saved_path).name}")
+                
+                # 성공 시 처리 상태 업데이트
+                with lock:
+                    nonlocal processed_chunks
+                    processed_chunks += 1
+                
+                return (lesson_path, saved_path, None)
+                
+            except Exception as e:
+                print(f"    [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 오류 발생 - {str(e)}")
+                # 오류도 파일로 저장
+                error_result = {"error": str(e), "chunk_info": chunk_info}
+                saved_path = thread_processor.save_chunk_result(chunk_info, error_result, thread_processor.chunk_results_dir)
+                
+                with lock:
+                    failed_chunks.append(chunk_info)
+                
+                return (lesson_path, saved_path, None)
+            finally:
+                # Ensure cleanup happens
+                try:
+                    thread_processor.__del__()
+                except (OSError, IOError) as e:
+                    print(f"Failed to delete temp file: {e}")
+        
+        # Process all chunks in parallel with multiple APIs
+        max_workers = min(len(api_keys), len(all_chunks))  # Use at most as many workers as API keys
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] {len(all_chunks)}개 청크 Multi-API 처리 시작 (max_workers={max_workers})")
+        
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all chunk tasks at once
+            future_to_chunk = {
+                executor.submit(process_single_chunk_with_api, chunk_info): chunk_info
+                for chunk_info in all_chunks
+            }
+            
+            print(f"  [{datetime.now().strftime('%H:%M:%S')}] 모든 작업 제출 완료 - Multi-API 처리 중...")
+            
+            # Process completed tasks with progress bar
+            if TQDM_AVAILABLE:
+                pbar = tqdm(total=len(future_to_chunk), desc="청크 처리")
+            
+            completed = 0
+            for future in as_completed(future_to_chunk):
+                try:
+                    result = future.result()
+                    # Results are already saved to files, no need to store in memory
+                except Exception as e:
+                    print(f"  작업 실행 오류: {str(e)}")
+                
+                completed += 1
+                if TQDM_AVAILABLE:
+                    pbar.update(1)
+            
+            if TQDM_AVAILABLE:
+                pbar.close()
+        
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 모든 청크 처리 완료")
+        
+        # Print API usage statistics
+        print("\n  API 사용 통계:")
+        api_status = api_manager.get_status()
+        for api_name, status in api_status.items():
+            print(f"    {api_name}: 사용 횟수={status['usage_count']}, 마지막 사용={status['last_used']}, "
+                  f"상태={'사용 가능' if status['available'] else f\"쿨다운 ({status['cooldown_remaining']})\"}") 
+        
+        # 모든 청크 결과 파일 로드 및 병합
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 청크 결과 병합 중...")
+        final_result = self.merge_chunk_results(self.chunk_results_dir)
+        
+        # 결과 크기 확인
+        import sys
+        result_size = sys.getsizeof(final_result["jokbo_pages"])
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 결과 데이터 크기: {result_size / 1024 / 1024:.2f} MB")
+        
+        if failed_chunks:
+            print(f"  경고: {len(failed_chunks)}개 청크 처리 실패")
+            final_result["failed_chunks"] = len(failed_chunks)
+        
+        return final_result

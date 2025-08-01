@@ -46,6 +46,7 @@
 - **상세 해설**: AI가 생성한 문제 해설과 정답, 오답 설명 제공
 - **듀얼 모드**: 강의자료 중심 또는 족보 중심 학습 모드 지원
 - **병렬 처리**: 다중 파일 빠른 처리 지원 (개선된 안정성과 성능)
+- **Multi-API 모드**: 여러 Gemini API 키를 사용한 병렬 처리로 성능 향상
 - **효율적 학습**: 중요한 내용만 집중적으로 학습 가능
 - **모델 선택**: Gemini 2.5 Pro/Flash/Flash-lite 중 선택 가능
 - **비용 최적화**: Flash-lite 모델로 더 빠르고 저렴하게 처리
@@ -95,7 +96,11 @@ cp .env.example .env
 
 5. `.env` 파일을 열어 Gemini API 키 입력
 ```
+# 단일 API 키 사용
 GEMINI_API_KEY=your_actual_api_key_here
+
+# 또는 Multi-API 모드용 다중 키 설정 (선택사항)
+GEMINI_API_KEYS=api_key_1,api_key_2,api_key_3
 ```
 
 ## 사용법 📖
@@ -151,6 +156,12 @@ python main.py
 - **특징**: tqdm 진행률 표시 자동 활성화
 - **예시**: `python main.py --parallel`
 
+**--multi-api** 🆕
+- **설명**: 여러 API 키를 사용하여 병렬 처리 (족보 중심 모드 전용)
+- **특징**: 각 API가 독립적으로 작업하여 컨텍스트 감소 및 성능 향상
+- **예시**: `python main.py --mode jokbo-centric --multi-api`
+- **요구사항**: `.env` 파일에 `GEMINI_API_KEYS` 설정 필요
+
 **--single-lesson FILE**
 - **설명**: 모든 강의자료 대신 특정 파일 하나만 처리합니다
 - **사용 시기**: 특정 과목이나 주차만 빠르게 분석하고 싶을 때
@@ -185,6 +196,12 @@ python main.py --parallel --model flash
 **📝 기말고사 직전 (족보 위주 학습)**
 ```bash
 python main.py --mode jokbo-centric --model flash-lite --thinking-budget 0
+```
+
+**🚀 대량 처리 (Multi-API 모드)**
+```bash
+# .env에 GEMINI_API_KEYS=key1,key2,key3 설정 후
+python main.py --mode jokbo-centric --multi-api --model flash
 ```
 
 **🎯 특정 과목만 집중 공부**
@@ -329,7 +346,15 @@ python recover_from_chunks.py
 python cleanup_gemini_files.py
 ```
 
-## 🆕 최근 개선사항 (2025-07-28)
+## 🆕 최근 개선사항 (2025-08-01)
+
+### Multi-API 모드 추가
+- **다중 API 키 지원**: 여러 Gemini API 키를 동시에 사용하여 처리 속도 향상
+- **컨텍스트 격리**: 각 API가 족보 1개 + 레슨 청크 1개만 처리하여 성능 최적화
+- **자동 폴백**: Rate limit 발생 시 다른 API로 자동 전환
+- **실시간 모니터링**: API별 사용 통계 및 상태 표시
+
+## 📝 이전 개선사항 (2025-07-28)
 
 ### 병렬 처리 모드 안정성 대폭 개선
 - **스레드 안전성**: PDF 캐시 접근에 Lock 추가로 동시성 문제 해결
