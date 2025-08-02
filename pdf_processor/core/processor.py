@@ -13,8 +13,10 @@ import shutil
 
 from ..api.client import GeminiAPIClient
 from ..api.file_manager import FileManager
+from ..api.multi_api_manager import MultiAPIManager
 from ..analyzers.lesson_centric import LessonCentricAnalyzer
 from ..analyzers.jokbo_centric import JokboCentricAnalyzer
+from ..analyzers.multi_api_analyzer import MultiAPIAnalyzer
 from ..parallel.executor import ParallelExecutor
 from ..pdf.cache import get_global_cache, clear_global_cache
 from ..utils.logging import get_logger
@@ -190,25 +192,145 @@ class PDFProcessor:
             self.file_manager.delete_file_safe(jokbo_file)
     
     # Multi-API support
-    def analyze_with_multi_api(self, mode: str, api_keys: List[str], **kwargs) -> Dict[str, Any]:
+    def analyze_lesson_centric_multi_api(self, jokbo_paths: List[str], lesson_path: str,
+                                        api_keys: List[str], max_workers: int = 3) -> Dict[str, Any]:
         """
-        Analyze using multiple API keys for better reliability.
+        Analyze multiple jokbos using multi-API support (lesson-centric mode).
         
         Args:
-            mode: Analysis mode ('lesson-centric' or 'jokbo-centric')
+            jokbo_paths: List of jokbo file paths
+            lesson_path: Path to lesson file
             api_keys: List of API keys to use
-            **kwargs: Additional arguments for analysis
+            max_workers: Maximum parallel workers
             
         Returns:
             Analysis results
         """
-        logger.info(f"Starting multi-API analysis with {len(api_keys)} keys")
+        logger.info(f"Starting multi-API lesson-centric analysis with {len(api_keys)} keys")
         
-        # TODO: Implement multi-API rotation logic
-        # This would require creating multiple model instances with different API keys
-        # and distributing work among them
+        # Create multi-API manager
+        model_config = self._get_model_config()
+        api_manager = MultiAPIManager(api_keys, model_config)
         
-        raise NotImplementedError("Multi-API support to be implemented")
+        # Create multi-API analyzer
+        multi_analyzer = MultiAPIAnalyzer(api_manager, self.session_id, self.debug_dir)
+        
+        # Create file pairs for analysis
+        file_pairs = [(jokbo_path, lesson_path) for jokbo_path in jokbo_paths]
+        
+        # Analyze with distribution across APIs
+        results = multi_analyzer.analyze_multiple_with_distribution(
+            "lesson-centric", file_pairs, parallel=(max_workers > 1)
+        )
+        
+        # Log API status
+        status = api_manager.get_status_report()
+        logger.info(f"API Status: {status['available_apis']}/{status['total_apis']} available")
+        
+        # Merge results
+        return self._merge_lesson_centric_results(results)
+    
+    def analyze_jokbo_centric_multi_api(self, lesson_paths: List[str], jokbo_path: str,
+                                       api_keys: List[str], max_workers: int = 3) -> Dict[str, Any]:
+        """
+        Analyze multiple lessons using multi-API support (jokbo-centric mode).
+        
+        Args:
+            lesson_paths: List of lesson file paths
+            jokbo_path: Path to jokbo file
+            api_keys: List of API keys to use
+            max_workers: Maximum parallel workers
+            
+        Returns:
+            Analysis results
+        """
+        logger.info(f"Starting multi-API jokbo-centric analysis with {len(api_keys)} keys")
+        
+        # Create multi-API manager
+        model_config = self._get_model_config()
+        api_manager = MultiAPIManager(api_keys, model_config)
+        
+        # Create multi-API analyzer
+        multi_analyzer = MultiAPIAnalyzer(api_manager, self.session_id, self.debug_dir)
+        
+        # Check if we need chunking for lessons
+        from ..pdf.operations import PDFOperations
+        chunked_lessons = []
+        
+        for lesson_path in lesson_paths:
+            chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
+            if len(chunks) > 1:
+                # This lesson needs chunking
+                logger.info(f"Lesson {Path(lesson_path).name} will be processed in {len(chunks)} chunks")
+                for chunk_info in chunks:
+                    chunked_lessons.append((lesson_path, chunk_info))
+            else:
+                # Process as single file
+                chunked_lessons.append((lesson_path, None))
+        
+        # Process with multi-API support
+        if any(chunk_info for _, chunk_info in chunked_lessons):
+            # Some lessons need chunking - handle specially
+            results = self._process_chunked_lessons_multi_api(
+                chunked_lessons, jokbo_path, multi_analyzer
+            )
+        else:
+            # All lessons are single files
+            file_pairs = [(lesson_path, jokbo_path) for lesson_path in lesson_paths]
+            results = multi_analyzer.analyze_multiple_with_distribution(
+                "jokbo-centric", file_pairs, parallel=(max_workers > 1)
+            )
+        
+        # Log API status
+        status = api_manager.get_status_report()
+        logger.info(f"API Status: {status['available_apis']}/{status['total_apis']} available")
+        
+        # Merge results
+        return self.jokbo_analyzer._merge_lesson_results(results, jokbo_path)
+    
+    def _process_chunked_lessons_multi_api(self, chunked_lessons: List[tuple],
+                                          jokbo_path: str, multi_analyzer: MultiAPIAnalyzer) -> List[Dict[str, Any]]:
+        """Process lessons that need chunking with multi-API support."""
+        results = []
+        
+        for lesson_path, chunk_info in chunked_lessons:
+            if chunk_info is None:
+                # Single file
+                result = multi_analyzer.analyze_jokbo_centric(lesson_path, jokbo_path)
+                results.append(result)
+            else:
+                # Process chunks
+                from ..pdf.operations import PDFOperations
+                chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
+                
+                # Extract chunk files
+                chunk_paths = []
+                for _, start_page, end_page in chunks:
+                    chunk_path = PDFOperations.extract_pages(lesson_path, start_page, end_page)
+                    chunk_paths.append((chunk_path, start_page, end_page))
+                
+                try:
+                    # Analyze chunks with retry on different APIs
+                    result = multi_analyzer.analyze_with_chunk_retry(
+                        "jokbo-centric", lesson_path, jokbo_path, chunk_paths
+                    )
+                    results.append(result)
+                finally:
+                    # Clean up chunk files
+                    for chunk_path, _, _ in chunk_paths:
+                        Path(chunk_path).unlink(missing_ok=True)
+        
+        return results
+    
+    def _get_model_config(self) -> Dict[str, Any]:
+        """Get the model configuration from the current model."""
+        # Extract config from current model
+        # This is a simplified version - in reality, you'd want to properly extract the config
+        return {
+            "model_name": getattr(self.model, "_model_name", "gemini-1.5-pro"),
+            "generation_config": getattr(self.model, "_generation_config", None),
+            "safety_settings": getattr(self.model, "_safety_settings", None)
+        }
     
     # Utility methods
     def _merge_lesson_centric_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:

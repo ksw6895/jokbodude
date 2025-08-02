@@ -71,14 +71,22 @@ class RefactoredPDFProcessor:
         """Clean up session."""
         return self.processor.cleanup_session()
     
-    # Multi-API support (placeholder for now)
+    # Multi-API support
     def analyze_lessons_for_jokbo_multi_api(self, lesson_paths: List[str], jokbo_path: str,
                                            api_keys: List[str], model_type: str = "pro",
                                            thinking_budget=None) -> Dict[str, Any]:
-        """Multi-API analysis - to be implemented."""
-        # TODO: Implement multi-API support in the new architecture
-        logger.warning("Multi-API support not yet implemented in refactored version")
-        return self.analyze_lessons_for_jokbo_parallel(lesson_paths, jokbo_path)
+        """Multi-API analysis for jokbo-centric mode."""
+        return self.processor.analyze_jokbo_centric_multi_api(
+            lesson_paths, jokbo_path, api_keys
+        )
+    
+    def analyze_pdfs_for_lesson_multi_api(self, jokbo_paths: List[str], lesson_path: str,
+                                         api_keys: List[str], model_type: str = "pro",
+                                         thinking_budget=None) -> Dict[str, Any]:
+        """Multi-API analysis for lesson-centric mode."""
+        return self.processor.analyze_lesson_centric_multi_api(
+            jokbo_paths, lesson_path, api_keys
+        )
 
 
 def demonstrate_usage():

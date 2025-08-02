@@ -1,6 +1,6 @@
 # PDF Processor - Modular Architecture
 
-This is the refactored, modular version of the PDF processor system. The monolithic `pdf_processor.py` has been broken down into focused, maintainable modules.
+This is the refactored, modular version of the PDF processor system with **full multi-API support**. The monolithic `pdf_processor.py` has been broken down into focused, maintainable modules.
 
 ## Architecture Overview
 
@@ -11,10 +11,12 @@ pdf_processor/
 ├── analyzers/      # Analysis strategies
 │   ├── base.py              # Abstract base analyzer
 │   ├── lesson_centric.py    # Lesson-centric analysis
-│   └── jokbo_centric.py     # Jokbo-centric analysis  
+│   ├── jokbo_centric.py     # Jokbo-centric analysis
+│   └── multi_api_analyzer.py # Multi-API analysis wrapper  
 ├── api/            # Gemini API interactions
 │   ├── client.py            # API client with retry logic
-│   └── file_manager.py      # File upload/delete management
+│   ├── file_manager.py      # File upload/delete management
+│   └── multi_api_manager.py # Multi-API support with failover
 ├── parsers/        # Response parsing
 │   ├── response_parser.py   # JSON parsing with error recovery
 │   └── result_merger.py     # Result merging and filtering
@@ -84,9 +86,27 @@ result = processor.analyze_jokbo_centric_parallel(
     max_workers=3
 )
 
+# Multi-API analysis (NEW!)
+api_keys = ["API_KEY_1", "API_KEY_2", "API_KEY_3"]
+result = processor.analyze_jokbo_centric_multi_api(
+    lesson_paths=["lesson/lecture1.pdf", "lesson/lecture2.pdf"],
+    jokbo_path="jokbo/exam1.pdf",
+    api_keys=api_keys
+)
+
 # Clean up
 processor.cleanup_session()
 ```
+
+## Multi-API Support
+
+The processor now includes full multi-API support with:
+- **Automatic failover**: Switch to backup API on failures
+- **Load balancing**: Distribute requests across API keys
+- **Chunk retry**: Failed chunks retry with different APIs
+- **Status monitoring**: Track API health and success rates
+
+See [MULTI_API_GUIDE.md](MULTI_API_GUIDE.md) for detailed multi-API usage.
 
 ## Migration Guide
 
