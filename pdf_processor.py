@@ -589,7 +589,95 @@ class PDFProcessor:
             return {"error": "Failed to parse response"}
     
     def analyze_pdfs_for_lesson(self, jokbo_paths: List[str], lesson_path: str) -> Dict[str, Any]:
-        """Analyze multiple jokbo PDFs against one lesson PDF by processing each jokbo individually"""
+        """Analyze multiple jokbo PDFs against one lesson PDF with chunking support"""
+        
+        # Check if lesson file needs chunking
+        max_pages_per_chunk = ProcessingConfig.DEFAULT_CHUNK_SIZE
+        lesson_chunks = self.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)
+        
+        if len(lesson_chunks) == 1:
+            # Small lesson file, use original method
+            return self._analyze_pdfs_for_lesson_original(jokbo_paths, lesson_path)
+        
+        # Large lesson file, process in chunks
+        print(f"  큰 강의자료를 {len(lesson_chunks)}개 조각으로 분할하여 처리합니다.")
+        print(f"  세션 ID: {self.session_id}")
+        
+        # Save processing state
+        state = {
+            'session_id': self.session_id,
+            'mode': 'lesson-centric',
+            'lesson_path': lesson_path,
+            'jokbo_paths': jokbo_paths,
+            'total_chunks': len(lesson_chunks),
+            'processed_chunks': 0,
+            'status': 'processing',
+            'started_at': datetime.now().isoformat()
+        }
+        self.save_processing_state(state, self.session_dir / "processing_state.json")
+        
+        chunk_results_saved = []
+        
+        try:
+            # Process each lesson chunk
+            if TQDM_AVAILABLE:
+                chunk_iterator = tqdm(enumerate(lesson_chunks), total=len(lesson_chunks), 
+                                    desc="강의자료 청크 처리", unit="청크")
+            else:
+                chunk_iterator = enumerate(lesson_chunks)
+            
+            for idx, (chunk_path, start_page, end_page) in chunk_iterator:
+                if not TQDM_AVAILABLE:
+                    print(f"  분석 중: {Path(lesson_path).name} (페이지 {start_page}-{end_page}) [{idx+1}/{len(lesson_chunks)}]")
+                
+                # Create temporary PDF for this chunk
+                temp_pdf = self.extract_pdf_pages(chunk_path, start_page, end_page)
+                
+                try:
+                    # Analyze this chunk against all jokbo files
+                    chunk_result = self._analyze_lesson_chunk_with_jokbos(
+                        temp_pdf, jokbo_paths, start_page, end_page
+                    )
+                    
+                    # Save chunk result
+                    chunk_info = {
+                        'lesson_filename': Path(lesson_path).name,
+                        'start_page': start_page,
+                        'end_page': end_page,
+                        'total_pages': end_page - start_page + 1,
+                        'chunk_index': idx
+                    }
+                    
+                    saved_path = self.save_chunk_result(chunk_info, chunk_result, self.chunk_results_dir)
+                    chunk_results_saved.append(saved_path)
+                    
+                    # Update state
+                    state['processed_chunks'] = idx + 1
+                    self.save_processing_state(state, self.session_dir / "processing_state.json")
+                    
+                finally:
+                    # Clean up temp PDF
+                    if temp_pdf.exists():
+                        temp_pdf.unlink()
+            
+            # Load and merge all chunk results
+            return self._merge_lesson_centric_chunk_results(chunk_results_saved)
+            
+        except Exception as e:
+            print(f"  오류 발생: {str(e)}")
+            state['status'] = 'failed'
+            state['error'] = str(e)
+            self.save_processing_state(state, self.session_dir / "processing_state.json")
+            raise
+        
+        finally:
+            # Update final state
+            state['status'] = 'completed'
+            state['completed_at'] = datetime.now().isoformat()
+            self.save_processing_state(state, self.session_dir / "processing_state.json")
+    
+    def _analyze_pdfs_for_lesson_original(self, jokbo_paths: List[str], lesson_path: str) -> Dict[str, Any]:
+        """Original method for small lesson files (no chunking)"""
         
         all_related_slides = {}
         total_questions = 0
@@ -1033,6 +1121,208 @@ class PDFProcessor:
         print(f"\nMerge complete: {final_pages} pages with {final_questions} questions (was {initial_pages} pages with {initial_questions} questions)")
         
         return merged
+    
+    def _analyze_lesson_chunk_with_jokbos(self, lesson_chunk_path: str, jokbo_paths: List[str], 
+                                          start_page: int, end_page: int) -> Dict[str, Any]:
+        """Analyze a lesson chunk against all jokbo files (lesson-centric)
+        
+        Args:
+            lesson_chunk_path: Path to the lesson chunk PDF
+            jokbo_paths: List of jokbo file paths
+            start_page: Start page in original lesson
+            end_page: End page in original lesson
+            
+        Returns:
+            Analysis results for this chunk
+        """
+        all_related_slides = {}
+        total_questions = 0
+        all_key_topics = set()
+        
+        # Upload lesson chunk once
+        lesson_chunk_file = self.upload_pdf(lesson_chunk_path, 
+                                          f"강의자료_chunk_p{start_page}-{end_page}")
+        
+        try:
+            # Process each jokbo against this chunk
+            if TQDM_AVAILABLE:
+                jokbo_iterator = tqdm(jokbo_paths, desc="    족보 분석", leave=False)
+            else:
+                jokbo_iterator = jokbo_paths
+                
+            for jokbo_path in jokbo_iterator:
+                jokbo_filename = Path(jokbo_path).name
+                if not TQDM_AVAILABLE:
+                    print(f"    족보 분석 중: {jokbo_filename}")
+                
+                # Upload jokbo file
+                jokbo_file = self.upload_pdf(jokbo_path, f"족보_{jokbo_filename}")
+                
+                try:
+                    # Build prompt
+                    prompt = PromptBuilder.build_lesson_centric_prompt(jokbo_filename)
+                    
+                    # Prepare content
+                    content = [prompt, lesson_chunk_file, jokbo_file]
+                    
+                    # Generate response with retry
+                    response = self.generate_content_with_retry(content)
+                    
+                    # Save debug response
+                    self.save_api_response(response.text, jokbo_filename, 
+                                         f"chunk_p{start_page}-{end_page}", "lesson-centric-chunk")
+                    
+                    # Parse response
+                    result = self.parse_response_json(response.text, "lesson-centric")
+                    
+                    if "error" not in result:
+                        # Adjust page numbers for chunk
+                        for slide in result.get("related_slides", []):
+                            # Adjust lesson page to original page number
+                            chunk_page = slide["lesson_page"]
+                            original_page = chunk_page + start_page - 1
+                            slide["lesson_page"] = original_page
+                            
+                            # Add to results
+                            if original_page not in all_related_slides:
+                                all_related_slides[original_page] = {
+                                    "lesson_page": original_page,
+                                    "related_jokbo_questions": [],
+                                    "importance_score": slide.get("importance_score", 5),
+                                    "key_concepts": set()
+                                }
+                            
+                            # Merge questions
+                            all_related_slides[original_page]["related_jokbo_questions"].extend(
+                                slide.get("related_jokbo_questions", [])
+                            )
+                            
+                            # Update importance score
+                            all_related_slides[original_page]["importance_score"] = max(
+                                all_related_slides[original_page]["importance_score"],
+                                slide.get("importance_score", 5)
+                            )
+                            
+                            # Add key concepts
+                            all_related_slides[original_page]["key_concepts"].update(
+                                slide.get("key_concepts", [])
+                            )
+                        
+                        # Update summary
+                        if "summary" in result:
+                            total_questions += result["summary"].get("total_questions", 0)
+                            all_key_topics.update(result["summary"].get("key_topics", []))
+                    
+                finally:
+                    # Delete jokbo file
+                    self.delete_file_safe(jokbo_file)
+                    
+        finally:
+            # Delete lesson chunk file
+            self.delete_file_safe(lesson_chunk_file)
+        
+        # Convert sets to lists
+        final_slides = []
+        for slide_data in all_related_slides.values():
+            slide_data["key_concepts"] = list(slide_data["key_concepts"])
+            final_slides.append(slide_data)
+        
+        return {
+            "related_slides": final_slides,
+            "summary": {
+                "total_questions": total_questions,
+                "key_topics": list(all_key_topics),
+                "chunk_info": {
+                    "start_page": start_page,
+                    "end_page": end_page
+                }
+            }
+        }
+    
+    def _merge_lesson_centric_chunk_results(self, chunk_result_paths: List[str]) -> Dict[str, Any]:
+        """Merge results from multiple lesson chunks (lesson-centric mode)
+        
+        Args:
+            chunk_result_paths: List of saved chunk result file paths
+            
+        Returns:
+            Merged analysis results
+        """
+        all_related_slides = {}
+        total_questions = 0
+        all_key_topics = set()
+        
+        print(f"  병합 중: {len(chunk_result_paths)}개 청크 결과")
+        
+        # Load and merge each chunk result
+        for chunk_path in chunk_result_paths:
+            with open(chunk_path, 'r', encoding='utf-8') as f:
+                chunk_data = json.load(f)
+                
+            if "error" in chunk_data['result']:
+                continue
+                
+            result = chunk_data['result']
+            
+            # Merge slides
+            for slide in result.get("related_slides", []):
+                lesson_page = slide["lesson_page"]
+                
+                if lesson_page not in all_related_slides:
+                    all_related_slides[lesson_page] = slide
+                else:
+                    # Merge with existing slide
+                    existing = all_related_slides[lesson_page]
+                    
+                    # Extend questions
+                    existing["related_jokbo_questions"].extend(
+                        slide.get("related_jokbo_questions", [])
+                    )
+                    
+                    # Update importance score
+                    existing["importance_score"] = max(
+                        existing["importance_score"],
+                        slide.get("importance_score", 5)
+                    )
+                    
+                    # Merge key concepts
+                    existing_concepts = set(existing.get("key_concepts", []))
+                    existing_concepts.update(slide.get("key_concepts", []))
+                    existing["key_concepts"] = list(existing_concepts)
+            
+            # Update summary
+            if "summary" in result:
+                total_questions += result["summary"].get("total_questions", 0)
+                all_key_topics.update(result["summary"].get("key_topics", []))
+        
+        # Remove duplicate questions per slide
+        for slide_data in all_related_slides.values():
+            questions = slide_data.get("related_jokbo_questions", [])
+            # Remove duplicates while preserving order
+            seen = set()
+            unique_questions = []
+            for q in questions:
+                key = (q.get("jokbo_filename"), q.get("jokbo_page"), q.get("question_number"))
+                if key not in seen:
+                    seen.add(key)
+                    unique_questions.append(q)
+            slide_data["related_jokbo_questions"] = unique_questions
+        
+        # Convert to list and sort
+        final_slides = list(all_related_slides.values())
+        final_slides.sort(key=lambda x: x["lesson_page"])
+        
+        print(f"  병합 완료: {len(final_slides)}개 관련 슬라이드, {total_questions}개 문제")
+        
+        return {
+            "related_slides": final_slides,
+            "summary": {
+                "total_related_slides": len(final_slides),
+                "total_questions": total_questions,
+                "key_topics": list(all_key_topics),
+                "study_recommendations": "각 슬라이드별로 관련된 족보 문제들을 중점적으로 학습하세요."
+            }
+        }
     
     def analyze_lessons_for_jokbo(self, lesson_paths: List[str], jokbo_path: str) -> Dict[str, Any]:
         """Analyze multiple lesson PDFs against one jokbo PDF (jokbo-centric)"""
@@ -1656,7 +1946,116 @@ class PDFProcessor:
         return final_result
     
     def analyze_pdfs_for_lesson_parallel(self, jokbo_paths: List[str], lesson_path: str, max_workers: int = ProcessingConfig.DEFAULT_THREAD_WORKERS) -> Dict[str, Any]:
-        """Analyze multiple jokbo PDFs against one lesson PDF using parallel processing"""
+        """Analyze multiple jokbo PDFs against one lesson PDF using parallel processing with chunking support"""
+        
+        print(f"  [{datetime.now().strftime('%H:%M:%S')}] 병렬 처리 시작")
+        
+        # Check if lesson file needs chunking
+        max_pages_per_chunk = ProcessingConfig.DEFAULT_CHUNK_SIZE
+        lesson_chunks = self.split_pdf_for_analysis(lesson_path, max_pages=max_pages_per_chunk)
+        
+        if len(lesson_chunks) == 1:
+            # Small lesson file, use original parallel method
+            return self._analyze_pdfs_for_lesson_parallel_original(jokbo_paths, lesson_path, max_workers)
+        
+        # Large lesson file, process chunks in parallel
+        print(f"  큰 강의자료를 {len(lesson_chunks)}개 조각으로 분할하여 병렬 처리합니다.")
+        print(f"  세션 ID: {self.session_id}")
+        
+        # Save processing state
+        state = {
+            'session_id': self.session_id,
+            'mode': 'lesson-centric-parallel',
+            'lesson_path': lesson_path,
+            'jokbo_paths': jokbo_paths,
+            'total_chunks': len(lesson_chunks),
+            'processed_chunks': 0,
+            'status': 'processing',
+            'started_at': datetime.now().isoformat()
+        }
+        self.save_processing_state(state, self.session_dir / "processing_state.json")
+        
+        chunk_results_saved = []
+        lock = threading.Lock()
+        
+        def process_chunk(chunk_info: Tuple[int, Tuple[str, int, int]]) -> str:
+            """Process a single chunk in parallel"""
+            idx, (chunk_path, start_page, end_page) = chunk_info
+            thread_id = threading.current_thread().ident
+            print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{thread_id}: 청크 처리 시작 - 페이지 {start_page}-{end_page}")
+            
+            # Create temporary PDF for this chunk
+            temp_pdf = self.extract_pdf_pages(chunk_path, start_page, end_page)
+            
+            try:
+                # Create thread processor with parent session
+                thread_processor = PDFProcessor(self.model, session_id=self.session_id)
+                
+                # Analyze this chunk against all jokbo files
+                chunk_result = thread_processor._analyze_lesson_chunk_with_jokbos(
+                    temp_pdf, jokbo_paths, start_page, end_page
+                )
+                
+                # Save chunk result
+                chunk_info = {
+                    'lesson_filename': Path(lesson_path).name,
+                    'start_page': start_page,
+                    'end_page': end_page,
+                    'total_pages': end_page - start_page + 1,
+                    'chunk_index': idx
+                }
+                
+                saved_path = thread_processor.save_chunk_result(chunk_info, chunk_result, self.chunk_results_dir)
+                
+                # Update state
+                with lock:
+                    state['processed_chunks'] += 1
+                    self.save_processing_state(state, self.session_dir / "processing_state.json")
+                
+                return saved_path
+                
+            finally:
+                # Clean up temp PDF
+                if temp_pdf.exists():
+                    temp_pdf.unlink()
+                # Clean up thread processor
+                try:
+                    thread_processor.__del__()
+                except:
+                    pass
+        
+        try:
+            # Process chunks in parallel
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                if TQDM_AVAILABLE:
+                    futures = list(tqdm(
+                        executor.map(process_chunk, enumerate(lesson_chunks)),
+                        total=len(lesson_chunks),
+                        desc="강의자료 청크 병렬 처리"
+                    ))
+                else:
+                    futures = list(executor.map(process_chunk, enumerate(lesson_chunks)))
+                
+                chunk_results_saved = futures
+            
+            # Load and merge all chunk results
+            return self._merge_lesson_centric_chunk_results(chunk_results_saved)
+            
+        except Exception as e:
+            print(f"  오류 발생: {str(e)}")
+            state['status'] = 'failed'
+            state['error'] = str(e)
+            self.save_processing_state(state, self.session_dir / "processing_state.json")
+            raise
+        
+        finally:
+            # Update final state
+            state['status'] = 'completed'
+            state['completed_at'] = datetime.now().isoformat()
+            self.save_processing_state(state, self.session_dir / "processing_state.json")
+    
+    def _analyze_pdfs_for_lesson_parallel_original(self, jokbo_paths: List[str], lesson_path: str, max_workers: int = ProcessingConfig.DEFAULT_THREAD_WORKERS) -> Dict[str, Any]:
+        """Original parallel method for small lesson files (no chunking)"""
         
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] 병렬 처리 시작")
         
