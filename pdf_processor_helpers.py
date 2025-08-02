@@ -83,6 +83,52 @@ class PDFProcessorHelpers:
                 ]
     
     @staticmethod
+    def remove_self_referencing_slides(result: Dict[str, Any], jokbo_filename: str) -> int:
+        """Remove slides where jokbo and lesson pages are the same
+        
+        This handles cases where AI mistakenly identifies slides within the jokbo
+        as lesson slides.
+        
+        Args:
+            result: Result dictionary to modify
+            jokbo_filename: Name of the jokbo file for warning messages
+            
+        Returns:
+            Number of self-referencing slides removed
+        """
+        removed_count = 0
+        
+        if "jokbo_pages" not in result:
+            return removed_count
+        
+        for page_info in result["jokbo_pages"]:
+            jokbo_page = page_info.get("jokbo_page", 0)
+            
+            for question in page_info.get("questions", []):
+                question_num = question.get("question_number", "Unknown")
+                related_slides = question.get("related_lesson_slides", [])
+                
+                # Filter out self-referencing slides
+                filtered_slides = []
+                for slide in related_slides:
+                    lesson_page = slide.get("lesson_page", -1)
+                    
+                    # Check if lesson page is the same as jokbo page
+                    if lesson_page == jokbo_page:
+                        removed_count += 1
+                        print(f"  경고: 족보 페이지를 강의 슬라이드로 잘못 인식 (문제 {question_num}, 페이지 {jokbo_page})")
+                    else:
+                        filtered_slides.append(slide)
+                
+                # Update the related slides
+                question["related_lesson_slides"] = filtered_slides
+        
+        if removed_count > 0:
+            print(f"  → 총 {removed_count}개의 자기 참조 슬라이드 제거됨")
+        
+        return removed_count
+    
+    @staticmethod
     def build_chunk_prompt(jokbo_filename: str, lesson_filename: str, 
                           start_page: int, end_page: int, 
                           task: str, warnings: str, output_format: str) -> str:

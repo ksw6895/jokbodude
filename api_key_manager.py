@@ -6,7 +6,7 @@ from typing import List, Dict, Optional, Tuple
 from datetime import datetime, timedelta
 import threading
 import google.generativeai as genai
-from config import API_KEYS, GENERATION_CONFIG, SAFETY_SETTINGS, MODEL_NAMES
+from config import API_KEYS, GENERATION_CONFIG, SAFETY_SETTINGS, MODEL_NAMES, configure_api
 from processing_config import ProcessingConfig
 
 
@@ -86,7 +86,7 @@ class APIKeyManager:
                 
                 if state['available']:
                     # Configure genai with this API key
-                    genai.configure(api_key=api_key)
+                    configure_api(api_key)
                     
                     # Create model if not exists
                     if state['model'] is None:
@@ -128,6 +128,40 @@ class APIKeyManager:
                 self.api_states[api_key]['available'] = False
                 self.api_states[api_key]['cooldown_until'] = datetime.now() + timedelta(minutes=cooldown_minutes)
                 print(f"  API key ending with ...{api_key[-4:]} marked as rate limited. Cooldown for {cooldown_minutes} minutes")
+    
+    def mark_api_failure(self, api_key: str, is_empty_response: bool = False):
+        """
+        Mark an API failure and handle consecutive failures
+        
+        Args:
+            api_key: The API key that failed
+            is_empty_response: Whether the failure was due to empty response
+        """
+        with self.lock:
+            if api_key in self.api_states:
+                state = self.api_states[api_key]
+                state['consecutive_failures'] += 1
+                state['total_failures'] += 1
+                
+                failure_type = "empty response" if is_empty_response else "API error"
+                print(f"  API key ending with ...{api_key[-4:]} failed ({failure_type}). Consecutive failures: {state['consecutive_failures']}")
+                
+                # If 3 consecutive failures (including empty responses), apply cooldown
+                if state['consecutive_failures'] >= 3:
+                    self.api_states[api_key]['available'] = False
+                    self.api_states[api_key]['cooldown_until'] = datetime.now() + timedelta(minutes=10)
+                    print(f"  API key ending with ...{api_key[-4:]} reached 3 consecutive failures. Applying 10-minute cooldown")
+    
+    def mark_api_success(self, api_key: str):
+        """
+        Mark an API success and reset consecutive failure counter
+        
+        Args:
+            api_key: The API key that succeeded
+        """
+        with self.lock:
+            if api_key in self.api_states:
+                self.api_states[api_key]['consecutive_failures'] = 0
     
     def get_status(self) -> Dict[str, Dict]:
         """Get current status of all API keys"""
@@ -178,7 +212,7 @@ class APIKeyManager:
             # Create model if not exists
             if state['model'] is None:
                 # Configure genai with this API key temporarily
-                genai.configure(api_key=api_key)
+                configure_api(api_key)
                 
                 config = GENERATION_CONFIG.copy()
                 if self.model_type != "pro" and self.thinking_budget is not None:

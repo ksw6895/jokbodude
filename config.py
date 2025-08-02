@@ -23,7 +23,8 @@ else:
     raise ValueError("Please set either GEMINI_API_KEY or GEMINI_API_KEYS in .env file")
 
 # Configure with the default (first) API key
-genai.configure(api_key=API_KEY)
+# NOTE: Configure is now done explicitly when needed, not at import time
+# genai.configure(api_key=API_KEY)
 
 # Base configuration
 GENERATION_CONFIG = {
@@ -94,4 +95,10 @@ def create_model(model_type: str = "pro", thinking_budget: Optional[int] = None)
     )
 
 # Default model (for backward compatibility)
-model = create_model("pro")
+# NOTE: Model creation is now done after explicit configuration
+# model = create_model("pro")
+
+def configure_api(api_key: Optional[str] = None):
+    """Explicitly configure the API with the given key or default"""
+    key_to_use = api_key or API_KEY
+    genai.configure(api_key=key_to_use)

@@ -15,6 +15,7 @@ try:
     TQDM_AVAILABLE = True
 except ImportError:
     TQDM_AVAILABLE = False
+from config import configure_api
 from constants import (
     COMMON_PROMPT_INTRO, COMMON_WARNINGS, RELEVANCE_CRITERIA,
     LESSON_CENTRIC_TASK, LESSON_CENTRIC_OUTPUT_FORMAT,
@@ -46,6 +47,9 @@ class PDFProcessor:
         self.file_manager = FileManager()
         
         # 세션 식별자 시스템
+        # Ensure API is configured
+        configure_api()
+        
         if session_id:
             # 기존 세션 ID 사용
             self.session_id = session_id
@@ -169,6 +173,18 @@ class PDFProcessor:
         for attempt in range(max_retries):
             try:
                 response = self.model.generate_content(content)
+                
+                # Check for empty response first
+                if not response.text or len(response.text) == 0:
+                    print(f"  경고: 빈 응답 받음 (시도 {attempt + 1}/{max_retries})")
+                    if attempt < max_retries - 1:
+                        wait_time = backoff_factor ** attempt
+                        print(f"  {wait_time}초 후 재시도...")
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        # Last attempt, raise exception for empty response
+                        raise ValueError("Empty response from API")
                 
                 # Check finish reason
                 if response.candidates:
@@ -526,7 +542,16 @@ class PDFProcessor:
         content = [prompt, lesson_file, jokbo_file]
         
         print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: AI 분석 시작 - {jokbo_filename}")
-        response = self.generate_content_with_retry(content)
+        try:
+            response = self.generate_content_with_retry(content)
+        except ValueError as e:
+            if "Empty response from API" in str(e):
+                print(f"  오류: 빈 응답 받음 - {jokbo_filename}")
+                # Delete jokbo file before returning
+                self.delete_file_safe(jokbo_file)
+                return {"error": "Empty response from API"}
+            else:
+                raise
         
         # Save API response for debugging
         self.save_api_response(response.text, jokbo_filename, lesson_file.display_name.replace("강의자료_", ""), "lesson-centric")
@@ -1198,7 +1223,16 @@ class PDFProcessor:
             content = [prompt, jokbo_file, lesson_file]
             
             print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: AI 분석 시작 - {lesson_filename}")
-            response = self.generate_content_with_retry(content)
+            try:
+                response = self.generate_content_with_retry(content)
+            except ValueError as e:
+                if "Empty response from API" in str(e):
+                    print(f"  오류: 빈 응답 받음 - {lesson_filename}")
+                    # Delete lesson file before returning
+                    self.delete_file_safe(lesson_file)
+                    return {"error": "Empty response from API"}
+                else:
+                    raise
             
             # Save API response for debugging
             self.save_api_response(response.text, jokbo_filename, lesson_filename, "jokbo-centric")
@@ -1210,6 +1244,10 @@ class PDFProcessor:
             
             try:
                 result = self.parse_response_json(response.text, "jokbo-centric")
+                
+                # Remove self-referencing slides (where jokbo page == lesson page)
+                removed_count = PDFProcessorHelpers.remove_self_referencing_slides(result, jokbo_filename)
+                
                 print(f"  [{datetime.now().strftime('%H:%M:%S')}] Thread-{threading.current_thread().ident}: 분석 완료 - {lesson_filename}")
                 return result
             except (json.JSONDecodeError, ValueError) as e:
@@ -1299,7 +1337,16 @@ class PDFProcessor:
         # Prepare content for model
         content = [prompt, jokbo_file, lesson_chunk_file]
         
-        response = self.generate_content_with_retry(content)
+        try:
+            response = self.generate_content_with_retry(content)
+        except ValueError as e:
+            if "Empty response from API" in str(e):
+                print(f"  오류: 빈 응답 받음 (청크 p{start_page}-{end_page})")
+                # Delete the chunk file before returning
+                self.delete_file_safe(lesson_chunk_file)
+                return {"error": "Empty response from API", "chunk_info": {"start": start_page, "end": end_page}}, None
+            else:
+                raise
         
         # Get finish reason and metadata
         finish_reason = None
@@ -1316,12 +1363,12 @@ class PDFProcessor:
         if finish_reason and ('MAX_TOKENS' in finish_reason or finish_reason == '2'):
             print(f"  경고: 응답이 토큰 제한으로 잘림 (청크 p{start_page}-{end_page}, 길이: {len(response.text)})")
         
-        # Comprehensive response validation
+        # Comprehensive response validation (still check in case of other issues)
         if not response.text or len(response.text) == 0:
             print(f"  오류: 빈 응답 받음 (청크 p{start_page}-{end_page})")
             # Delete the chunk file before returning
             self.delete_file_safe(lesson_chunk_file)
-            return {"error": "Empty response received", "chunk_info": {"start": start_page, "end": end_page}}, None
+            return {"error": "Empty response from API", "chunk_info": {"start": start_page, "end": end_page}}, None
         elif len(response.text) < ProcessingConfig.MIN_RESPONSE_LENGTH:
             print(f"  오류: 응답이 너무 짧음 (청크 p{start_page}-{end_page}, 길이: {len(response.text)})")
             self.delete_file_safe(lesson_chunk_file)
@@ -1335,6 +1382,9 @@ class PDFProcessor:
             # Clean up common JSON errors from Gemini
             cleaned_text = PDFProcessorHelpers.clean_json_text(response.text)
             result = self.parse_response_json(cleaned_text, "jokbo-centric")
+            
+            # Remove self-referencing slides (where jokbo page == lesson page)
+            removed_count = PDFProcessorHelpers.remove_self_referencing_slides(result, jokbo_filename)
             
             # Process page numbers with validation and potential retry
             retry_needed, invalid_questions = PDFProcessorHelpers.validate_question_pages(
@@ -1999,7 +2049,7 @@ class PDFProcessor:
             Analysis results
         """
         from api_key_manager import APIKeyManager
-        from config import create_model
+        from config import create_model, configure_api
         import google.generativeai as genai
         from multiprocessing import Process, Queue
         import multiprocessing
@@ -2203,7 +2253,7 @@ class PDFProcessor:
         This function runs in a separate process to avoid genai.configure conflicts
         """
         import google.generativeai as genai
-        from config import create_model
+        from config import create_model, configure_api
         
         import multiprocessing
         thread_id = multiprocessing.current_process().pid
@@ -2214,7 +2264,7 @@ class PDFProcessor:
         print(f"  [Process-{thread_id}] API ***{api_key_suffix}: {len(assigned_chunks)}개 청크 처리 시작")
         
         # Configure API for this process
-        genai.configure(api_key=api_key)
+        configure_api(api_key)
         
         # Create model for this process
         model = create_model(model_type, thinking_budget)

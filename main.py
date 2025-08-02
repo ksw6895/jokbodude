@@ -8,14 +8,84 @@ import argparse
 from typing import List, Tuple, Optional
 import shutil
 import json
+from multiprocessing import Process, Queue
+import multiprocessing
+import atexit
+import signal
 
 import google.generativeai as genai
 
-from config import create_model
+from config import create_model, configure_api
 from pdf_processor import PDFProcessor
 from pdf_creator import PDFCreator
 from error_handler import ErrorHandler
 from path_validator import PathValidator
+
+
+# 전역 변수로 Multi-API 모드 상태 저장
+_multi_api_mode = False
+_original_api_key = None
+
+
+def cleanup_on_exit():
+    """프로그램 종료 시 업로드된 파일 정리"""
+    if _multi_api_mode:
+        print("\n프로그램 종료 중... 업로드된 파일 정리")
+        from config import API_KEYS
+        
+        # 각 API별로 파일 정리 시도
+        for i, api_key in enumerate(API_KEYS):
+            try:
+                from config import configure_api
+                configure_api(api_key)
+                files = list(genai.list_files())
+                if files:
+                    print(f"  API #{i+1}: {len(files)}개 파일 정리 중...")
+                    deleted = 0
+                    for file in files:
+                        try:
+                            genai.delete_file(file.name)
+                            deleted += 1
+                        except:
+                            pass
+                    if deleted > 0:
+                        print(f"    {deleted}개 삭제됨")
+            except:
+                pass
+        
+        # 원래 API 키로 복원
+        if _original_api_key:
+            configure_api(_original_api_key)
+    else:
+        # 일반 모드에서도 파일 정리
+        try:
+            files = list(genai.list_files())
+            if files:
+                print(f"\n프로그램 종료 중... {len(files)}개 파일 정리")
+                deleted = 0
+                for file in files:
+                    try:
+                        genai.delete_file(file.name)
+                        deleted += 1
+                    except:
+                        pass
+                if deleted > 0:
+                    print(f"  {deleted}개 파일 삭제됨")
+        except:
+            pass
+
+
+def signal_handler(signum, frame):
+    """Ctrl+C 등의 시그널 처리"""
+    print("\n\n중단 신호 감지...")
+    cleanup_on_exit()
+    sys.exit(1)
+
+
+# 종료 핸들러 등록
+atexit.register(cleanup_on_exit)
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 
 def find_pdf_files(directory: str, pattern: str = "*.pdf") -> List[Path]:
@@ -118,6 +188,143 @@ def cleanup_sessions(days_old=None, cleanup_all=False):
         print(f"\n총 {cleaned}개 세션 삭제됨, {total_size / (1024 * 1024):.1f}MB 공간 확보")
     else:
         print("삭제할 세션이 없습니다.")
+
+
+def validate_api_key(api_key: str) -> bool:
+    """API 키 유효성 검증
+    
+    Args:
+        api_key: 검증할 API 키
+        
+    Returns:
+        True if valid, False otherwise
+    """
+    try:
+        # 임시로 API 키 설정
+        configure_api(api_key)
+        # 간단한 모델 정보 요청으로 유효성 확인
+        # gemini-2.5-flash로 변경 (현재 사용 가능한 모델)
+        model = genai.get_model('models/gemini-2.5-flash')
+        return True
+    except Exception as e:
+        # 검증 실패는 조용히 처리 (어차피 나중에 유효하지 않다고 표시됨)
+        return False
+
+
+def cleanup_files_for_api_process(api_key: str, api_index: int, result_queue):
+    """단일 API 키로 파일 정리 (별도 프로세스에서 실행)
+    
+    Args:
+        api_key: 사용할 API 키
+        api_index: API 키 인덱스 (1-based)
+        result_queue: 결과를 담을 Queue
+    """
+    # 프로세스 내에서 필요한 모듈 import
+    import os
+    import sys
+    from datetime import datetime
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    
+    pid = os.getpid()
+    
+    try:
+        import google.generativeai as genai
+        from config import configure_api
+        import time
+        
+        # 프로세스별로 독립적인 API 설정
+        configure_api(api_key)
+        time.sleep(0.5)  # API 초기화 대기
+        
+        # 파일 목록 조회
+        files = list(genai.list_files())
+        print(f"    API #{api_index}: {len(files)}개 파일 발견")
+        
+        if not files:
+            result_queue.put({
+                'api_index': api_index,
+                'deleted': 0,
+                'skipped_403': 0,
+                'errors': 0,
+                'total': 0,
+                'success': True
+            })
+            return
+        
+        deleted = 0
+        errors = 0
+        skipped_403 = 0
+        
+        # 병렬로 파일 삭제 (각 파일마다 독립적으로 처리)
+        def delete_file_safe(file_info):
+            file, idx = file_info
+            try:
+                genai.delete_file(file.name)
+                return 'deleted', idx, file.name
+            except Exception as e:
+                error_str = str(e)
+                if "403" in error_str or "permission" in error_str.lower():
+                    return 'skipped_403', idx, file.name
+                else:
+                    return 'error', idx, file.name
+        
+        # 모든 파일을 병렬로 처리 (최대 10개 스레드)
+        with ThreadPoolExecutor(max_workers=min(10, len(files))) as executor:
+            # 모든 파일에 대한 작업 제출
+            futures = {executor.submit(delete_file_safe, (file, i+1)): i 
+                      for i, file in enumerate(files)}
+            
+            # 각 작업이 완료될 때마다 결과 처리 (타임아웃 없음)
+            completed = 0
+            for future in as_completed(futures):
+                completed += 1
+                try:
+                    result, idx, filename = future.result()
+                    if result == 'deleted':
+                        deleted += 1
+                        if completed % 10 == 0:  # 10개마다 진행상황 표시
+                            print(f"      진행률: {completed}/{len(files)}")
+                    elif result == 'skipped_403':
+                        skipped_403 += 1
+                    else:
+                        errors += 1
+                except Exception:
+                    errors += 1
+        
+        # 결과 요약
+        summary_parts = []
+        if deleted > 0:
+            summary_parts.append(f"삭제 {deleted}개")
+        if skipped_403 > 0:
+            summary_parts.append(f"권한없음 {skipped_403}개")
+        if errors > 0:
+            summary_parts.append(f"실패 {errors}개")
+        
+        if summary_parts:
+            print(f"    API #{api_index} 완료: {', '.join(summary_parts)}")
+        else:
+            print(f"    API #{api_index} 완료: 파일 없음")
+        
+        result_queue.put({
+            'api_index': api_index,
+            'deleted': deleted,
+            'skipped_403': skipped_403,
+            'errors': errors,
+            'total': len(files),
+            'success': True
+        })
+        
+    except Exception as e:
+        print(f"    API #{api_index} 프로세스 실패: {str(e)}")
+        result_queue.put({
+            'api_index': api_index,
+            'deleted': 0,
+            'skipped_403': 0,
+            'errors': 0,
+            'total': 0,
+            'success': False,
+            'error_msg': str(e)
+        })
 
 
 def auto_cleanup_old_sessions(keep_days: int):
@@ -294,6 +501,9 @@ def main():
         print("      --mode jokbo-centric 옵션을 함께 사용하세요.")
         return 1
     
+    # Configure API before creating model
+    configure_api()
+    
     # Create model with specified configuration
     model = create_model(args.model, args.thinking_budget)
     
@@ -336,49 +546,72 @@ def main():
     
     print(f"족보 파일 {len(jokbo_files)}개, 강의자료 파일 {len(lesson_files)}개 발견")
     
+    # 전역 변수 설정
+    global _multi_api_mode, _original_api_key
+    _multi_api_mode = args.multi_api
+    _original_api_key = os.getenv('GEMINI_API_KEY')
+    
     # 프로그램 시작 시 기존 업로드 파일 정리
     if args.multi_api:
         # Multi-API 모드에서는 모든 API 키에 대해 정리 수행
         print("\nMulti-API 모드: 모든 API 키로 기존 업로드 파일 정리 중...")
-        api_keys = []
-        for i in range(10):  # 최대 10개 API 키 확인
-            api_key = os.getenv(f'GEMINI_API_KEY_{i+1}')
-            if api_key:
-                api_keys.append(api_key)
-        
-        if not api_keys:
-            # GEMINI_API_KEY_N이 없으면 기본 키 사용
-            api_key = os.getenv('GEMINI_API_KEY')
-            if api_key:
-                api_keys = [api_key]
+        from config import API_KEYS
         
         # 현재 API 키 백업
         original_api_key = os.getenv('GEMINI_API_KEY')
         
-        for i, api_key in enumerate(api_keys):
-            print(f"  API #{i+1} 정리 중...")
-            # 각 API 키로 임시 설정
-            genai.configure(api_key=api_key)
+        # 먼저 각 API 키 유효성 검증
+        valid_keys = []
+        for i, api_key in enumerate(API_KEYS):
+            print(f"  API #{i+1} 검증 중...")
+            if validate_api_key(api_key):
+                valid_keys.append((i+1, api_key))
+                print(f"    ✓ 유효한 API 키")
+            else:
+                print(f"    ✗ 유효하지 않은 API 키")
+        
+        if not valid_keys:
+            print("  경고: 유효한 API 키가 없습니다.")
+        else:
+            # 순차적으로 각 API 키별 파일 정리 (각각 별도 프로세스)
+            total_deleted = 0
+            total_errors = 0
             
-            # 업로드된 파일 목록 조회 및 삭제
-            try:
-                files = list(genai.list_files())
-                deleted = 0
-                for file in files:
-                    try:
-                        genai.delete_file(file.name)
-                        deleted += 1
-                    except Exception as e:
-                        # 403 오류 등은 무시
-                        pass
-                if deleted > 0:
-                    print(f"    {deleted}개 파일 삭제됨")
-            except Exception as e:
-                print(f"    파일 정리 중 오류: {e}")
+            for api_index, api_key in valid_keys:
+                print(f"  API #{api_index} 파일 정리 중...")
+                
+                # Manager를 사용한 Queue 생성
+                manager = multiprocessing.Manager()
+                result_queue = manager.Queue()
+                
+                # 단일 프로세스 시작
+                p = Process(target=cleanup_files_for_api_process, 
+                           args=(api_key, api_index, result_queue))
+                p.start()
+                
+                # 타임아웃 없이 완료까지 대기
+                p.join()
+                
+                # 결과 수집 (타임아웃 1초)
+                try:
+                    result = result_queue.get(timeout=1.0)
+                    if result['success']:
+                        total_deleted += result.get('deleted', 0)
+                        total_errors += result.get('errors', 0)
+                except:
+                    print(f"    API #{api_index} 결과 수집 실패")
+                    total_errors += 1
+            
+            print(f"\n  전체 정리 완료: 총 {total_deleted}개 파일 삭제")
+            if total_errors > 0:
+                print(f"  오류 발생: {total_errors}개")
         
         # 원래 API 키로 복원
         if original_api_key:
-            genai.configure(api_key=original_api_key)
+            configure_api(original_api_key)
+        else:
+            configure_api()  # 기본 키로 복원
+        print()  # 공백 줄 추가
     else:
         # 일반 모드에서는 기본 API 키로만 정리
         print("\n기존 업로드 파일 정리 중...")
@@ -391,7 +624,9 @@ def main():
                     deleted += 1
                 except Exception as e:
                     # 403 오류 등은 무시
-                    pass
+                    error_str = str(e)
+                    if "403" not in error_str and "permission" not in error_str.lower():
+                        print(f"  삭제 실패: {file.display_name} - {error_str[:50]}...")
             if deleted > 0:
                 print(f"  {deleted}개 파일 삭제됨")
         except Exception as e:

@@ -4,11 +4,11 @@ Gemini API에 업로드된 모든 파일을 확인하고 삭제하는 스크립�
 """
 
 import google.generativeai as genai
-from config import API_KEY
+from config import API_KEY, configure_api
 from datetime import datetime
 
 # API 키 설정
-genai.configure(api_key=API_KEY)
+configure_api()
 
 def list_all_files():
     """Gemini API에 업로드된 모든 파일 나열"""
