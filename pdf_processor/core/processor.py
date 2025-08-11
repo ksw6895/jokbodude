@@ -17,7 +17,6 @@ from ..api.multi_api_manager import MultiAPIManager
 from ..analyzers.lesson_centric import LessonCentricAnalyzer
 from ..analyzers.jokbo_centric import JokboCentricAnalyzer
 from ..analyzers.multi_api_analyzer import MultiAPIAnalyzer
-from ..parallel.executor import ParallelExecutor
 from ..pdf.cache import get_global_cache, clear_global_cache
 from ..utils.logging import get_logger
 from ..utils.exceptions import PDFProcessorError
@@ -95,45 +94,7 @@ class PDFProcessor:
         
         return merged
     
-    def analyze_lesson_centric_parallel(self, jokbo_paths: List[str], lesson_path: str,
-                                       max_workers: int = 3) -> Dict[str, Any]:
-        """
-        Analyze multiple jokbos in parallel (lesson-centric mode).
-        
-        Args:
-            jokbo_paths: List of jokbo file paths
-            lesson_path: Path to lesson file
-            max_workers: Maximum parallel workers
-            
-        Returns:
-            Analysis results
-        """
-        logger.info(f"Starting parallel lesson-centric analysis: {len(jokbo_paths)} jokbos, {max_workers} workers")
-        
-        # Pre-upload lesson file
-        lesson_filename = Path(lesson_path).name
-        lesson_file = self.api_client.upload_file(lesson_path, f"강의자료_{lesson_filename}")
-        self.file_manager.track_file(lesson_file)
-        
-        try:
-            # Create task function for parallel execution
-            def analyze_task(jokbo_path):
-                # Create analyzer with same session ID
-                analyzer = LessonCentricAnalyzer(
-                    self.api_client, self.file_manager, self.session_id, self.debug_dir
-                )
-                return analyzer.analyze(jokbo_path, lesson_path, lesson_file)
-            
-            # Execute in parallel
-            executor = ParallelExecutor(max_workers)
-            results = executor.execute_parallel(analyze_task, jokbo_paths, "Analyzing jokbos")
-            
-            # Merge results
-            return self._merge_lesson_centric_results(results)
-            
-        finally:
-            # Clean up lesson file
-            self.file_manager.delete_file_safe(lesson_file)
+    # parallel mode removed
     
     # Jokbo-centric methods
     def analyze_jokbo_centric(self, lesson_paths: List[str], jokbo_path: str) -> Dict[str, Any]:
@@ -151,45 +112,7 @@ class PDFProcessor:
         
         return self.jokbo_analyzer.analyze_multiple_lessons(lesson_paths, jokbo_path)
     
-    def analyze_jokbo_centric_parallel(self, lesson_paths: List[str], jokbo_path: str,
-                                      max_workers: int = 3) -> Dict[str, Any]:
-        """
-        Analyze multiple lessons in parallel (jokbo-centric mode).
-        
-        Args:
-            lesson_paths: List of lesson file paths
-            jokbo_path: Path to jokbo file
-            max_workers: Maximum parallel workers
-            
-        Returns:
-            Analysis results
-        """
-        logger.info(f"Starting parallel jokbo-centric analysis: {len(lesson_paths)} lessons, {max_workers} workers")
-        
-        # Pre-upload jokbo file
-        jokbo_filename = Path(jokbo_path).name
-        jokbo_file = self.api_client.upload_file(jokbo_path, f"족보_{jokbo_filename}")
-        self.file_manager.track_file(jokbo_file)
-        
-        try:
-            # Create task function for parallel execution
-            def analyze_task(lesson_path):
-                # Create analyzer with same session ID
-                analyzer = JokboCentricAnalyzer(
-                    self.api_client, self.file_manager, self.session_id, self.debug_dir
-                )
-                return analyzer.analyze(lesson_path, jokbo_path, jokbo_file)
-            
-            # Execute in parallel
-            executor = ParallelExecutor(max_workers)
-            results = executor.execute_parallel(analyze_task, lesson_paths, "Analyzing lessons")
-            
-            # Merge results
-            return self.jokbo_analyzer._merge_lesson_results(results, jokbo_path)
-            
-        finally:
-            # Clean up jokbo file
-            self.file_manager.delete_file_safe(jokbo_file)
+    # parallel mode removed
     
     # Multi-API support
     def analyze_lesson_centric_multi_api(self, jokbo_paths: List[str], lesson_path: str,
@@ -215,13 +138,34 @@ class PDFProcessor:
         # Create multi-API analyzer
         multi_analyzer = MultiAPIAnalyzer(api_manager, self.session_id, self.debug_dir)
         
-        # Create file pairs for analysis
-        file_pairs = [(jokbo_path, lesson_path) for jokbo_path in jokbo_paths]
-        
-        # Analyze with distribution across APIs
-        results = multi_analyzer.analyze_multiple_with_distribution(
-            "lesson-centric", file_pairs, parallel=(max_workers > 1)
-        )
+        # If lesson file is large, split into chunks and distribute chunks across APIs per jokbo
+        from ..pdf.operations import PDFOperations
+        chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
+        if len(chunks) > 1:
+            aggregated_results: List[Dict[str, Any]] = []
+            # Extract chunk files once
+            chunk_paths: List[tuple] = []
+            for _, start_page, end_page in chunks:
+                chunk_path = PDFOperations.extract_pages(lesson_path, start_page, end_page)
+                chunk_paths.append((chunk_path, start_page, end_page))
+            try:
+                for jokbo_path in jokbo_paths:
+                    # For lesson-centric chunking, the file being chunked is the lesson,
+                    # and the center (pre-uploaded) file is the jokbo.
+                    result = multi_analyzer.analyze_with_chunk_retry(
+                        "lesson-centric", lesson_path, jokbo_path, chunk_paths
+                    )
+                    aggregated_results.append(result)
+                results = aggregated_results
+            finally:
+                for chunk_path, _, _ in chunk_paths:
+                    Path(chunk_path).unlink(missing_ok=True)
+        else:
+            # Distribute jokbos across APIs without chunking
+            file_pairs = [(jokbo_path, lesson_path) for jokbo_path in jokbo_paths]
+            results = multi_analyzer.analyze_multiple_with_distribution(
+                "lesson-centric", file_pairs, parallel=True
+            )
         
         # Log API status
         status = api_manager.get_status_report()
@@ -341,8 +285,8 @@ class PDFProcessor:
             if "error" not in result and "related_slides" in result:
                 all_slides.extend(result["related_slides"])
         
-        # Sort by page number
-        all_slides.sort(key=lambda x: x.get("lesson_page", 0))
+        # Sort by page number (normalize to int)
+        all_slides.sort(key=lambda x: int(str(x.get("lesson_page", 0)) or 0))
         
         return {"related_slides": all_slides}
     

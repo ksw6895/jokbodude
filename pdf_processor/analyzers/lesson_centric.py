@@ -53,7 +53,8 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         return prompt.strip()
     
     def analyze(self, jokbo_path: str, lesson_path: str, 
-                preloaded_lesson_file: Optional[Any] = None) -> Dict[str, Any]:
+                preloaded_lesson_file: Optional[Any] = None,
+                chunk_info: Optional[Tuple[int, int]] = None) -> Dict[str, Any]:
         """
         Analyze a jokbo against a lesson.
         
@@ -70,6 +71,10 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         
         logger.info(f"Analyzing jokbo '{jokbo_filename}' with lesson '{lesson_filename}'")
         
+        # If this is not already a chunk, and lesson is large, analyze with chunks
+        if chunk_info is None and self._should_chunk_lesson(lesson_path):
+            return self._analyze_with_chunks(jokbo_path, lesson_path)
+
         # Build prompt
         prompt = self.build_prompt(jokbo_filename)
         
@@ -93,7 +98,45 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         # Validate and filter results
         result = self._validate_and_filter_results(result, jokbo_path)
         
+        # Post-process for chunk offsets if applicable
+        result = self._post_process_results(result, chunk_info)
+        
         return result
+
+    def _should_chunk_lesson(self, lesson_path: str, max_pages: int = 40) -> bool:
+        """Check if lesson PDF needs chunking."""
+        from ..pdf.operations import PDFOperations
+        page_count = PDFOperations.get_page_count(lesson_path)
+        return page_count > max_pages
+
+    def _analyze_with_chunks(self, jokbo_path: str, lesson_path: str) -> Dict[str, Any]:
+        """Analyze lesson in chunks for lesson-centric mode."""
+        from ..pdf.operations import PDFOperations
+        
+        chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
+        logger.info(f"Processing {len(chunks)} chunks for {Path(lesson_path).name}")
+        
+        chunk_results: List[Dict[str, Any]] = []
+        
+        for i, (path, start_page, end_page) in enumerate(chunks):
+            logger.info(f"Processing chunk {i+1}/{len(chunks)}: pages {start_page}-{end_page}")
+            
+            # Extract chunk
+            chunk_path = PDFOperations.extract_pages(path, start_page, end_page)
+            
+            try:
+                # Analyze chunk with chunk info for page offset correction
+                result = self.analyze(
+                    jokbo_path, chunk_path, None, chunk_info=(start_page, end_page)
+                )
+                chunk_results.append(result)
+            finally:
+                # Clean up chunk file
+                Path(chunk_path).unlink(missing_ok=True)
+        
+        # Merge results across chunks
+        from ..parsers.result_merger import ResultMerger
+        return ResultMerger.merge_chunk_results(chunk_results, self.get_mode())
     
     def _analyze_with_uploads(self, prompt: str, jokbo_path: str, lesson_path: str,
                              jokbo_filename: str, lesson_filename: str) -> str:
@@ -159,6 +202,24 @@ class LessonCentricAnalyzer(BaseAnalyzer):
                         jokbo_path
                     )
         
+        return result
+
+    def _post_process_results(self, result: Dict[str, Any],
+                              chunk_info: Optional[Tuple[int, int]] = None) -> Dict[str, Any]:
+        """Adjust lesson page numbers when processing a chunk."""
+        if not chunk_info:
+            return result
+        start_page, _ = chunk_info
+        offset = start_page - 1
+        
+        # Adjust lesson_page inside related_slides
+        if "related_slides" in result and isinstance(result["related_slides"], list):
+            for slide in result["related_slides"]:
+                if isinstance(slide, dict) and "lesson_page" in slide:
+                    try:
+                        slide["lesson_page"] = slide.get("lesson_page", 0) + offset
+                    except Exception:
+                        continue
         return result
     
     def analyze_multiple_jokbos(self, jokbo_paths: List[str], lesson_path: str) -> List[Dict[str, Any]]:

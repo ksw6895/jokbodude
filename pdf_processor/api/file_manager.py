@@ -91,7 +91,8 @@ class FileManager:
         Returns:
             Number of files deleted
         """
-        files = self.list_uploaded_files()
+        # Only delete files that were tracked by this manager (uploaded by this client)
+        files = [f for f in self.list_uploaded_files() if f.name in self._tracked_files]
         if not files:
             logger.info("No files to delete")
             return 0
@@ -126,7 +127,8 @@ class FileManager:
             center_file_display_name: Display name of the file to keep
         """
         try:
-            files = self.list_uploaded_files()
+            # Only consider files uploaded by this FileManager instance
+            files = [f for f in self.list_uploaded_files() if f.name in self._tracked_files]
             for file in files:
                 if file.display_name != center_file_display_name:
                     self.delete_file_safe(file)

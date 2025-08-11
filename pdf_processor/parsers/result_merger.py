@@ -44,8 +44,8 @@ class ResultMerger:
             if "jokbo_pages" in result:
                 merged["jokbo_pages"].extend(result["jokbo_pages"])
         
-        # Sort by page number
-        merged["jokbo_pages"].sort(key=lambda x: x.get("jokbo_page", 0))
+        # Sort by page number (normalize to int)
+        merged["jokbo_pages"].sort(key=lambda x: int(str(x.get("jokbo_page", 0)) or 0))
         
         logger.info(f"Merged {len(chunk_results)} chunks into {len(merged['jokbo_pages'])} pages")
         return merged
@@ -59,8 +59,8 @@ class ResultMerger:
             if "related_slides" in result:
                 merged["related_slides"].extend(result["related_slides"])
         
-        # Sort by page number
-        merged["related_slides"].sort(key=lambda x: x.get("lesson_page", 0))
+        # Sort by page number (normalize to int)
+        merged["related_slides"].sort(key=lambda x: int(str(x.get("lesson_page", 0)) or 0))
         
         logger.info(f"Merged {len(chunk_results)} chunks into {len(merged['related_slides'])} slides")
         return merged
@@ -125,8 +125,8 @@ class ResultMerger:
                     seen_pages.add(page_num)
                     unique_pages.append(page)
             
-            # Sort by page number
-            unique_pages.sort(key=lambda x: x.get("jokbo_page", 0))
+            # Sort by page number (normalize to int)
+            unique_pages.sort(key=lambda x: int(str(x.get("jokbo_page", 0)) or 0))
             
             return {"jokbo_pages": unique_pages}
         
@@ -146,8 +146,8 @@ class ResultMerger:
                     seen_pages.add(page_num)
                     unique_slides.append(slide)
             
-            # Sort by page number
-            unique_slides.sort(key=lambda x: x.get("lesson_page", 0))
+            # Sort by page number (normalize to int)
+            unique_slides.sort(key=lambda x: int(str(x.get("lesson_page", 0)) or 0))
             
             return {"related_slides": unique_slides}
     

@@ -114,7 +114,9 @@ class PDFCreator:
         return question_doc
     
     def create_filtered_pdf(self, lesson_path: str, analysis_result: Dict[str, Any], output_path: str, jokbo_dir: str = "jokbo"):
-        """Create new PDF with filtered slides and related jokbo questions"""
+        """Create new PDF for lesson-centric mode.
+        Ensures all slides of the original lesson are present, marking slides without matches.
+        """
         
         if "error" in analysis_result:
             print(f"Cannot create PDF due to analysis error: {analysis_result['error']}")
@@ -122,78 +124,75 @@ class PDFCreator:
         
         doc = fitz.open()
         lesson_pdf = fitz.open(lesson_path)
-        
+
+        # Build an index of related questions by lesson page
+        related_by_page: Dict[int, List[Dict[str, Any]]] = {}
         for slide_info in analysis_result.get("related_slides", []):
-            page_num = slide_info["lesson_page"]
-            
-            if page_num <= len(lesson_pdf):
-                # Insert the lesson slide
-                doc.insert_pdf(lesson_pdf, from_page=page_num-1, to_page=page_num-1)
-                
-                if slide_info["related_jokbo_questions"]:
-                    
-                    # Create a page for each question with its explanation
-                    for question in slide_info["related_jokbo_questions"]:
-                        # Determine if this is the last question on the page
-                        is_last_question = False
-                        question_numbers = question.get("question_numbers_on_page", [])
-                        if question_numbers and str(question["question_number"]) == question_numbers[-1]:
-                            is_last_question = True
-                        
-                        # Extract and insert the question from jokbo
-                        question_doc = self.extract_jokbo_question(
-                            question["jokbo_filename"], 
-                            question["jokbo_page"],
-                            question["question_number"],
-                            question.get("question_text", ""),
-                            jokbo_dir,
-                            question.get("jokbo_end_page"),  # Pass end page if available
-                            is_last_question,  # Calculated flag
-                            question_numbers  # Pass question numbers on page
-                        )
-                        if question_doc:
-                            doc.insert_pdf(question_doc)
-                            question_doc.close()
-                        
-                        # Add explanation page
-                        explanation_page = doc.new_page()
-                        
-                        # Create text content
-                        text_content = f"=== 문제 {question['question_number']} 해설 ===\n\n"
-                        text_content += f"※ 앞 페이지의 문제 {question['question_number']}번을 참고하세요\n\n"
-                        text_content += f"[출처: {question['jokbo_filename']} - {question['jokbo_page']}페이지]\n\n"
-                        text_content += f"정답: {question['answer']}\n\n"
-                        
-                        if question.get('explanation'):
-                            text_content += f"해설:\n{question['explanation']}\n\n"
-                        
-                        # 오답 설명 추가
-                        if question.get('wrong_answer_explanations'):
-                            text_content += "오답 설명:\n"
-                            for choice, explanation in question['wrong_answer_explanations'].items():
-                                text_content += f"  {choice}: {explanation}\n"
-                            text_content += "\n"
-                        
-                        if question.get('relevance_reason'):
-                            text_content += f"관련성:\n{question['relevance_reason']}\n\n"
-                        
-                        text_content += f"관련 강의 페이지: {page_num}\n\n"
-                        text_content += f"💡 이 문제는 강의자료 {page_num}페이지의 내용과 관련이 있습니다."
-                        
-                        # Use CJK font for Korean text
-                        font = fitz.Font("cjk")
-                        fontname = "F1"
-                        explanation_page.insert_font(fontname=fontname, fontbuffer=font.buffer)
-                        
-                        # Insert text into the page
-                        text_rect = fitz.Rect(50, 50, explanation_page.rect.width - 50, explanation_page.rect.height - 50)
-                        explanation_page.insert_textbox(
-                            text_rect,
-                            text_content,
-                            fontsize=11,
-                            fontname=fontname,
-                            align=fitz.TEXT_ALIGN_LEFT
-                        )
+            page_num = int(slide_info.get("lesson_page", 0))
+            if page_num <= 0:
+                continue
+            related_by_page.setdefault(page_num, [])
+            for q in slide_info.get("related_jokbo_questions", []) or []:
+                related_by_page[page_num].append(q)
+
+        total_pages = len(lesson_pdf)
+        # Iterate through every slide to ensure none are skipped
+        for page_num in range(1, total_pages + 1):
+            # Always insert the lesson slide
+            doc.insert_pdf(lesson_pdf, from_page=page_num-1, to_page=page_num-1)
+
+            # If there are related questions, append them after the slide
+            for question in related_by_page.get(page_num, []):
+                # Determine if this is the last question on the page
+                is_last_question = False
+                question_numbers = question.get("question_numbers_on_page", [])
+                if question_numbers and str(question.get("question_number")) == str(question_numbers[-1]):
+                    is_last_question = True
+
+                # Extract and insert the question from jokbo (handles next-page inclusion)
+                question_doc = self.extract_jokbo_question(
+                    question.get("jokbo_filename"), 
+                    int(question.get("jokbo_page", 0)),
+                    question.get("question_number"),
+                    question.get("question_text", ""),
+                    jokbo_dir,
+                    question.get("jokbo_end_page"),
+                    is_last_question,
+                    question_numbers
+                )
+                if question_doc:
+                    doc.insert_pdf(question_doc)
+                    question_doc.close()
+
+                # Add explanation page
+                explanation_page = doc.new_page()
+                text_content = f"=== 문제 {question.get('question_number')} 해설 ===\n\n"
+                text_content += f"※ 앞 페이지의 문제 {question.get('question_number')}번을 참고하세요\n\n"
+                text_content += f"[출처: {question.get('jokbo_filename')} - {question.get('jokbo_page')}페이지]\n\n"
+                text_content += f"정답: {question.get('answer')}\n\n"
+                if question.get('explanation'):
+                    text_content += f"해설:\n{question['explanation']}\n\n"
+                if question.get('wrong_answer_explanations'):
+                    text_content += "오답 설명:\n"
+                    for choice, explanation in question['wrong_answer_explanations'].items():
+                        text_content += f"  {choice}: {explanation}\n"
+                    text_content += "\n"
+                if question.get('relevance_reason'):
+                    text_content += f"관련성:\n{question['relevance_reason']}\n\n"
+                text_content += f"관련 강의 페이지: {page_num}\n\n"
+                text_content += f"💡 이 문제는 강의자료 {page_num}페이지의 내용과 관련이 있습니다."
+
+                font = fitz.Font("cjk")
+                fontname = "F1"
+                explanation_page.insert_font(fontname=fontname, fontbuffer=font.buffer)
+                text_rect = fitz.Rect(50, 50, explanation_page.rect.width - 50, explanation_page.rect.height - 50)
+                explanation_page.insert_textbox(
+                    text_rect,
+                    text_content,
+                    fontsize=11,
+                    fontname=fontname,
+                    align=fitz.TEXT_ALIGN_LEFT
+                )
         
         if analysis_result.get("summary"):
             summary_page = doc.new_page()

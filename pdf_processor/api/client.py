@@ -27,6 +27,7 @@ class GeminiAPIClient:
             api_key: Optional API key (if not provided, uses environment variable)
         """
         self.model = model
+        self.api_key = api_key
         self._configure_api(api_key)
         
     def _configure_api(self, api_key: Optional[str] = None):
@@ -54,6 +55,8 @@ class GeminiAPIClient:
             display_name = Path(file_path).name
             
         try:
+            # Ensure correct API key context for this client
+            self._configure_api(self.api_key)
             logger.info(f"Uploading file: {display_name}")
             uploaded_file = genai.upload_file(
                 path=file_path,
@@ -90,6 +93,8 @@ class GeminiAPIClient:
         """
         for attempt in range(max_retries):
             try:
+                # Ensure correct API key context for this client
+                self._configure_api(self.api_key)
                 genai.delete_file(file.name)
                 logger.info(f"Deleted file: {file.display_name}")
                 return True
@@ -107,6 +112,8 @@ class GeminiAPIClient:
             List of uploaded files
         """
         try:
+            # Ensure correct API key context for this client
+            self._configure_api(self.api_key)
             return list(genai.list_files())
         except Exception as e:
             logger.error(f"Failed to list files: {str(e)}")
@@ -179,6 +186,8 @@ class GeminiAPIClient:
             File object if found, None otherwise
         """
         try:
+            # Ensure correct API key context for this client
+            self._configure_api(self.api_key)
             return genai.get_file(file_name)
         except Exception as e:
             logger.error(f"Failed to get file {file_name}: {str(e)}")

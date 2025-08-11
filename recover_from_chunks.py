@@ -133,7 +133,7 @@ def apply_filtering_and_sorting(all_connections: Dict[str, Any]) -> Dict[str, An
             total_related_slides += len(filtered_slides)
     
     # 페이지 번호순 정렬
-    sorted_pages = sorted(final_pages.values(), key=lambda x: x["jokbo_page"])
+    sorted_pages = sorted(final_pages.values(), key=lambda x: int(str(x["jokbo_page"]) or 0))
     
     print(f"필터링 완료: {len(sorted_pages)}개 페이지, {total_questions}개 문제, {total_related_slides}개 연결")
     

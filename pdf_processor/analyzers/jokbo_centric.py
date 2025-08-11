@@ -339,7 +339,7 @@ class JokboCentricAnalyzer(BaseAnalyzer):
         
         # Convert to list and sort
         result = {
-            "jokbo_pages": sorted(final_pages.values(), key=lambda x: x["jokbo_page"])
+            "jokbo_pages": sorted(final_pages.values(), key=lambda x: int(str(x["jokbo_page"]) or 0))
         }
         
         logger.info(f"Merged results: {len(result['jokbo_pages'])} pages, "

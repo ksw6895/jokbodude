@@ -361,7 +361,7 @@ def handle_session_cleanup(args):
     return 0
 
 
-def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], output_dir: Path, jokbo_dir: str, model, use_parallel: bool = False) -> bool:
+def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], output_dir: Path, jokbo_dir: str, model) -> bool:
     """Process one lesson PDF with all jokbo PDFs"""
     try:
         print(f"\n처리 중...")
@@ -375,11 +375,7 @@ def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], o
         # Convert Path objects to strings
         jokbo_path_strs = [str(path) for path in jokbo_paths]
         
-        if use_parallel:
-            print("  (병렬 처리 모드)")
-            analysis_result = processor.analyze_pdfs_for_lesson_parallel(jokbo_path_strs, str(lesson_path))
-        else:
-            analysis_result = processor.analyze_pdfs_for_lesson(jokbo_path_strs, str(lesson_path))
+        analysis_result = processor.analyze_lesson_centric(jokbo_path_strs, str(lesson_path))
         
         if "error" in analysis_result:
             print(f"  오류 발생: {analysis_result['error']}")
@@ -403,7 +399,7 @@ def process_lesson_with_all_jokbos(lesson_path: Path, jokbo_paths: List[Path], o
         return False
 
 
-def process_jokbo_with_all_lessons(jokbo_path: Path, lesson_paths: List[Path], output_dir: Path, lesson_dir: str, model, use_parallel: bool = False, use_multi_api: bool = False, model_type: str = "pro", thinking_budget: Optional[int] = None) -> bool:
+def process_jokbo_with_all_lessons(jokbo_path: Path, lesson_paths: List[Path], output_dir: Path, lesson_dir: str, model, use_multi_api: bool = False, model_type: str = "pro", thinking_budget: Optional[int] = None) -> bool:
     """Process one jokbo PDF with all lesson PDFs (jokbo-centric)"""
     try:
         print(f"\n처리 중...")
@@ -421,15 +417,12 @@ def process_jokbo_with_all_lessons(jokbo_path: Path, lesson_paths: List[Path], o
             from config import API_KEYS
             if len(API_KEYS) > 1:
                 print(f"  (Multi-API 모드 - {len(API_KEYS)}개 API 키 사용)")
-                analysis_result = processor.analyze_lessons_for_jokbo_multi_api(lesson_path_strs, str(jokbo_path), API_KEYS, model_type, thinking_budget)
+                analysis_result = processor.analyze_jokbo_centric_multi_api(lesson_path_strs, str(jokbo_path), API_KEYS)
             else:
                 print("  경고: Multi-API 모드가 요청되었지만 API 키가 1개뿐입니다. 일반 모드로 실행합니다.")
-                analysis_result = processor.analyze_lessons_for_jokbo(lesson_path_strs, str(jokbo_path))
-        elif use_parallel:
-            print("  (병렬 처리 모드)")
-            analysis_result = processor.analyze_lessons_for_jokbo_parallel(lesson_path_strs, str(jokbo_path))
+                analysis_result = processor.analyze_jokbo_centric(lesson_path_strs, str(jokbo_path))
         else:
-            analysis_result = processor.analyze_lessons_for_jokbo(lesson_path_strs, str(jokbo_path))
+            analysis_result = processor.analyze_jokbo_centric(lesson_path_strs, str(jokbo_path))
         
         if "error" in analysis_result:
             print(f"  오류 발생: {analysis_result['error']}")
@@ -467,8 +460,7 @@ def main():
     parser.add_argument("--lesson-dir", default="lesson", help="강의자료 PDF 디렉토리 (기본값: lesson)")
     parser.add_argument("--output-dir", default="output", help="출력 디렉토리 (기본값: output)")
     parser.add_argument("--single-lesson", help="특정 강의자료 파일만 사용")
-    parser.add_argument("--parallel", action="store_true", help="병렬 처리 모드 사용 (더 빠른 처리)")
-    parser.add_argument("--multi-api", action="store_true", help="Multi-API 모드 사용 (여러 API 키로 병렬 처리)")
+    parser.add_argument("--multi-api", action="store_true", help="Multi-API 모드 사용 (여러 API 키로 분산 처리)")
     parser.add_argument("--mode", choices=["lesson-centric", "jokbo-centric"], default="lesson-centric", 
                        help="분석 모드 선택 (기본값: lesson-centric)")
     parser.add_argument("--model", choices=["pro", "flash", "flash-lite"], default="pro",
@@ -489,11 +481,6 @@ def main():
     
     # 시작 시 오래된 세션 자동 정리 (--keep-days 설정 사용)
     auto_cleanup_old_sessions(args.keep_days)
-    
-    # Check for conflicting options
-    if args.parallel and args.multi_api:
-        print("오류: --parallel과 --multi-api 옵션은 동시에 사용할 수 없습니다.")
-        return 1
     
     # Multi-API mode is only supported for jokbo-centric mode
     if args.multi_api and args.mode != "jokbo-centric":
@@ -639,13 +626,11 @@ def main():
     
     if args.mode == "lesson-centric":
         print(f"각 강의자료별로 모든 족보와 비교하여 처리합니다.")
-        if args.parallel:
-            print("병렬 처리 모드가 활성화되었습니다. (더 빠른 처리)")
         print()
         
         # Process each lesson with all jokbos
         for lesson_file in lesson_files:
-            if process_lesson_with_all_jokbos(lesson_file, jokbo_files, output_dir, args.jokbo_dir, model, args.parallel):
+            if process_lesson_with_all_jokbos(lesson_file, jokbo_files, output_dir, args.jokbo_dir, model):
                 successful += 1
             else:
                 failed += 1
@@ -653,14 +638,12 @@ def main():
         print(f"각 족보별로 모든 강의자료와 비교하여 처리합니다.")
         if args.multi_api:
             print("Multi-API 모드가 활성화되었습니다. (여러 API 키로 병렬 처리)")
-        elif args.parallel:
-            print("병렬 처리 모드가 활성화되었습니다. (더 빠른 처리)")
         print()
         
         # Process each jokbo with all lessons
         for jokbo_file in jokbo_files:
             if process_jokbo_with_all_lessons(jokbo_file, lesson_files, output_dir, args.lesson_dir, model, 
-                                             args.parallel, args.multi_api, args.model, args.thinking_budget):
+                                             args.multi_api, args.model, args.thinking_budget):
                 successful += 1
             else:
                 failed += 1

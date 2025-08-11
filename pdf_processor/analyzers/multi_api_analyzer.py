@@ -111,71 +111,73 @@ class MultiAPIAnalyzer:
     def analyze_with_chunk_retry(self, mode: str, file_path: str, 
                                center_file_path: str, chunks: List[tuple]) -> Dict[str, Any]:
         """
-        Analyze chunks with retry on different APIs for failed chunks.
+        Analyze chunks in parallel across multiple API keys with automatic failover.
         
         Args:
             mode: 'lesson-centric' or 'jokbo-centric'
             file_path: Path to file being analyzed in chunks
-            center_file_path: Path to center file (pre-uploaded)
+            center_file_path: Path to center file
             chunks: List of (chunk_path, start_page, end_page) tuples
             
         Returns:
             Merged analysis results
         """
-        chunk_results = []
-        failed_chunks = []
+        # Prepare tasks as (index, (chunk_path, start_page, end_page)) tuples
+        tasks = [(i, chunk_info) for i, chunk_info in enumerate(chunks)]
         
-        # First pass: try all chunks
-        for i, chunk_info in enumerate(chunks):
-            chunk_path, start_page, end_page = chunk_info
-            
-            try:
-                if mode == "lesson-centric":
-                    result = self.analyze_lesson_centric(chunk_path, center_file_path)
-                else:
-                    result = self.analyze_jokbo_centric(chunk_path, center_file_path)
-                
-                chunk_results.append((i, result))
-                logger.info(f"Chunk {i+1}/{len(chunks)} successful")
-                
-            except Exception as e:
-                logger.error(f"Chunk {i+1}/{len(chunks)} failed: {str(e)}")
-                failed_chunks.append((i, chunk_info))
+        # Determine a suitable level of parallelism
+        try:
+            max_workers = min(len(tasks), len(self.api_manager.api_keys))
+            if max_workers <= 0:
+                max_workers = 1
+        except Exception:
+            max_workers = min(len(tasks), 3)
         
-        # Retry failed chunks with different APIs
-        if failed_chunks:
-            logger.info(f"Retrying {len(failed_chunks)} failed chunks...")
-            
-            for chunk_idx, chunk_info in failed_chunks:
-                chunk_path, start_page, end_page = chunk_info
-                
-                # Try up to 3 times with different APIs
-                for retry in range(3):
-                    try:
-                        if mode == "lesson-centric":
-                            result = self.analyze_lesson_centric(chunk_path, center_file_path)
-                        else:
-                            result = self.analyze_jokbo_centric(chunk_path, center_file_path)
-                        
-                        chunk_results.append((chunk_idx, result))
-                        logger.info(f"Chunk {chunk_idx+1} succeeded on retry {retry+1}")
-                        break
-                        
-                    except Exception as e:
-                        logger.error(f"Chunk {chunk_idx+1} retry {retry+1} failed: {str(e)}")
-                        if retry == 2:  # Last retry
-                            # Add empty result to maintain order
-                            chunk_results.append((chunk_idx, {"error": str(e)}))
+        # Define how to process a single chunk with a specific API client
+        def operation(task, api_client, model):
+            idx, (chunk_path, start_page, end_page) = task
+            if mode == "lesson-centric":
+                analyzer = LessonCentricAnalyzer(
+                    api_client, self.file_manager, self.session_id, self.debug_dir
+                )
+                result = analyzer.analyze(center_file_path, chunk_path)
+            else:
+                analyzer = JokboCentricAnalyzer(
+                    api_client, self.file_manager, self.session_id, self.debug_dir
+                )
+                result = analyzer.analyze(
+                    chunk_path, center_file_path, preloaded_jokbo_file=None,
+                    chunk_info=(start_page, end_page)
+                )
+            return (idx, result)
         
-        # Sort results by chunk index
-        chunk_results.sort(key=lambda x: x[0])
+        # Distribute chunk tasks across APIs in parallel with failover
+        results_raw = self.api_manager.distribute_tasks(
+            tasks, operation, parallel=True, max_workers=max_workers
+        )
         
-        # Extract just the results
-        sorted_results = [result for _, result in chunk_results]
+        # Collect results back into original order
+        ordered_results = [None] * len(tasks)
+        for entry in results_raw:
+            if isinstance(entry, tuple) and len(entry) == 2:
+                idx, result = entry
+                if 0 <= idx < len(ordered_results):
+                    ordered_results[idx] = result
+            elif isinstance(entry, dict) and "task" in entry:
+                try:
+                    idx = entry["task"][0]
+                except Exception:
+                    idx = None
+                if idx is not None and 0 <= idx < len(ordered_results):
+                    ordered_results[idx] = {"error": entry.get("error", "Unknown error")}
         
-        # Merge results
+        # Replace any missing entries with error placeholders
+        for i in range(len(ordered_results)):
+            if ordered_results[i] is None:
+                ordered_results[i] = {"error": "No result"}
+        
         from ..parsers.result_merger import ResultMerger
-        return ResultMerger.merge_chunk_results(sorted_results, mode)
+        return ResultMerger.merge_chunk_results(ordered_results, mode)
     
     def get_api_status(self) -> Dict[str, Any]:
         """Get the status of all API keys."""
