@@ -1,3 +1,4 @@
+# Existing dependencies
 google-generativeai==0.8.5
 PyPDF2==3.0.1
 reportlab==4.2.2
@@ -5,3 +6,10 @@ Pillow==11.0.0
 python-dotenv==1.0.1
 PyMuPDF==1.24.14
 tqdm==4.66.4
+
+# Web service dependencies
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+celery==5.3.6
+redis==5.0.4
+python-multipart==0.0.9

@@ -1,0 +1,54 @@
+services:
+  # 1. The Redis instance for Celery
+  - type: redis
+    name: jokbodude-redis
+    plan: free # Or starter for production
+    ipAllowList: [] # Allows access from all your services
+
+  # 2. The Web Service to handle API requests
+  - type: web
+    name: jokbodude-api
+    plan: starter # Starter plan is required for background workers
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn web_server:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: jokbodude-redis
+          property: connectionString
+      - key: RENDER_STORAGE_PATH
+        value: /data/storage
+      - key: GEMINI_API_KEY
+        sync: false # Set this in the Render dashboard
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+    disk:
+      name: jokbodude-storage
+      mountPath: /data/storage
+      sizeGB: 1 # Start with 1 GB
+
+  # 3. The Background Worker for PDF processing
+  - type: worker
+    name: jokbodude-worker
+    plan: starter
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "celery -A tasks worker --loglevel=info"
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: jokbodude-redis
+          property: connectionString
+      - key: RENDER_STORAGE_PATH
+        value: /data/storage
+      - key: GEMINI_API_KEY
+        sync: false # Set this in the Render dashboard
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+    disk:
+      name: jokbodude-storage
+      mountPath: /data/storage
+      sizeGB: 1 # Start with 1 GB

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JokboDude Online - AI PDF Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-label {
+            display: block;
+            padding: 12px;
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .file-input-label:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+        
+        .file-input-label.has-files {
+            background: #e7f5ff;
+            border-color: #667eea;
+            color: #667eea;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-container {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+        
+        .status-title {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .status-box {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-height: 60px;
+        }
+        
+        .status-box.processing {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+        }
+        
+        .status-box.success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+        }
+        
+        .status-box.error {
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+        }
+        
+        .download-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .download-link:hover {
+            background: #218838;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,.1);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 3px;
+            width: 0%;
+            animation: progress 2s ease-in-out infinite;
+        }
+        
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 60%; }
+            100% { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JokboDude Online</h1>
+        <p class="subtitle">AI 기반 PDF 분석 시스템 - 족보와 강의자료를 연결해드립니다</p>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('jokbo')">족보 중심 분석</button>
+            <button class="tab" onclick="switchTab('lesson')">강의 중심 분석</button>
+        </div>
+        
+        <!-- Jokbo-Centric Tab -->
+        <div id="jokbo-tab" class="tab-content active">
+            <form id="jokboForm">
+                <div class="form-group">
+                    <label for="jokbo_files">족보 PDF 파일 (복수 선택 가능)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="jokbo_files" name="jokbo_files" multiple accept=".pdf" required>
+                        <label for="jokbo_files" class="file-input-label" id="jokbo_label">
+                            📄 클릭하여 족보 PDF 파일 선택
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="jokbo_lesson_files">강의자료 PDF 파일 (복수 선택 가능)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="jokbo_lesson_files" name="lesson_files" multiple accept=".pdf" required>
+                        <label for="jokbo_lesson_files" class="file-input-label" id="jokbo_lesson_label">
+                            📚 클릭하여 강의자료 PDF 파일 선택
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">족보 중심 분석 시작</button>
+            </form>
+        </div>
+        
+        <!-- Lesson-Centric Tab -->
+        <div id="lesson-tab" class="tab-content">
+            <form id="lessonForm">
+                <div class="form-group">
+                    <label for="lesson_lesson_files">강의자료 PDF 파일 (복수 선택 가능)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="lesson_lesson_files" name="lesson_files" multiple accept=".pdf" required>
+                        <label for="lesson_lesson_files" class="file-input-label" id="lesson_lesson_label">
+                            📚 클릭하여 강의자료 PDF 파일 선택
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="lesson_jokbo_files">족보 PDF 파일 (복수 선택 가능)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="lesson_jokbo_files" name="jokbo_files" multiple accept=".pdf" required>
+                        <label for="lesson_jokbo_files" class="file-input-label" id="lesson_jokbo_label">
+                            📄 클릭하여 족보 PDF 파일 선택
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">강의 중심 분석 시작</button>
+            </form>
+        </div>
+        
+        <div class="status-container">
+            <h2 class="status-title">처리 상태</h2>
+            <div id="status" class="status-box">
+                파일을 업로드하고 분석을 시작하세요.
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+        
+        // File input labels update
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const labelId = this.id.replace('_files', '_label').replace('lesson_lesson', 'lesson_lesson').replace('lesson_jokbo', 'lesson_jokbo');
+                const label = document.getElementById(labelId);
+                const fileCount = this.files.length;
+                
+                if (fileCount > 0) {
+                    label.textContent = `✅ ${fileCount}개 파일 선택됨`;
+                    label.classList.add('has-files');
+                } else {
+                    const isJokbo = this.id.includes('jokbo');
+                    label.textContent = isJokbo ? '📄 클릭하여 족보 PDF 파일 선택' : '📚 클릭하여 강의자료 PDF 파일 선택';
+                    label.classList.remove('has-files');
+                }
+            });
+        });
+        
+        // Form submissions
+        const jokboForm = document.getElementById('jokboForm');
+        const lessonForm = document.getElementById('lessonForm');
+        const statusDiv = document.getElementById('status');
+        
+        jokboForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await submitAnalysis('jokbo-centric', 'jokbo_files', 'jokbo_lesson_files');
+        });
+        
+        lessonForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await submitAnalysis('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files');
+        });
+        
+        async function submitAnalysis(mode, jokboInputId, lessonInputId) {
+            statusDiv.className = 'status-box processing';
+            statusDiv.innerHTML = '<span class="spinner"></span> 파일 업로드 중...';
+            
+            const formData = new FormData();
+            
+            // Add jokbo files
+            const jokboFiles = document.getElementById(jokboInputId).files;
+            for (const file of jokboFiles) {
+                formData.append('jokbo_files', file);
+            }
+            
+            // Add lesson files
+            const lessonFiles = document.getElementById(lessonInputId).files;
+            for (const file of lessonFiles) {
+                formData.append('lesson_files', file);
+            }
+            
+            try {
+                statusDiv.innerHTML = '<span class="spinner"></span> 분석 작업 시작 중...';
+                
+                const response = await fetch(`/analyze/${mode}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Upload failed');
+                }
+                
+                const data = await response.json();
+                statusDiv.innerHTML = `<span class="spinner"></span> 분석 진행 중... (Job ID: ${data.job_id})<div class="progress-bar"><div class="progress-fill"></div></div>`;
+                
+                // Start checking status
+                checkStatus(data.task_id, data.job_id);
+                
+            } catch (error) {
+                statusDiv.className = 'status-box error';
+                statusDiv.innerHTML = `❌ 오류 발생: ${error.message}`;
+            }
+        }
+        
+        async function checkStatus(taskId, jobId) {
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/status/${taskId}`);
+                    const data = await res.json();
+                    
+                    if (data.status === 'PENDING') {
+                        statusDiv.innerHTML = `<span class="spinner"></span> 대기 중... (Job ID: ${jobId})<div class="progress-bar"><div class="progress-fill"></div></div>`;
+                    } else if (data.status === 'STARTED' || data.status === 'PROCESSING') {
+                        statusDiv.innerHTML = `<span class="spinner"></span> PDF 분석 중... (Job ID: ${jobId})<div class="progress-bar"><div class="progress-fill"></div></div>`;
+                    } else if (data.status === 'SUCCESS') {
+                        clearInterval(interval);
+                        statusDiv.className = 'status-box success';
+                        
+                        // Get list of generated files
+                        const filesRes = await fetch(`/results/${jobId}`);
+                        if (filesRes.ok) {
+                            const filesData = await filesRes.json();
+                            let downloadLinks = '';
+                            for (const filename of filesData.files) {
+                                downloadLinks += `<a href="/result/${jobId}/${filename}" class="download-link" target="_blank">📥 ${filename} 다운로드</a> `;
+                            }
+                            statusDiv.innerHTML = `✅ 분석 완료! (Job ID: ${jobId})<br>${downloadLinks}`;
+                        } else {
+                            statusDiv.innerHTML = `✅ 분석 완료! (Job ID: ${jobId})<br><a href="/result/${jobId}" class="download-link" target="_blank">📥 결과 PDF 다운로드</a>`;
+                        }
+                    } else if (data.status === 'FAILURE') {
+                        clearInterval(interval);
+                        statusDiv.className = 'status-box error';
+                        statusDiv.innerHTML = `❌ 분석 실패: ${data.error || 'Unknown error'}`;
+                    }
+                } catch (error) {
+                    clearInterval(interval);
+                    statusDiv.className = 'status-box error';
+                    statusDiv.innerHTML = `❌ 상태 확인 오류: ${error.message}`;
+                }
+            }, 3000); // Check every 3 seconds
+        }
+    </script>
+</body>
+</html>

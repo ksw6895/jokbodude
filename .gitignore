@@ -46,5 +46,8 @@ Thumbs.db
 temp/
 tmp/
 
+# Render storage
+persistent_storage/
+
 # 테스트 파일 (개인 데이터 참조)
 test_*.py
