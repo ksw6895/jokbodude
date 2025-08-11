@@ -3,9 +3,11 @@ import os
 import shutil
 import uuid
 from pathlib import Path
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from typing import Optional
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Query
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from celery import Celery
 
 # --- Configuration ---
@@ -14,8 +16,21 @@ STORAGE_PATH = Path(os.getenv("RENDER_STORAGE_PATH", "persistent_storage"))
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 # --- App & Celery Initialization ---
-app = FastAPI()
+app = FastAPI(title="JokboDude API", version="1.0.0")
+
+# Add CORS middleware for web frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify actual origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 celery_app = Celery("tasks", broker=REDIS_URL, backend=REDIS_URL)
+
+# File size limit: 50MB
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB in bytes
 
 # --- Helper Functions ---
 def save_uploaded_file(upload_file: UploadFile, destination_dir: Path) -> Path:
@@ -31,15 +46,23 @@ def read_root():
     return FileResponse('frontend/index.html')
 
 @app.post("/analyze/jokbo-centric", status_code=202)
-def analyze_jokbo_centric(
+async def analyze_jokbo_centric(
     jokbo_files: list[UploadFile] = File(...), 
     lesson_files: list[UploadFile] = File(...),
-    model: str = "pro"  # Optional model selection
+    model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$")
 ):
     job_id = str(uuid.uuid4())
     job_dir = STORAGE_PATH / job_id
 
     try:
+        # Validate file sizes
+        for f in jokbo_files + lesson_files:
+            if f.size and f.size > MAX_FILE_SIZE:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"File {f.filename} exceeds maximum size of 50MB"
+                )
+        
         jokbo_paths_str = [str(save_uploaded_file(f, job_dir / "jokbo")) for f in jokbo_files]
         lesson_paths_str = [str(save_uploaded_file(f, job_dir / "lesson")) for f in lesson_files]
 
@@ -54,15 +77,23 @@ def analyze_jokbo_centric(
         raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
 
 @app.post("/analyze/lesson-centric", status_code=202)
-def analyze_lesson_centric(
+async def analyze_lesson_centric(
     jokbo_files: list[UploadFile] = File(...), 
     lesson_files: list[UploadFile] = File(...),
-    model: str = "pro"  # Optional model selection
+    model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$")
 ):
     job_id = str(uuid.uuid4())
     job_dir = STORAGE_PATH / job_id
 
     try:
+        # Validate file sizes
+        for f in jokbo_files + lesson_files:
+            if f.size and f.size > MAX_FILE_SIZE:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"File {f.filename} exceeds maximum size of 50MB"
+                )
+        
         jokbo_paths_str = [str(save_uploaded_file(f, job_dir / "jokbo")) for f in jokbo_files]
         lesson_paths_str = [str(save_uploaded_file(f, job_dir / "lesson")) for f in lesson_files]
 
