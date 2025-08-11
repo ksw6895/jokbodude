@@ -31,7 +31,11 @@ def read_root():
     return FileResponse('frontend/index.html')
 
 @app.post("/analyze/jokbo-centric", status_code=202)
-def analyze_jokbo_centric(jokbo_files: list[UploadFile] = File(...), lesson_files: list[UploadFile] = File(...)):
+def analyze_jokbo_centric(
+    jokbo_files: list[UploadFile] = File(...), 
+    lesson_files: list[UploadFile] = File(...),
+    model: str = "pro"  # Optional model selection
+):
     job_id = str(uuid.uuid4())
     job_dir = STORAGE_PATH / job_id
 
@@ -39,17 +43,22 @@ def analyze_jokbo_centric(jokbo_files: list[UploadFile] = File(...), lesson_file
         jokbo_paths_str = [str(save_uploaded_file(f, job_dir / "jokbo")) for f in jokbo_files]
         lesson_paths_str = [str(save_uploaded_file(f, job_dir / "lesson")) for f in lesson_files]
 
-        # Send the processing task to the Celery worker
+        # Send the processing task to the Celery worker with model selection
         task = celery_app.send_task(
             "tasks.run_jokbo_analysis",
-            args=[job_id, jokbo_paths_str, lesson_paths_str]
+            args=[job_id, jokbo_paths_str, lesson_paths_str],
+            kwargs={"model_type": model}
         )
         return {"job_id": job_id, "task_id": task.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
 
 @app.post("/analyze/lesson-centric", status_code=202)
-def analyze_lesson_centric(jokbo_files: list[UploadFile] = File(...), lesson_files: list[UploadFile] = File(...)):
+def analyze_lesson_centric(
+    jokbo_files: list[UploadFile] = File(...), 
+    lesson_files: list[UploadFile] = File(...),
+    model: str = "pro"  # Optional model selection
+):
     job_id = str(uuid.uuid4())
     job_dir = STORAGE_PATH / job_id
 
@@ -57,10 +66,11 @@ def analyze_lesson_centric(jokbo_files: list[UploadFile] = File(...), lesson_fil
         jokbo_paths_str = [str(save_uploaded_file(f, job_dir / "jokbo")) for f in jokbo_files]
         lesson_paths_str = [str(save_uploaded_file(f, job_dir / "lesson")) for f in lesson_files]
 
-        # Send the processing task to the Celery worker
+        # Send the processing task to the Celery worker with model selection
         task = celery_app.send_task(
             "tasks.run_lesson_analysis",
-            args=[job_id, jokbo_paths_str, lesson_paths_str]
+            args=[job_id, jokbo_paths_str, lesson_paths_str],
+            kwargs={"model_type": model}
         )
         return {"job_id": job_id, "task_id": task.id}
     except Exception as e:

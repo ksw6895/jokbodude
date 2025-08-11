@@ -68,6 +68,36 @@
 
 ### 필요 사항
 
+## 🚀 Render 웹 서비스 배포 (NEW!)
+
+JokboDude를 웹 서비스로 배포하여 어디서나 사용할 수 있습니다!
+
+### Render 배포 방법
+
+1. **GitHub 리포지토리 Fork 또는 Clone**
+2. **Render Dashboard 접속**: [render.com](https://render.com)
+3. **New → Blueprint Instance** 클릭
+4. **GitHub 리포지토리 연결** 후 `render` 브랜치 선택
+5. **환경변수 설정** (Dashboard → Environment):
+   ```
+   # 필수 (하나만 선택)
+   GEMINI_API_KEY=your_single_api_key       # 단일 API 키 모드
+   # 또는
+   GEMINI_API_KEYS=key1,key2,key3          # Multi-API 모드 (더 안정적)
+   
+   # 선택사항
+   GEMINI_MODEL=pro                         # 모델 선택: pro, flash, flash-lite
+   ```
+
+### Multi-API 모드 활성화
+여러 API 키를 사용하면 더 안정적이고 빠른 처리가 가능합니다:
+- `GEMINI_API_KEYS`에 콤마로 구분된 여러 키 입력
+- 자동 로드 밸런싱 및 장애 복구
+- API 제한 회피로 더 많은 파일 처리 가능
+
+## 로컬 설치 방법 🛠️
+
+### 요구사항
 - Python 3.8 이상
 - Google Gemini API 키 ([여기서 발급](https://makersuite.google.com/app/apikey))
 

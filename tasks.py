@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 from celery import Celery
-from config import create_model, configure_api
+from config import create_model, configure_api, API_KEYS
 from pdf_processor.core.processor import PDFProcessor
 from pdf_creator import PDFCreator
 
@@ -10,12 +10,16 @@ from pdf_creator import PDFCreator
 STORAGE_PATH = Path(os.getenv("RENDER_STORAGE_PATH", "persistent_storage"))
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
+# Check if multi-API mode is available
+USE_MULTI_API = len(API_KEYS) > 1 if 'API_KEYS' in globals() else False
+MODEL_TYPE = os.getenv("GEMINI_MODEL", "pro")  # Allow model selection via env var
+
 # --- Celery Initialization ---
 celery_app = Celery("tasks", broker=REDIS_URL, backend=REDIS_URL)
 
 # --- Analysis Tasks ---
 @celery_app.task(name="tasks.run_jokbo_analysis")
-def run_jokbo_analysis(job_id: str, jokbo_paths: list[str], lesson_paths: list[str]):
+def run_jokbo_analysis(job_id: str, jokbo_paths: list[str], lesson_paths: list[str], model_type: str = None):
     """Run jokbo-centric analysis"""
     try:
         job_dir = STORAGE_PATH / job_id
@@ -24,8 +28,9 @@ def run_jokbo_analysis(job_id: str, jokbo_paths: list[str], lesson_paths: list[s
 
         # Configure API and create model inside the task
         configure_api()
-        model = create_model("pro")  # You can make this configurable later
-        processor = PDFProcessor(model, session_id=job_id)
+        selected_model = model_type or MODEL_TYPE
+        model = create_model(selected_model)
+        processor = PDFProcessor(model, session_id=job_id, multi_api=USE_MULTI_API)
         creator = PDFCreator()
 
         # Process each jokbo file
@@ -62,7 +67,7 @@ def run_jokbo_analysis(job_id: str, jokbo_paths: list[str], lesson_paths: list[s
         raise e
 
 @celery_app.task(name="tasks.run_lesson_analysis")
-def run_lesson_analysis(job_id: str, jokbo_paths: list[str], lesson_paths: list[str]):
+def run_lesson_analysis(job_id: str, jokbo_paths: list[str], lesson_paths: list[str], model_type: str = None):
     """Run lesson-centric analysis"""
     try:
         job_dir = STORAGE_PATH / job_id
@@ -71,8 +76,9 @@ def run_lesson_analysis(job_id: str, jokbo_paths: list[str], lesson_paths: list[
 
         # Configure API and create model inside the task
         configure_api()
-        model = create_model("pro")  # You can make this configurable later
-        processor = PDFProcessor(model, session_id=job_id)
+        selected_model = model_type or MODEL_TYPE
+        model = create_model(selected_model)
+        processor = PDFProcessor(model, session_id=job_id, multi_api=USE_MULTI_API)
         creator = PDFCreator()
 
         # Process each lesson file
