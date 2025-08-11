@@ -20,8 +20,13 @@ STORAGE_PATH.mkdir(parents=True, exist_ok=True)
 USE_MULTI_API = len(API_KEYS) > 1 if 'API_KEYS' in globals() else False
 MODEL_TYPE = os.getenv("GEMINI_MODEL", "pro")  # Allow model selection via env var
 
-# --- Celery Initialization ---
-celery_app = Celery("tasks", broker=REDIS_URL, backend=REDIS_URL)
+# --- Celery Initialization with Configuration ---
+celery_app = Celery("tasks")
+celery_app.config_from_object('celeryconfig')
+
+# Fix deprecated warnings for Celery 6.0
+celery_app.conf.broker_connection_retry_on_startup = True
+celery_app.conf.worker_cancel_long_running_tasks_on_connection_loss = True
 
 # --- Analysis Tasks ---
 @celery_app.task(name="tasks.run_jokbo_analysis")
