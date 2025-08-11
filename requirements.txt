@@ -13,3 +13,8 @@ uvicorn[standard]==0.29.0
 celery==5.3.6
 redis==5.0.4
 python-multipart==0.0.9
+
+# Database dependencies
+sqlalchemy==2.0.30
+psycopg2-binary==2.9.9
+alembic==1.13.1

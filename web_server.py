@@ -2,13 +2,15 @@
 import os
 import shutil
 import uuid
+import tempfile
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Query
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from celery import Celery
+from storage_manager import StorageManager
 
 # --- Configuration ---
 # Use an environment variable for the storage path, essential for Render.
@@ -32,6 +34,9 @@ celery_app = Celery("tasks", broker=REDIS_URL, backend=REDIS_URL)
 # File size limit: 50MB
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB in bytes
 
+# Initialize storage manager
+storage_manager = StorageManager(REDIS_URL)
+
 # --- Helper Functions ---
 def save_uploaded_file(upload_file: UploadFile, destination_dir: Path) -> Path:
     destination_dir.mkdir(parents=True, exist_ok=True)
@@ -52,7 +57,6 @@ async def analyze_jokbo_centric(
     model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$")
 ):
     job_id = str(uuid.uuid4())
-    job_dir = STORAGE_PATH / job_id
 
     try:
         # Validate file sizes
@@ -63,13 +67,41 @@ async def analyze_jokbo_centric(
                     detail=f"File {f.filename} exceeds maximum size of 50MB"
                 )
         
-        jokbo_paths_str = [str(save_uploaded_file(f, job_dir / "jokbo")) for f in jokbo_files]
-        lesson_paths_str = [str(save_uploaded_file(f, job_dir / "lesson")) for f in lesson_files]
+        # Save files to temporary location and store in Redis
+        jokbo_keys = []
+        lesson_keys = []
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            
+            # Process jokbo files
+            for f in jokbo_files:
+                file_path = temp_path / f.filename
+                content = await f.read()
+                file_path.write_bytes(content)
+                file_key = storage_manager.store_file(file_path, job_id, "jokbo")
+                jokbo_keys.append(file_key)
+            
+            # Process lesson files
+            for f in lesson_files:
+                file_path = temp_path / f.filename
+                content = await f.read()
+                file_path.write_bytes(content)
+                file_key = storage_manager.store_file(file_path, job_id, "lesson")
+                lesson_keys.append(file_key)
+        
+        # Store job metadata
+        metadata = {
+            "jokbo_keys": jokbo_keys,
+            "lesson_keys": lesson_keys,
+            "model": model
+        }
+        storage_manager.store_job_metadata(job_id, metadata)
 
-        # Send the processing task to the Celery worker with model selection
+        # Send the processing task to the Celery worker
         task = celery_app.send_task(
             "tasks.run_jokbo_analysis",
-            args=[job_id, jokbo_paths_str, lesson_paths_str],
+            args=[job_id],
             kwargs={"model_type": model}
         )
         return {"job_id": job_id, "task_id": task.id}
@@ -119,15 +151,24 @@ def get_task_status(task_id: str):
 
 @app.get("/result/{job_id}")
 def get_result_file(job_id: str):
-    output_dir = STORAGE_PATH / job_id / "output"
-    if not output_dir.exists():
+    # Get result from Redis
+    result_keys = storage_manager.redis_client.keys(f"result:{job_id}:*")
+    if not result_keys:
         raise HTTPException(status_code=404, detail="Result not found or job not complete.")
     
-    output_files = list(output_dir.glob("*.pdf"))
-    if not output_files:
+    # Get the first result
+    result_key = result_keys[0].decode() if isinstance(result_keys[0], bytes) else result_keys[0]
+    content = storage_manager.get_result(result_key)
+    
+    if not content:
         raise HTTPException(status_code=404, detail="Generated PDF not found.")
-
-    return FileResponse(output_files[0], media_type='application/pdf', filename=output_files[0].name)
+    
+    filename = result_key.split(":")[-1]
+    return Response(
+        content=content,
+        media_type='application/pdf',
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 @app.get("/results/{job_id}")
 def list_result_files(job_id: str):

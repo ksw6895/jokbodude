@@ -47,7 +47,7 @@ services:
           name: jokbodude-redis
           property: connectionString
       - key: RENDER_STORAGE_PATH
-        value: /data/storage
+        value: /tmp/storage
       - key: GEMINI_API_KEY
         sync: false # Set this in the Render dashboard (single key mode)
       - key: GEMINI_API_KEYS
@@ -56,7 +56,3 @@ services:
         value: pro # Options: pro, flash, flash-lite
       - key: PYTHONPATH
         value: /opt/render/project/src
-    disk:
-      name: jokbodude-storage
-      mountPath: /data/storage
-      sizeGB: 1 # Start with 1 GB
