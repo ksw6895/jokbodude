@@ -5,6 +5,7 @@ import uuid
 import tempfile
 from pathlib import Path
 from typing import Optional
+from datetime import datetime
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Query
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -115,7 +116,7 @@ async def analyze_lesson_centric(
     model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$")
 ):
     job_id = str(uuid.uuid4())
-    job_dir = STORAGE_PATH / job_id
+    storage_manager = StorageManager()
 
     try:
         # Validate file sizes
@@ -126,13 +127,31 @@ async def analyze_lesson_centric(
                     detail=f"File {f.filename} exceeds maximum size of 50MB"
                 )
         
-        jokbo_paths_str = [str(save_uploaded_file(f, job_dir / "jokbo")) for f in jokbo_files]
-        lesson_paths_str = [str(save_uploaded_file(f, job_dir / "lesson")) for f in lesson_files]
+        # Save files and collect Redis keys
+        jokbo_keys = []
+        for file in jokbo_files:
+            saved_path = save_uploaded_file(file, Path("/tmp") / job_id / "jokbo")
+            key = storage_manager.store_file(saved_path, job_id, "jokbo")
+            jokbo_keys.append(key)
+        
+        lesson_keys = []
+        for file in lesson_files:
+            saved_path = save_uploaded_file(file, Path("/tmp") / job_id / "lesson")
+            key = storage_manager.store_file(saved_path, job_id, "lesson")
+            lesson_keys.append(key)
+        
+        # Store metadata in Redis
+        metadata = {
+            "jokbo_keys": jokbo_keys,
+            "lesson_keys": lesson_keys,
+            "model": model
+        }
+        storage_manager.store_job_metadata(job_id, metadata)
 
         # Send the processing task to the Celery worker with model selection
         task = celery_app.send_task(
             "tasks.run_lesson_analysis",
-            args=[job_id, jokbo_paths_str, lesson_paths_str],
+            args=[job_id],
             kwargs={"model_type": model}
         )
         return {"job_id": job_id, "task_id": task.id}
@@ -172,20 +191,78 @@ def get_result_file(job_id: str):
 
 @app.get("/results/{job_id}")
 def list_result_files(job_id: str):
-    output_dir = STORAGE_PATH / job_id / "output"
-    if not output_dir.exists():
+    # Get result keys from Redis
+    result_keys = storage_manager.redis_client.keys(f"result:{job_id}:*")
+    if not result_keys:
         raise HTTPException(status_code=404, detail="Result not found or job not complete.")
     
-    output_files = list(output_dir.glob("*.pdf"))
-    if not output_files:
-        raise HTTPException(status_code=404, detail="Generated PDFs not found.")
+    # Extract filenames from keys
+    files = []
+    for key in result_keys:
+        key_str = key.decode() if isinstance(key, bytes) else key
+        filename = key_str.split(":")[-1]
+        files.append(filename)
     
-    return {"files": [f.name for f in output_files]}
+    return {"files": files}
 
 @app.get("/result/{job_id}/{filename}")
 def get_specific_result_file(job_id: str, filename: str):
-    file_path = STORAGE_PATH / job_id / "output" / filename
-    if not file_path.exists():
+    result_key = f"result:{job_id}:{filename}"
+    content = storage_manager.get_result(result_key)
+    
+    if not content:
         raise HTTPException(status_code=404, detail="File not found.")
     
-    return FileResponse(file_path, media_type='application/pdf', filename=filename)
+    return Response(
+        content=content,
+        media_type='application/pdf',
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+@app.get("/progress/{job_id}")
+def get_job_progress(job_id: str):
+    """Get job progress information"""
+    progress_data = storage_manager.get_progress(job_id)
+    if not progress_data:
+        raise HTTPException(status_code=404, detail="Progress information not found")
+    return progress_data
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring"""
+    checks = {
+        "web": "healthy",
+        "redis": "unknown",
+        "worker": "unknown"
+    }
+    
+    # Check Redis connection
+    try:
+        storage_manager.redis_client.ping()
+        checks["redis"] = "healthy"
+    except Exception as e:
+        checks["redis"] = f"unhealthy: {str(e)}"
+    
+    # Check Celery worker
+    try:
+        inspector = celery_app.control.inspect()
+        active_workers = inspector.active()
+        if active_workers:
+            checks["worker"] = "healthy"
+        else:
+            checks["worker"] = "no active workers"
+    except Exception as e:
+        checks["worker"] = f"unhealthy: {str(e)}"
+    
+    # Determine overall status
+    all_healthy = all(v == "healthy" for v in checks.values())
+    status_code = 200 if all_healthy else 503
+    
+    return JSONResponse(
+        content={
+            "status": "healthy" if all_healthy else "degraded",
+            "checks": checks,
+            "timestamp": datetime.now().isoformat()
+        },
+        status_code=status_code
+    )

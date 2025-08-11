@@ -434,11 +434,24 @@
             text-align: center;
         }
         
-        .progress-wrapper {
-            margin-top: 1rem;
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
         }
         
-        .progress-bar {
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-wrapper {
+            margin-top: 1rem;
             width: 100%;
             height: 8px;
             background: var(--gray-200);
@@ -917,6 +930,27 @@
             
             const interval = setInterval(async () => {
                 try {
+                    // Check progress first
+                    try {
+                        const progressRes = await fetch(`/progress/${jobId}`);
+                        if (progressRes.ok) {
+                            const progressData = await progressRes.json();
+                            statusContent.innerHTML = `
+                                <div class="status-message">
+                                    <div style="margin-bottom: 0.5rem;">${progressData.message}</div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${progressData.progress}%"></div>
+                                    </div>
+                                    <div style="margin-top: 0.25rem; font-size: 0.875rem; color: #666;">
+                                        ${progressData.progress}% 완료
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    } catch (e) {
+                        // Progress endpoint might not be available yet
+                    }
+                    
                     const res = await fetch(`/status/${taskId}`);
                     const data = await res.json();
                     
