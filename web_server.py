@@ -30,7 +30,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-celery_app = Celery("tasks", broker=REDIS_URL, backend=REDIS_URL)
+celery_app = Celery("tasks")
+celery_app.config_from_object('celeryconfig')
 
 # File size limit: 50MB
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB in bytes
