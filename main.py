@@ -213,8 +213,15 @@ def process_jokbo_with_all_lessons(jokbo_path: Path, lesson_paths: List[Path], o
         if use_multi_api:
             from config import API_KEYS
             if len(API_KEYS) > 1:
-                print(f"  (Multi-API 모드 - {len(API_KEYS)}개 API 키 사용)")
-                analysis_result = processor.analyze_lessons_for_jokbo_multi_api(lesson_path_strs, str(jokbo_path), API_KEYS, model_type, thinking_budget)
+                print(f"  (Enhanced Multi-API 모드 - {len(API_KEYS)}개 API 키 사용)")
+                print(f"  청크 재분배 및 자동 재시도 기능 활성화")
+                
+                # Use enhanced multi-API processor
+                from pdf_processor.core.multi_api_processor_v2 import EnhancedMultiAPIProcessor
+                enhanced_processor = EnhancedMultiAPIProcessor(API_KEYS, model_type, thinking_budget)
+                analysis_result = enhanced_processor.analyze_lessons_for_jokbo_with_redistribution(
+                    lesson_path_strs, str(jokbo_path), max_workers=None  # None = use all available API keys
+                )
             else:
                 print("  경고: Multi-API 모드가 요청되었지만 API 키가 1개뿐입니다. 일반 모드로 실행합니다.")
                 analysis_result = processor.analyze_lessons_for_jokbo(lesson_path_strs, str(jokbo_path))

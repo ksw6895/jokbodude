@@ -48,7 +48,10 @@ class MultiAPIProcessor:
         self.api_manager.initialize_keys(api_keys)
         
         # Create main processor for file management
-        main_model = create_model(api_keys[0], model_type, thinking_budget)
+        # Configure API key first, then create model
+        import google.generativeai as genai
+        genai.configure(api_key=api_keys[0])
+        main_model = create_model(model_type, thinking_budget)
         main_processor = PDFProcessor(main_model)
         
         # Upload jokbo once
@@ -81,7 +84,9 @@ class MultiAPIProcessor:
                 
                 try:
                     # Create processor with current API key
-                    model = create_model(api_key, model_type, thinking_budget)
+                    # Configure API key first, then create model
+                    genai.configure(api_key=api_key)
+                    model = create_model(model_type, thinking_budget)
                     processor = PDFProcessor(model, session_id=main_processor.session_id)
                     
                     # Analyze lesson
@@ -201,8 +206,9 @@ def process_api_chunks_multiprocess(
         # Configure API
         genai.configure(api_key=api_key)
         
-        # Create model and processor
-        model = create_model(api_key, model_type, thinking_budget)
+        # Configure API key first, then create model and processor
+        genai.configure(api_key=api_key)
+        model = create_model(model_type, thinking_budget)
         processor = PDFProcessor(model, session_id=session_id)
         
         # Re-upload jokbo in this process

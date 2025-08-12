@@ -191,3 +191,132 @@ class APIKeyManager:
                 )
             
             return state['model']
+    
+    def initialize_keys(self, api_keys: List[str]):
+        """
+        Initialize or reinitialize API keys
+        
+        Args:
+            api_keys: List of API keys to initialize
+        """
+        with self.lock:
+            self.api_keys = api_keys
+            self.api_states.clear()
+            
+            for key in api_keys:
+                self.api_states[key] = {
+                    'available': True,
+                    'cooldown_until': None,
+                    'genai_client': None,
+                    'model': None,
+                    'usage_count': 0,
+                    'last_used': None,
+                    'consecutive_failures': 0,
+                    'total_failures': 0
+                }
+            
+            self.current_index = 0
+            self._initialize_clients()
+            print(f"  Initialized {len(api_keys)} API keys")
+    
+    def get_next_api(self) -> Optional[str]:
+        """
+        Get next available API key using round-robin with cooldown awareness
+        
+        Returns:
+            API key string or None if no API is available
+        """
+        with self.lock:
+            # Check and update cooldown status
+            current_time = datetime.now()
+            for api_key, state in self.api_states.items():
+                if state['cooldown_until'] and current_time >= state['cooldown_until']:
+                    state['available'] = True
+                    state['cooldown_until'] = None
+                    state['consecutive_failures'] = 0  # Reset on cooldown end
+                    print(f"  API key ...{api_key[-4:]} cooldown ended, now available")
+            
+            # Try to find an available API using round-robin
+            attempts = 0
+            while attempts < len(self.api_keys):
+                api_key = self.api_keys[self.current_index]
+                state = self.api_states[api_key]
+                
+                # Move to next index for round-robin
+                self.current_index = (self.current_index + 1) % len(self.api_keys)
+                attempts += 1
+                
+                if state['available']:
+                    state['usage_count'] += 1
+                    state['last_used'] = datetime.now()
+                    print(f"  Selected API key ...{api_key[-4:]} (usage: {state['usage_count']}, failures: {state['consecutive_failures']})")
+                    return api_key
+            
+            # No available API found
+            print("  ⚠️ No available API keys at this time")
+            return None
+    
+    def mark_success(self, api_key: str):
+        """
+        Mark an API request as successful
+        
+        Args:
+            api_key: The API key that succeeded
+        """
+        with self.lock:
+            if api_key in self.api_states:
+                state = self.api_states[api_key]
+                state['consecutive_failures'] = 0  # Reset consecutive failures
+                state['available'] = True
+                print(f"  ✓ API key ...{api_key[-4:]} marked as successful")
+    
+    def mark_failure(self, api_key: str, is_rate_limit: bool = False, is_empty_response: bool = False):
+        """
+        Mark an API request as failed and handle cooldown if needed
+        
+        Args:
+            api_key: The API key that failed
+            is_rate_limit: Whether the failure was due to rate limiting
+            is_empty_response: Whether the failure was due to empty response
+        """
+        with self.lock:
+            if api_key not in self.api_states:
+                return
+            
+            state = self.api_states[api_key]
+            state['consecutive_failures'] += 1
+            state['total_failures'] += 1
+            
+            # Determine cooldown duration based on failure type
+            if is_rate_limit:
+                cooldown_minutes = 15  # Longer cooldown for rate limits
+                print(f"  ⚠️ API key ...{api_key[-4:]} hit rate limit (failures: {state['consecutive_failures']})")
+            elif is_empty_response:
+                cooldown_minutes = 5  # Medium cooldown for empty responses
+                print(f"  ⚠️ API key ...{api_key[-4:]} returned empty response (failures: {state['consecutive_failures']})")
+            else:
+                cooldown_minutes = 10  # Default cooldown
+                print(f"  ⚠️ API key ...{api_key[-4:]} failed (failures: {state['consecutive_failures']})")
+            
+            # Apply cooldown after 3 consecutive failures
+            if state['consecutive_failures'] >= 3:
+                state['available'] = False
+                state['cooldown_until'] = datetime.now() + timedelta(minutes=cooldown_minutes)
+                print(f"  🔒 API key ...{api_key[-4:]} entering cooldown for {cooldown_minutes} minutes")
+    
+    def get_available_count(self) -> int:
+        """
+        Get count of currently available API keys
+        
+        Returns:
+            Number of available API keys
+        """
+        with self.lock:
+            current_time = datetime.now()
+            available_count = 0
+            
+            for state in self.api_states.values():
+                if state['available'] or (state['cooldown_until'] and current_time >= state['cooldown_until']):
+                    available_count += 1
+            
+            return available_count

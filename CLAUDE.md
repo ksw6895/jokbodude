@@ -161,7 +161,32 @@ ls output/debug/
   - Top 2 connections per question (configurable via MAX_CONNECTIONS_PER_QUESTION)
   - Minimum score threshold filtering (default: 50점)
 
-## 최근 개선사항 (Recent Improvements - 2025-08-02)
+## 최근 개선사항 (Recent Improvements - 2025-08-12)
+
+### 1. Enhanced Multi-API 모드 - 지능형 청크 재분배 시스템
+- **청크 레벨 재분배**: 특정 API가 실패해도 청크를 포기하지 않고 다른 API로 자동 재분배
+- **지능형 재시도 로직**: 
+  - 실패 유형별 분류 (rate limit, empty response, timeout, parse error, API error)
+  - 실패 유형에 따른 차별화된 재시도 전략
+  - 지수 백오프(exponential backoff) 적용
+- **API 격리 및 추적**:
+  - 각 API가 업로드한 파일을 개별 추적
+  - API별 파일 접근 격리로 일관성 유지
+  - API별 성공/실패 통계 실시간 모니터링
+- **쿨다운 시스템 개선**:
+  - 연속 3회 실패 시 자동 쿨다운 (rate limit: 15분, empty response: 5분, 기타: 10분)
+  - 쿨다운 종료 시 자동 재활성화
+  - 사용 가능한 API 수 실시간 추적
+- **진행률 및 통계 표시**:
+  - 청크 처리 진행률 실시간 표시
+  - 재시도/재분배 통계
+  - API별 사용량 및 실패율 모니터링
+- **새로운 컴포넌트**:
+  - `ChunkDistributor`: 청크를 여러 API에 효율적으로 분배
+  - `FailedChunkRetrier`: 실패한 청크의 지능형 재시도 관리
+  - `EnhancedMultiAPIProcessor`: 개선된 multi-API 처리 엔진
+
+## 이전 개선사항 (2025-08-02)
 
 ### 1. Multi-API 모드 버그 수정 및 개선
 - **AttributeError 수정**: `merge_chunk_results` → `load_and_merge_chunk_results` 메서드 이름 수정

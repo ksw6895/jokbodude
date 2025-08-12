@@ -33,12 +33,13 @@ class PromptBuilder:
         return f"{intro}\n\n{LESSON_CENTRIC_TASK}\n\n{COMMON_WARNINGS}\n\n{RELEVANCE_CRITERIA}\n\n{output_format}"
     
     @staticmethod
-    def build_jokbo_centric_prompt(jokbo_filename: str, lesson_filename: str) -> str:
+    def build_jokbo_centric_prompt(jokbo_filename: str, lesson_filename: str, chunk_info: dict = None) -> str:
         """Build prompt for jokbo-centric analysis
         
         Args:
             jokbo_filename: Name of the jokbo file
             lesson_filename: Name of the lesson file being analyzed
+            chunk_info: Optional dict with chunk information (current_chunk, total_chunks, start_page, end_page)
             
         Returns:
             Complete prompt string
@@ -47,6 +48,14 @@ class PromptBuilder:
 
 중요: 족보 파일명은 반드시 "{jokbo_filename}"을 그대로 사용하세요.
 중요: 강의자료 파일명은 반드시 "{lesson_filename}"을 그대로 사용하세요."""
+        
+        # Add chunk information if provided
+        if chunk_info:
+            chunk_notice = f"""
+참고: 현재 분석 중인 강의자료는 전체 {chunk_info['total_chunks']}개 청크 중 {chunk_info['current_chunk']}번째 청크입니다.
+이 청크는 원본 PDF의 {chunk_info['start_page']}-{chunk_info['end_page']} 페이지에 해당합니다.
+페이지 번호를 출력할 때는 반드시 원본 페이지 번호({chunk_info['start_page']}-{chunk_info['end_page']} 범위)를 사용하세요."""
+            intro += chunk_notice
         
         output_format = JOKBO_CENTRIC_OUTPUT_FORMAT.format(
             jokbo_filename=jokbo_filename,
