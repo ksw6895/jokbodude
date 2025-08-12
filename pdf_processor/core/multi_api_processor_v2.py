@@ -333,6 +333,20 @@ class EnhancedMultiAPIProcessor:
             
             if result and "error" not in result:
                 self.api_manager.mark_success(api_key)
+                
+                # Save chunk result to session folder
+                if not work_item['is_single'] and hasattr(processor, 'save_chunk_result'):
+                    chunk_info = {
+                        'lesson_filename': work_item['lesson_name'],
+                        'chunk_idx': work_item['chunk_idx'],
+                        'total_chunks': work_item['total_chunks'],
+                        'start_page': work_item['chunk_info'][1],
+                        'end_page': work_item['chunk_info'][2]
+                    }
+                    temp_dir = Path(f"output/temp/sessions/{self.main_session_id}/chunk_results")
+                    temp_dir.mkdir(parents=True, exist_ok=True)
+                    processor.save_chunk_result(chunk_info, result, str(temp_dir))
+                
                 return result
             else:
                 error = result.get("error", "Unknown error") if result else "No result"
