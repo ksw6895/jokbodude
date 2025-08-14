@@ -244,3 +244,15 @@ class StorageManager:
         if job_dir.exists():
             import shutil
             shutil.rmtree(job_dir)
+
+    def close(self) -> None:
+        """Close Redis connections and release resources."""
+        try:
+            if self.redis_client is not None:
+                pool = getattr(self.redis_client, "connection_pool", None)
+                if pool is not None:
+                    pool.disconnect()
+                self.redis_client = None
+                logger.info("StorageManager Redis connections closed")
+        except Exception as e:
+            logger.warning(f"Error while closing StorageManager: {e}")

@@ -6,7 +6,8 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 from datetime import datetime
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Query
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Query, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,6 +15,7 @@ from celery import Celery
 from storage_manager import StorageManager
 from urllib.parse import quote
 import re
+from pdf_processor.pdf.cache import get_global_cache, clear_global_cache
 
 # --- Configuration ---
 # Use an environment variable for the storage path, essential for Render.
@@ -21,7 +23,25 @@ STORAGE_PATH = Path(os.getenv("RENDER_STORAGE_PATH", "persistent_storage"))
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 # --- App & Celery Initialization ---
-app = FastAPI(title="JokboDude API", version="1.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Application startup: initialize resources
+    print("Application startup: Initializing resources...")
+    # Initialize StorageManager and PDF cache
+    app.state.storage_manager = StorageManager(REDIS_URL)
+    get_global_cache()
+    yield
+    # Application shutdown: clean up resources
+    print("Application shutdown: Cleaning up resources...")
+    clear_global_cache()
+    sm = getattr(app.state, "storage_manager", None)
+    if sm is not None:
+        try:
+            sm.close()
+        except Exception:
+            pass
+
+app = FastAPI(title="JokboDude API", version="1.0.0", lifespan=lifespan)
 
 # Add CORS middleware for web frontend
 app.add_middleware(
@@ -38,8 +58,7 @@ celery_app.config_from_object('celeryconfig')
 # File size limit: 50MB
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB in bytes
 
-# Initialize storage manager
-storage_manager = StorageManager(REDIS_URL)
+# StorageManager is initialized in lifespan and accessed via app.state
 
 # --- Helper Functions ---
 def save_uploaded_file(upload_file: UploadFile, destination_dir: Path) -> Path:
@@ -81,12 +100,14 @@ def read_root():
 
 @app.post("/analyze/jokbo-centric", status_code=202)
 async def analyze_jokbo_centric(
+    request: Request,
     jokbo_files: list[UploadFile] = File(...), 
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
     multi_api: bool = Query(False)
 ):
     job_id = str(uuid.uuid4())
+    storage_manager = request.app.state.storage_manager
 
     try:
         # Validate file sizes
@@ -141,13 +162,14 @@ async def analyze_jokbo_centric(
 
 @app.post("/analyze/lesson-centric", status_code=202)
 async def analyze_lesson_centric(
+    request: Request,
     jokbo_files: list[UploadFile] = File(...), 
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
     multi_api: bool = Query(False)
 ):
     job_id = str(uuid.uuid4())
-    storage_manager = StorageManager()
+    storage_manager = request.app.state.storage_manager
 
     try:
         # Validate file sizes
@@ -201,9 +223,10 @@ def get_task_status(task_id: str):
     return response
 
 @app.get("/result/{job_id}")
-def get_result_file(job_id: str):
+def get_result_file(request: Request, job_id: str):
+    storage_manager = request.app.state.storage_manager
     # Get result from Redis
-    result_keys = storage_manager.redis_client.keys(f"result:{job_id}:*")
+    result_keys = list(storage_manager.redis_client.scan_iter(match=f"result:{job_id}:*"))
     if not result_keys:
         raise HTTPException(status_code=404, detail="Result not found or job not complete.")
     
@@ -223,9 +246,10 @@ def get_result_file(job_id: str):
     )
 
 @app.get("/results/{job_id}")
-def list_result_files(job_id: str):
+def list_result_files(request: Request, job_id: str):
+    storage_manager = request.app.state.storage_manager
     # Get result keys from Redis
-    result_keys = storage_manager.redis_client.keys(f"result:{job_id}:*")
+    result_keys = list(storage_manager.redis_client.scan_iter(match=f"result:{job_id}:*"))
     if not result_keys:
         raise HTTPException(status_code=404, detail="Result not found or job not complete.")
     
@@ -239,7 +263,8 @@ def list_result_files(job_id: str):
     return {"files": files}
 
 @app.get("/result/{job_id}/{filename}")
-def get_specific_result_file(job_id: str, filename: str):
+def get_specific_result_file(request: Request, job_id: str, filename: str):
+    storage_manager = request.app.state.storage_manager
     result_key = f"result:{job_id}:{filename}"
     content = storage_manager.get_result(result_key)
     
@@ -254,16 +279,18 @@ def get_specific_result_file(job_id: str, filename: str):
     )
 
 @app.get("/progress/{job_id}")
-def get_job_progress(job_id: str):
+def get_job_progress(request: Request, job_id: str):
     """Get job progress information"""
+    storage_manager = request.app.state.storage_manager
     progress_data = storage_manager.get_progress(job_id)
     if not progress_data:
         raise HTTPException(status_code=404, detail="Progress information not found")
     return progress_data
 
 @app.get("/health")
-async def health_check():
+async def health_check(request: Request):
     """Health check endpoint for monitoring"""
+    storage_manager = request.app.state.storage_manager
     checks = {
         "web": "healthy",
         "redis": "unknown",
