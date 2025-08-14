@@ -73,7 +73,8 @@ def run_jokbo_analysis(job_id: str, model_type: str = None):
             configure_api()
             selected_model = model_type or MODEL_TYPE
             model = create_model(selected_model)
-            processor = PDFProcessor(model, session_id=job_id, multi_api=USE_MULTI_API)
+            # PDFProcessor does not take a 'multi_api' arg; choose methods conditionally
+            processor = PDFProcessor(model, session_id=job_id)
             creator = PDFCreator()
             
             # Process each jokbo file with progress tracking
@@ -85,8 +86,13 @@ def run_jokbo_analysis(job_id: str, model_type: str = None):
                 progress = int((idx - 0.5) / total_jokbos * 100)
                 storage_manager.update_progress(job_id, progress, f"분석 중: {jokbo_path.name}")
                 
-                # Analyze jokbo against all lessons
-                analysis_result = processor.analyze_jokbo_centric(lesson_paths, jokbo_path_str)
+                # Analyze jokbo against all lessons (use multi-API when enabled)
+                if USE_MULTI_API and len(API_KEYS) > 1:
+                    analysis_result = processor.analyze_jokbo_centric_multi_api(
+                        lesson_paths, jokbo_path_str, api_keys=API_KEYS
+                    )
+                else:
+                    analysis_result = processor.analyze_jokbo_centric(lesson_paths, jokbo_path_str)
                 
                 if "error" in analysis_result:
                     raise Exception(f"Analysis error for {jokbo_path.name}: {analysis_result['error']}")
@@ -110,7 +116,7 @@ def run_jokbo_analysis(job_id: str, model_type: str = None):
                 storage_manager.store_result(job_id, output_path)
             
             # Clean up processor resources
-            processor.cleanup()
+            processor.cleanup_session()
             
             return {
                 "status": "Complete",
@@ -166,7 +172,8 @@ def run_lesson_analysis(job_id: str, model_type: str = None):
             configure_api()
             selected_model = model_type or MODEL_TYPE
             model = create_model(selected_model)
-            processor = PDFProcessor(model, session_id=job_id, multi_api=USE_MULTI_API)
+            # PDFProcessor does not take a 'multi_api' arg; choose methods conditionally
+            processor = PDFProcessor(model, session_id=job_id)
             creator = PDFCreator()
             
             # Process each lesson file with progress tracking
@@ -178,8 +185,13 @@ def run_lesson_analysis(job_id: str, model_type: str = None):
                 progress = int((idx - 0.5) / total_lessons * 100)
                 storage_manager.update_progress(job_id, progress, f"분석 중: {lesson_path.name}")
                 
-                # Analyze lesson against all jokbos
-                analysis_result = processor.analyze_lesson_centric(jokbo_paths, lesson_path_str)
+                # Analyze lesson against all jokbos (use multi-API when enabled)
+                if USE_MULTI_API and len(API_KEYS) > 1:
+                    analysis_result = processor.analyze_lesson_centric_multi_api(
+                        jokbo_paths, lesson_path_str, api_keys=API_KEYS
+                    )
+                else:
+                    analysis_result = processor.analyze_lesson_centric(jokbo_paths, lesson_path_str)
                 
                 if "error" in analysis_result:
                     raise Exception(f"Analysis error for {lesson_path.name}: {analysis_result['error']}")
@@ -203,7 +215,7 @@ def run_lesson_analysis(job_id: str, model_type: str = None):
                 storage_manager.store_result(job_id, output_path)
             
             # Clean up processor resources
-            processor.cleanup()
+            processor.cleanup_session()
             
             return {
                 "status": "Complete",
