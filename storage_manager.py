@@ -4,6 +4,7 @@ Uses Redis to share file data between web and worker services.
 """
 
 import os
+import tempfile
 import base64
 import json
 import redis
@@ -151,7 +152,15 @@ class StorageManager:
         content = self.get_file(file_key)
         if not content:
             raise ValueError(f"File not found in Redis: {file_key}")
-        
+
+        # Safety: only allow writes under the system temp directory
+        tmp_root = Path(os.getenv("TMPDIR", tempfile.gettempdir())).resolve()
+        resolved_target = target_path.resolve()
+        try:
+            resolved_target.relative_to(tmp_root)
+        except ValueError:
+            raise ValueError(f"Refusing to write outside temp dir: {resolved_target} not under {tmp_root}")
+
         target_path.parent.mkdir(parents=True, exist_ok=True)
         target_path.write_bytes(content)
         return target_path
