@@ -115,25 +115,27 @@ worker_log_color = False
 
 # Memory and performance settings
 worker_max_memory_per_child = 200000  # 200MB
-task_time_limit = 3600  # 1 hour
-task_soft_time_limit = 3300  # 55 minutes
+# Extend task time limits to support very long analyses
+# 24 hours = 86400 seconds (set hard slightly above soft)
+task_time_limit = 90000  # ~25 hours
+task_soft_time_limit = 86400  # 24 hours
 
 # Error handling
 task_annotations = {
     '*': {
         'rate_limit': '10/s',
-        'time_limit': 3600,
-        'soft_time_limit': 3300,
+        'time_limit': 90000,
+        'soft_time_limit': 86400,
     },
     'tasks.run_jokbo_analysis': {
         'rate_limit': '5/s',
-        'time_limit': 7200,  # 2 hours for large analysis tasks
-        'soft_time_limit': 6900,  # 1h 55min
+        'time_limit': 90000,  # ~25 hours
+        'soft_time_limit': 86400,  # 24 hours
     },
     'tasks.run_lesson_analysis': {
         'rate_limit': '5/s', 
-        'time_limit': 7200,  # 2 hours for large analysis tasks
-        'soft_time_limit': 6900,  # 1h 55min
+        'time_limit': 90000,  # ~25 hours
+        'soft_time_limit': 86400,  # 24 hours
     }
 }
 

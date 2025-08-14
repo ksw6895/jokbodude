@@ -255,7 +255,8 @@ class MultiAPIManager:
                 logger.info(f"Reset status for API key {api_index}")
     
     def distribute_tasks(self, tasks: List[Any], operation: Callable,
-                        parallel: bool = True, max_workers: int = 3) -> List[Any]:
+                        parallel: bool = True, max_workers: int = 3,
+                        on_progress: Optional[Callable[[Any], None]] = None) -> List[Any]:
         """
         Distribute tasks across multiple API keys.
         
@@ -293,6 +294,12 @@ class MultiAPIManager:
                     except Exception as e:
                         logger.error(f"Task failed: {str(e)}")
                         results.append({"error": str(e), "task": task})
+                    finally:
+                        try:
+                            if on_progress:
+                                on_progress(task)
+                        except Exception:
+                            pass
         else:
             # Sequential processing
             for task in tasks:
@@ -304,5 +311,11 @@ class MultiAPIManager:
                 except Exception as e:
                     logger.error(f"Task failed: {str(e)}")
                     results.append({"error": str(e), "task": task})
+                finally:
+                    try:
+                        if on_progress:
+                            on_progress(task)
+                    except Exception:
+                        pass
         
         return results

@@ -168,9 +168,10 @@ class StorageManager:
     def store_job_metadata(self, job_id: str, metadata: Dict) -> None:
         """Store job metadata in Redis"""
         key = f"job:{job_id}:metadata"
+        # Keep metadata longer to support long-running tasks
         self.redis_client.setex(
             key,
-            3600,  # 1 hour TTL
+            172800,  # 48 hours TTL
             json.dumps(metadata)
         )
     
@@ -191,7 +192,7 @@ class StorageManager:
         # Store with longer TTL for results
         self.redis_client.setex(
             result_key,
-            7200,  # 2 hours TTL
+            172800,  # 48 hours TTL
             content
         )
         return result_key
@@ -201,9 +202,8 @@ class StorageManager:
         return self.redis_client.get(result_key)
     
     def update_progress(self, job_id: str, progress: int, message: str) -> None:
-        """Update job progress in Redis"""
+        """Update job progress in Redis (percent + message)."""
         from datetime import datetime
-        
         if not self.use_local_only and self.redis_client:
             try:
                 self._with_retry(
@@ -212,11 +212,11 @@ class StorageManager:
                     mapping={
                         "progress": str(progress),
                         "message": message,
-                        "timestamp": datetime.now().isoformat()
+                        "timestamp": datetime.now().isoformat(),
                     }
                 )
-                # Set expiration
-                self._with_retry(self.redis_client.expire, f"progress:{job_id}", 3600)
+                # Extend expiration to match long jobs
+                self._with_retry(self.redis_client.expire, f"progress:{job_id}", 172800)
             except Exception as e:
                 logger.error(f"Failed to update progress: {e}")
     
@@ -226,12 +226,26 @@ class StorageManager:
             try:
                 data = self._with_retry(self.redis_client.hgetall, f"progress:{job_id}")
                 if data:
+                    def _get(key, default=b''):
+                        v = data.get(key) or data.get(key if isinstance(key, str) else key)
+                        return v
+                    def _decode(v):
+                        return v.decode() if isinstance(v, (bytes, bytearray)) else v
+                    progress = int(_get(b'progress', b'0') or _get('progress', '0') or 0)
+                    message = _decode(_get(b'message', b'') or _get('message', '')) or ''
+                    timestamp = _decode(_get(b'timestamp', b'') or _get('timestamp', '')) or ''
+                    total_chunks = int(_get(b'total_chunks', b'0') or _get('total_chunks', '0') or 0)
+                    completed_chunks = int(_get(b'completed_chunks', b'0') or _get('completed_chunks', '0') or 0)
+                    eta_seconds = float(_get(b'eta_seconds', b'-1') or _get('eta_seconds', '-1') or -1)
+                    avg_chunk_seconds = float(_get(b'avg_chunk_seconds', b'0') or _get('avg_chunk_seconds', '0') or 0)
                     return {
-                        "progress": int(data.get(b'progress', 0) or data.get('progress', 0)),
-                        "message": (data.get(b'message', b'').decode() if isinstance(data.get(b'message'), bytes) 
-                                   else data.get('message', '')),
-                        "timestamp": (data.get(b'timestamp', b'').decode() if isinstance(data.get(b'timestamp'), bytes)
-                                    else data.get('timestamp', ''))
+                        "progress": progress,
+                        "message": message,
+                        "timestamp": timestamp,
+                        "total_chunks": total_chunks,
+                        "completed_chunks": completed_chunks,
+                        "eta_seconds": eta_seconds,
+                        "avg_chunk_seconds": avg_chunk_seconds,
                     }
             except Exception as e:
                 logger.error(f"Failed to get progress: {e}")
@@ -265,3 +279,117 @@ class StorageManager:
                 logger.info("StorageManager Redis connections closed")
         except Exception as e:
             logger.warning(f"Error while closing StorageManager: {e}")
+
+    # --- Enhanced progress tracking helpers ---
+    def init_progress(self, job_id: str, total_chunks: int, message: str = "") -> None:
+        """Initialize chunk-based progress with ETA support."""
+        from datetime import datetime
+        now = time.time()
+        if not self.use_local_only and self.redis_client:
+            try:
+                self._with_retry(
+                    self.redis_client.hset,
+                    f"progress:{job_id}",
+                    mapping={
+                        "progress": "0",
+                        "message": message or "작업을 시작합니다",
+                        "timestamp": datetime.now().isoformat(),
+                        "started_at": str(now),
+                        "total_chunks": str(int(total_chunks)),
+                        "completed_chunks": "0",
+                        "eta_seconds": "-1",
+                        "avg_chunk_seconds": "0",
+                    }
+                )
+                self._with_retry(self.redis_client.expire, f"progress:{job_id}", 172800)
+            except Exception as e:
+                logger.error(f"Failed to init progress: {e}")
+
+    def increment_chunk(self, job_id: str, inc: int = 1, message: Optional[str] = None) -> None:
+        """Increment completed chunk count and update ETA and percent."""
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            key = f"progress:{job_id}"
+            data = self._with_retry(self.redis_client.hgetall, key) or {}
+            def _get_num(name: str, default: float = 0.0) -> float:
+                v = data.get(name.encode()) or data.get(name)
+                try:
+                    return float(v) if v is not None else default
+                except Exception:
+                    return default
+            total_chunks = int(_get_num('total_chunks', 0))
+            completed = int(_get_num('completed_chunks', 0)) + int(inc)
+            started_at = _get_num('started_at', time.time())
+            now = time.time()
+            elapsed = max(0.0, now - started_at)
+            avg = (elapsed / completed) if completed > 0 else 0.0
+            remaining = max(0, total_chunks - completed)
+            eta = avg * remaining if completed > 0 else -1
+            progress = int((completed / total_chunks) * 100) if total_chunks > 0 else 0
+            # Avoid showing 100% until finalization elsewhere
+            progress = min(progress, 99 if remaining > 0 else 100)
+            auto_msg = message or f"청크 진행: {completed}/{total_chunks} 완료"
+            self._with_retry(
+                self.redis_client.hset,
+                key,
+                mapping={
+                    "completed_chunks": str(completed),
+                    "total_chunks": str(total_chunks),
+                    "progress": str(progress),
+                    "eta_seconds": f"{eta:.2f}",
+                    "avg_chunk_seconds": f"{avg:.2f}",
+                    "message": auto_msg,
+                }
+            )
+            self._with_retry(self.redis_client.expire, key, 172800)
+        except Exception as e:
+            logger.error(f"Failed to increment chunk progress: {e}")
+
+    # --- User → jobs mapping helpers ---
+    def add_user_job(self, user_id: str, job_id: str) -> None:
+        """Associate a job with a user id."""
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            self._with_retry(self.redis_client.lpush, f"user:{user_id}:jobs", job_id)
+            self._with_retry(self.redis_client.expire, f"user:{user_id}:jobs", 2592000)  # 30 days
+            self._with_retry(self.redis_client.setex, f"job:{job_id}:user", 2592000, user_id)
+        except Exception as e:
+            logger.error(f"Failed to add user job mapping: {e}")
+
+    def get_user_jobs(self, user_id: str, limit: int = 50) -> List[str]:
+        if self.use_local_only or not self.redis_client:
+            return []
+        try:
+            jobs = self._with_retry(self.redis_client.lrange, f"user:{user_id}:jobs", 0, max(0, limit - 1)) or []
+            return [j.decode() if isinstance(j, (bytes, bytearray)) else j for j in jobs]
+        except Exception as e:
+            logger.error(f"Failed to fetch user jobs: {e}")
+            return []
+
+    def get_job_owner(self, job_id: str) -> Optional[str]:
+        if self.use_local_only or not self.redis_client:
+            return None
+        try:
+            v = self._with_retry(self.redis_client.get, f"job:{job_id}:user")
+            return v.decode() if isinstance(v, (bytes, bytearray)) else v
+        except Exception:
+            return None
+
+    def set_job_task(self, job_id: str, task_id: str) -> None:
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            self._with_retry(self.redis_client.setex, f"job:{job_id}:task", 172800, task_id)
+        except Exception as e:
+            logger.error(f"Failed to set job task mapping: {e}")
+
+    def get_job_task(self, job_id: str) -> Optional[str]:
+        if self.use_local_only or not self.redis_client:
+            return None
+        try:
+            v = self._with_retry(self.redis_client.get, f"job:{job_id}:task")
+            return v.decode() if isinstance(v, (bytes, bytearray)) else v
+        except Exception:
+            return None

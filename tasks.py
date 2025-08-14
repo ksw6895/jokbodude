@@ -8,6 +8,7 @@ from config import create_model, configure_api, API_KEYS
 from pdf_processor.core.processor import PDFProcessor
 from pdf_creator import PDFCreator
 from storage_manager import StorageManager
+from pdf_processor.pdf.operations import PDFOperations
 
 # --- Configuration ---
 # Use /tmp for initial file storage if persistent storage not available
@@ -76,6 +77,17 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
                 storage_manager.save_file_locally(key, local_path)
                 lesson_paths.append(str(local_path))
             
+            # Initialize chunk-based progress
+            try:
+                total_jokbos = len(jokbo_paths)
+                lesson_chunks = 0
+                for lp in lesson_paths:
+                    lesson_chunks += len(PDFOperations.split_pdf_for_chunks(lp))
+                total_chunks = max(1, total_jokbos * lesson_chunks)
+                storage_manager.init_progress(job_id, total_chunks, f"총 청크: {total_chunks}")
+            except Exception:
+                storage_manager.init_progress(job_id, 1, "진행률 초기화")
+
             # Configure API and create model
             configure_api()
             selected_model = model_type or MODEL_TYPE
@@ -89,9 +101,12 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             for idx, jokbo_path_str in enumerate(jokbo_paths, 1):
                 jokbo_path = Path(jokbo_path_str)
                 
-                # Update progress
-                progress = int((idx - 0.5) / total_jokbos * 100)
-                storage_manager.update_progress(job_id, progress, f"분석 중: {jokbo_path.name}")
+                # Update status message (percent driven by chunk progress)
+                try:
+                    cur = storage_manager.get_progress(job_id) or {}
+                    storage_manager.update_progress(job_id, int(cur.get('progress', 0) or 0), f"분석 중: {jokbo_path.name}")
+                except Exception:
+                    pass
                 
                 # Analyze jokbo against all lessons (use multi-API when enabled)
                 if use_multi and len(API_KEYS) > 1:
@@ -104,9 +119,12 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
                 if "error" in analysis_result:
                     raise Exception(f"Analysis error for {jokbo_path.name}: {analysis_result['error']}")
                 
-                # Update progress for PDF generation
-                progress = int(idx / total_jokbos * 100)
-                storage_manager.update_progress(job_id, progress, f"PDF 생성 중: {jokbo_path.name}")
+                # Update status message for PDF generation
+                try:
+                    cur = storage_manager.get_progress(job_id) or {}
+                    storage_manager.update_progress(job_id, int(cur.get('progress', 0) or 0), f"PDF 생성 중: {jokbo_path.name}")
+                except Exception:
+                    pass
                 
                 # Generate output PDF
                 output_filename = f"jokbo_centric_{jokbo_path.stem}_all_lessons.pdf"
@@ -125,6 +143,12 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             # Clean up processor resources
             processor.cleanup_session()
             
+            # Finalize progress to 100%
+            try:
+                storage_manager.update_progress(job_id, 100, "완료")
+            except Exception:
+                pass
+
             return {
                 "status": "Complete",
                 "job_id": job_id,
@@ -181,6 +205,18 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
                 storage_manager.save_file_locally(key, local_path)
                 lesson_paths.append(str(local_path))
             
+            # Initialize chunk-based progress (lesson-centric)
+            try:
+                total_lessons = len(lesson_paths)
+                total_jokbos = len(jokbo_paths)
+                lesson_chunks = 0
+                for lp in lesson_paths:
+                    lesson_chunks += len(PDFOperations.split_pdf_for_chunks(lp))
+                total_chunks = max(1, lesson_chunks * max(1, total_jokbos))
+                storage_manager.init_progress(job_id, total_chunks, f"총 청크: {total_chunks}")
+            except Exception:
+                storage_manager.init_progress(job_id, 1, "진행률 초기화")
+
             # Configure API and create model
             configure_api()
             selected_model = model_type or MODEL_TYPE
@@ -194,9 +230,12 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
             for idx, lesson_path_str in enumerate(lesson_paths, 1):
                 lesson_path = Path(lesson_path_str)
                 
-                # Update progress
-                progress = int((idx - 0.5) / total_lessons * 100)
-                storage_manager.update_progress(job_id, progress, f"분석 중: {lesson_path.name}")
+                # Update status message (percent driven by chunk progress)
+                try:
+                    cur = storage_manager.get_progress(job_id) or {}
+                    storage_manager.update_progress(job_id, int(cur.get('progress', 0) or 0), f"분석 중: {lesson_path.name}")
+                except Exception:
+                    pass
                 
                 # Analyze lesson against all jokbos (use multi-API when enabled)
                 if use_multi and len(API_KEYS) > 1:
@@ -209,9 +248,12 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
                 if "error" in analysis_result:
                     raise Exception(f"Analysis error for {lesson_path.name}: {analysis_result['error']}")
                 
-                # Update progress for PDF generation
-                progress = int(idx / total_lessons * 100)
-                storage_manager.update_progress(job_id, progress, f"PDF 생성 중: {lesson_path.name}")
+                # Update status message for PDF generation
+                try:
+                    cur = storage_manager.get_progress(job_id) or {}
+                    storage_manager.update_progress(job_id, int(cur.get('progress', 0) or 0), f"PDF 생성 중: {lesson_path.name}")
+                except Exception:
+                    pass
                 
                 # Generate output PDF
                 output_filename = f"filtered_{lesson_path.stem}_all_jokbos.pdf"
@@ -229,6 +271,12 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
             
             # Clean up processor resources
             processor.cleanup_session()
+            
+            # Finalize progress to 100%
+            try:
+                storage_manager.update_progress(job_id, 100, "완료")
+            except Exception:
+                pass
             
             return {
                 "status": "Complete",

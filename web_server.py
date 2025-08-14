@@ -104,7 +104,8 @@ async def analyze_jokbo_centric(
     jokbo_files: list[UploadFile] = File(...), 
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
-    multi_api: bool = Query(False)
+    multi_api: bool = Query(False),
+    user_id: Optional[str] = Query(None)
 ):
     job_id = str(uuid.uuid4())
     storage_manager = request.app.state.storage_manager
@@ -146,9 +147,12 @@ async def analyze_jokbo_centric(
             "jokbo_keys": jokbo_keys,
             "lesson_keys": lesson_keys,
             "model": model,
-            "multi_api": multi_api
+            "multi_api": multi_api,
+            "user_id": user_id
         }
         storage_manager.store_job_metadata(job_id, metadata)
+        if user_id:
+            storage_manager.add_user_job(user_id, job_id)
 
         # Send the processing task to the Celery worker
         task = celery_app.send_task(
@@ -156,6 +160,10 @@ async def analyze_jokbo_centric(
             args=[job_id],
             kwargs={"model_type": model, "multi_api": multi_api}
         )
+        try:
+            storage_manager.set_job_task(job_id, task.id)
+        except Exception:
+            pass
         return {"job_id": job_id, "task_id": task.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
@@ -166,7 +174,8 @@ async def analyze_lesson_centric(
     jokbo_files: list[UploadFile] = File(...), 
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
-    multi_api: bool = Query(False)
+    multi_api: bool = Query(False),
+    user_id: Optional[str] = Query(None)
 ):
     job_id = str(uuid.uuid4())
     storage_manager = request.app.state.storage_manager
@@ -198,9 +207,12 @@ async def analyze_lesson_centric(
             "jokbo_keys": jokbo_keys,
             "lesson_keys": lesson_keys,
             "model": model,
-            "multi_api": multi_api
+            "multi_api": multi_api,
+            "user_id": user_id
         }
         storage_manager.store_job_metadata(job_id, metadata)
+        if user_id:
+            storage_manager.add_user_job(user_id, job_id)
 
         # Send the processing task to the Celery worker with model selection
         task = celery_app.send_task(
@@ -208,6 +220,10 @@ async def analyze_lesson_centric(
             args=[job_id],
             kwargs={"model_type": model, "multi_api": multi_api}
         )
+        try:
+            storage_manager.set_job_task(job_id, task.id)
+        except Exception:
+            pass
         return {"job_id": job_id, "task_id": task.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
@@ -286,6 +302,40 @@ def get_job_progress(request: Request, job_id: str):
     if not progress_data:
         raise HTTPException(status_code=404, detail="Progress information not found")
     return progress_data
+
+@app.get("/user/{user_id}/jobs")
+def get_user_jobs(request: Request, user_id: str, limit: int = 50):
+    """List recent jobs for a user with status, progress, and files."""
+    storage_manager = request.app.state.storage_manager
+    job_ids = storage_manager.get_user_jobs(user_id, limit=limit) or []
+    results = []
+    for job_id in job_ids:
+        entry = {"job_id": job_id}
+        try:
+            task_id = storage_manager.get_job_task(job_id)
+            if task_id:
+                tr = celery_app.AsyncResult(task_id)
+                entry["status"] = tr.status
+            else:
+                entry["status"] = "UNKNOWN"
+        except Exception:
+            entry["status"] = "UNKNOWN"
+        try:
+            entry["progress"] = storage_manager.get_progress(job_id) or {}
+        except Exception:
+            entry["progress"] = None
+        try:
+            # List result filenames if any
+            keys = list(storage_manager.redis_client.scan_iter(match=f"result:{job_id}:*"))
+            files = []
+            for k in keys:
+                ks = k.decode() if isinstance(k, (bytes, bytearray)) else k
+                files.append(ks.split(":")[-1])
+            entry["files"] = files
+        except Exception:
+            entry["files"] = []
+        results.append(entry)
+    return {"user_id": user_id, "jobs": results}
 
 @app.get("/health")
 async def health_check(request: Request):

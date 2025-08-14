@@ -130,6 +130,13 @@ class LessonCentricAnalyzer(BaseAnalyzer):
                     jokbo_path, chunk_path, None, chunk_info=(start_page, end_page)
                 )
                 chunk_results.append(result)
+                # Update chunk progress
+                try:
+                    from storage_manager import StorageManager
+                    StorageManager().increment_chunk(self.session_id, 1,
+                        f"청크 진행: {i+1}/{len(chunks)} ({Path(lesson_path).name})")
+                except Exception:
+                    pass
             finally:
                 # Clean up chunk file
                 Path(chunk_path).unlink(missing_ok=True)
@@ -244,11 +251,22 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         self.file_manager.track_file(lesson_file)
         
         try:
+            from ..pdf.operations import PDFOperations
+            chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
+            is_chunked = len(chunks) > 1
             for jokbo_path in jokbo_paths:
                 logger.info(f"Analyzing jokbo: {Path(jokbo_path).name}")
                 
                 try:
                     result = self.analyze(jokbo_path, lesson_path, lesson_file)
+                    # If lesson did not chunk, count this jokbo as one chunk unit
+                    if not is_chunked:
+                        try:
+                            from storage_manager import StorageManager
+                            StorageManager().increment_chunk(self.session_id, 1,
+                                f"파일 완료: {Path(lesson_path).name} / {Path(jokbo_path).name}")
+                        except Exception:
+                            pass
                     results.append(result)
                 except Exception as e:
                     logger.error(f"Failed to analyze {jokbo_path}: {str(e)}")

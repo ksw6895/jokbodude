@@ -145,6 +145,13 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                 except Exception:
                     pass
                 chunk_results.append(result)
+                # Update chunk progress
+                try:
+                    from storage_manager import StorageManager
+                    StorageManager().increment_chunk(self.session_id, 1,
+                        f"청크 진행: {i+1}/{len(chunks)} ({Path(lesson_path).name})")
+                except Exception:
+                    pass
             finally:
                 # Clean up
                 Path(chunk_path).unlink(missing_ok=True)
@@ -253,7 +260,18 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                 logger.info(f"Analyzing lesson {idx+1}/{len(lesson_paths)}: {Path(lesson_path).name}")
                 
                 try:
+                    # Perform analysis (may chunk internally)
                     result = self.analyze(lesson_path, jokbo_path, jokbo_file)
+                    # If lesson processed without chunking, count as one chunk
+                    try:
+                        from ..pdf.operations import PDFOperations
+                        chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
+                        if len(chunks) <= 1:
+                            from storage_manager import StorageManager
+                            StorageManager().increment_chunk(self.session_id, 1,
+                                f"파일 완료: {Path(lesson_path).name}")
+                    except Exception:
+                        pass
                     
                     if save_intermediate:
                         # Save intermediate result

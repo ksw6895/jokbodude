@@ -641,9 +641,10 @@
                 <span>JokboDude</span>
             </div>
             <div class="nav-links">
-                <a href="#" class="nav-link">Features</a>
-                <a href="#" class="nav-link">Pricing</a>
-                <a href="#" class="nav-link">Documentation</a>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <input id="user_id_input" placeholder="User ID" style="padding:0.4rem 0.6rem;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.08);color:var(--text);min-width:140px;" />
+                    <button id="save_user_id_btn" class="tab" style="padding:0.4rem 0.8rem;">Save</button>
+                </div>
             </div>
         </div>
     </nav>
@@ -821,6 +822,17 @@
                 </div>
             </div>
         </div>
+
+        <div class="app-card" style="margin-top:1rem;">
+            <div class="card-header">
+                <h2 class="card-title">My Jobs</h2>
+                <p class="card-description">View your recent jobs by User ID</p>
+            </div>
+            <div class="card-body">
+                <button id="load_jobs_btn" class="tab" style="margin-bottom:1rem;">Load My Jobs</button>
+                <div id="jobs_list" class="status-content" style="display:block;align-items:stretch;justify-content:flex-start;"></div>
+            </div>
+        </div>
     </div>
     
     <script>
@@ -952,7 +964,9 @@
                 const multiApi = (mode === 'jokbo-centric'
                     ? document.getElementById('jokbo_multi_api').checked
                     : document.getElementById('lesson_multi_api').checked);
-                const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}`, {
+                const userId = (localStorage.getItem('jd_user_id') || '').trim();
+                const userParam = userId ? `&user_id=${encodeURIComponent(userId)}` : '';
+                const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}${userParam}`, {
                     method: 'POST',
                     body: formData
                 });
@@ -1005,14 +1019,17 @@
                         const progressRes = await fetch(`/progress/${jobId}`);
                         if (progressRes.ok) {
                             const progressData = await progressRes.json();
+                            const chunks = progressData.total_chunks ? ` · ${progressData.completed_chunks||0}/${progressData.total_chunks} chunks` : '';
+                            const etaSecs = (progressData.eta_seconds && progressData.eta_seconds > 0) ? Math.round(progressData.eta_seconds) : null;
+                            const etaText = etaSecs ? ` · ETA ${new Date(etaSecs*1000).toISOString().substr(11,8)}` : '';
                             statusContent.innerHTML = `
                                 <div class="status-message">
-                                    <div style="margin-bottom: 0.5rem;">${progressData.message}</div>
+                                    <div style="margin-bottom: 0.5rem;">${progressData.message || ''}</div>
                                     <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${progressData.progress}%"></div>
+                                        <div class="progress-fill" style="width: ${progressData.progress||0}%"></div>
                                     </div>
                                     <div style="margin-top: 0.25rem; font-size: 0.875rem; color: #666;">
-                                        ${progressData.progress}% 완료
+                                        ${(progressData.progress||0)}% 완료${chunks}${etaText}
                                     </div>
                                 </div>
                             `;
@@ -1096,6 +1113,60 @@
             e.preventDefault();
             const model = document.getElementById('lesson_model').value;
             await submitAnalysis('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
+        });
+
+        // User ID handling
+        const userInput = document.getElementById('user_id_input');
+        const saveBtn = document.getElementById('save_user_id_btn');
+        const saved = localStorage.getItem('jd_user_id') || '';
+        if (saved) userInput.value = saved;
+        saveBtn.addEventListener('click', () => {
+            const val = userInput.value.trim();
+            if (val) localStorage.setItem('jd_user_id', val);
+        });
+
+        // Load My Jobs
+        document.getElementById('load_jobs_btn').addEventListener('click', async () => {
+            const userId = (localStorage.getItem('jd_user_id') || '').trim();
+            const list = document.getElementById('jobs_list');
+            if (!userId) {
+                list.innerHTML = '<div class="status-message">Please set your User ID first.</div>';
+                return;
+            }
+            list.innerHTML = '<div class="status-message">Loading...</div>';
+            try {
+                const res = await fetch(`/user/${encodeURIComponent(userId)}/jobs`);
+                const data = await res.json();
+                if (!data.jobs || data.jobs.length === 0) {
+                    list.innerHTML = '<div class="status-message">No jobs found.</div>';
+                    return;
+                }
+                let html = '';
+                for (const j of data.jobs) {
+                    const prog = j.progress || {};
+                    const pct = prog.progress || 0;
+                    const chunks = (prog.total_chunks ? `${prog.completed_chunks||0}/${prog.total_chunks} chunks` : '');
+                    let files = '';
+                    for (const f of (j.files||[])) {
+                        files += `<a class="download-btn" style="margin-top:0.5rem;" href="/result/${j.job_id}/${f}" target="_blank">📥 ${f}</a>`;
+                    }
+                    html += `
+                        <div style="padding:1rem;border-bottom:1px solid var(--border);">
+                            <div class="status-message" style="text-align:left;">
+                                <div><b>Job:</b> ${j.job_id} · <b>Status:</b> ${j.status}</div>
+                                <div class="progress-bar" style="margin:0.4rem 0;">
+                                    <div class="progress-fill" style="width:${pct}%"></div>
+                                </div>
+                                <div style="font-size:0.875rem;color:#666;">${pct}% ${chunks}</div>
+                                <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;">${files}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                list.innerHTML = html;
+            } catch (e) {
+                list.innerHTML = `<div class="status-message">Failed to load jobs: ${e.message}</div>`;
+            }
         });
     </script>
 </body>

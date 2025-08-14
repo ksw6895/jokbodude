@@ -160,8 +160,16 @@ class MultiAPIAnalyzer:
             return (idx, result)
         
         # Distribute chunk tasks across APIs in parallel with failover
+        # Progress callback: increment chunk completion for this session/job
+        def _on_progress(_task):
+            try:
+                from storage_manager import StorageManager
+                StorageManager().increment_chunk(self.session_id, 1)
+            except Exception:
+                pass
+
         results_raw = self.api_manager.distribute_tasks(
-            tasks, operation, parallel=True, max_workers=max_workers
+            tasks, operation, parallel=True, max_workers=max_workers, on_progress=_on_progress
         )
         
         # Collect results back into original order
