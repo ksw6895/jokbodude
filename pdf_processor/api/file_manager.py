@@ -14,12 +14,22 @@ logger = get_logger(__name__)
 
 
 class FileManager:
-    """Manages file uploads and cleanup for Gemini API."""
-    
-    def __init__(self):
-        """Initialize the file manager."""
+    """Manages file uploads and cleanup for Gemini API.
+
+    In multi-API mode, this manager should be scoped to a single API key.
+    Pass a bound GeminiAPIClient so all list/delete operations use the
+    correct credentials, avoiding cross-key 403s.
+    """
+
+    def __init__(self, api_client: Optional["GeminiAPIClient"] = None):
+        """Initialize the file manager.
+
+        Args:
+            api_client: API client bound to the owning API key.
+        """
         self.uploaded_files: List[Any] = []
         self._tracked_files: Set[str] = set()
+        self.api_client = api_client
         
     def track_file(self, file: Any) -> None:
         """
@@ -52,7 +62,11 @@ class FileManager:
             List of uploaded files
         """
         try:
-            files = list(genai.list_files())
+            # Use bound client when available so we stay in the correct key context
+            if self.api_client is not None:
+                files = self.api_client.list_files()
+            else:
+                files = list(genai.list_files())
             logger.info(f"Found {len(files)} uploaded files")
             return files
         except Exception as e:
@@ -72,14 +86,24 @@ class FileManager:
         """
         for attempt in range(max_retries):
             try:
-                genai.delete_file(file.name)
-                logger.info(f"Deleted file: {file.display_name}")
-                self.untrack_file(file)
-                return True
+                if self.api_client is not None:
+                    # Delegate to client (already bound to correct key)
+                    ok = self.api_client.delete_file(file, max_retries=1)
+                    if ok:
+                        logger.info(f"Deleted file: {file.display_name}")
+                        self.untrack_file(file)
+                        return True
+                else:
+                    genai.delete_file(file.name)
+                    logger.info(f"Deleted file: {file.display_name}")
+                    self.untrack_file(file)
+                    return True
             except Exception as e:
-                logger.warning(f"Failed to delete {file.display_name} (attempt {attempt + 1}/{max_retries}): {str(e)}")
-                if attempt < max_retries - 1:
-                    time.sleep(2 ** attempt)  # Exponential backoff
+                logger.warning(
+                    f"Failed to delete {file.display_name} (attempt {attempt + 1}/{max_retries}): {str(e)}"
+                )
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)  # Exponential backoff
         
         logger.error(f"Failed to delete file {file.display_name} after {max_retries} attempts")
         return False

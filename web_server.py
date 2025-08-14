@@ -83,7 +83,8 @@ def read_root():
 async def analyze_jokbo_centric(
     jokbo_files: list[UploadFile] = File(...), 
     lesson_files: list[UploadFile] = File(...),
-    model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$")
+    model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
+    multi_api: bool = Query(False)
 ):
     job_id = str(uuid.uuid4())
 
@@ -123,7 +124,8 @@ async def analyze_jokbo_centric(
         metadata = {
             "jokbo_keys": jokbo_keys,
             "lesson_keys": lesson_keys,
-            "model": model
+            "model": model,
+            "multi_api": multi_api
         }
         storage_manager.store_job_metadata(job_id, metadata)
 
@@ -131,7 +133,7 @@ async def analyze_jokbo_centric(
         task = celery_app.send_task(
             "tasks.run_jokbo_analysis",
             args=[job_id],
-            kwargs={"model_type": model}
+            kwargs={"model_type": model, "multi_api": multi_api}
         )
         return {"job_id": job_id, "task_id": task.id}
     except Exception as e:
@@ -141,7 +143,8 @@ async def analyze_jokbo_centric(
 async def analyze_lesson_centric(
     jokbo_files: list[UploadFile] = File(...), 
     lesson_files: list[UploadFile] = File(...),
-    model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$")
+    model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
+    multi_api: bool = Query(False)
 ):
     job_id = str(uuid.uuid4())
     storage_manager = StorageManager()
@@ -172,7 +175,8 @@ async def analyze_lesson_centric(
         metadata = {
             "jokbo_keys": jokbo_keys,
             "lesson_keys": lesson_keys,
-            "model": model
+            "model": model,
+            "multi_api": multi_api
         }
         storage_manager.store_job_metadata(job_id, metadata)
 
@@ -180,7 +184,7 @@ async def analyze_lesson_centric(
         task = celery_app.send_task(
             "tasks.run_lesson_analysis",
             args=[job_id],
-            kwargs={"model_type": model}
+            kwargs={"model_type": model, "multi_api": multi_api}
         )
         return {"job_id": job_id, "task_id": task.id}
     except Exception as e:

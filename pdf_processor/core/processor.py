@@ -37,7 +37,8 @@ class PDFProcessor:
         """
         self.model = model
         self.api_client = GeminiAPIClient(model)
-        self.file_manager = FileManager()
+        # Bind file manager to this API client (single-key context)
+        self.file_manager = FileManager(self.api_client)
         
         # Session management
         if session_id:

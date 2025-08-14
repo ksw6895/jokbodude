@@ -31,7 +31,9 @@ class MultiAPIAnalyzer:
         self.api_manager = api_manager
         self.session_id = session_id
         self.debug_dir = debug_dir
-        self.file_manager = FileManager()
+        # Do not bind a shared FileManager across different API keys.
+        # We'll create a per-client FileManager in each operation call.
+        self.file_manager = None
         
     def analyze_lesson_centric(self, jokbo_path: str, lesson_path: str) -> Dict[str, Any]:
         """
@@ -45,9 +47,10 @@ class MultiAPIAnalyzer:
             Analysis results
         """
         def operation(api_client, model):
-            # Create analyzer with specific API client
+            # Create analyzer with specific API client and a file manager bound to it
+            fm = FileManager(api_client)
             analyzer = LessonCentricAnalyzer(
-                api_client, self.file_manager, self.session_id, self.debug_dir
+                api_client, fm, self.session_id, self.debug_dir
             )
             return analyzer.analyze(jokbo_path, lesson_path)
         
@@ -65,9 +68,10 @@ class MultiAPIAnalyzer:
             Analysis results
         """
         def operation(api_client, model):
-            # Create analyzer with specific API client
+            # Create analyzer with specific API client and a file manager bound to it
+            fm = FileManager(api_client)
             analyzer = JokboCentricAnalyzer(
-                api_client, self.file_manager, self.session_id, self.debug_dir
+                api_client, fm, self.session_id, self.debug_dir
             )
             return analyzer.analyze(lesson_path, jokbo_path)
         
@@ -89,15 +93,17 @@ class MultiAPIAnalyzer:
         if mode == "lesson-centric":
             def task_operation(file_pair, api_client, model):
                 jokbo_path, lesson_path = file_pair
+                fm = FileManager(api_client)
                 analyzer = LessonCentricAnalyzer(
-                    api_client, self.file_manager, self.session_id, self.debug_dir
+                    api_client, fm, self.session_id, self.debug_dir
                 )
                 return analyzer.analyze(jokbo_path, lesson_path)
         else:  # jokbo-centric
             def task_operation(file_pair, api_client, model):
                 lesson_path, jokbo_path = file_pair
+                fm = FileManager(api_client)
                 analyzer = JokboCentricAnalyzer(
-                    api_client, self.file_manager, self.session_id, self.debug_dir
+                    api_client, fm, self.session_id, self.debug_dir
                 )
                 return analyzer.analyze(lesson_path, jokbo_path)
         
@@ -137,13 +143,15 @@ class MultiAPIAnalyzer:
         def operation(task, api_client, model):
             idx, (chunk_path, start_page, end_page) = task
             if mode == "lesson-centric":
+                fm = FileManager(api_client)
                 analyzer = LessonCentricAnalyzer(
-                    api_client, self.file_manager, self.session_id, self.debug_dir
+                    api_client, fm, self.session_id, self.debug_dir
                 )
                 result = analyzer.analyze(center_file_path, chunk_path)
             else:
+                fm = FileManager(api_client)
                 analyzer = JokboCentricAnalyzer(
-                    api_client, self.file_manager, self.session_id, self.debug_dir
+                    api_client, fm, self.session_id, self.debug_dir
                 )
                 result = analyzer.analyze(
                     chunk_path, center_file_path, preloaded_jokbo_file=None,

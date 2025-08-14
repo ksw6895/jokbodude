@@ -137,6 +137,8 @@ class GeminiAPIClient:
         """
         for attempt in range(max_retries):
             try:
+                # Ensure correct API key context for this client before generation
+                self._configure_api(self.api_key)
                 response = self.model.generate_content(content)
                 
                 # Check for empty response

@@ -3,6 +3,7 @@ import os
 import tempfile
 from pathlib import Path
 from celery import Celery
+from typing import Optional
 from config import create_model, configure_api, API_KEYS
 from pdf_processor.core.processor import PDFProcessor
 from pdf_creator import PDFCreator
@@ -30,7 +31,7 @@ celery_app.conf.worker_cancel_long_running_tasks_on_connection_loss = True
 
 # --- Analysis Tasks ---
 @celery_app.task(name="tasks.run_jokbo_analysis")
-def run_jokbo_analysis(job_id: str, model_type: str = None):
+def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[bool] = None):
     """Run jokbo-centric analysis"""
     storage_manager = StorageManager()
     
@@ -43,6 +44,12 @@ def run_jokbo_analysis(job_id: str, model_type: str = None):
         jokbo_keys = metadata["jokbo_keys"]
         lesson_keys = metadata["lesson_keys"]
         
+        # Determine multi-API usage
+        meta_multi = None
+        if isinstance(metadata, dict):
+            meta_multi = metadata.get("multi_api")
+        use_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else USE_MULTI_API)
+
         # Create temporary directory for processing
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -87,7 +94,7 @@ def run_jokbo_analysis(job_id: str, model_type: str = None):
                 storage_manager.update_progress(job_id, progress, f"분석 중: {jokbo_path.name}")
                 
                 # Analyze jokbo against all lessons (use multi-API when enabled)
-                if USE_MULTI_API and len(API_KEYS) > 1:
+                if use_multi and len(API_KEYS) > 1:
                     analysis_result = processor.analyze_jokbo_centric_multi_api(
                         lesson_paths, jokbo_path_str, api_keys=API_KEYS
                     )
@@ -129,7 +136,7 @@ def run_jokbo_analysis(job_id: str, model_type: str = None):
         raise e
 
 @celery_app.task(name="tasks.run_lesson_analysis")
-def run_lesson_analysis(job_id: str, model_type: str = None):
+def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional[bool] = None):
     """Run lesson-centric analysis"""
     storage_manager = StorageManager()
     
@@ -142,6 +149,12 @@ def run_lesson_analysis(job_id: str, model_type: str = None):
         jokbo_keys = metadata["jokbo_keys"]
         lesson_keys = metadata["lesson_keys"]
         
+        # Determine multi-API usage
+        meta_multi = None
+        if isinstance(metadata, dict):
+            meta_multi = metadata.get("multi_api")
+        use_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else USE_MULTI_API)
+
         # Create temporary directory for processing
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -186,7 +199,7 @@ def run_lesson_analysis(job_id: str, model_type: str = None):
                 storage_manager.update_progress(job_id, progress, f"분석 중: {lesson_path.name}")
                 
                 # Analyze lesson against all jokbos (use multi-API when enabled)
-                if USE_MULTI_API and len(API_KEYS) > 1:
+                if use_multi and len(API_KEYS) > 1:
                     analysis_result = processor.analyze_lesson_centric_multi_api(
                         jokbo_paths, lesson_path_str, api_keys=API_KEYS
                     )
