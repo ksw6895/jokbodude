@@ -578,6 +578,63 @@
             }
         }
     </style>
+    <style>
+        /* Glassmorphism overrides */
+        :root {
+            --bg-start: #0f1226;
+            --bg-end: #1b2340;
+            --primary-2: #51e1ff;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-strong: rgba(255, 255, 255, 0.14);
+            --border: rgba(255, 255, 255, 0.18);
+            --text: #ecf0ff;
+            --muted: #b8c0ff;
+        }
+        body {
+            color: var(--text);
+            background: radial-gradient(1200px 800px at 10% -10%, #2c2d72 0%, transparent 55%),
+                        radial-gradient(1200px 800px at 110% 10%, #2b5876 0%, transparent 55%),
+                        linear-gradient(160deg, var(--bg-start), var(--bg-end));
+        }
+        .grid-bg { position: fixed; inset: 0; background:
+            linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px) 0 0 / 40px 40px,
+            linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px) 0 0 / 40px 40px; 
+            pointer-events: none; z-index: 0; }
+        .navbar { background: linear-gradient(180deg, rgba(15,18,38,0.65), rgba(15,18,38,0.35)); border-bottom: 1px solid var(--border); color: var(--text); }
+        .logo { color: var(--text); }
+        .logo-icon { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%); box-shadow: inset 0 0 12px rgba(255,255,255,0.25), 0 8px 20px rgba(81, 225, 255, 0.2); }
+        .nav-link { color: var(--muted); }
+        .nav-link:hover { color: var(--text); background: var(--glass); }
+        .hero-section { color: var(--text); }
+        .app-card { background: var(--glass); border: 1px solid var(--border); }
+        .card-header { background: rgba(255,255,255,0.06); border-bottom: 1px solid var(--border); }
+        .card-title { color: var(--text); }
+        .card-description { color: var(--muted); }
+        .tabs { background: rgba(255,255,255,0.06); border: 1px solid var(--border); }
+        .tab { color: var(--muted); border: 1px solid transparent; }
+        .tab:hover { color: var(--text); background: rgba(255,255,255,0.06); border-color: var(--border); }
+        .tab.active { background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06)); color: #fff; border-color: var(--border); }
+        label { color: var(--text); }
+        .select-wrapper::after { color: var(--muted); }
+        select { background: rgba(10,12,28,0.35); color: var(--text); border: 1px solid var(--border); backdrop-filter: blur(6px); }
+        .file-upload-area { background: rgba(255,255,255,0.06); border-color: var(--border); }
+        .file-upload-area:hover { border-color: rgba(124,108,255,0.8); background: rgba(124,108,255,0.065); }
+        .file-upload-area.active { border-color: var(--primary); background: rgba(124,108,255,0.09); }
+        .file-upload-icon { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%); color: #0b1024; }
+        .file-upload-text { color: var(--text); }
+        .file-upload-hint { color: var(--muted); }
+        .file-item { background: rgba(255,255,255,0.06); border: 1px solid var(--border); }
+        .file-name { color: var(--text); }
+        .file-size { color: var(--muted); }
+        .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%); color: #0b1024; box-shadow: 0 18px 30px rgba(124,108,255,0.35); }
+        .download-btn { background: linear-gradient(135deg, #9be7ff 0%, #7c6cff 100%); color: #0b1024; box-shadow: 0 12px 24px rgba(123,108,255,0.32); }
+        .status-title { color: var(--text); }
+        .status-badge { border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--muted); }
+        .status-content { background: rgba(255,255,255,0.06); border: 1px solid var(--border); }
+        .status-message { color: var(--muted); }
+        .progress-bar { background: rgba(255,255,255,0.06); border: 1px solid var(--border); }
+        .progress-fill { background: linear-gradient(90deg, var(--primary) 0%, var(--primary-2) 100%); }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -593,6 +650,7 @@
             </div>
         </div>
     </nav>
+    <div class="grid-bg"></div>
     
     <div class="main-container">
         <div class="hero-section">
