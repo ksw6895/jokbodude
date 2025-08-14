@@ -114,12 +114,15 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                            preloaded_jokbo_file: Optional[Any] = None) -> Dict[str, Any]:
         """Analyze lesson in chunks."""
         from ..pdf.operations import PDFOperations
-        
+
         chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
         logger.info(f"Processing {len(chunks)} chunks for {Path(lesson_path).name}")
-        
+
         chunk_results = []
-        
+
+        # Keep original lesson filename for display in results (avoid tmp chunk names)
+        original_lesson_filename = Path(lesson_path).name
+
         for i, (path, start_page, end_page) in enumerate(chunks):
             logger.info(f"Processing chunk {i+1}/{len(chunks)}: pages {start_page}-{end_page}")
             
@@ -132,6 +135,15 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                     chunk_path, jokbo_path, preloaded_jokbo_file,
                     chunk_info=(start_page, end_page)
                 )
+                # Normalize lesson filenames in related slides back to original
+                try:
+                    for page in result.get("jokbo_pages", []):
+                        for q in page.get("questions", []):
+                            for slide in q.get("related_lesson_slides", []) or []:
+                                if isinstance(slide, dict):
+                                    slide["lesson_filename"] = original_lesson_filename
+                except Exception:
+                    pass
                 chunk_results.append(result)
             finally:
                 # Clean up
