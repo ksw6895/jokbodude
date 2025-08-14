@@ -104,10 +104,10 @@ class StorageManager:
                 logger.error(f"Failed to store in Redis, falling back to local: {e}")
                 self.use_local_only = True
         
-        # Always save locally as backup
-        local_path = self.local_storage / job_id / file_type / file_path.name
-        local_path.parent.mkdir(parents=True, exist_ok=True)
-        local_path.write_bytes(content)
+        # Always save locally as backup (disabled to prevent disk growth)
+        # local_path = self.local_storage / job_id / file_type / file_path.name
+        # local_path.parent.mkdir(parents=True, exist_ok=True)
+        # local_path.write_bytes(content)
         
         return file_key
     
