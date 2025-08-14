@@ -3,6 +3,7 @@
 Celery configuration with Redis connection stability improvements
 """
 import os
+import socket
 from kombu import Queue
 
 # Redis configuration
@@ -21,6 +22,19 @@ broker_connection_retry_on_startup = True
 broker_connection_max_retries = 10
 
 # Redis connection pool settings
+# Build cross-platform TCP keepalive socket options using integer constants
+# redis-py expects numeric socket option keys, not string names.
+KEEPALIVE_OPTS = {}
+if hasattr(socket, "TCP_KEEPIDLE"):
+    KEEPALIVE_OPTS[socket.TCP_KEEPIDLE] = 1
+if hasattr(socket, "TCP_KEEPINTVL"):
+    KEEPALIVE_OPTS[socket.TCP_KEEPINTVL] = 3
+if hasattr(socket, "TCP_KEEPCNT"):
+    KEEPALIVE_OPTS[socket.TCP_KEEPCNT] = 5
+# macOS/BSD fallback
+if not KEEPALIVE_OPTS and hasattr(socket, "TCP_KEEPALIVE"):
+    KEEPALIVE_OPTS[socket.TCP_KEEPALIVE] = 60
+
 broker_transport_options = {
     'retry_on_timeout': True,
     'retry_on_error': [
@@ -30,11 +44,7 @@ broker_transport_options = {
     ],
     'max_connections': 20,
     'socket_keepalive': True,
-    'socket_keepalive_options': {
-        'TCP_KEEPIDLE': 1,
-        'TCP_KEEPINTVL': 3,
-        'TCP_KEEPCNT': 5,
-    },
+    'socket_keepalive_options': KEEPALIVE_OPTS,
     'health_check_interval': 30,
     'retry_policy': {
         'timeout': 5.0,
@@ -143,11 +153,7 @@ result_backend_transport_options = {
     ],
     'max_connections': 20,
     'socket_keepalive': True,
-    'socket_keepalive_options': {
-        'TCP_KEEPIDLE': 1,
-        'TCP_KEEPINTVL': 3, 
-        'TCP_KEEPCNT': 5,
-    },
+    'socket_keepalive_options': KEEPALIVE_OPTS,
     'health_check_interval': 30,
     'socket_timeout': 30.0,
     'socket_connect_timeout': 30.0,
