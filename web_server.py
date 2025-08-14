@@ -12,6 +12,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from celery import Celery
 from storage_manager import StorageManager
+from urllib.parse import quote
+import re
 
 # --- Configuration ---
 # Use an environment variable for the storage path, essential for Render.
@@ -46,6 +48,31 @@ def save_uploaded_file(upload_file: UploadFile, destination_dir: Path) -> Path:
     with destination_path.open("wb") as buffer:
         shutil.copyfileobj(upload_file.file, buffer)
     return destination_path
+
+def build_content_disposition(original_name: str) -> str:
+    """Build a RFC 6266 compliant Content-Disposition header value.
+
+    Provides an ASCII-only fallback filename plus UTF-8 filename* parameter
+    to safely handle non-ASCII characters (e.g., Korean) without header
+    encoding errors.
+    """
+    # Preserve extension if present
+    match = re.search(r"(\.[A-Za-z0-9]+)$", original_name)
+    ext = match.group(1) if match else ""
+    base = original_name[:-len(ext)] if ext else original_name
+
+    # Create ASCII-only fallback: replace non-safe chars with '_'
+    # Keep common safe chars: letters, digits, dot, underscore, hyphen
+    fallback_base = re.sub(r"[^A-Za-z0-9._-]+", "_", base).strip("_") or "download"
+    # Trim to a reasonable length to avoid overly long headers
+    if len(fallback_base) > 150:
+        fallback_base = fallback_base[:150] + "_"
+    fallback = f"{fallback_base}{ext or '.pdf'}"
+
+    # UTF-8 encoded filename* per RFC 5987/6266
+    utf8_star = quote(original_name)
+
+    return f"attachment; filename=\"{fallback}\"; filename*=UTF-8''{utf8_star}"
 
 # --- API Endpoints ---
 @app.get("/")
@@ -184,10 +211,11 @@ def get_result_file(job_id: str):
         raise HTTPException(status_code=404, detail="Generated PDF not found.")
     
     filename = result_key.split(":")[-1]
+    disposition = build_content_disposition(filename)
     return Response(
         content=content,
         media_type='application/pdf',
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
+        headers={"Content-Disposition": disposition}
     )
 
 @app.get("/results/{job_id}")
@@ -214,10 +242,11 @@ def get_specific_result_file(job_id: str, filename: str):
     if not content:
         raise HTTPException(status_code=404, detail="File not found.")
     
+    disposition = build_content_disposition(filename)
     return Response(
         content=content,
         media_type='application/pdf',
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
+        headers={"Content-Disposition": disposition}
     )
 
 @app.get("/progress/{job_id}")
