@@ -178,7 +178,25 @@ class MultiAPIAnalyzer:
                     idx = None
                 if idx is not None and 0 <= idx < len(ordered_results):
                     ordered_results[idx] = {"error": entry.get("error", "Unknown error")}
-        
+
+        # Normalize lesson filenames when chunking is orchestrated externally (multi-API path).
+        # For jokbo-centric mode, ensure related_lesson_slides[].lesson_filename shows the original
+        # lesson PDF name instead of temporary chunk filenames (e.g., tmp*.pdf).
+        if mode == "jokbo-centric":
+            try:
+                original_lesson_filename = Path(file_path).name
+                for res in ordered_results:
+                    if not isinstance(res, dict):
+                        continue
+                    for page in (res.get("jokbo_pages") or []):
+                        for q in (page.get("questions") or []):
+                            for slide in (q.get("related_lesson_slides") or []):
+                                if isinstance(slide, dict):
+                                    slide["lesson_filename"] = original_lesson_filename
+            except Exception:
+                # Best-effort normalization; continue if structure differs
+                pass
+
         # Replace any missing entries with error placeholders
         for i in range(len(ordered_results)):
             if ordered_results[i] is None:
