@@ -133,6 +133,9 @@ async def analyze_jokbo_centric(
                 file_path.write_bytes(content)
                 file_key = storage_manager.store_file(file_path, job_id, "jokbo")
                 jokbo_keys.append(file_key)
+                # Fail-fast: verify stored and TTL is healthy
+                if not storage_manager.verify_file_available(file_key):
+                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
             
             # Process lesson files
             for f in lesson_files:
@@ -141,6 +144,15 @@ async def analyze_jokbo_centric(
                 file_path.write_bytes(content)
                 file_key = storage_manager.store_file(file_path, job_id, "lesson")
                 lesson_keys.append(file_key)
+                # Fail-fast: verify stored and TTL is healthy
+                if not storage_manager.verify_file_available(file_key):
+                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+
+        # Ensure TTLs are fresh before enqueueing
+        try:
+            storage_manager.refresh_ttls(jokbo_keys + lesson_keys)
+        except Exception:
+            pass
         
         # Store job metadata
         metadata = {
@@ -195,12 +207,22 @@ async def analyze_lesson_centric(
             saved_path = save_uploaded_file(file, Path("/tmp") / job_id / "jokbo")
             key = storage_manager.store_file(saved_path, job_id, "jokbo")
             jokbo_keys.append(key)
+            if not storage_manager.verify_file_available(key):
+                raise HTTPException(status_code=503, detail=f"Storage unavailable for {file.filename}; please retry later")
         
         lesson_keys = []
         for file in lesson_files:
             saved_path = save_uploaded_file(file, Path("/tmp") / job_id / "lesson")
             key = storage_manager.store_file(saved_path, job_id, "lesson")
             lesson_keys.append(key)
+            if not storage_manager.verify_file_available(key):
+                raise HTTPException(status_code=503, detail=f"Storage unavailable for {file.filename}; please retry later")
+
+        # Ensure TTLs are fresh before enqueueing
+        try:
+            storage_manager.refresh_ttls(jokbo_keys + lesson_keys)
+        except Exception:
+            pass
         
         # Store metadata in Redis
         metadata = {

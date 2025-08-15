@@ -51,6 +51,18 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             meta_multi = metadata.get("multi_api")
         use_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else USE_MULTI_API)
 
+        # Refresh TTLs upfront to avoid expiry during queue delays
+        try:
+            storage_manager.refresh_ttls(jokbo_keys + lesson_keys)
+        except Exception:
+            pass
+
+        # Refresh TTLs upfront to avoid expiry during queue delays
+        try:
+            storage_manager.refresh_ttls(jokbo_keys + lesson_keys)
+        except Exception:
+            pass
+
         # Create temporary directory for processing
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -67,6 +79,10 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             for key in jokbo_keys:
                 filename = key.split(":")[-2]  # Extract filename from key
                 local_path = jokbo_dir / filename
+                try:
+                    storage_manager.refresh_ttl(key)
+                except Exception:
+                    pass
                 storage_manager.save_file_locally(key, local_path)
                 jokbo_paths.append(str(local_path))
             
@@ -74,6 +90,10 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             for key in lesson_keys:
                 filename = key.split(":")[-2]  # Extract filename from key
                 local_path = lesson_dir / filename
+                try:
+                    storage_manager.refresh_ttl(key)
+                except Exception:
+                    pass
                 storage_manager.save_file_locally(key, local_path)
                 lesson_paths.append(str(local_path))
             
@@ -195,6 +215,10 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
             for key in jokbo_keys:
                 filename = key.split(":")[-2]  # Extract filename from key
                 local_path = jokbo_dir / filename
+                try:
+                    storage_manager.refresh_ttl(key)
+                except Exception:
+                    pass
                 storage_manager.save_file_locally(key, local_path)
                 jokbo_paths.append(str(local_path))
             
@@ -202,6 +226,10 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
             for key in lesson_keys:
                 filename = key.split(":")[-2]  # Extract filename from key
                 local_path = lesson_dir / filename
+                try:
+                    storage_manager.refresh_ttl(key)
+                except Exception:
+                    pass
                 storage_manager.save_file_locally(key, local_path)
                 lesson_paths.append(str(local_path))
             

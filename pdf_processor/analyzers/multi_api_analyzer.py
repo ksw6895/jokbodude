@@ -78,7 +78,7 @@ class MultiAPIAnalyzer:
         return self.api_manager.execute_with_failover(operation)
     
     def analyze_multiple_with_distribution(self, mode: str, file_pairs: List[tuple],
-                                         parallel: bool = True) -> List[Dict[str, Any]]:
+                                         parallel: bool = True, max_workers: Optional[int] = None) -> List[Dict[str, Any]]:
         """
         Analyze multiple file pairs with task distribution across APIs.
         
@@ -108,8 +108,14 @@ class MultiAPIAnalyzer:
                 return analyzer.analyze(lesson_path, jokbo_path)
         
         # Distribute tasks across APIs
+        # Determine workers: default to using all API keys up to number of tasks
+        if max_workers is None:
+            try:
+                max_workers = min(len(file_pairs), len(self.api_manager.api_keys)) or 1
+            except Exception:
+                max_workers = min(len(file_pairs), 3) or 1
         results = self.api_manager.distribute_tasks(
-            file_pairs, task_operation, parallel=parallel
+            file_pairs, task_operation, parallel=parallel, max_workers=max_workers
         )
         
         return results

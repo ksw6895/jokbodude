@@ -25,6 +25,11 @@ class StorageManager:
         self.use_local_only = False
         self.local_storage = Path(os.getenv("RENDER_STORAGE_PATH", "/tmp/storage"))
         self.local_storage.mkdir(parents=True, exist_ok=True)
+        # Configurable TTL for file keys (seconds). Default 24h.
+        try:
+            self.file_ttl_seconds = max(60, int(os.getenv("FILE_TTL_SECONDS", "86400")))
+        except Exception:
+            self.file_ttl_seconds = 86400
         
         # Try to connect to Redis with retry
         self._init_redis_connection()
@@ -99,8 +104,8 @@ class StorageManager:
                         "original_size": str(len(content))
                     }
                 )
-                # Set expiration
-                self._with_retry(self.redis_client.expire, file_key, 3600)
+                # Set expiration using configured TTL
+                self._with_retry(self.redis_client.expire, file_key, self.file_ttl_seconds)
             except Exception as e:
                 logger.error(f"Failed to store in Redis, falling back to local: {e}")
                 self.use_local_only = True
@@ -164,6 +169,50 @@ class StorageManager:
         target_path.parent.mkdir(parents=True, exist_ok=True)
         target_path.write_bytes(content)
         return target_path
+
+    # --- TTL helpers and verification ---
+    def refresh_ttl(self, file_key: str, ttl_seconds: Optional[int] = None) -> None:
+        """Refresh TTL on a single file key (noop if Redis/local-only unavailable)."""
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            ttl = int(ttl_seconds) if ttl_seconds is not None else self.file_ttl_seconds
+            self._with_retry(self.redis_client.expire, file_key, ttl)
+        except Exception as e:
+            logger.warning(f"Failed to refresh TTL for {file_key}: {e}")
+
+    def refresh_ttls(self, file_keys: List[str], ttl_seconds: Optional[int] = None) -> None:
+        """Refresh TTL on multiple file keys efficiently."""
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            ttl = int(ttl_seconds) if ttl_seconds is not None else self.file_ttl_seconds
+            pipe = self.redis_client.pipeline()
+            for k in file_keys:
+                pipe.expire(k, ttl)
+            pipe.execute()
+        except Exception as e:
+            logger.warning(f"Failed to refresh TTLs: {e}")
+
+    def verify_file_available(self, file_key: str, min_ttl_seconds: int = 60) -> bool:
+        """Check if file exists in Redis and TTL is healthy.
+
+        Returns True if the key exists and TTL is either >= min_ttl_seconds or persistent (-1).
+        """
+        if self.use_local_only or not self.redis_client:
+            return False
+        try:
+            hlen = self._with_retry(self.redis_client.hlen, file_key)
+            if not hlen:
+                return False
+            ttl = self._with_retry(self.redis_client.ttl, file_key)
+            if ttl == -2:
+                return False
+            if ttl == -1:
+                return True
+            return ttl >= max(0, int(min_ttl_seconds))
+        except Exception:
+            return False
     
     def store_job_metadata(self, job_id: str, metadata: Dict) -> None:
         """Store job metadata in Redis"""

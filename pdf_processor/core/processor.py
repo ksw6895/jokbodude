@@ -164,8 +164,10 @@ class PDFProcessor:
         else:
             # Distribute jokbos across APIs without chunking
             file_pairs = [(jokbo_path, lesson_path) for jokbo_path in jokbo_paths]
+            # Use all API keys up to number of pairs
+            workers = min(len(api_keys), len(file_pairs)) if api_keys else min(3, len(file_pairs))
             results = multi_analyzer.analyze_multiple_with_distribution(
-                "lesson-centric", file_pairs, parallel=True
+                "lesson-centric", file_pairs, parallel=True, max_workers=workers
             )
         
         # Log API status
@@ -222,8 +224,10 @@ class PDFProcessor:
         else:
             # All lessons are single files
             file_pairs = [(lesson_path, jokbo_path) for lesson_path in lesson_paths]
+            # Use all API keys up to number of pairs
+            workers = min(len(api_keys), len(file_pairs)) if api_keys else min(3, len(file_pairs))
             results = multi_analyzer.analyze_multiple_with_distribution(
-                "jokbo-centric", file_pairs, parallel=(max_workers > 1)
+                "jokbo-centric", file_pairs, parallel=(workers > 1), max_workers=workers
             )
         
         # Log API status
