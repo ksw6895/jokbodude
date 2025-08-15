@@ -263,58 +263,61 @@ def get_task_status(task_id: str):
 @app.get("/result/{job_id}")
 def get_result_file(request: Request, job_id: str):
     storage_manager = request.app.state.storage_manager
-    # Get result from Redis
-    result_keys = list(storage_manager.redis_client.scan_iter(match=f"result:{job_id}:*"))
-    if not result_keys:
+    # Prefer on-disk results; fallback to Redis
+    files = storage_manager.list_result_files(job_id)
+    if not files:
         raise HTTPException(status_code=404, detail="Result not found or job not complete.")
-    
-    # Get the first result
-    result_key = result_keys[0].decode() if isinstance(result_keys[0], bytes) else result_keys[0]
-    content = storage_manager.get_result(result_key)
-    
+    filename = files[0]
+    path = storage_manager.get_result_path(job_id, filename)
+    if path and path.exists():
+        disposition = build_content_disposition(filename)
+        return FileResponse(path, media_type='application/pdf', filename=filename,
+                            headers={"Content-Disposition": disposition})
+    # fallback to Redis blob
+    content = storage_manager.get_result(f"result:{job_id}:{filename}")
     if not content:
         raise HTTPException(status_code=404, detail="Generated PDF not found.")
-    
-    filename = result_key.split(":")[-1]
     disposition = build_content_disposition(filename)
-    return Response(
-        content=content,
-        media_type='application/pdf',
-        headers={"Content-Disposition": disposition}
-    )
+    return Response(content=content, media_type='application/pdf', headers={"Content-Disposition": disposition})
 
 @app.get("/results/{job_id}")
 def list_result_files(request: Request, job_id: str):
     storage_manager = request.app.state.storage_manager
-    # Get result keys from Redis
-    result_keys = list(storage_manager.redis_client.scan_iter(match=f"result:{job_id}:*"))
-    if not result_keys:
+    files = storage_manager.list_result_files(job_id)
+    if not files:
         raise HTTPException(status_code=404, detail="Result not found or job not complete.")
-    
-    # Extract filenames from keys
-    files = []
-    for key in result_keys:
-        key_str = key.decode() if isinstance(key, bytes) else key
-        filename = key_str.split(":")[-1]
-        files.append(filename)
-    
     return {"files": files}
 
 @app.get("/result/{job_id}/{filename}")
 def get_specific_result_file(request: Request, job_id: str, filename: str):
     storage_manager = request.app.state.storage_manager
+    # Try on-disk file first
+    path = storage_manager.get_result_path(job_id, filename)
+    if path and path.exists():
+        disposition = build_content_disposition(filename)
+        return FileResponse(path, media_type='application/pdf', filename=filename,
+                            headers={"Content-Disposition": disposition})
+    # Fallback to Redis
     result_key = f"result:{job_id}:{filename}"
     content = storage_manager.get_result(result_key)
-    
     if not content:
         raise HTTPException(status_code=404, detail="File not found.")
-    
     disposition = build_content_disposition(filename)
-    return Response(
-        content=content,
-        media_type='application/pdf',
-        headers={"Content-Disposition": disposition}
-    )
+    return Response(content=content, media_type='application/pdf', headers={"Content-Disposition": disposition})
+
+@app.delete("/result/{job_id}/{filename}")
+def delete_specific_result_file(request: Request, job_id: str, filename: str):
+    storage_manager = request.app.state.storage_manager
+    removed = storage_manager.delete_result(job_id, filename)
+    if not removed:
+        raise HTTPException(status_code=404, detail="File not found")
+    return {"status": "deleted", "job_id": job_id, "filename": filename}
+
+@app.delete("/results/{job_id}")
+def delete_all_result_files(request: Request, job_id: str):
+    storage_manager = request.app.state.storage_manager
+    count = storage_manager.delete_all_results(job_id)
+    return {"status": "deleted", "job_id": job_id, "deleted_count": int(count)}
 
 @app.get("/progress/{job_id}")
 def get_job_progress(request: Request, job_id: str):
@@ -347,17 +350,53 @@ def get_user_jobs(request: Request, user_id: str, limit: int = 50):
         except Exception:
             entry["progress"] = None
         try:
-            # List result filenames if any
-            keys = list(storage_manager.redis_client.scan_iter(match=f"result:{job_id}:*"))
-            files = []
-            for k in keys:
-                ks = k.decode() if isinstance(k, (bytes, bytearray)) else k
-                files.append(ks.split(":")[-1])
-            entry["files"] = files
+            # List result filenames if any (Redis + disk)
+            entry["files"] = storage_manager.list_result_files(job_id)
         except Exception:
             entry["files"] = []
         results.append(entry)
     return {"user_id": user_id, "jobs": results}
+
+@app.post("/jobs/{job_id}/cancel")
+def cancel_job(request: Request, job_id: str):
+    """Request cancellation of a running or queued job."""
+    storage_manager = request.app.state.storage_manager
+    task_id = storage_manager.get_job_task(job_id)
+    # Mark cancel flag for cooperative stops
+    try:
+        storage_manager.request_cancel(job_id)
+    except Exception:
+        pass
+    revoked = False
+    if task_id:
+        try:
+            celery_app.control.revoke(task_id, terminate=True, signal="SIGTERM")
+            revoked = True
+        except Exception:
+            revoked = False
+    return {"job_id": job_id, "task_id": task_id, "revoked": revoked}
+
+@app.delete("/jobs/{job_id}")
+def delete_job(request: Request, job_id: str, cancel_if_running: bool = True):
+    """Delete all data for a job (results, metadata, progress). Optionally cancels first."""
+    storage_manager = request.app.state.storage_manager
+    # Optionally cancel
+    if cancel_if_running:
+        try:
+            task_id = storage_manager.get_job_task(job_id)
+            if task_id:
+                tr = celery_app.AsyncResult(task_id)
+                if tr.status in ("PENDING", "STARTED", "RETRY"):
+                    celery_app.control.revoke(task_id, terminate=True, signal="SIGTERM")
+        except Exception:
+            pass
+    # Remove results and keys
+    try:
+        storage_manager.delete_all_results(job_id)
+    except Exception:
+        pass
+    storage_manager.cleanup_job(job_id)
+    return {"status": "deleted", "job_id": job_id}
 
 @app.get("/health")
 async def health_check(request: Request):

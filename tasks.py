@@ -2,7 +2,8 @@
 import os
 import tempfile
 from pathlib import Path
-from celery import Celery
+from celery import Celery, current_task
+from celery.exceptions import Ignore
 from typing import Optional
 from config import create_model, configure_api, API_KEYS
 from pdf_processor.core.processor import PDFProcessor
@@ -37,6 +38,14 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
     storage_manager = StorageManager()
     
     try:
+        # Cooperative cancellation early check
+        try:
+            if storage_manager.is_cancelled(job_id):
+                storage_manager.update_progress(job_id, 0, "사용자 취소됨")
+                current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+                raise Ignore()
+        except Exception:
+            pass
         # Get job metadata from Redis
         metadata = storage_manager.get_job_metadata(job_id)
         if not metadata:
@@ -119,6 +128,16 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             # Process each jokbo file with progress tracking
             total_jokbos = len(jokbo_paths)
             for idx, jokbo_path_str in enumerate(jokbo_paths, 1):
+                # Check cancellation between items
+                try:
+                    if storage_manager.is_cancelled(job_id):
+                        storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
+                        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+                        raise Ignore()
+                except Ignore:
+                    raise
+                except Exception:
+                    pass
                 jokbo_path = Path(jokbo_path_str)
                 
                 # Update status message (percent driven by chunk progress)
@@ -185,6 +204,14 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
     storage_manager = StorageManager()
     
     try:
+        # Cooperative cancellation early check
+        try:
+            if storage_manager.is_cancelled(job_id):
+                storage_manager.update_progress(job_id, 0, "사용자 취소됨")
+                current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+                raise Ignore()
+        except Exception:
+            pass
         # Get job metadata from Redis
         metadata = storage_manager.get_job_metadata(job_id)
         if not metadata:
@@ -256,6 +283,16 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
             # Process each lesson file with progress tracking
             total_lessons = len(lesson_paths)
             for idx, lesson_path_str in enumerate(lesson_paths, 1):
+                # Check cancellation between items
+                try:
+                    if storage_manager.is_cancelled(job_id):
+                        storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
+                        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+                        raise Ignore()
+                except Ignore:
+                    raise
+                except Exception:
+                    pass
                 lesson_path = Path(lesson_path_str)
                 
                 # Update status message (percent driven by chunk progress)

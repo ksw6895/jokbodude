@@ -23,8 +23,13 @@ class StorageManager:
     def __init__(self, redis_url: str = None):
         self.redis_url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379/0")
         self.use_local_only = False
+        # Local storage for intermediate files (backups/fallbacks)
         self.local_storage = Path(os.getenv("RENDER_STORAGE_PATH", "/tmp/storage"))
         self.local_storage.mkdir(parents=True, exist_ok=True)
+        # Dedicated results directory (persistent when RENDER_STORAGE_PATH is set, or ./output by default)
+        results_root = Path(os.getenv("RENDER_STORAGE_PATH", "output"))
+        self.results_dir = results_root / "results"
+        self.results_dir.mkdir(parents=True, exist_ok=True)
         # Configurable TTL for file keys (seconds). Default 24h.
         try:
             self.file_ttl_seconds = max(60, int(os.getenv("FILE_TTL_SECONDS", "86400")))
@@ -244,11 +249,115 @@ class StorageManager:
             172800,  # 48 hours TTL
             content
         )
+        # Persist to disk as well to avoid overusing Redis memory
+        try:
+            dest = self.results_dir / job_id / result_path.name
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(content)
+            # Index the on-disk path for lookup
+            self.redis_client.setex(
+                f"result_path:{job_id}:{result_path.name}",
+                172800,
+                str(dest)
+            )
+        except Exception as e:
+            logger.warning(f"Failed to persist result to disk: {e}")
         return result_key
     
     def get_result(self, result_key: str) -> Optional[bytes]:
         """Retrieve result from Redis"""
         return self.redis_client.get(result_key)
+
+    def get_result_path(self, job_id: str, filename: str) -> Optional[Path]:
+        """Return on-disk path for a stored result if available."""
+        try:
+            # First try indexed path
+            v = None
+            if not self.use_local_only and self.redis_client:
+                v = self._with_retry(self.redis_client.get, f"result_path:{job_id}:{filename}")
+                if isinstance(v, (bytes, bytearray)):
+                    v = v.decode()
+            # Fallback to convention path
+            path = Path(v) if v else (self.results_dir / job_id / filename)
+            return path if path.exists() else None
+        except Exception:
+            path = self.results_dir / job_id / filename
+            return path if path.exists() else None
+
+    def read_result_file(self, job_id: str, filename: str) -> Optional[bytes]:
+        """Read a result file from disk if present."""
+        p = self.get_result_path(job_id, filename)
+        if p and p.exists():
+            try:
+                return p.read_bytes()
+            except Exception:
+                return None
+        return None
+
+    def list_result_files(self, job_id: str) -> List[str]:
+        """List result filenames for a job (from Redis keys and disk)."""
+        names = set()
+        try:
+            if not self.use_local_only and self.redis_client:
+                for key in self.redis_client.scan_iter(match=f"result:{job_id}:*"):
+                    ks = key.decode() if isinstance(key, (bytes, bytearray)) else key
+                    names.add(ks.split(":")[-1])
+        except Exception:
+            pass
+        # Include on-disk files
+        d = self.results_dir / job_id
+        if d.exists():
+            for p in d.glob("*.pdf"):
+                names.add(p.name)
+        return sorted(names)
+
+    def delete_result(self, job_id: str, filename: str) -> bool:
+        """Delete a single result (Redis + disk). Returns True if anything was removed."""
+        removed = False
+        # Delete Redis content and index
+        if not self.use_local_only and self.redis_client:
+            try:
+                rk = f"result:{job_id}:{filename}"
+                rpk = f"result_path:{job_id}:{filename}"
+                self._with_retry(self.redis_client.delete, rk)
+                self._with_retry(self.redis_client.delete, rpk)
+                removed = True
+            except Exception:
+                pass
+        # Delete file on disk
+        p = (self.results_dir / job_id / filename)
+        try:
+            if p.exists():
+                p.unlink()
+                removed = True
+        except Exception:
+            pass
+        return removed
+
+    def delete_all_results(self, job_id: str) -> int:
+        """Delete all results (Redis + disk) for a job. Returns count removed (best-effort)."""
+        count = 0
+        # Remove Redis keys
+        if not self.use_local_only and self.redis_client:
+            try:
+                for key in list(self.redis_client.scan_iter(match=f"result:{job_id}:*")):
+                    self.redis_client.delete(key)
+                    count += 1
+                for key in list(self.redis_client.scan_iter(match=f"result_path:{job_id}:*")):
+                    self.redis_client.delete(key)
+            except Exception:
+                pass
+        # Remove disk directory
+        job_results = self.results_dir / job_id
+        if job_results.exists():
+            try:
+                # Count files before deletion
+                count += len(list(job_results.glob("*")))
+                import shutil
+                shutil.rmtree(job_results)
+            except Exception:
+                pass
+        return count
     
     def update_progress(self, job_id: str, progress: int, message: str) -> None:
         """Update job progress in Redis (percent + message)."""
@@ -319,6 +428,14 @@ class StorageManager:
         if job_dir.exists():
             import shutil
             shutil.rmtree(job_dir)
+        # Clean up persisted results
+        results_dir = self.results_dir / job_id
+        if results_dir.exists():
+            try:
+                import shutil
+                shutil.rmtree(results_dir)
+            except Exception:
+                pass
 
     def close(self) -> None:
         """Close Redis connections and release resources."""
@@ -459,3 +576,30 @@ class StorageManager:
             return v.decode() if isinstance(v, (bytes, bytearray)) else v
         except Exception:
             return None
+
+    # --- Cancellation helpers ---
+    def request_cancel(self, job_id: str) -> None:
+        """Mark a job as requested to cancel (cooperative check by workers)."""
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            self._with_retry(self.redis_client.setex, f"job:{job_id}:cancel", 172800, "1")
+        except Exception as e:
+            logger.error(f"Failed to set cancel flag: {e}")
+
+    def is_cancelled(self, job_id: str) -> bool:
+        if self.use_local_only or not self.redis_client:
+            return False
+        try:
+            v = self._with_retry(self.redis_client.get, f"job:{job_id}:cancel")
+            return bool(v)
+        except Exception:
+            return False
+
+    def clear_cancel(self, job_id: str) -> None:
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            self._with_retry(self.redis_client.delete, f"job:{job_id}:cancel")
+        except Exception:
+            pass

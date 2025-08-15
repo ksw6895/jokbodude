@@ -1148,8 +1148,13 @@
                     const chunks = (prog.total_chunks ? `${prog.completed_chunks||0}/${prog.total_chunks} chunks` : '');
                     let files = '';
                     for (const f of (j.files||[])) {
-                        files += `<a class="download-btn" style="margin-top:0.5rem;" href="/result/${j.job_id}/${f}" target="_blank">📥 ${f}</a>`;
+                        const ef = encodeURIComponent(f);
+                        files += `<div style="display:flex;gap:0.4rem;align-items:center;">`+
+                                 `<a class="download-btn" style="margin-top:0.5rem;" href="/result/${j.job_id}/${ef}" target="_blank">📥 ${f}</a>`+
+                                 `<button style="margin-top:0.5rem;padding:0.4rem 0.6rem;border:1px solid var(--border);background:rgba(255,255,255,0.06);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="deleteResult('${j.job_id}','${ef}')">🗑️ Delete</button>`+
+                                 `</div>`;
                     }
+                    const canCancel = (j.status === 'PENDING' || j.status === 'STARTED' || j.status === 'RETRY');
                     html += `
                         <div style="padding:1rem;border-bottom:1px solid var(--border);">
                             <div class="status-message" style="text-align:left;">
@@ -1159,6 +1164,10 @@
                                 </div>
                                 <div style="font-size:0.875rem;color:#666;">${pct}% ${chunks}</div>
                                 <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;">${files}</div>
+                                <div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+                                    ${canCancel ? `<button style="padding:0.5rem 0.8rem;border:1px solid var(--border);background:rgba(255,255,255,0.06);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="cancelJob('${j.job_id}')">⏹️ Cancel</button>` : ''}
+                                    <button style="padding:0.5rem 0.8rem;border:1px solid var(--border);background:rgba(255,255,255,0.06);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="deleteJob('${j.job_id}')">🧹 Delete Job</button>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1168,6 +1177,32 @@
                 list.innerHTML = `<div class="status-message">Failed to load jobs: ${e.message}</div>`;
             }
         });
+        async function cancelJob(jobId) {
+            try {
+                await fetch(`/jobs/${jobId}/cancel`, { method: 'POST' });
+                document.getElementById('load_jobs_btn').click();
+            } catch (e) {
+                alert('Failed to cancel: ' + e.message);
+            }
+        }
+        async function deleteJob(jobId) {
+            if (!confirm('Delete this job and its results?')) return;
+            try {
+                await fetch(`/jobs/${jobId}`, { method: 'DELETE' });
+                document.getElementById('load_jobs_btn').click();
+            } catch (e) {
+                alert('Failed to delete: ' + e.message);
+            }
+        }
+        async function deleteResult(jobId, filename) {
+            if (!confirm('Delete this result file?')) return;
+            try {
+                await fetch(`/result/${jobId}/${filename}`, { method: 'DELETE' });
+                document.getElementById('load_jobs_btn').click();
+            } catch (e) {
+                alert('Failed to delete file: ' + e.message);
+            }
+        }
     </script>
 </body>
 </html>
