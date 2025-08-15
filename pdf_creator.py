@@ -15,6 +15,8 @@ import os
 from datetime import datetime
 import threading
 from validators import PDFValidator
+import unicodedata
+import re
 
 class PDFCreator:
     def __init__(self):
@@ -23,6 +25,114 @@ class PDFCreator:
         self.pdf_lock = threading.Lock()  # Thread-safe lock for PDF cache
         self.debug_log_path = Path("output/debug/pdf_creator_debug.log")
         self.debug_log_path.parent.mkdir(parents=True, exist_ok=True)
+        self._lesson_dir_cache = {}
+
+    # ---------- Text / Filename utilities ----------
+    @staticmethod
+    def _normalize_korean(text: str) -> str:
+        """Normalize text to NFC (모아쓰기) so Hangul renders correctly in PDF."""
+        try:
+            return unicodedata.normalize('NFC', text or '')
+        except Exception:
+            return text or ''
+
+    @staticmethod
+    def _insert_soft_breaks(token: str, every: int = 24) -> str:
+        """Insert zero-width spaces into very long tokens to enable wrapping.
+
+        - Adds zero-width spaces after common separators ("_", "-", ")", "]")
+        - If token has no spaces/separators and is long, inserts ZWSP every N chars
+        """
+        if not token:
+            return token
+        # Add soft breaks after separators
+        token = token.replace('_', '_\u200b').replace('-', '-\u200b')
+        token = token.replace(')', ')\u200b').replace(']', ']\u200b')
+        # If still a single long run, inject ZWSP periodically
+        parts = re.split(r"(\s+|[_\-\)\]])", token)
+        rebuilt = []
+        for part in parts:
+            if not part:
+                continue
+            if re.fullmatch(r"\s+|[_\-\)\]]", part):
+                rebuilt.append(part)
+                continue
+            if len(part) > every:
+                chunks = [part[i:i+every] for i in range(0, len(part), every)]
+                rebuilt.append('\u200b'.join(chunks))
+            else:
+                rebuilt.append(part)
+        return ''.join(rebuilt)
+
+    def _format_display_filename(self, name: str) -> str:
+        """Normalize Hangul and make long filenames wrap-friendly for PDF text boxes."""
+        normalized = self._normalize_korean(name)
+        return self._insert_soft_breaks(normalized)
+
+    @staticmethod
+    def _safe_int(value, default: int = 0) -> int:
+        """Coerce common stringy numbers like "12", "p12", "12-13" to an int (first number)."""
+        try:
+            if isinstance(value, int):
+                return value
+            if isinstance(value, float):
+                return int(value)
+            s = str(value)
+            m = re.search(r"(\d+)", s)
+            return int(m.group(1)) if m else default
+        except Exception:
+            return default
+
+    # ---------- File resolution helpers ----------
+    def _resolve_lesson_path(self, lesson_dir: str, lesson_filename: str) -> Path:
+        """Resolve a lesson file in directory, with normalization and fuzzy fallback.
+
+        Handles Hangul normalization differences and minor separator differences.
+        """
+        base_dir = Path(lesson_dir)
+        direct = base_dir / (lesson_filename or '')
+        if direct.exists():
+            return direct
+
+        # Build directory cache once
+        cache_key = str(base_dir.resolve())
+        if cache_key not in self._lesson_dir_cache:
+            try:
+                files = list(base_dir.glob('*.pdf'))
+            except Exception:
+                files = []
+            mapping = {}
+            for p in files:
+                key = self._normalize_korean(p.name)
+                key = re.sub(r"[\s_\-]+", "", key)
+                mapping[key.lower()] = p
+            self._lesson_dir_cache[cache_key] = mapping
+
+        # Try fuzzy match
+        needle = self._normalize_korean(lesson_filename or '')
+        needle_key = re.sub(r"[\s_\-]+", "", needle).lower()
+        candidate = self._lesson_dir_cache.get(cache_key, {}).get(needle_key)
+        if candidate and candidate.exists():
+            self.log_debug(f"Fuzzy-matched lesson file: '{lesson_filename}' -> '{candidate.name}'")
+            return candidate
+
+        # Last resort: contains match by stem
+        best = None
+        best_len = 0
+        try:
+            for k, p in self._lesson_dir_cache.get(cache_key, {}).items():
+                if needle_key and needle_key in k and len(k) > best_len:
+                    best = p
+                    best_len = len(k)
+        except Exception:
+            pass
+        if best and best.exists():
+            self.log_debug(f"Contains-matched lesson file: '{lesson_filename}' -> '{best.name}'")
+            return best
+
+        # Not found
+        self.log_debug(f"Lesson file not found (after fallback): {lesson_filename} in {lesson_dir}")
+        return direct
         
     def _register_font(self, page: fitz.Page) -> str:
         """Register a Unicode-capable font on the given page and return its name.
@@ -143,6 +253,7 @@ class PDFCreator:
         doc = fitz.open()
         lesson_pdf = fitz.open(lesson_path)
         lesson_basename = Path(lesson_path).name
+        display_lesson_basename = self._format_display_filename(lesson_basename)
 
         # Build an index of related questions by lesson page
         related_by_page: Dict[int, List[Dict[str, Any]]] = {}
@@ -190,7 +301,8 @@ class PDFCreator:
                 explanation_page = doc.new_page()
                 text_content = f"=== 문제 {question.get('question_number')} 해설 ===\n\n"
                 text_content += f"※ 앞 페이지의 문제 {question.get('question_number')}번을 참고하세요\n\n"
-                text_content += f"[출처: {question.get('jokbo_filename')} - {question.get('jokbo_page')}페이지]\n\n"
+                src_name = self._format_display_filename(str(question.get('jokbo_filename') or ''))
+                text_content += f"[출처: {src_name} - {question.get('jokbo_page')}페이지]\n\n"
                 # Slide-level importance score (if available)
                 if page_num in importance_by_page:
                     text_content += f"관련성 점수(슬라이드): {importance_by_page[page_num]} / 110\n\n"
@@ -204,7 +316,7 @@ class PDFCreator:
                     text_content += "\n"
                 if question.get('relevance_reason'):
                     text_content += f"관련성:\n{question['relevance_reason']}\n\n"
-                text_content += f"관련 강의 페이지: {page_num} ({lesson_basename})\n\n"
+                text_content += f"관련 강의 페이지: {page_num} ({display_lesson_basename})\n\n"
                 text_content += f"참고: 이 문제는 강의자료 {page_num}페이지의 내용과 관련이 있습니다."
 
                 fontname = self._register_font(explanation_page)
@@ -246,17 +358,24 @@ class PDFCreator:
         
         print(f"Filtered PDF created: {output_path}")
     
+    # Backward-compatible alias used by tasks.py
+    def create_lesson_centric_pdf(self, lesson_path: str, analysis_result: Dict[str, Any], output_path: str, jokbo_dir: str = "jokbo"):
+        return self.create_filtered_pdf(lesson_path, analysis_result, output_path, jokbo_dir)
+    
     def extract_lesson_slide(self, lesson_filename: str, lesson_page: int, lesson_dir: str = "lesson") -> fitz.Document:
         """Extract a single page from lesson PDF"""
-        lesson_path = Path(lesson_dir) / lesson_filename
+        lesson_path = self._resolve_lesson_path(lesson_dir, lesson_filename)
         if not lesson_path.exists():
             print(f"Warning: Lesson file not found: {lesson_path}")
+            self.log_debug(f"WARN extract_lesson_slide: missing file {lesson_path}")
             return None
             
         lesson_pdf = fitz.open(str(lesson_path))
-        
+        # Defensive: coerce lesson_page to int
+        lesson_page = self._safe_int(lesson_page, 0)
         if lesson_page > len(lesson_pdf) or lesson_page < 1:
             print(f"Warning: Page {lesson_page} does not exist in {lesson_filename}")
+            self.log_debug(f"WARN extract_lesson_slide: invalid page {lesson_page} for {lesson_path.name} (max {len(lesson_pdf)})")
             lesson_pdf.close()
             return None
         
@@ -285,6 +404,7 @@ class PDFCreator:
         
         doc = fitz.open()
         jokbo_filename = Path(jokbo_path).name
+        display_jokbo_filename = self._format_display_filename(jokbo_filename)
         
         # Get PDF page count thread-safely
         jokbo_pdf = self.get_jokbo_pdf(jokbo_path)  # get_jokbo_pdf already handles locking
@@ -364,14 +484,14 @@ class PDFCreator:
                 
                 # Add related lesson slides for this specific question
                 for slide_info in related_slides:
-                    lesson_page = slide_info["lesson_page"]
-                    lesson_filename = slide_info["lesson_filename"]
+                    lesson_page = self._safe_int(slide_info.get("lesson_page"))
+                    lesson_filename = str(slide_info.get("lesson_filename") or "")
                     
                     # Validate page number
-                    lesson_path = Path(lesson_dir) / lesson_filename
+                    lesson_path = self._resolve_lesson_path(lesson_dir, lesson_filename)
                     if lesson_path.exists():
                         max_pages = PDFValidator.get_pdf_page_count(str(lesson_path))
-                        if not PDFValidator.validate_page_number(lesson_page, max_pages, lesson_filename):
+                        if not PDFValidator.validate_page_number(int(lesson_page), max_pages, lesson_path.name):
                             self.log_debug(f"  WARNING: Page {lesson_page} > max {max_pages} in {lesson_filename}")
                             continue
                     
@@ -383,13 +503,15 @@ class PDFCreator:
                     if slide_doc:
                         doc.insert_pdf(slide_doc)
                         slide_doc.close()
+                    else:
+                        self.log_debug(f"SKIP inserting slide: file='{lesson_filename}', page={lesson_page}")
                 
                 # Add explanation page
                 explanation_page = doc.new_page()
                 
                 # Create text content
                 text_content = f"=== 문제 {question['question_number']} 해설 ===\n\n"
-                text_content += f"[출처: {jokbo_filename} - {jokbo_page_num}페이지]\n\n"
+                text_content += f"[출처: {display_jokbo_filename} - {jokbo_page_num}페이지]\n\n"
                 text_content += f"정답: {question['answer']}\n\n"
                 
                 if question.get('explanation'):
@@ -405,7 +527,7 @@ class PDFCreator:
                 text_content += "관련 강의 슬라이드:\n"
                 for i, slide_info in enumerate(related_slides, 1):
                     # Defensive fetches
-                    fname = slide_info.get('lesson_filename') or 'Unknown.pdf'
+                    fname = self._format_display_filename(slide_info.get('lesson_filename') or 'Unknown.pdf')
                     page_no = slide_info.get('lesson_page')
                     score = slide_info.get('relevance_score')
                     if score is None:
