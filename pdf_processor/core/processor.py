@@ -239,35 +239,50 @@ class PDFProcessor:
     
     def _process_chunked_lessons_multi_api(self, chunked_lessons: List[tuple],
                                           jokbo_path: str, multi_analyzer: MultiAPIAnalyzer) -> List[Dict[str, Any]]:
-        """Process lessons that need chunking with multi-API support."""
+        """Process lessons that need chunking with multi-API support.
+        Avoids duplicate processing by ensuring each lesson is processed once.
+        Increments progress for single-file lessons to keep totals accurate.
+        """
         results = []
+        processed_chunked_lessons = set()
+        
+        from ..pdf.operations import PDFOperations
         
         for lesson_path, chunk_info in chunked_lessons:
             if chunk_info is None:
-                # Single file
+                # Single file – analyze once and count as one unit of progress
                 result = multi_analyzer.analyze_jokbo_centric(lesson_path, jokbo_path)
-                results.append(result)
-            else:
-                # Process chunks
-                from ..pdf.operations import PDFOperations
-                chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
-                
-                # Extract chunk files
-                chunk_paths = []
-                for _, start_page, end_page in chunks:
-                    chunk_path = PDFOperations.extract_pages(lesson_path, start_page, end_page)
-                    chunk_paths.append((chunk_path, start_page, end_page))
-                
                 try:
-                    # Analyze chunks with retry on different APIs
-                    result = multi_analyzer.analyze_with_chunk_retry(
-                        "jokbo-centric", lesson_path, jokbo_path, chunk_paths
-                    )
-                    results.append(result)
-                finally:
-                    # Clean up chunk files
-                    for chunk_path, _, _ in chunk_paths:
-                        Path(chunk_path).unlink(missing_ok=True)
+                    from storage_manager import StorageManager
+                    StorageManager().increment_chunk(self.session_id, 1,
+                        f"파일 완료: {Path(lesson_path).name}")
+                except Exception:
+                    pass
+                results.append(result)
+                continue
+
+            # For chunked lessons, ensure we process each lesson only once
+            if lesson_path in processed_chunked_lessons:
+                continue
+            processed_chunked_lessons.add(lesson_path)
+
+            # Build all chunks once for this lesson
+            chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
+            chunk_paths = []
+            for _, start_page, end_page in chunks:
+                chunk_path = PDFOperations.extract_pages(lesson_path, start_page, end_page)
+                chunk_paths.append((chunk_path, start_page, end_page))
+
+            try:
+                # Analyze chunks with retry on different APIs (progress increments per chunk inside)
+                result = multi_analyzer.analyze_with_chunk_retry(
+                    "jokbo-centric", lesson_path, jokbo_path, chunk_paths
+                )
+                results.append(result)
+            finally:
+                # Clean up chunk files
+                for chunk_path, _, _ in chunk_paths:
+                    Path(chunk_path).unlink(missing_ok=True)
         
         return results
     
