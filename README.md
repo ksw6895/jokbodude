@@ -424,3 +424,151 @@ python cleanup_gemini_files.py
 ## 문의 💬
 
 이슈 탭을 통해 문의해주세요.
+# JokboDude
+
+문제집(족보, jokbo) PDF와 강의자료(lesson) PDF를 서로 비교/매칭하여, 관련 슬라이드/페이지를 뽑아 결과 PDF로 만들어 주는 서비스입니다. FastAPI 웹 API, Celery 워커, Redis 기반 스토리지/진행도 공유, Google Gemini API 기반 분석 엔진으로 구성됩니다.
+
+- 분석 모드
+  - Jokbo‑centric: 하나의 족보 vs 여러 강의자료
+  - Lesson‑centric: 하나의 강의자료 vs 여러 족보
+- 멀티 API 키(Multi‑API): 여러 Gemini API 키를 동시에 병렬로 사용하여 처리량을 극대화합니다.
+
+## 주요 특징
+- FastAPI 기반 업로드/상태/결과 API, 간단한 정적 UI 제공
+- Celery 워커로 장시간 작업 분리, Redis로 파일/메타데이터/진행도 공유
+- 장문 PDF 자동 청크 분할 처리 및 병렬 분석
+- 멀티 API 키 병렬화: 제공한 키 개수만큼 동시 처리(작업 단위 수까지)로 가속
+- 내구성 강화 스토리지: 업로드 직후 저장 검증, TTL(만료시간) 연장, 장시간 대기/처리에도 안전
+
+## 아키텍처 개요
+- `pdf_processor/`: 분석 엔진
+  - `core/`: 오케스트레이션, 세션 관리
+  - `analyzers/`: lesson/jokbo 중심 분석 로직, 멀티 API 래퍼
+  - `api/`: Gemini 클라이언트, Multi‑API 매니저, 파일 업로드/추적
+  - `parsers/`: 응답 정규화/병합
+  - `pdf/`: PDF 분할/추출 유틸
+  - `utils/`: 로깅/예외/캐시
+- `web_server.py`: FastAPI 앱 (업로드, 상태 조회, 결과 다운로드, 헬스체크)
+- `tasks.py`: Celery 작업자 (분석 실행, 결과 PDF 생성/저장)
+- `pdf_creator.py`: 결과 PDF 생성기
+- `storage_manager.py`: Redis 기반 파일 전달/진행도/결과 저장, TTL 관리
+- `frontend/`: 정적 UI (루트 `/`로 서빙)
+- `jokbo/`, `lesson/`: 입력 샘플 폴더(개인 파일 커밋 금지)
+- `output/`: 생성 결과 출력
+- 설정: `.env(.example)`, `config.py`, `celeryconfig.py`, `requirements.txt`
+
+## 요구사항
+- Python 3.8+
+- Redis 6+
+- 네트워크 접근(외부 Gemini API 호출)
+
+## 빠른 시작(로컬)
+1) 가상환경 및 의존성 설치
+```
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+# .env에 필수 값 설정: GEMINI_API_KEY 또는 GEMINI_API_KEYS, REDIS_URL 등
+```
+
+2) 필수 환경 변수 설정(요약)
+- `GEMINI_API_KEY` 또는 `GEMINI_API_KEYS`(쉼표로 구분)
+- `REDIS_URL`(예: `redis://localhost:6379/0`)
+- 선택: `FILE_TTL_SECONDS`(기본 86400 = 24h), `GEMINI_MODEL`(`pro|flash|flash-lite`), `MAX_PAGES_PER_CHUNK`, `RENDER_STORAGE_PATH`
+
+3) 서버 및 워커 실행(각각 터미널)
+```
+uvicorn web_server:app --reload   # API 서버 (기본 8000)
+celery -A tasks:celery_app worker -Q analysis,default --loglevel=info
+```
+
+4) 간단 테스트(curl)
+```
+curl -F "jokbo_files=@jokbo/sample.pdf" -F "lesson_files=@lesson/sample.pdf" \
+     "http://localhost:8000/analyze/jokbo-centric?model=flash&multi_api=true"
+
+# 상태/결과 조회
+curl http://localhost:8000/status/<task_id>
+curl http://localhost:8000/progress/<job_id>
+curl http://localhost:8000/results/<job_id>
+curl -OJ http://localhost:8000/result/<job_id>/<filename>
+```
+
+스크립트 기반 스모크 테스트도 제공됩니다.
+```
+python scripts/generate_dummy_pdfs.py
+bash scripts/smoke.sh   # API + Celery + Redis가 실행 중이어야 함
+```
+
+## API 요약
+- `POST /analyze/jokbo-centric`
+  - Form: `jokbo_files[]`, `lesson_files[]`
+  - Query: `model=pro|flash|flash-lite`, `multi_api=true|false`, `user_id`
+  - Res: `{ job_id, task_id }` (202 Accepted)
+
+- `POST /analyze/lesson-centric`
+  - Form: `jokbo_files[]`, `lesson_files[]`
+  - Query: 동일
+  - Res: `{ job_id, task_id }` (202 Accepted)
+
+- `GET /status/{task_id}` → Celery 작업 상태/에러/결과 메타
+- `GET /progress/{job_id}` → 진행률/메시지/ETA 등
+- `GET /results/{job_id}` → 생성된 결과 파일 목록
+- `GET /result/{job_id}/{filename}` → 특정 결과 PDF 다운로드
+- `GET /health` → Redis/Worker 헬스
+- `GET /` → 간단 UI
+
+## 멀티 API 모드(Multi‑API)
+- 설정: `.env`에 `GEMINI_API_KEYS=key1,key2,...` 지정 (유효 키만 사용)
+- 호출 시 `multi_api=true`를 주면, 가능한 한 많은 키를 동시에 사용
+  - 병렬도 = `min(작업 단위 수, 제공 키 수)`로 자동 설정
+  - 청크 처리 시에도 키 수만큼 분산
+  - 429/쿼터 초과 등 연속 3회 실패 키는 10분 쿨다운 후 자동 복귀
+
+권장:
+- 많은 키를 사용할수록(합리적인 범위) 처리량이 선형에 가깝게 증가합니다.
+- 단, 입력 파일 수/청크 수가 적으면 추가 키가 속도 개선에 기여하지 않을 수 있습니다.
+
+## 스토리지/TTL(중요)
+업로드 파일은 Redis에 해시(Hash) 키로 저장되며, 키 형태는 다음과 같습니다.
+```
+file:{job_id}:{type}:{filename}:{md5_8}
+```
+
+- 기본 TTL: `FILE_TTL_SECONDS`(기본 86400 = 24h)
+- 업로드 시점에 즉시 저장 검증(Fail‑Fast) 수행: 비정상 저장/TTL이면 503으로 거절
+- 워커는 잡 시작 시 전체 키 TTL을 연장하고, 각 파일을 읽기 직전 TTL 재연장
+- 결과/메타/진행도 TTL: 결과와 메타데이터는 48h, 진행도는 작업 중 갱신되며 최대 48h 유지
+
+필수 체크리스트:
+- 장시간 대기/처리(수 시간 이상) 환경에서는 `FILE_TTL_SECONDS`를 24~48h로 설정
+- 웹/워커 모두 같은 `REDIS_URL`을 사용해야 함
+- Redis 메모리 정책이 최근 키를 축출하지 않도록 `maxmemory`/`maxmemory-policy` 점검
+
+문제 해결: “File not found in Redis”가 뜬다면
+- 해당 키의 `HLEN`, `TTL` 확인 (`-2`면 이미 만료/삭제됨)
+- `FILE_TTL_SECONDS` 증가, 큐 지연 단축 또는 워커 수 확장 고려
+
+## 구성/환경 변수(요약)
+- `GEMINI_API_KEY` 또는 `GEMINI_API_KEYS`: Gemini API 키(필수)
+- `GEMINI_MODEL`: `pro|flash|flash-lite` (기본 `pro`)
+- `REDIS_URL`: 예) `redis://localhost:6379/0`
+- `FILE_TTL_SECONDS`: 업로드 파일 TTL(초), 기본 86400(24h)
+- `MAX_PAGES_PER_CHUNK`: 큰 PDF 청크 분할 페이지 상한(기본 40)
+- `RENDER_STORAGE_PATH`: Render 등에서 쓰기 가능한 경로(임시/세션/출력에 사용)
+
+## 개발/테스트 가이드
+- 스타일: PEP 8, 타입힌트 가급적, 함수는 작고 테스트 가능하게
+- 엔드포인트 스모크 테스트 위주로 확인 (작은 샘플 PDF)
+- 테스트 추가 시 `tests/test_*.py`에 작성(분석기, 파서 병합 경로 중심)
+- 스크립트:
+  - `scripts/generate_dummy_pdfs.py`: 더미 PDF 생성
+  - `scripts/smoke.sh`: 업로드→폴링→결과 다운로드 자동화
+
+## 배포(예: Render)
+- `render.yaml` 참고, `RENDER_STORAGE_PATH`가 쓰기 가능해야 함
+- 환경 변수 설정: `GEMINI_API_KEY(S)`, `REDIS_URL`, `FILE_TTL_SECONDS` 등
+- 워커/웹 모두 동일한 `REDIS_URL` 사용
+
+## 라이선스
+이 프로젝트는 MIT 라이선스를 따릅니다. 자세한 내용은 `LICENSE` 파일을 참고하세요.
