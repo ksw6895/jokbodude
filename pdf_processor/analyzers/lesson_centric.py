@@ -129,6 +129,17 @@ class LessonCentricAnalyzer(BaseAnalyzer):
                 result = self.analyze(
                     jokbo_path, chunk_path, None, chunk_info=(start_page, end_page)
                 )
+                # Optional: mirror chunk result to Redis debug storage (best effort)
+                try:
+                    from storage_manager import StorageManager
+                    StorageManager().store_debug_json(self.session_id, f"lesson_chunk_{i+1:03d}", {
+                        'chunk_index': i+1,
+                        'chunk_pages': [start_page, end_page],
+                        'lesson_filename': Path(lesson_path).name,
+                        'result': result,
+                    })
+                except Exception:
+                    pass
                 chunk_results.append(result)
                 # Update chunk progress
                 try:

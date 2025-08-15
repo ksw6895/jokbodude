@@ -449,6 +449,45 @@ class StorageManager:
         except Exception as e:
             logger.warning(f"Error while closing StorageManager: {e}")
 
+    # --- Optional debug data helpers (JSON) ---
+    def store_debug_json(self, job_id: str, name: str, data: Dict) -> Optional[str]:
+        """Store small JSON debug blobs (e.g., chunk results) under a namespaced key.
+
+        Returns the Redis key used when successful, otherwise None.
+        """
+        if self.use_local_only or not self.redis_client:
+            return None
+        try:
+            key = f"debug:{job_id}:{name}"
+            payload = json.dumps(data, ensure_ascii=False).encode("utf-8")
+            self._with_retry(self.redis_client.setex, key, 172800, payload)  # 48h TTL
+            return key
+        except Exception as e:
+            logger.warning(f"Failed to store debug json: {e}")
+            return None
+
+    def list_debug_keys(self, job_id: str) -> List[str]:
+        if self.use_local_only or not self.redis_client:
+            return []
+        try:
+            keys = [k.decode() if isinstance(k, (bytes, bytearray)) else k
+                    for k in self.redis_client.scan_iter(match=f"debug:{job_id}:*")]
+            return keys
+        except Exception:
+            return []
+
+    def get_debug_json(self, key: str) -> Optional[Dict]:
+        if self.use_local_only or not self.redis_client:
+            return None
+        try:
+            v = self._with_retry(self.redis_client.get, key)
+            if not v:
+                return None
+            s = v.decode() if isinstance(v, (bytes, bytearray)) else v
+            return json.loads(s)
+        except Exception:
+            return None
+
     # --- Enhanced progress tracking helpers ---
     def init_progress(self, job_id: str, total_chunks: int, message: str = "") -> None:
         """Initialize chunk-based progress with ETA support."""

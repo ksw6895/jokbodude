@@ -309,6 +309,16 @@ class JokboCentricAnalyzer(BaseAnalyzer):
             }, f, ensure_ascii=False, indent=2)
         
         logger.debug(f"Saved intermediate result to {filepath}")
+        # Optionally mirror to Redis debug storage (best effort)
+        try:
+            from storage_manager import StorageManager
+            StorageManager().store_debug_json(self.session_id, f"jokbo_chunk_{idx:03d}", {
+                'lesson_idx': idx,
+                'lesson_filename': Path(lesson_path).name,
+                'result': result,
+            })
+        except Exception:
+            pass
     
     def _merge_lesson_results(self, results: List[Dict[str, Any]], 
                             jokbo_path: str) -> Dict[str, Any]:
