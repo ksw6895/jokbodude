@@ -181,7 +181,7 @@ class BaseAnalyzer(ABC):
         return result
     
     def filter_connections(self, connections: List[Dict[str, Any]], 
-                         min_score: int = 50, max_connections: int = 2) -> List[Dict[str, Any]]:
+                         min_score: int = 70, max_connections: int = 2) -> List[Dict[str, Any]]:
         """
         Filter connections by relevance score.
         
