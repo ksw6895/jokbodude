@@ -1,6 +1,10 @@
 """
-JSON response parser with error recovery.
-Handles parsing of Gemini API responses with automatic partial recovery.
+JSON response parser with robust recovery and sanitation.
+Handles parsing of Gemini API responses with:
+- Code-fence/markdown cleanup and top-level JSON extraction
+- Common JSON repair (trailing commas, smart quotes)
+- Partial recovery for jokbo/lesson modes
+- Schema normalization and placeholder filtering to avoid low-value outputs
 """
 
 import json
@@ -31,24 +35,130 @@ class ResponseParser:
         Raises:
             JSONParsingError: If parsing completely fails
         """
+        # 1) Preprocess: strip code fences/markdown noise and isolate JSON-ish region
+        cleaned = ResponseParser._preprocess_response_text(response_text)
+
+        # 2) Try direct JSON
         try:
-            # First try direct JSON parsing
-            return json.loads(response_text)
-        except json.JSONDecodeError as e:
-            logger.warning(f"JSON parsing error: {str(e)}")
-            logger.info("Attempting partial parsing...")
-            
-            # Attempt partial parsing based on mode
-            if mode == "jokbo-centric":
-                partial_result = ResponseParser._parse_partial_jokbo(response_text)
-            else:
-                partial_result = ResponseParser._parse_partial_lesson(response_text)
-            
-            # If partial parsing completely failed, raise the original error
-            if partial_result.get("error") and not partial_result.get("partial"):
-                raise JSONParsingError(f"Complete JSON parsing failure: {partial_result['error']}")
-            
-            return partial_result
+            parsed = json.loads(cleaned)
+            return ResponseParser._sanitize_parsed_response(parsed, mode)
+        except Exception as e:
+            logger.warning(f"JSON parsing error (direct): {e}")
+
+        # 3) Attempt common repairs (trailing commas, smart quotes, NaN/Infinity)
+        repaired = ResponseParser._repair_common_json_issues(cleaned)
+        try:
+            parsed = json.loads(repaired)
+            return ResponseParser._sanitize_parsed_response(parsed, mode)
+        except Exception as e:
+            logger.warning(f"JSON parsing error (after repair): {e}")
+
+        # 4) Try extracting the largest top-level JSON object and parse
+        extracted = ResponseParser._extract_top_level_json(response_text)
+        if extracted:
+            try:
+                parsed = json.loads(extracted)
+                return ResponseParser._sanitize_parsed_response(parsed, mode)
+            except Exception as e:
+                logger.warning(f"JSON parsing error (after extraction): {e}")
+
+        # 5) Partial parsing fallback per mode
+        logger.info("Attempting partial parsing...")
+        if mode == "jokbo-centric":
+            partial_result = ResponseParser._parse_partial_jokbo(response_text)
+        else:
+            partial_result = ResponseParser._parse_partial_lesson(response_text)
+
+        # If partial parsing completely failed, raise the original error
+        if partial_result.get("error") and not partial_result.get("partial"):
+            raise JSONParsingError(f"Complete JSON parsing failure: {partial_result['error']}")
+
+        return ResponseParser._sanitize_parsed_response(partial_result, mode)
+
+    # --------------------
+    # Preprocessing helpers
+    # --------------------
+    @staticmethod
+    def _preprocess_response_text(text: str) -> str:
+        """
+        Remove common markdown wrappers and isolate probable JSON region.
+        - Strips code fences like ```json ... ``` or ``` ... ```
+        - If multiple fences exist, prefer the first block containing '{'
+        - Falls back to slicing from first '{' to last '}' if present
+        """
+        if not text:
+            return text
+
+        t = text.strip().lstrip("\ufeff")  # strip BOM
+
+        # Prefer fenced code blocks
+        fence_matches = list(re.finditer(r"```(json)?\s*([\s\S]*?)```", t, flags=re.IGNORECASE))
+        for m in fence_matches:
+            block = m.group(2) or ""
+            if "{" in block:
+                return block.strip()
+
+        # Single-line JSON may be prefixed/suffixed by explanation text
+        first = t.find("{")
+        last = t.rfind("}")
+        if first != -1 and last != -1 and last > first:
+            return t[first:last + 1].strip()
+
+        return t
+
+    @staticmethod
+    def _repair_common_json_issues(text: str) -> str:
+        """
+        Apply simple, safe repairs to improve JSON parseability:
+        - Replace smart quotes with standard quotes
+        - Remove trailing commas before '}' or ']'
+        - Replace bare NaN/Infinity with null
+        """
+        if not text:
+            return text
+        s = text
+        # Normalize curly/smart quotes frequently emitted by LLMs
+        s = s.replace("“", '"').replace("”", '"').replace("’", "'").replace("‘", "'")
+        # Remove trailing commas before closing braces/brackets
+        s = re.sub(r",\s*([}\]])", r"\1", s)
+        # Replace non-JSON numerics
+        s = re.sub(r"\bNaN\b|\bInfinity\b|-Infinity", "null", s)
+        return s
+
+    @staticmethod
+    def _extract_top_level_json(text: str) -> Optional[str]:
+        """
+        Scan the text to extract the first balanced top-level JSON object.
+        Handles stray commentary before/after the JSON.
+        """
+        if not text:
+            return None
+        start = text.find("{")
+        if start == -1:
+            return None
+        brace = 0
+        in_string = False
+        escape = False
+        for i in range(start, len(text)):
+            ch = text[i]
+            if escape:
+                escape = False
+                continue
+            if ch == "\\":
+                escape = True
+                continue
+            if ch == '"':
+                in_string = not in_string
+                continue
+            if in_string:
+                continue
+            if ch == '{':
+                brace += 1
+            elif ch == '}':
+                brace -= 1
+                if brace == 0:
+                    return text[start:i + 1]
+        return None
     
     @staticmethod
     def _parse_partial_jokbo(response_text: str) -> Dict[str, Any]:
@@ -196,7 +306,10 @@ class ResponseParser:
         
         if obj_end > obj_start:
             try:
-                return json.loads(text[obj_start:obj_end])
+                candidate = text[obj_start:obj_end]
+                # Attempt with minor repairs for object-only segments
+                candidate = ResponseParser._repair_common_json_issues(candidate)
+                return json.loads(candidate)
             except json.JSONDecodeError:
                 return None
         
@@ -221,9 +334,10 @@ class ResponseParser:
         valid_questions = []
         
         for q in questions:
-            # A complete question should have at least these fields
+            # A complete question should have at least these fields, and not placeholders
             if all(key in q for key in ["question_number", "question_text", "answer"]):
-                valid_questions.append(q)
+                if not ResponseParser._is_placeholder_value(q.get("answer")):
+                    valid_questions.append(q)
         
         if valid_questions:
             page_obj["questions"] = valid_questions
@@ -247,3 +361,195 @@ class ResponseParser:
             return "jokbo_pages" in data and isinstance(data["jokbo_pages"], list)
         else:
             return "related_slides" in data and isinstance(data["related_slides"], list)
+
+    # --------------------
+    # Sanitation / normalization
+    # --------------------
+    @staticmethod
+    def _is_placeholder_value(val: Any) -> bool:
+        if val is None:
+            return True
+        s = str(val).strip().lower()
+        if s in {"", "n/a", "na", "none", "null", "not provided", "not provided in jokbo"}:
+            return True
+        # Korean common placeholders
+        if s in {"없음", "제공되지 않음", "정보 없음"}:
+            return True
+        return False
+
+    @staticmethod
+    def _to_int_safe(v: Any, default: int = 0) -> int:
+        try:
+            if isinstance(v, bool):
+                return default
+            if isinstance(v, (int, float)):
+                return int(v)
+            m = re.search(r"(\d+)", str(v) or "")
+            return int(m.group(1)) if m else default
+        except Exception:
+            return default
+
+    @staticmethod
+    def _norm_wrong_answer_explanations(data: Any) -> Dict[str, str]:
+        if not isinstance(data, dict):
+            return {}
+        out: Dict[str, str] = {}
+        for k, v in data.items():
+            ks = str(k).strip()
+            # Normalize keys to "1번".."5번" patterns where possible
+            m = re.search(r"(\d)", ks)
+            if m:
+                ks = f"{m.group(1)}번"
+            vs = "" if v is None else str(v).strip()
+            if not ResponseParser._is_placeholder_value(vs):
+                out[ks] = vs
+        return out
+
+    @staticmethod
+    def _sanitize_parsed_response(data: Dict[str, Any], mode: str) -> Dict[str, Any]:
+        """
+        Normalize schema, coerce types, and drop low-value entries so that
+        downstream rendering avoids empty or placeholder content.
+        """
+        if not isinstance(data, dict):
+            return data
+
+        if mode == "jokbo-centric":
+            pages = data.get("jokbo_pages")
+            if not isinstance(pages, list):
+                return {"jokbo_pages": []}
+
+            cleaned_pages: List[Dict[str, Any]] = []
+            for p in pages:
+                if not isinstance(p, dict):
+                    continue
+                page_no = ResponseParser._to_int_safe(p.get("jokbo_page"), 0)
+                questions = p.get("questions") or []
+                if not isinstance(questions, list):
+                    questions = []
+                cleaned_questions: List[Dict[str, Any]] = []
+                for q in questions:
+                    if not isinstance(q, dict):
+                        continue
+                    qnum = str(q.get("question_number", "")).strip()
+                    qtext = (q.get("question_text") or "").strip()
+                    ans = (q.get("answer") or "").strip()
+                    if not qnum or not qtext or ResponseParser._is_placeholder_value(ans):
+                        continue
+                    # Normalize wrong answers
+                    wae = ResponseParser._norm_wrong_answer_explanations(q.get("wrong_answer_explanations"))
+                    # Normalize related slides
+                    slides = q.get("related_lesson_slides") or []
+                    if not isinstance(slides, list):
+                        slides = []
+                    norm_slides: List[Dict[str, Any]] = []
+                    for s in slides:
+                        if not isinstance(s, dict):
+                            continue
+                        lf = (s.get("lesson_filename") or "").strip()
+                        lp = ResponseParser._to_int_safe(s.get("lesson_page"), 0)
+                        if not lf or lp <= 0:
+                            continue
+                        sc = ResponseParser._to_int_safe(s.get("relevance_score"), 0)
+                        sc = max(0, min(sc, 110))
+                        rs = (s.get("relevance_reason") or s.get("reason") or "").strip()
+                        norm_slides.append({
+                            "lesson_filename": lf,
+                            "lesson_page": lp,
+                            "relevance_score": sc,
+                            "relevance_reason": rs
+                        })
+                    # Keep at most 2 slides by score desc
+                    norm_slides.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)
+                    norm_slides = norm_slides[:2]
+                    # Normalize question_numbers_on_page to strings
+                    qn_on_page = q.get("question_numbers_on_page") or []
+                    if isinstance(qn_on_page, list):
+                        qn_on_page = [str(x) for x in qn_on_page if str(x).strip()]
+                    else:
+                        qn_on_page = []
+
+                    expl = (q.get("explanation") or "").strip()
+                    if ResponseParser._is_placeholder_value(expl):
+                        expl = ""
+                    cleaned_questions.append({
+                        "jokbo_page": page_no,
+                        "question_number": qnum,
+                        "question_text": qtext,
+                        "answer": ans,
+                        "explanation": expl,
+                        "wrong_answer_explanations": wae,
+                        "related_lesson_slides": norm_slides,
+                        "question_numbers_on_page": qn_on_page,
+                        **({"jokbo_filename": (q.get("jokbo_filename") or "").strip()} if q.get("jokbo_filename") else {}),
+                        # preserve optional fields if present and valid
+                        **({"jokbo_end_page": ResponseParser._to_int_safe(q.get("jokbo_end_page"), 0)} if q.get("jokbo_end_page") else {})
+                    })
+                if cleaned_questions:
+                    cleaned_pages.append({
+                        "jokbo_page": page_no,
+                        "questions": cleaned_questions
+                    })
+            # Sort pages and finalize
+            cleaned_pages.sort(key=lambda x: int(str(x.get("jokbo_page", 0)) or 0))
+            try:
+                total_q = sum(len(p.get("questions", [])) for p in cleaned_pages)
+                logger.info(f"Sanitized jokbo response: {len(cleaned_pages)} pages, {total_q} questions")
+            except Exception:
+                pass
+            return {"jokbo_pages": cleaned_pages}
+
+        # lesson-centric normalization
+        slides = data.get("related_slides")
+        if not isinstance(slides, list):
+            return {"related_slides": []}
+        cleaned_slides: List[Dict[str, Any]] = []
+        for s in slides:
+            if not isinstance(s, dict):
+                continue
+            lp = ResponseParser._to_int_safe(s.get("lesson_page"), 0)
+            if lp <= 0:
+                continue
+            questions = s.get("related_jokbo_questions") or []
+            if not isinstance(questions, list):
+                questions = []
+            norm_qs: List[Dict[str, Any]] = []
+            for q in questions:
+                if not isinstance(q, dict):
+                    continue
+                qnum = str(q.get("question_number", "")).strip()
+                qtext = (q.get("question_text") or "").strip()
+                ans = (q.get("answer") or "").strip()
+                if not qnum or not qtext or ResponseParser._is_placeholder_value(ans):
+                    continue
+                expl = (q.get("explanation") or "").strip()
+                if ResponseParser._is_placeholder_value(expl):
+                    expl = ""
+                norm_qs.append({
+                    "jokbo_filename": (q.get("jokbo_filename") or "").strip(),
+                    "jokbo_page": ResponseParser._to_int_safe(q.get("jokbo_page"), 0),
+                    "jokbo_end_page": ResponseParser._to_int_safe(q.get("jokbo_end_page"), 0) if q.get("jokbo_end_page") else None,
+                    "question_number": qnum,
+                    "question_numbers_on_page": [str(x) for x in (q.get("question_numbers_on_page") or []) if str(x).strip()],
+                    "question_text": qtext,
+                    "answer": ans,
+                    "explanation": expl,
+                    "wrong_answer_explanations": ResponseParser._norm_wrong_answer_explanations(q.get("wrong_answer_explanations")),
+                    "relevance_score": max(0, min(ResponseParser._to_int_safe(q.get("relevance_score"), 0), 110)),
+                    "relevance_reason": (q.get("relevance_reason") or q.get("reason") or "").strip(),
+                })
+            # Skip slides that ended up with no valid questions
+            if norm_qs:
+                cleaned_slides.append({
+                    "lesson_page": lp,
+                    "related_jokbo_questions": norm_qs,
+                    **({"importance_score": max(0, min(ResponseParser._to_int_safe(s.get("importance_score"), 0), 110))} if s.get("importance_score") is not None else {}),
+                    **({"key_concepts": s.get("key_concepts", [])} if isinstance(s.get("key_concepts"), list) else {}),
+                })
+        cleaned_slides.sort(key=lambda x: x.get("lesson_page", 0))
+        try:
+            total_q = sum(len(s.get("related_jokbo_questions", [])) for s in cleaned_slides)
+            logger.info(f"Sanitized lesson response: {len(cleaned_slides)} slides, {total_q} linked questions")
+        except Exception:
+            pass
+        return {"related_slides": cleaned_slides}
