@@ -142,6 +142,7 @@ class PDFCreator:
         
         doc = fitz.open()
         lesson_pdf = fitz.open(lesson_path)
+        lesson_basename = Path(lesson_path).name
 
         # Build an index of related questions by lesson page
         related_by_page: Dict[int, List[Dict[str, Any]]] = {}
@@ -203,7 +204,7 @@ class PDFCreator:
                     text_content += "\n"
                 if question.get('relevance_reason'):
                     text_content += f"관련성:\n{question['relevance_reason']}\n\n"
-                text_content += f"관련 강의 페이지: {page_num}\n\n"
+                text_content += f"관련 강의 페이지: {page_num} ({lesson_basename})\n\n"
                 text_content += f"참고: 이 문제는 강의자료 {page_num}페이지의 내용과 관련이 있습니다."
 
                 fontname = self._register_font(explanation_page)
@@ -403,15 +404,28 @@ class PDFCreator:
                 
                 text_content += "관련 강의 슬라이드:\n"
                 for i, slide_info in enumerate(related_slides, 1):
+                    # Defensive fetches
+                    fname = slide_info.get('lesson_filename') or 'Unknown.pdf'
+                    page_no = slide_info.get('lesson_page')
                     score = slide_info.get('relevance_score')
-                    # Fallback to any available score-like field
                     if score is None:
                         score = slide_info.get('importance_score')
-                    score_text = f"{score}/100" if score is not None else "N/A"
-                    text_content += (
-                        f"{i}. {slide_info['lesson_filename']} - {slide_info['lesson_page']}페이지 "
-                        f"(관련성 점수: {score_text})\n"
-                    )
+                    # Normalize score text for jokbo-centric (5~110 scale)
+                    score_text = "N/A"
+                    try:
+                        if score is not None:
+                            score_num = int(score)
+                            # Cap within expected range to avoid odd strings
+                            score_num = max(0, min(score_num, 110))
+                            score_text = f"{score_num}/110"
+                    except Exception:
+                        pass
+                    header = f"{i}. {fname}"
+                    if page_no:
+                        header += f" - {page_no}페이지"
+                    if score_text != "N/A":
+                        header += f" (관련성 점수: {score_text})"
+                    text_content += header + "\n"
                     reason = slide_info.get('relevance_reason') or slide_info.get('reason') or ''
                     if reason:
                         text_content += f"   관련성 이유: {reason}\n"
