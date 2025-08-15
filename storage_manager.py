@@ -287,6 +287,9 @@ class StorageManager:
                     completed_chunks = int(_get(b'completed_chunks', b'0') or _get('completed_chunks', '0') or 0)
                     eta_seconds = float(_get(b'eta_seconds', b'-1') or _get('eta_seconds', '-1') or -1)
                     avg_chunk_seconds = float(_get(b'avg_chunk_seconds', b'0') or _get('avg_chunk_seconds', '0') or 0)
+                    # Clamp completed to not exceed total for display consistency
+                    if total_chunks > 0 and completed_chunks > total_chunks:
+                        completed_chunks = total_chunks
                     return {
                         "progress": progress,
                         "message": message,
@@ -355,35 +358,49 @@ class StorageManager:
                 logger.error(f"Failed to init progress: {e}")
 
     def increment_chunk(self, job_id: str, inc: int = 1, message: Optional[str] = None) -> None:
-        """Increment completed chunk count and update ETA and percent."""
+        """Increment completed chunk count and update ETA and percent (atomically)."""
         if self.use_local_only or not self.redis_client:
             return
         try:
             key = f"progress:{job_id}"
-            data = self._with_retry(self.redis_client.hgetall, key) or {}
-            def _get_num(name: str, default: float = 0.0) -> float:
-                v = data.get(name.encode()) or data.get(name)
-                try:
-                    return float(v) if v is not None else default
-                except Exception:
-                    return default
-            total_chunks = int(_get_num('total_chunks', 0))
-            completed = int(_get_num('completed_chunks', 0)) + int(inc)
-            started_at = _get_num('started_at', time.time())
+            pipe = self.redis_client.pipeline()
+            # Atomically increment and fetch needed fields
+            pipe.hincrby(key, "completed_chunks", int(inc))
+            pipe.hget(key, "total_chunks")
+            pipe.hget(key, "started_at")
+            completed_val, total_val, started_at_val = self._with_retry(pipe.execute)
+
+            try:
+                total_chunks = int(total_val) if total_val is not None else 0
+            except Exception:
+                total_chunks = 0
+            try:
+                completed = int(completed_val) if completed_val is not None else 0
+            except Exception:
+                completed = 0
+            try:
+                started_at = float(started_at_val) if started_at_val is not None else time.time()
+            except Exception:
+                started_at = time.time()
+
+            # Clamp completed to not exceed total for display consistency
+            completed_clamped = min(completed, total_chunks) if total_chunks > 0 else completed
+
             now = time.time()
             elapsed = max(0.0, now - started_at)
-            avg = (elapsed / completed) if completed > 0 else 0.0
-            remaining = max(0, total_chunks - completed)
-            eta = avg * remaining if completed > 0 else -1
-            progress = int((completed / total_chunks) * 100) if total_chunks > 0 else 0
+            avg = (elapsed / completed_clamped) if completed_clamped > 0 else 0.0
+            remaining = max(0, total_chunks - completed_clamped)
+            eta = avg * remaining if completed_clamped > 0 else -1
+            progress = int((completed_clamped / total_chunks) * 100) if total_chunks > 0 else 0
             # Avoid showing 100% until finalization elsewhere
             progress = min(progress, 99 if remaining > 0 else 100)
-            auto_msg = message or f"청크 진행: {completed}/{total_chunks} 완료"
+            auto_msg = message or f"청크 진행: {completed_clamped}/{total_chunks} 완료"
+
             self._with_retry(
                 self.redis_client.hset,
                 key,
                 mapping={
-                    "completed_chunks": str(completed),
+                    "completed_chunks": str(completed_clamped),
                     "total_chunks": str(total_chunks),
                     "progress": str(progress),
                     "eta_seconds": f"{eta:.2f}",

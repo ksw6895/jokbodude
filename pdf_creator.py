@@ -24,6 +24,24 @@ class PDFCreator:
         self.debug_log_path = Path("output/debug/pdf_creator_debug.log")
         self.debug_log_path.parent.mkdir(parents=True, exist_ok=True)
         
+    def _register_font(self, page: fitz.Page) -> str:
+        """Register a Unicode-capable font on the given page and return its name.
+        Tries CJK-capable font for Korean; falls back to Helvetica if unavailable.
+        """
+        try:
+            font = fitz.Font("cjk")
+            fontname = "F1"
+            page.insert_font(fontname=fontname, fontbuffer=font.buffer)
+            return fontname
+        except Exception as e:
+            # Fallback to base font (may not render CJK but avoids crash)
+            self.log_debug(f"CJK font registration failed: {e}")
+            try:
+                page.insert_font(fontname="helv")
+                return "helv"
+            except Exception:
+                return "helv"
+        
     def __del__(self):
         for temp_file in self.temp_files:
             if os.path.exists(temp_file):
@@ -127,11 +145,14 @@ class PDFCreator:
 
         # Build an index of related questions by lesson page
         related_by_page: Dict[int, List[Dict[str, Any]]] = {}
+        importance_by_page: Dict[int, Any] = {}
         for slide_info in analysis_result.get("related_slides", []):
             page_num = int(slide_info.get("lesson_page", 0))
             if page_num <= 0:
                 continue
             related_by_page.setdefault(page_num, [])
+            if "importance_score" in slide_info:
+                importance_by_page[page_num] = slide_info.get("importance_score")
             for q in slide_info.get("related_jokbo_questions", []) or []:
                 related_by_page[page_num].append(q)
 
@@ -169,6 +190,9 @@ class PDFCreator:
                 text_content = f"=== 문제 {question.get('question_number')} 해설 ===\n\n"
                 text_content += f"※ 앞 페이지의 문제 {question.get('question_number')}번을 참고하세요\n\n"
                 text_content += f"[출처: {question.get('jokbo_filename')} - {question.get('jokbo_page')}페이지]\n\n"
+                # Slide-level importance score (if available)
+                if page_num in importance_by_page:
+                    text_content += f"관련성 점수(슬라이드): {importance_by_page[page_num]} / 110\n\n"
                 text_content += f"정답: {question.get('answer')}\n\n"
                 if question.get('explanation'):
                     text_content += f"해설:\n{question['explanation']}\n\n"
@@ -180,11 +204,9 @@ class PDFCreator:
                 if question.get('relevance_reason'):
                     text_content += f"관련성:\n{question['relevance_reason']}\n\n"
                 text_content += f"관련 강의 페이지: {page_num}\n\n"
-                text_content += f"💡 이 문제는 강의자료 {page_num}페이지의 내용과 관련이 있습니다."
+                text_content += f"참고: 이 문제는 강의자료 {page_num}페이지의 내용과 관련이 있습니다."
 
-                font = fitz.Font("cjk")
-                fontname = "F1"
-                explanation_page.insert_font(fontname=fontname, fontbuffer=font.buffer)
+                fontname = self._register_font(explanation_page)
                 text_rect = fitz.Rect(50, 50, explanation_page.rect.width - 50, explanation_page.rect.height - 50)
                 explanation_page.insert_textbox(
                     text_rect,
@@ -206,9 +228,7 @@ class PDFCreator:
                 summary_text += f"학습 권장사항:\n{summary['study_recommendations']}"
             
             # Use CJK font for summary page
-            font = fitz.Font("cjk")
-            fontname = "F1"
-            summary_page.insert_font(fontname=fontname, fontbuffer=font.buffer)
+            fontname = self._register_font(summary_page)
             
             text_rect = fitz.Rect(50, 50, summary_page.rect.width - 50, summary_page.rect.height - 50)
             summary_page.insert_textbox(
@@ -383,27 +403,28 @@ class PDFCreator:
                 
                 text_content += "관련 강의 슬라이드:\n"
                 for i, slide_info in enumerate(related_slides, 1):
-                    score = slide_info.get('relevance_score', 0)
-                    if score >= 95:
-                        score_text = f"{score}/100 ⭐"
-                    elif score >= 90:
-                        score_text = f"{score}/100 🎯"
-                    else:
-                        score_text = f"{score}/100"
-                    text_content += f"{i}. {slide_info['lesson_filename']} - {slide_info['lesson_page']}페이지 (관련성 점수: {score_text})\n"
-                    text_content += f"   관련성 이유: {slide_info['relevance_reason']}\n"
+                    score = slide_info.get('relevance_score')
+                    # Fallback to any available score-like field
+                    if score is None:
+                        score = slide_info.get('importance_score')
+                    score_text = f"{score}/100" if score is not None else "N/A"
+                    text_content += (
+                        f"{i}. {slide_info['lesson_filename']} - {slide_info['lesson_page']}페이지 "
+                        f"(관련성 점수: {score_text})\n"
+                    )
+                    reason = slide_info.get('relevance_reason') or slide_info.get('reason') or ''
+                    if reason:
+                        text_content += f"   관련성 이유: {reason}\n"
                 text_content += "\n"
                 
                 # 선택된 연결 개수에 따른 메시지
                 if len(related_slides) == 1:
-                    text_content += "💡 이 문제와 가장 관련성이 높은 강의자료입니다."
+                    text_content += "참고: 이 문제와 가장 관련성이 높은 강의자료입니다."
                 else:
-                    text_content += "💡 이 문제와 가장 관련성이 높은 상위 2개의 강의자료입니다."
+                    text_content += "참고: 이 문제와 가장 관련성이 높은 상위 2개의 강의자료입니다."
                 
                 # Use CJK font for Korean text
-                font = fitz.Font("cjk")
-                fontname = "F1"
-                explanation_page.insert_font(fontname=fontname, fontbuffer=font.buffer)
+                fontname = self._register_font(explanation_page)
                 
                 # Insert text into the page
                 text_rect = fitz.Rect(50, 50, explanation_page.rect.width - 50, explanation_page.rect.height - 50)
@@ -427,9 +448,7 @@ class PDFCreator:
                 summary_text += f"학습 권장사항:\n{summary['study_recommendations']}"
             
             # Use CJK font for summary page
-            font = fitz.Font("cjk")
-            fontname = "F1"
-            summary_page.insert_font(fontname=fontname, fontbuffer=font.buffer)
+            fontname = self._register_font(summary_page)
             
             text_rect = fitz.Rect(50, 50, summary_page.rect.width - 50, summary_page.rect.height - 50)
             summary_page.insert_textbox(

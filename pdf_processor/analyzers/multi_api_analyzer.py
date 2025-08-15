@@ -114,8 +114,20 @@ class MultiAPIAnalyzer:
                 max_workers = min(len(file_pairs), len(self.api_manager.api_keys)) or 1
             except Exception:
                 max_workers = min(len(file_pairs), 3) or 1
+        # Increment progress for each completed non-chunk task to keep totals consistent
+        def _on_progress(_task):
+            try:
+                from storage_manager import StorageManager
+                StorageManager().increment_chunk(self.session_id, 1)
+            except Exception:
+                pass
+
         results = self.api_manager.distribute_tasks(
-            file_pairs, task_operation, parallel=parallel, max_workers=max_workers
+            file_pairs,
+            task_operation,
+            parallel=parallel,
+            max_workers=max_workers,
+            on_progress=_on_progress,
         )
         
         return results
