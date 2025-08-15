@@ -87,7 +87,8 @@ class PDFCreator:
     def _resolve_lesson_path(self, lesson_dir: str, lesson_filename: str) -> Path:
         """Resolve a lesson file in directory, with normalization and fuzzy fallback.
 
-        Handles Hangul normalization differences and minor separator differences.
+        Handles Hangul normalization differences, minor separator differences, and
+        AI/display-name prefixes like '강의자료_<name>.pdf'.
         """
         base_dir = Path(lesson_dir)
         direct = base_dir / (lesson_filename or '')
@@ -108,22 +109,42 @@ class PDFCreator:
                 mapping[key.lower()] = p
             self._lesson_dir_cache[cache_key] = mapping
 
-        # Try fuzzy match
-        needle = self._normalize_korean(lesson_filename or '')
-        needle_key = re.sub(r"[\s_\-]+", "", needle).lower()
-        candidate = self._lesson_dir_cache.get(cache_key, {}).get(needle_key)
+        mapping = self._lesson_dir_cache.get(cache_key, {})
+
+        # Helper to sanitize for matching
+        def _keyify(name: str) -> str:
+            n = self._normalize_korean(name or '')
+            return re.sub(r"[\s_\-]+", "", n).lower()
+
+        # Try exact sanitized match
+        needle_key = _keyify(lesson_filename)
+        candidate = mapping.get(needle_key)
         if candidate and candidate.exists():
             self.log_debug(f"Fuzzy-matched lesson file: '{lesson_filename}' -> '{candidate.name}'")
             return candidate
 
-        # Last resort: contains match by stem
+        # Try removing common prefixes like '강의자료_', '강의_', 'lesson_', 'lecture_'
+        reduced = re.sub(r"^(강의자료|강의|lesson|lecture)[\s_\-]+", "", (lesson_filename or ''), flags=re.IGNORECASE)
+        if reduced != (lesson_filename or ''):
+            reduced_key = _keyify(reduced)
+            candidate = mapping.get(reduced_key)
+            if candidate and candidate.exists():
+                self.log_debug(f"Prefix-stripped match: '{lesson_filename}' -> '{candidate.name}'")
+                return candidate
+
+        # Last resort: bidirectional contains/suffix match on sanitized names
         best = None
         best_len = 0
         try:
-            for k, p in self._lesson_dir_cache.get(cache_key, {}).items():
-                if needle_key and needle_key in k and len(k) > best_len:
-                    best = p
-                    best_len = len(k)
+            for k, p in mapping.items():
+                if not needle_key:
+                    continue
+                # If filename from AI includes extra prefix/suffix, prefer longest overlap
+                if needle_key in k or k in needle_key:
+                    l = min(len(k), len(needle_key))
+                    if l > best_len:
+                        best = p
+                        best_len = l
         except Exception:
             pass
         if best and best.exists():

@@ -182,9 +182,9 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             # Clean up processor resources
             processor.cleanup_session()
             
-            # Finalize progress to 100%
+            # Finalize progress to 100% and clamp chunks
             try:
-                storage_manager.update_progress(job_id, 100, "완료")
+                storage_manager.finalize_progress(job_id, "완료")
             except Exception:
                 pass
 
@@ -337,9 +337,9 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
             # Clean up processor resources
             processor.cleanup_session()
             
-            # Finalize progress to 100%
+            # Finalize progress to 100% and clamp chunks
             try:
-                storage_manager.update_progress(job_id, 100, "완료")
+                storage_manager.finalize_progress(job_id, "완료")
             except Exception:
                 pass
             

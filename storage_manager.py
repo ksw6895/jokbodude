@@ -377,6 +377,36 @@ class StorageManager:
                 self._with_retry(self.redis_client.expire, f"progress:{job_id}", 172800)
             except Exception as e:
                 logger.error(f"Failed to update progress: {e}")
+
+    def finalize_progress(self, job_id: str, message: str = "완료") -> None:
+        """Set completed_chunks to total_chunks and mark progress 100% with final message.
+
+        This avoids confusing post-completion increments from parallel workers.
+        """
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            key = f"progress:{job_id}"
+            pipe = self.redis_client.pipeline()
+            pipe.hget(key, "total_chunks")
+            total_val, = self._with_retry(pipe.execute)
+            try:
+                total_chunks = int(total_val) if total_val is not None else 0
+            except Exception:
+                total_chunks = 0
+            mapping = {
+                "progress": "100",
+                "message": message,
+            }
+            if total_chunks > 0:
+                mapping.update({
+                    "completed_chunks": str(total_chunks),
+                    "eta_seconds": "0",
+                })
+            self._with_retry(self.redis_client.hset, key, mapping=mapping)
+            self._with_retry(self.redis_client.expire, key, 172800)
+        except Exception as e:
+            logger.error(f"Failed to finalize progress: {e}")
     
     def get_progress(self, job_id: str) -> Optional[Dict]:
         """Get job progress from Redis"""

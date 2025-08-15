@@ -74,8 +74,26 @@ class MultiAPIAnalyzer:
                 api_client, fm, self.session_id, self.debug_dir
             )
             return analyzer.analyze(lesson_path, jokbo_path)
-        
-        return self.api_manager.execute_with_failover(operation)
+
+        # Run once against the selected API key (with failover)
+        result = self.api_manager.execute_with_failover(operation)
+
+        # Normalize lesson filenames in related slides to the original lesson filename.
+        # This avoids temporary/AI-facing display names like "강의자료_<name>.pdf" breaking PDF assembly.
+        try:
+            from pathlib import Path as _P
+            original_lesson_filename = _P(lesson_path).name
+            if isinstance(result, dict):
+                for page in (result.get("jokbo_pages") or []):
+                    for q in (page.get("questions") or []):
+                        for slide in (q.get("related_lesson_slides") or []):
+                            if isinstance(slide, dict):
+                                slide["lesson_filename"] = original_lesson_filename
+        except Exception:
+            # Best-effort normalization; continue even if structure differs
+            pass
+
+        return result
     
     def analyze_multiple_with_distribution(self, mode: str, file_pairs: List[tuple],
                                          parallel: bool = True, max_workers: Optional[int] = None) -> List[Dict[str, Any]]:
