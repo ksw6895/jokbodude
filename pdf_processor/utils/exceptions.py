@@ -23,6 +23,11 @@ class ContentGenerationError(APIError):
     pass
 
 
+class ContentQualityError(PDFProcessorError):
+    """Raised when content generation succeeds but output content is invalid/low-quality."""
+    pass
+
+
 class FileNotFoundError(PDFProcessorError):
     """Raised when a required file is not found."""
     pass

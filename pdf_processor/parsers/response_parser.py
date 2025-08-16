@@ -373,9 +373,45 @@ class ResponseParser:
         if s in {"", "n/a", "na", "none", "null", "not provided", "not provided in jokbo"}:
             return True
         # Korean common placeholders
-        if s in {"없음", "제공되지 않음", "정보 없음"}:
+        if s in {
+            "없음", "제공되지 않음", "정보 없음", "정답 없음", "해설 없음", "오답 설명 없음",
+            "설명 없음", "관련성 이유 없음"
+        }:
+            return True
+        # Frequently seen variants like "~ 없음" at the end
+        try:
+            if s.endswith("없음"):
+                return True
+        except Exception:
             return True
         return False
+
+    @staticmethod
+    def _snap_score(value: Any, allow_zero: bool = True) -> int:
+        """
+        Snap scores to 5-point grid within [5..100], with a special-case 110.
+        If allow_zero and the input is exactly 0, keep 0.
+        """
+        try:
+            # Keep explicit 0 for exclusion semantics
+            if allow_zero and (str(value).strip() == "0" or value == 0):
+                return 0
+            v = float(ResponseParser._to_int_safe(value, 0))
+        except Exception:
+            v = 0.0
+        # Special 110 allowance
+        if v >= 107.5:
+            return 110
+        # Round to nearest 5
+        snapped = int(round(v / 5.0) * 5)
+        # Clamp to [5..100] and avoid 105
+        if snapped < 5:
+            snapped = 5
+        if snapped > 100:
+            snapped = 100
+        if snapped == 105:
+            snapped = 100
+        return snapped
 
     @staticmethod
     def _to_int_safe(v: Any, default: int = 0) -> int:
@@ -450,8 +486,7 @@ class ResponseParser:
                         lp = ResponseParser._to_int_safe(s.get("lesson_page"), 0)
                         if not lf or lp <= 0:
                             continue
-                        sc = ResponseParser._to_int_safe(s.get("relevance_score"), 0)
-                        sc = max(0, min(sc, 110))
+                        sc = ResponseParser._snap_score(s.get("relevance_score"), allow_zero=True)
                         rs = (s.get("relevance_reason") or s.get("reason") or "").strip()
                         norm_slides.append({
                             "lesson_filename": lf,
@@ -543,7 +578,7 @@ class ResponseParser:
                 cleaned_slides.append({
                     "lesson_page": lp,
                     "related_jokbo_questions": norm_qs,
-                    **({"importance_score": max(0, min(ResponseParser._to_int_safe(s.get("importance_score"), 0), 110))} if s.get("importance_score") is not None else {}),
+                    **({"importance_score": ResponseParser._snap_score(s.get("importance_score"), allow_zero=True)} if s.get("importance_score") is not None else {}),
                     **({"key_concepts": s.get("key_concepts", [])} if isinstance(s.get("key_concepts"), list) else {}),
                 })
         cleaned_slides.sort(key=lambda x: x.get("lesson_page", 0))
@@ -553,3 +588,63 @@ class ResponseParser:
         except Exception:
             pass
         return {"related_slides": cleaned_slides}
+
+    # --------------------
+    # Result quality checks
+    # --------------------
+    @staticmethod
+    def is_result_suspicious(data: Dict[str, Any], mode: str) -> bool:
+        """
+        Heuristic checks to detect obviously bad or low-value responses
+        (e.g., empty content or pervasive placeholders) to trigger retries.
+        """
+        try:
+            if mode == "jokbo-centric":
+                pages = data.get("jokbo_pages") or []
+                if not pages:
+                    return True
+                total_q = 0
+                good_q = 0
+                with_slides = 0
+                for p in pages:
+                    for q in (p.get("questions") or []):
+                        total_q += 1
+                        ans = (q.get("answer") or "").strip()
+                        expl = (q.get("explanation") or "").strip()
+                        wae = q.get("wrong_answer_explanations") or {}
+                        slides = q.get("related_lesson_slides") or []
+                        # Consider "good" if we have an answer and at least one of explanation/wae
+                        if ans and (expl or (isinstance(wae, dict) and len(wae) > 0)):
+                            good_q += 1
+                        if isinstance(slides, list) and len(slides) > 0:
+                            with_slides += 1
+                if total_q == 0:
+                    return True
+                # If fewer than 25% questions look complete, or no slides linked, suspicious
+                if good_q / max(1, total_q) < 0.25:
+                    return True
+                if with_slides == 0:
+                    return True
+                return False
+            else:
+                slides = data.get("related_slides") or []
+                if not slides:
+                    return True
+                total_q = 0
+                good_q = 0
+                for s in slides:
+                    for q in (s.get("related_jokbo_questions") or []):
+                        total_q += 1
+                        ans = (q.get("answer") or "").strip()
+                        expl = (q.get("explanation") or "").strip()
+                        wae = q.get("wrong_answer_explanations") or {}
+                        if ans and (expl or (isinstance(wae, dict) and len(wae) > 0)):
+                            good_q += 1
+                if total_q == 0:
+                    return True
+                if good_q / max(1, total_q) < 0.25:
+                    return True
+                return False
+        except Exception:
+            # On any error, err on the side of retry
+            return True

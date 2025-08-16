@@ -3,9 +3,7 @@ Constants for JokboDude - 프롬프트 및 설정 상수
 """
 
 # 공통 프롬프트 부분
-COMMON_PROMPT_INTRO = """당신은 병리학 교수입니다. 두 개의 PDF 파일을 받았습니다:
-- 첫 번째 파일: {first_file_desc}
-- 두 번째 파일: {second_file_desc}
+COMMON_PROMPT_INTRO = """당신은 병리학 교수입니다. 다음 두 개의 PDF가 업로드되어 있습니다: 족보 1개, 강의자료 1개.
 
 ⚠️ 매우 중요: 문제는 오직 족보 PDF에서만 추출하세요!
 강의자료에 있는 예제 문제는 절대 추출하지 마세요!"""
@@ -118,42 +116,47 @@ LESSON_CENTRIC_TASK = """작업:
 - 문제와 내용이 섞인 슬라이드의 경우 문제 영역은 무시하고 내용 부분만 고려하며, 50점 미만이면 제외
 - 각 문제당 최대 2개의 '내용 슬라이드'만 반환"""
 
-LESSON_CENTRIC_OUTPUT_FORMAT = """출력 형식:
-{{
-    "related_slides": [
-        {{
-            "lesson_page": 페이지번호,
-            "related_jokbo_questions": [
-                {{
-                    "jokbo_filename": "{jokbo_filename}",
-                    "jokbo_page": 족보페이지번호,
-                    "jokbo_end_page": 족보끝페이지번호,  // 문제가 여러 페이지에 걸쳐있을 경우
-                    "question_number": 문제번호,
-                    "question_numbers_on_page": ["13", "14", "15"],  // 해당 페이지의 모든 문제 번호
-                    "question_text": "문제 내용",
-                    "answer": "정답",
-                    "explanation": "해설",
-                    "wrong_answer_explanations": {{
-                        "1번": "왜 1번이 오답인지 설명",
-                        "2번": "왜 2번이 오답인지 설명",
-                        "3번": "왜 3번이 오답인지 설명",
-                        "4번": "왜 4번이 오답인지 설명"
-                    }},
-                    "relevance_score": 5-110,  // 5점 단위로만 (5, 10, 15, ..., 95, 100, 110) - 문제형 슬라이드는 0점 및 제외
-                    "relevance_reason": "관련성 이유"
-                }}
-            ],
-            "importance_score": 5-110,  // 5점 단위로만 (110점은 특수)
-            "key_concepts": ["핵심개념1", "핵심개념2"]
-        }}
-    ],
-    "summary": {{
-        "total_related_slides": 관련된슬라이드수,
-        "total_questions": 총관련문제수,
-        "key_topics": ["주요주제1", "주요주제2"],
-        "study_recommendations": "학습 권장사항"
-    }}
-}}"""
+LESSON_CENTRIC_OUTPUT_FORMAT = """출력 형식 (반드시 순수 JSON만 응답하세요):
+{
+  "related_slides": [
+    {
+      "lesson_page": 10,
+      "related_jokbo_questions": [
+        {
+          "jokbo_filename": "{jokbo_filename}",
+          "jokbo_page": 3,
+          "jokbo_end_page": 4,
+          "question_number": "15",
+          "question_numbers_on_page": ["13", "14", "15"],
+          "question_text": "문제 내용",
+          "answer": "정답",
+          "explanation": "해설",
+          "wrong_answer_explanations": {
+            "1번": "왜 1번이 오답인지 설명",
+            "2번": "왜 2번이 오답인지 설명",
+            "3번": "왜 3번이 오답인지 설명",
+            "4번": "왜 4번이 오답인지 설명"
+          },
+          "relevance_score": 80,
+          "relevance_reason": "관련성 이유"
+        }
+      ],
+      "importance_score": 60,
+      "key_concepts": ["핵심개념1", "핵심개념2"]
+    }
+  ],
+  "summary": {
+    "total_related_slides": 1,
+    "total_questions": 1,
+    "key_topics": ["주요주제1", "주요주제2"],
+    "study_recommendations": "학습 권장사항"
+  }
+}
+
+규칙 설명:
+- relevance_score는 [5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,110] 중 하나만 허용
+- importance_score도 동일한 규칙 적용 (110 특수 점수 포함)
+- response_mime_type=application/json과 일관되게 JSON 외 텍스트/주석 금지"""
 
 # 족보 중심 모드 프롬프트
 JOKBO_CENTRIC_TASK = """작업 (족보 중심 분석):
@@ -178,46 +181,50 @@ JOKBO_CENTRIC_TASK = """작업 (족보 중심 분석):
 - API 비용 절감을 위해 관련성이 낮은 문제는 처리하지 않습니다
 - '문제/정답/해설/퀴즈/TBL/기출' 슬라이드는 점수 부여 금지(0점) 및 결과에서 제외"""
 
-JOKBO_CENTRIC_OUTPUT_FORMAT = """출력 형식:
-{{
-    "jokbo_pages": [
-        {{
-            "jokbo_page": 족보페이지번호,  // 받은 PDF의 물리적 페이지 번호 (1부터 시작, PDF 내부 인쇄 번호 무시)
-            "questions": [
-                {{
-                    "question_number": 문제번호,
-                    "question_numbers_on_page": ["13", "14", "15"],  // 해당 페이지의 모든 문제 번호
-                    "question_text": "문제 내용",
-                    "answer": "정답",
-                    "explanation": "해설",
-                    "wrong_answer_explanations": {{
-                        "1번": "왜 1번이 오답인지 설명",
-                        "2번": "왜 2번이 오답인지 설명",
-                        "3번": "왜 3번이 오답인지 설명",
-                        "4번": "왜 4번이 오답인지 설명"
-                    }},
-                    "related_lesson_slides": [
-                        {{
-                            "lesson_filename": "{lesson_filename}",
-                            "lesson_page": 강의페이지번호,  // 받은 PDF의 물리적 페이지 번호 (1부터 시작, PDF 내부 인쇄 번호 무시)
-                            "relevance_reason": "관련성 이유",
-                            "relevance_score": 5-110  // 5점 단위로만 (5, 10, 15, ..., 95, 100, 110)
-                        }}
-                    ]
-                }}
-            ]
-        }}
-    ],
-    "summary": {{
-        "total_jokbo_pages": 총족보페이지수,
-        "total_questions": 총문제수,
-        "total_related_slides": 관련된강의슬라이드수
-    }}
-}}
+JOKBO_CENTRIC_OUTPUT_FORMAT = """출력 형식 (반드시 순수 JSON만 응답하세요):
+{
+  "jokbo_pages": [
+    {
+      "jokbo_page": 9,
+      "questions": [
+        {
+          "question_number": "15",
+          "question_numbers_on_page": ["13", "14", "15"],
+          "question_text": "문제 내용",
+          "answer": "정답",
+          "explanation": "해설",
+          "wrong_answer_explanations": {
+            "1번": "왜 1번이 오답인지 설명",
+            "2번": "왜 2번이 오답인지 설명",
+            "3번": "왜 3번이 오답인지 설명",
+            "4번": "왜 4번이 오답인지 설명"
+          },
+          "related_lesson_slides": [
+            {
+              "lesson_filename": "{lesson_filename}",
+              "lesson_page": 10,
+              "relevance_reason": "관련성 이유",
+              "relevance_score": 80
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_jokbo_pages": 1,
+    "total_questions": 1,
+    "total_related_slides": 1
+  }
+}
 
-⚠️ **중요**: 
-- 관련 슬라이드가 없거나 모든 슬라이드가 50점 미만인 문제는 questions 배열에서 완전히 제외하세요
-- 빈 questions 배열을 가진 페이지도 jokbo_pages에서 제외하세요"""
+규칙 설명:
+- relevance_score는 [5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,110] 중 하나만 허용
+- response_mime_type=application/json과 일관되게 JSON 외 텍스트/주석 금지
+
+⚠️ 중요:
+- 관련 슬라이드가 없거나 모든 슬라이드가 50점 미만인 문제는 questions 배열에서 완전히 제외
+- 빈 questions 배열을 가진 페이지도 jokbo_pages에서 제외"""
 
 # 기타 설정
 MAX_CONNECTIONS_PER_QUESTION = 2  # 족보 중심 모드에서 문제당 최대 연결 수

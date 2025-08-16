@@ -15,7 +15,7 @@ from ..pdf.operations import PDFOperations
 from ..parsers.response_parser import ResponseParser
 from ..parsers.result_merger import ResultMerger
 from ..utils.logging import get_logger
-from ..utils.exceptions import PDFProcessorError
+from ..utils.exceptions import PDFProcessorError, ContentGenerationError
 
 logger = get_logger(__name__)
 
@@ -131,7 +131,7 @@ class BaseAnalyzer(ABC):
     def upload_and_analyze(self, files_to_upload: List[Tuple[str, str]], 
                           prompt: str) -> str:
         """
-        Upload files and perform analysis.
+        Upload files and perform analysis with quality-aware retry.
         
         Args:
             files_to_upload: List of (file_path, display_name) tuples
@@ -148,14 +148,11 @@ class BaseAnalyzer(ABC):
                 uploaded_file = self.api_client.upload_file(file_path, display_name)
                 uploaded_files.append(uploaded_file)
                 self.file_manager.track_file(uploaded_file)
-            
-            # Prepare content
+
+            # Prepare content and attempt quality-aware generation
             content = [prompt] + uploaded_files
-            
-            # Generate response
-            response = self.api_client.generate_content(content)
-            return response.text
-            
+            return self._generate_with_quality_retry(content)
+
         finally:
             # Clean up uploaded files
             for file in uploaded_files:
@@ -196,3 +193,46 @@ class BaseAnalyzer(ABC):
         return ResultMerger.filter_connections_by_score(
             connections, min_score, max_connections
         )
+
+    # --------------------
+    # Internal helpers
+    # --------------------
+    def _generate_with_quality_retry(self, content: List[Any], retries: int = 1) -> str:
+        """
+        Generate content and retry if output looks suspicious per parser heuristics.
+        Retries are performed with the same API key and same uploaded files.
+        """
+        last_error: Exception | None = None
+        mode = self.get_mode()
+        attempts = max(1, retries + 1)
+        for attempt in range(1, attempts + 1):
+            try:
+                response = self.api_client.generate_content(content)
+                text = response.text
+                try:
+                    parsed = ResponseParser.parse_response(text, mode)
+                    if ResponseParser.is_result_suspicious(parsed, mode):
+                        logger.warning(f"Suspicious {mode} result detected (attempt {attempt}/{attempts}); retrying...")
+                        if attempt < attempts:
+                            continue
+                        else:
+                            raise ContentGenerationError("Suspicious content after retries")
+                except Exception as pe:
+                    # Parsing failed or suspicious; if more attempts, continue
+                    last_error = pe
+                    logger.warning(f"Parsing/quality check failed: {pe}")
+                    if attempt < attempts:
+                        continue
+                    raise
+                # Looks good
+                return text
+            except Exception as e:
+                last_error = e
+                logger.error(f"Generation failed on attempt {attempt}/{attempts}: {e}")
+                if attempt < attempts:
+                    continue
+                raise ContentGenerationError(str(e))
+        # Should not reach here
+        if last_error:
+            raise last_error
+        raise ContentGenerationError("Unknown generation error")

@@ -40,7 +40,7 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         prompt = f"""
 {COMMON_PROMPT_INTRO}
 
-족보 파일: {jokbo_filename}
+분석 대상 족보 파일명: {jokbo_filename}
 
 {LESSON_CENTRIC_TASK}
 
@@ -189,12 +189,10 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         self.file_manager.track_file(jokbo_file)
         
         try:
-            # Prepare content
+            # Prepare content and generate with quality-aware retry
             content = [prompt, lesson_file, jokbo_file]
-            
-            # Generate response
-            response = self.api_client.generate_content(content)
-            return response.text
+            response_text = self._generate_with_quality_retry(content)
+            return response_text
             
         finally:
             # Delete jokbo file
