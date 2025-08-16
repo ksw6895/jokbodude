@@ -443,7 +443,14 @@ class StorageManager:
         return None
     
     def cleanup_job(self, job_id: str) -> None:
-        """Clean up all data related to a job"""
+        """Clean up all data related to a job, including user mappings."""
+        # Capture owner before deleting job-scoped keys
+        owner_id = None
+        try:
+            owner_id = self.get_job_owner(job_id)
+        except Exception:
+            owner_id = None
+
         if not self.use_local_only and self.redis_client:
             try:
                 # Delete all Redis keys for this job
@@ -464,6 +471,13 @@ class StorageManager:
             try:
                 import shutil
                 shutil.rmtree(results_dir)
+            except Exception:
+                pass
+
+        # Finally, remove from the user's job list if known
+        if owner_id:
+            try:
+                self.remove_user_job(owner_id, job_id)
             except Exception:
                 pass
 
@@ -628,6 +642,28 @@ class StorageManager:
             return v.decode() if isinstance(v, (bytes, bytearray)) else v
         except Exception:
             return None
+
+    def remove_user_job(self, user_id: str, job_id: str) -> bool:
+        """Remove a job from a user's job list.
+
+        Returns True if one or more entries were removed.
+        """
+        if self.use_local_only or not self.redis_client:
+            return False
+        try:
+            removed_count = self._with_retry(
+                self.redis_client.lrem,
+                f"user:{user_id}:jobs",
+                0,
+                job_id,
+            )
+            try:
+                return int(removed_count) > 0
+            except Exception:
+                return bool(removed_count)
+        except Exception as e:
+            logger.error(f"Failed to remove user job mapping: {e}")
+            return False
 
     def set_job_task(self, job_id: str, task_id: str) -> None:
         if self.use_local_only or not self.redis_client:
