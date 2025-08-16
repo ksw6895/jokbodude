@@ -217,23 +217,35 @@ class PDFCreator:
         
         # Determine the end page
         if jokbo_end_page is None:
-            # Convert question_number to string for consistent comparison
-            question_num_str = str(question_number)
-            self.log_debug(f"  question_num_str: {repr(question_num_str)}")
-            
+            # Normalize question number and page list to digits for robust matching
+            qnum_int = self._safe_int(question_number, 0)
+            qnum_str = str(qnum_int) if qnum_int > 0 else str(question_number)
+            self.log_debug(f"  question_num_str(norm): {repr(qnum_str)}")
+
+            page_qnums: List[str] = []
+            try:
+                if isinstance(question_numbers_on_page, list):
+                    page_qnums = [str(self._safe_int(x, 0)) for x in question_numbers_on_page if self._safe_int(x, 0) > 0]
+            except Exception:
+                page_qnums = []
+
             # First, try to use question_numbers_on_page for more accurate detection
-            if question_numbers_on_page and question_num_str in question_numbers_on_page:
-                self.log_debug(f"  Found in question_numbers_on_page")
+            if page_qnums and qnum_str in page_qnums:
+                self.log_debug(f"  Found in question_numbers_on_page (normalized): {page_qnums}")
                 # Check if current question is the last one on the page
-                if question_num_str == question_numbers_on_page[-1] and jokbo_page < pdf_page_count:
+                try:
+                    last_q = str(max([int(x) for x in page_qnums]))
+                except Exception:
+                    last_q = page_qnums[-1]
+                if qnum_str == last_q and jokbo_page < pdf_page_count:
                     # This is the last question on the page, include next page
                     jokbo_end_page = jokbo_page + 1
-                    print(f"  DEBUG: Question {question_number} is last in {question_numbers_on_page} on page {jokbo_page}")
+                    print(f"  DEBUG: Question {question_number} is last in {page_qnums} on page {jokbo_page}")
                     print(f"  DEBUG: Including next page {jokbo_end_page} (PDF has {pdf_page_count} pages)")
                     self.log_debug(f"  LAST QUESTION: Including next page {jokbo_end_page}")
                 else:
                     jokbo_end_page = jokbo_page
-                    print(f"  DEBUG: Question {question_number} on page {jokbo_page}, not last or no next page")
+                    print(f"  DEBUG: Question {question_number} on page {jokbo_page}, not last or no next page (page list: {page_qnums})")
                     self.log_debug(f"  NOT LAST: Using single page {jokbo_end_page}")
             # Fallback to is_last_question_on_page flag
             elif is_last_question_on_page and jokbo_page < pdf_page_count:
@@ -297,11 +309,17 @@ class PDFCreator:
 
             # If there are related questions, append them after the slide
             for question in related_by_page.get(page_num, []):
-                # Determine if this is the last question on the page
+                # Determine if this is the last question on the page (numeric compare)
                 is_last_question = False
                 question_numbers = question.get("question_numbers_on_page", [])
-                if question_numbers and str(question.get("question_number")) == str(question_numbers[-1]):
-                    is_last_question = True
+                try:
+                    qnum_int = self._safe_int(question.get("question_number"))
+                    page_qnums = [self._safe_int(x) for x in (question_numbers or []) if self._safe_int(x) > 0]
+                    last_q = max(page_qnums) if page_qnums else None
+                    if last_q is not None and qnum_int > 0 and qnum_int == last_q:
+                        is_last_question = True
+                except Exception:
+                    pass
 
                 # Extract and insert the question from jokbo (handles next-page inclusion)
                 question_doc = self.extract_jokbo_question(
@@ -477,16 +495,22 @@ class PDFCreator:
             if question_num not in processed_questions:
                 processed_questions.add(question_num)
                 
-                # Determine if this is the last question on the page
+                # Determine if this is the last question on the page (numeric compare)
                 is_last_question = False
                 question_numbers = question.get("question_numbers_on_page", [])
                 self.log_debug(f"Processing Q{question_num}: question_numbers = {question_numbers}")
-                if question_numbers and str(question_num) == question_numbers[-1]:
-                    is_last_question = True
-                    print(f"DEBUG: Question {question_num} is last on page {jokbo_page_num}, questions: {question_numbers}")
-                    self.log_debug(f"  Q{question_num} is LAST on page {jokbo_page_num}")
-                else:
-                    self.log_debug(f"  Q{question_num} is NOT last on page {jokbo_page_num}")
+                try:
+                    qnum_int = self._safe_int(question_num)
+                    page_qnums = [self._safe_int(x) for x in (question_numbers or []) if self._safe_int(x) > 0]
+                    last_q = max(page_qnums) if page_qnums else None
+                    if last_q is not None and qnum_int > 0 and qnum_int == last_q:
+                        is_last_question = True
+                        print(f"DEBUG: Question {question_num} is last on page {jokbo_page_num}, questions: {page_qnums}")
+                        self.log_debug(f"  Q{question_num} is LAST on page {jokbo_page_num}")
+                    else:
+                        self.log_debug(f"  Q{question_num} is NOT last on page {jokbo_page_num}")
+                except Exception:
+                    self.log_debug(f"  WARN: could not compute last-on-page for Q{question_num}")
                 
                 # Extract the question pages (handles multi-page questions)
                 question_doc = self.extract_jokbo_question(
@@ -495,7 +519,8 @@ class PDFCreator:
                     question_num,
                     question.get("question_text", ""),
                     str(Path(jokbo_path).parent),
-                    None,  # jokbo_end_page not available in jokbo-centric mode yet
+                    # Respect jokbo_end_page if present (multi-page questions)
+                    question.get("jokbo_end_page"),
                     is_last_question,
                     question_numbers
                 )

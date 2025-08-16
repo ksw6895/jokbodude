@@ -467,7 +467,10 @@ class ResponseParser:
                 for q in questions:
                     if not isinstance(q, dict):
                         continue
-                    qnum = str(q.get("question_number", "")).strip()
+                    # Normalize question_number: prefer digit-only string if present
+                    qnum_raw = str(q.get("question_number", "")).strip()
+                    qnum_int = ResponseParser._to_int_safe(qnum_raw, 0)
+                    qnum = str(qnum_int) if qnum_int > 0 else qnum_raw
                     qtext = (q.get("question_text") or "").strip()
                     ans = (q.get("answer") or "").strip()
                     if not qnum or not qtext or ResponseParser._is_placeholder_value(ans):
@@ -497,10 +500,14 @@ class ResponseParser:
                     # Keep at most 2 slides by score desc
                     norm_slides.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)
                     norm_slides = norm_slides[:2]
-                    # Normalize question_numbers_on_page to strings
-                    qn_on_page = q.get("question_numbers_on_page") or []
-                    if isinstance(qn_on_page, list):
-                        qn_on_page = [str(x) for x in qn_on_page if str(x).strip()]
+                    # Normalize question_numbers_on_page to digit-only strings
+                    qn_on_page_raw = q.get("question_numbers_on_page") or []
+                    qn_on_page: List[str] = []
+                    if isinstance(qn_on_page_raw, list):
+                        for x in qn_on_page_raw:
+                            xi = ResponseParser._to_int_safe(x, 0)
+                            if xi > 0:
+                                qn_on_page.append(str(xi))
                     else:
                         qn_on_page = []
 
@@ -552,7 +559,10 @@ class ResponseParser:
             for q in questions:
                 if not isinstance(q, dict):
                     continue
-                qnum = str(q.get("question_number", "")).strip()
+                # Normalize question_number: prefer digit-only string if present
+                qnum_raw = str(q.get("question_number", "")).strip()
+                qnum_int = ResponseParser._to_int_safe(qnum_raw, 0)
+                qnum = str(qnum_int) if qnum_int > 0 else qnum_raw
                 qtext = (q.get("question_text") or "").strip()
                 ans = (q.get("answer") or "").strip()
                 if not qnum or not qtext or ResponseParser._is_placeholder_value(ans):
@@ -560,12 +570,23 @@ class ResponseParser:
                 expl = (q.get("explanation") or "").strip()
                 if ResponseParser._is_placeholder_value(expl):
                     expl = ""
+                # Normalize question_numbers_on_page to digit-only strings for lesson-centric
+                qn_on_page_raw = q.get("question_numbers_on_page") or []
+                qn_on_page: List[str] = []
+                if isinstance(qn_on_page_raw, list):
+                    for x in qn_on_page_raw:
+                        xi = ResponseParser._to_int_safe(x, 0)
+                        if xi > 0:
+                            qn_on_page.append(str(xi))
+                else:
+                    qn_on_page = []
+
                 norm_qs.append({
                     "jokbo_filename": (q.get("jokbo_filename") or "").strip(),
                     "jokbo_page": ResponseParser._to_int_safe(q.get("jokbo_page"), 0),
                     "jokbo_end_page": ResponseParser._to_int_safe(q.get("jokbo_end_page"), 0) if q.get("jokbo_end_page") else None,
                     "question_number": qnum,
-                    "question_numbers_on_page": [str(x) for x in (q.get("question_numbers_on_page") or []) if str(x).strip()],
+                    "question_numbers_on_page": qn_on_page,
                     "question_text": qtext,
                     "answer": ans,
                     "explanation": expl,
