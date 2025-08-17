@@ -485,7 +485,12 @@ class ResponseParser:
                     for s in slides:
                         if not isinstance(s, dict):
                             continue
-                        lf = (s.get("lesson_filename") or "").strip()
+                        # Normalize to base lesson filename (strip common prefixes the prompt may add)
+                        lf_raw = (s.get("lesson_filename") or "").strip()
+                        try:
+                            lf = re.sub(r"^(강의자료|강의|lesson|lecture)[\s_\-]+", "", lf_raw, flags=re.IGNORECASE)
+                        except Exception:
+                            lf = lf_raw
                         lp = ResponseParser._to_int_safe(s.get("lesson_page"), 0)
                         if not lf or lp <= 0:
                             continue

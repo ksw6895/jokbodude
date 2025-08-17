@@ -115,15 +115,33 @@ class MultiAPIAnalyzer:
                 analyzer = LessonCentricAnalyzer(
                     api_client, fm, self.session_id, self.debug_dir
                 )
-                return analyzer.analyze(jokbo_path, lesson_path)
+                result = analyzer.analyze(jokbo_path, lesson_path)
+                # Nothing to normalize for lesson-centric here
+                return result
         else:  # jokbo-centric
             def task_operation(file_pair, api_client, model):
+                # file_pair ordering: (lesson_path, jokbo_path)
                 lesson_path, jokbo_path = file_pair
                 fm = FileManager(api_client)
                 analyzer = JokboCentricAnalyzer(
                     api_client, fm, self.session_id, self.debug_dir
                 )
-                return analyzer.analyze(lesson_path, jokbo_path)
+                result = analyzer.analyze(lesson_path, jokbo_path)
+                # Normalize related slide filenames to the actual lesson filename
+                # to avoid tmp/prefixed names that break downstream PDF assembly.
+                try:
+                    from pathlib import Path as _P
+                    original_lesson_filename = _P(lesson_path).name
+                    if isinstance(result, dict):
+                        for page in (result.get("jokbo_pages") or []):
+                            for q in (page.get("questions") or []):
+                                for slide in (q.get("related_lesson_slides") or []):
+                                    if isinstance(slide, dict):
+                                        slide["lesson_filename"] = original_lesson_filename
+                except Exception:
+                    # Best-effort normalization; do not fail task on structure variance
+                    pass
+                return result
         
         # Distribute tasks across APIs
         # Determine workers: default to using all API keys up to number of tasks
@@ -189,9 +207,12 @@ class MultiAPIAnalyzer:
                 analyzer = JokboCentricAnalyzer(
                     api_client, fm, self.session_id, self.debug_dir
                 )
+                # Pass the original lesson file path so the analyzer can
+                # offset and clamp pages correctly across chunks
                 result = analyzer.analyze(
                     chunk_path, center_file_path, preloaded_jokbo_file=None,
-                    chunk_info=(start_page, end_page)
+                    chunk_info=(start_page, end_page),
+                    original_lesson_path=file_path
                 )
             return (idx, result)
         

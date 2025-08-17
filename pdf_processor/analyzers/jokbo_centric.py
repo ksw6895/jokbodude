@@ -59,7 +59,8 @@ class JokboCentricAnalyzer(BaseAnalyzer):
     
     def analyze(self, lesson_path: str, jokbo_path: str,
                 preloaded_jokbo_file: Optional[Any] = None,
-                chunk_info: Optional[Tuple[int, int]] = None) -> Dict[str, Any]:
+                chunk_info: Optional[Tuple[int, int]] = None,
+                original_lesson_path: Optional[str] = None) -> Dict[str, Any]:
         """
         Analyze a lesson against a jokbo.
         
@@ -102,12 +103,14 @@ class JokboCentricAnalyzer(BaseAnalyzer):
         # Parse response
         result = self.parse_and_validate_response(response_text)
         
-        # Post-process results
-        result = self._post_process_results(result, chunk_info)
+        # Post-process results with chunk offset and clamping using original lesson path
+        # Use the original (full) lesson path if provided; otherwise the current lesson_path
+        context_lesson_path = original_lesson_path or lesson_path
+        result = self._post_process_results(result, chunk_info, context_lesson_path)
         
         return result
     
-    def _should_chunk_lesson(self, lesson_path: str, max_pages: int = 40) -> bool:
+    def _should_chunk_lesson(self, lesson_path: str, max_pages: int = 30) -> bool:
         """Check if lesson PDF needs chunking."""
         from ..pdf.operations import PDFOperations
         page_count = PDFOperations.get_page_count(lesson_path)
@@ -136,7 +139,8 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                 # Analyze chunk
                 result = self.analyze(
                     chunk_path, jokbo_path, preloaded_jokbo_file,
-                    chunk_info=(start_page, end_page)
+                    chunk_info=(start_page, end_page),
+                    original_lesson_path=lesson_path
                 )
                 # Normalize lesson filenames in related slides back to original
                 try:
@@ -213,19 +217,84 @@ class JokboCentricAnalyzer(BaseAnalyzer):
             self.file_manager.delete_file_safe(lesson_file)
     
     def _post_process_results(self, result: Dict[str, Any],
-                            chunk_info: Optional[Tuple[int, int]] = None) -> Dict[str, Any]:
-        """Post-process analysis results."""
-        # Adjust page numbers for chunks if needed
-        if chunk_info and "jokbo_pages" in result:
-            start_page, _ = chunk_info
-            offset = start_page - 1
-            
-            for page_info in result["jokbo_pages"]:
-                for question in page_info.get("questions", []):
-                    for slide in question.get("related_lesson_slides", []):
-                        if "lesson_page" in slide:
-                            slide["lesson_page"] += offset
-        
+                            chunk_info: Optional[Tuple[int, int]] = None,
+                            context_lesson_path: Optional[str] = None) -> Dict[str, Any]:
+        """Post-process analysis results.
+
+        Applies chunk page offset only to slides that belong to the current lesson
+        and clamps to the lesson's total pages to avoid runaway indices when
+        responses mix references across lessons.
+        """
+        if not (chunk_info and isinstance(result, dict) and "jokbo_pages" in result):
+            return result
+
+        start_page, _ = chunk_info
+        offset = max(0, int(start_page) - 1)
+
+        # Prepare normalized expected lesson filename for comparison
+        expected_name_norm = None
+        total_pages = None
+        try:
+            from pathlib import Path as _P
+            if context_lesson_path:
+                expected_name = _P(context_lesson_path).name
+                # Strip common AI-added prefixes and normalize for robust match
+                import re as _re
+                expected_name_norm = _re.sub(r"^(강의자료|강의|lesson|lecture)[\s_\-]+", "", expected_name, flags=_re.IGNORECASE).strip().lower()
+        except Exception:
+            expected_name_norm = None
+
+        # Lazy-load total pages for clamping if we have a known lesson path
+        def _get_total_pages() -> int:
+            nonlocal total_pages
+            if total_pages is None:
+                try:
+                    from ..pdf.operations import PDFOperations as _PDFOps
+                    total_pages = int(_PDFOps.get_page_count(context_lesson_path)) if context_lesson_path else 0
+                except Exception:
+                    total_pages = 0
+            return total_pages or 0
+
+        import re as _re
+        for page_info in (result.get("jokbo_pages") or []):
+            for question in (page_info.get("questions") or []):
+                for slide in (question.get("related_lesson_slides") or []):
+                    if not isinstance(slide, dict):
+                        continue
+                    if "lesson_page" not in slide:
+                        continue
+                    # Decide whether this slide belongs to the current lesson
+                    try:
+                        lf_raw = (slide.get("lesson_filename") or "").strip()
+                        lf_norm = _re.sub(r"^(강의자료|강의|lesson|lecture)[\s_\-]+", "", lf_raw, flags=_re.IGNORECASE).strip().lower()
+                    except Exception:
+                        lf_norm = ""
+
+                    belongs_here = False
+                    if expected_name_norm:
+                        # Apply offset only if filename is empty/unknown or matches current lesson
+                        belongs_here = (lf_norm == "" or lf_norm == expected_name_norm)
+                    else:
+                        # If we don't know expected filename, conservatively apply offset
+                        belongs_here = True
+
+                    if not belongs_here:
+                        continue
+
+                    # Apply offset
+                    try:
+                        lp = int(slide.get("lesson_page", 0))
+                    except Exception:
+                        lp = 0
+                    if lp <= 0:
+                        continue
+                    new_lp = lp + offset
+                    # Clamp to document bounds if known
+                    tp = _get_total_pages()
+                    if tp > 0:
+                        new_lp = max(1, min(new_lp, tp))
+                    slide["lesson_page"] = new_lp
+
         return result
     
     def analyze_multiple_lessons(self, lesson_paths: List[str], jokbo_path: str,

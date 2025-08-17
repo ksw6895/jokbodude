@@ -539,16 +539,37 @@ class StorageManager:
         now = time.time()
         if not self.use_local_only and self.redis_client:
             try:
+                key = f"progress:{job_id}"
+                # If already initialized, avoid shrinking totals and only refresh metadata
+                existing = None
+                try:
+                    existing = self._with_retry(self.redis_client.hgetall, key)
+                except Exception:
+                    existing = None
+                existing_total = 0
+                existing_completed = 0
+                if existing:
+                    try:
+                        existing_total = int(existing.get(b'total_chunks') or existing.get('total_chunks') or 0)
+                    except Exception:
+                        existing_total = 0
+                    try:
+                        existing_completed = int(existing.get(b'completed_chunks') or existing.get('completed_chunks') or 0)
+                    except Exception:
+                        existing_completed = 0
+                safe_total = max(int(total_chunks), existing_total)
+                # Do not reduce completed; keep previous if present
+                safe_completed = max(0, existing_completed)
                 self._with_retry(
                     self.redis_client.hset,
-                    f"progress:{job_id}",
+                    key,
                     mapping={
-                        "progress": "0",
+                        "progress": "0" if safe_completed == 0 else (existing.get(b'progress') if existing else "0"),
                         "message": message or "작업을 시작합니다",
                         "timestamp": datetime.now().isoformat(),
                         "started_at": str(now),
-                        "total_chunks": str(int(total_chunks)),
-                        "completed_chunks": "0",
+                        "total_chunks": str(safe_total),
+                        "completed_chunks": str(safe_completed),
                         "eta_seconds": "-1",
                         "avg_chunk_seconds": "0",
                     }

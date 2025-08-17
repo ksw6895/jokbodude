@@ -44,7 +44,7 @@ class PDFOperations:
             raise PDFParsingError(f"Cannot open PDF file: {str(e)}")
     
     @staticmethod
-    def split_pdf_for_chunks(pdf_path: str, max_pages: int = 40) -> List[Tuple[str, int, int]]:
+    def split_pdf_for_chunks(pdf_path: str, max_pages: int = 30) -> List[Tuple[str, int, int]]:
         """
         Split PDF into chunks for processing.
         

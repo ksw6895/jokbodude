@@ -106,7 +106,7 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         
         return result
 
-    def _should_chunk_lesson(self, lesson_path: str, max_pages: int = 40) -> bool:
+    def _should_chunk_lesson(self, lesson_path: str, max_pages: int = 30) -> bool:
         """Check if lesson PDF needs chunking."""
         from ..pdf.operations import PDFOperations
         page_count = PDFOperations.get_page_count(lesson_path)

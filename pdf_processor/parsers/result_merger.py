@@ -53,17 +53,35 @@ class ResultMerger:
     @staticmethod
     def _merge_lesson_results(chunk_results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Merge lesson-centric results from chunks."""
-        merged = {"related_slides": []}
-        
+        # Collect and de-duplicate by (lesson_filename, lesson_page)
+        collected: List[Dict[str, Any]] = []
         for result in chunk_results:
-            if "related_slides" in result:
-                merged["related_slides"].extend(result["related_slides"])
-        
+            if isinstance(result, dict) and "related_slides" in result:
+                slides = result.get("related_slides") or []
+                if isinstance(slides, list):
+                    collected.extend([s for s in slides if isinstance(s, dict)])
+
+        seen = set()
+        unique_slides: List[Dict[str, Any]] = []
+        for s in collected:
+            try:
+                lf = str(s.get("lesson_filename") or "").strip()
+            except Exception:
+                lf = ""
+            try:
+                lp = int(str(s.get("lesson_page", 0)) or 0)
+            except Exception:
+                lp = 0
+            key = (lf.lower(), lp)
+            if lp > 0 and key not in seen:
+                seen.add(key)
+                unique_slides.append(s)
+
         # Sort by page number (normalize to int)
-        merged["related_slides"].sort(key=lambda x: int(str(x.get("lesson_page", 0)) or 0))
-        
-        logger.info(f"Merged {len(chunk_results)} chunks into {len(merged['related_slides'])} slides")
-        return merged
+        unique_slides.sort(key=lambda x: int(str(x.get("lesson_page", 0)) or 0))
+
+        logger.info(f"Merged {len(chunk_results)} chunks into {len(unique_slides)} slides")
+        return {"related_slides": unique_slides}
     
     @staticmethod
     def filter_connections_by_score(connections: List[Dict[str, Any]], 

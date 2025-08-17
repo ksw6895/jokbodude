@@ -89,7 +89,7 @@ class BaseAnalyzer(ABC):
             logger.error(f"Failed to save debug response: {str(e)}")
     
     def process_with_chunks(self, pdf_path: str, analysis_func: callable, 
-                          max_pages: int = 40) -> Dict[str, Any]:
+                          max_pages: int = 30) -> Dict[str, Any]:
         """
         Process a PDF in chunks if necessary.
         
