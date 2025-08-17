@@ -39,6 +39,8 @@ class BaseAnalyzer(ABC):
         self.session_id = session_id
         self.debug_dir = debug_dir
         self.debug_dir.mkdir(parents=True, exist_ok=True)
+        # User-configurable minimum relevance score (0..110). Default 70.
+        self.min_relevance_score: int = 70
         
     @abstractmethod
     def get_mode(self) -> str:
@@ -190,9 +192,20 @@ class BaseAnalyzer(ABC):
         Returns:
             Filtered connections
         """
+        # Use explicit min_score if passed, otherwise fall back to instance threshold
+        effective_min = min_score if min_score is not None else getattr(self, 'min_relevance_score', 70)
         return ResultMerger.filter_connections_by_score(
-            connections, min_score, max_connections
+            connections, effective_min, max_connections
         )
+
+    def set_relevance_threshold(self, score: int) -> None:
+        """Set the analyzer's minimum relevance threshold (clamped 0..110)."""
+        try:
+            v = int(score)
+        except Exception:
+            v = 70
+        v = max(0, min(v, 110))
+        self.min_relevance_score = v
 
     # --------------------
     # Internal helpers

@@ -50,7 +50,14 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
         metadata = storage_manager.get_job_metadata(job_id)
         if not metadata:
             raise Exception(f"Job metadata not found for {job_id}")
-        
+        min_relevance = None
+        try:
+            if isinstance(metadata, dict):
+                mr = metadata.get("min_relevance")
+                if mr is not None:
+                    min_relevance = int(mr)
+        except Exception:
+            min_relevance = None
         jokbo_keys = metadata["jokbo_keys"]
         lesson_keys = metadata["lesson_keys"]
         
@@ -123,6 +130,11 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             model = create_model(selected_model)
             # PDFProcessor does not take a 'multi_api' arg; choose methods conditionally
             processor = PDFProcessor(model, session_id=job_id)
+            if min_relevance is not None:
+                try:
+                    processor.set_relevance_threshold(min_relevance)
+                except Exception:
+                    pass
             creator = PDFCreator()
             
             # Process each jokbo file with progress tracking
@@ -216,7 +228,14 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
         metadata = storage_manager.get_job_metadata(job_id)
         if not metadata:
             raise Exception(f"Job metadata not found for {job_id}")
-        
+        min_relevance = None
+        try:
+            if isinstance(metadata, dict):
+                mr = metadata.get("min_relevance")
+                if mr is not None:
+                    min_relevance = int(mr)
+        except Exception:
+            min_relevance = None
         jokbo_keys = metadata["jokbo_keys"]
         lesson_keys = metadata["lesson_keys"]
         
@@ -278,6 +297,11 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
             model = create_model(selected_model)
             # PDFProcessor does not take a 'multi_api' arg; choose methods conditionally
             processor = PDFProcessor(model, session_id=job_id)
+            if min_relevance is not None:
+                try:
+                    processor.set_relevance_threshold(min_relevance)
+                except Exception:
+                    pass
             creator = PDFCreator()
             
             # Process each lesson file with progress tracking

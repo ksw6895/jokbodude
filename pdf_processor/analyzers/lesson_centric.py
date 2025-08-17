@@ -222,11 +222,26 @@ class LessonCentricAnalyzer(BaseAnalyzer):
                     # Import validator to avoid circular imports
                     from validators import PDFValidator
                     
-                    slide["related_jokbo_questions"] = PDFValidator.filter_valid_questions(
+                    # First, remove questions pointing to invalid jokbo pages
+                    qs = PDFValidator.filter_valid_questions(
                         slide["related_jokbo_questions"],
                         total_jokbo_pages,
                         jokbo_path
                     )
+                    # Then, apply user-configurable relevance threshold if present
+                    try:
+                        min_thr = int(getattr(self, 'min_relevance_score', 70))
+                    except Exception:
+                        min_thr = 70
+                    filtered_qs = []
+                    for q in (qs or []):
+                        try:
+                            score = int(q.get('relevance_score', 0))
+                        except Exception:
+                            score = 0
+                        if score >= min_thr:
+                            filtered_qs.append(q)
+                    slide["related_jokbo_questions"] = filtered_qs
         
         return result
 

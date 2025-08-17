@@ -120,8 +120,10 @@ async def analyze_jokbo_centric(
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
     multi_api: bool = Query(False),
+    min_relevance: Optional[int] = Query(70, ge=0, le=110),
     # Also accept multi_api via multipart form for robustness
     multi_api_form: Optional[bool] = Form(None),
+    min_relevance_form: Optional[int] = Form(None),
     user_id: Optional[str] = Query(None)
 ):
     job_id = str(uuid.uuid4())
@@ -173,6 +175,14 @@ async def analyze_jokbo_centric(
         
         # Determine effective multi_api value (form overrides query if provided)
         effective_multi = (multi_api_form if multi_api_form is not None else multi_api)
+        effective_min_rel = None
+        try:
+            # Prefer form value if provided
+            eff = min_relevance_form if min_relevance_form is not None else min_relevance
+            if eff is not None:
+                effective_min_rel = max(0, min(int(eff), 110))
+        except Exception:
+            effective_min_rel = None
 
         # Store job metadata
         metadata = {
@@ -180,6 +190,7 @@ async def analyze_jokbo_centric(
             "lesson_keys": lesson_keys,
             "model": model,
             "multi_api": effective_multi,
+            "min_relevance": effective_min_rel,
             "user_id": user_id
         }
         storage_manager.store_job_metadata(job_id, metadata)
@@ -207,8 +218,10 @@ async def analyze_lesson_centric(
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
     multi_api: bool = Query(False),
+    min_relevance: Optional[int] = Query(70, ge=0, le=110),
     # Also accept multi_api via multipart form for robustness
     multi_api_form: Optional[bool] = Form(None),
+    min_relevance_form: Optional[int] = Form(None),
     user_id: Optional[str] = Query(None)
 ):
     job_id = str(uuid.uuid4())
@@ -248,6 +261,13 @@ async def analyze_lesson_centric(
         
         # Determine effective multi_api value (form overrides query if provided)
         effective_multi = (multi_api_form if multi_api_form is not None else multi_api)
+        effective_min_rel = None
+        try:
+            eff = min_relevance_form if min_relevance_form is not None else min_relevance
+            if eff is not None:
+                effective_min_rel = max(0, min(int(eff), 110))
+        except Exception:
+            effective_min_rel = None
 
         # Store metadata in Redis
         metadata = {
@@ -255,6 +275,7 @@ async def analyze_lesson_centric(
             "lesson_keys": lesson_keys,
             "model": model,
             "multi_api": effective_multi,
+            "min_relevance": effective_min_rel,
             "user_id": user_id
         }
         storage_manager.store_job_metadata(job_id, metadata)

@@ -67,6 +67,22 @@ class PDFProcessor:
         self.pdf_cache = get_global_cache()
         
         logger.info(f"Initialized PDFProcessor with session ID: {self.session_id}")
+
+    def set_relevance_threshold(self, score: int) -> None:
+        """Set minimum relevance score across analyzers (0..110)."""
+        try:
+            v = int(score)
+        except Exception:
+            v = 70
+        v = max(0, min(v, 110))
+        try:
+            self.lesson_analyzer.set_relevance_threshold(v)
+        except Exception:
+            pass
+        try:
+            self.jokbo_analyzer.set_relevance_threshold(v)
+        except Exception:
+            pass
     
     def _generate_session_id(self) -> str:
         """Generate a unique session ID."""

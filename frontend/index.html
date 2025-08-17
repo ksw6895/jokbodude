@@ -738,9 +738,14 @@
                                         <option value="flash-lite">Gemini 2.5 Flash-lite - Fast & Economical</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Processing Mode</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="jokbo_min_rel">Minimum Relevance Score (0–110)</label>
+                            <input id="jokbo_min_rel" type="number" min="0" max="110" value="70" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--gray-300); border-radius: 8px;" />
+                            <div class="form-hint" style="color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem;">Connections below this score will be excluded.</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Processing Mode</label>
                                 <div class="toggle-group" id="jokbo_multi_api_group" aria-label="Processing mode">
                                     <button type="button" class="toggle-option" data-value="single">Single API</button>
                                     <button type="button" class="toggle-option" data-value="multi">Multi-API</button>
@@ -797,6 +802,11 @@
                                         <option value="flash-lite">Gemini 2.5 Flash-lite - Fast & Economical</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="lesson_min_rel">Minimum Relevance Score (0–110)</label>
+                                <input id="lesson_min_rel" type="number" min="0" max="110" value="70" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--gray-300); border-radius: 8px;" />
+                                <div class="form-hint" style="color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem;">Connections below this score will be excluded.</div>
                             </div>
                             <div class="form-group">
                                 <label>Processing Mode</label>
@@ -1072,11 +1082,19 @@
             
             try {
                 const multiApi = getMultiApiState(mode);
+                const minRel = (() => {
+                    const v = mode === 'jokbo-centric' ? document.getElementById('jokbo_min_rel').value : document.getElementById('lesson_min_rel').value;
+                    const n = parseInt(v, 10);
+                    if (isNaN(n)) return 70;
+                    return Math.max(0, Math.min(n, 110));
+                })();
                 const userId = (localStorage.getItem('jd_user_id') || '').trim();
                 const userParam = userId ? `&user_id=${encodeURIComponent(userId)}` : '';
                 // Send multi_api via both query and form for robustness
                 formData.append('multi_api', multiApi ? 'true' : 'false');
-                const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}${userParam}`, {
+                // Send min_relevance via both query and form
+                formData.append('min_relevance', String(minRel));
+                const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}&min_relevance=${minRel}${userParam}`, {
                     method: 'POST',
                     body: formData
                 });
