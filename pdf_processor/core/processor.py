@@ -154,6 +154,12 @@ class PDFProcessor:
         
         # Create multi-API analyzer
         multi_analyzer = MultiAPIAnalyzer(api_manager, self.session_id, self.debug_dir)
+        # Propagate current lesson-centric threshold to multi-API analyzers
+        try:
+            thr = getattr(self.lesson_analyzer, 'min_relevance_score', None)
+            multi_analyzer.set_relevance_threshold(thr)
+        except Exception:
+            pass
         
         # If lesson file is large, split into chunks and distribute chunks across APIs per jokbo
         from ..pdf.operations import PDFOperations

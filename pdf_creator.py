@@ -26,6 +26,7 @@ class PDFCreator:
         self.debug_log_path = Path("output/debug/pdf_creator_debug.log")
         self.debug_log_path.parent.mkdir(parents=True, exist_ok=True)
         self._lesson_dir_cache = {}
+        self._jokbo_dir_cache = {}
 
     # ---------- Text / Filename utilities ----------
     @staticmethod
@@ -84,6 +85,113 @@ class PDFCreator:
             return default
 
     # ---------- File resolution helpers ----------
+    def _resolve_jokbo_path(self, jokbo_dir: str, jokbo_filename: str) -> Path:
+        """Resolve a jokbo file robustly, stripping common AI-added prefixes.
+
+        Matching strategy (in order):
+        1) Direct path exists
+        2) Exact sanitized filename match
+        3) Prefix-stripped sanitized filename exact match (strip: 족보/jokbo/exam/시험/기출/중간/기말)
+        4) Exact sanitized stem match (unique only)
+        5) Prefix-stripped sanitized stem exact match (unique only)
+
+        If no match is found or ambiguous, return the direct path (likely non-existent)
+        so caller can skip rather than insert a wrong page.
+        """
+        base_dir = Path(jokbo_dir)
+        direct = base_dir / (jokbo_filename or '')
+        if direct.exists():
+            return direct
+
+        # Build directory cache once per directory
+        cache_key = str(base_dir.resolve())
+        if cache_key not in self._jokbo_dir_cache:
+            try:
+                files = list(base_dir.glob('*.pdf'))
+            except Exception:
+                files = []
+            mapping_full = {}
+            mapping_full_stripped = {}
+            mapping_stem = {}
+            mapping_stem_stripped = {}
+            for p in files:
+                name_norm = self._normalize_korean(p.name)
+                name_key = re.sub(r"[\s_\-]+", "", name_norm).lower()
+                mapping_full[name_key] = p
+                # Stem without extension
+                stem_norm = self._normalize_korean(p.stem)
+                stem_key = re.sub(r"[\s_\-]+", "", stem_norm).lower()
+                mapping_stem.setdefault(stem_key, []).append(p)
+                # Prefix-stripped variants
+                try:
+                    stripped_full_norm = re.sub(r"^(족보|jokbo|exam|시험|기출|중간|기말)[\s_\-]+", "", name_norm, flags=re.IGNORECASE)
+                except Exception:
+                    stripped_full_norm = name_norm
+                full_stripped_key = re.sub(r"[\s_\-]+", "", stripped_full_norm).lower()
+                mapping_full_stripped[full_stripped_key] = p
+                try:
+                    stripped_stem_norm = re.sub(r"^(족보|jokbo|exam|시험|기출|중간|기말)[\s_\-]+", "", stem_norm, flags=re.IGNORECASE)
+                except Exception:
+                    stripped_stem_norm = stem_norm
+                stem_stripped_key = re.sub(r"[\s_\-]+", "", stripped_stem_norm).lower()
+                mapping_stem_stripped.setdefault(stem_stripped_key, []).append(p)
+            self._jokbo_dir_cache[cache_key] = {
+                'full': mapping_full,
+                'full_stripped': mapping_full_stripped,
+                'stem': mapping_stem,
+                'stem_stripped': mapping_stem_stripped,
+            }
+
+        cache = self._jokbo_dir_cache.get(cache_key, {})
+        mapping_full = cache.get('full', {})
+        mapping_full_stripped = cache.get('full_stripped', {})
+        mapping_stem = cache.get('stem', {})
+        mapping_stem_stripped = cache.get('stem_stripped', {})
+
+        # Helpers to sanitize for matching
+        def _keyify(name: str) -> str:
+            n = self._normalize_korean(name or '')
+            return re.sub(r"[\s_\-]+", "", n).lower()
+
+        def _strip_prefix(name: str) -> str:
+            return re.sub(r"^(족보|jokbo|exam|시험|기출|중간|기말)[\s_\-]+", "", (name or ''), flags=re.IGNORECASE)
+
+        # Prepare candidate keys (full + stem)
+        needle_full = _keyify(jokbo_filename)
+        needle_full_stripped = _keyify(_strip_prefix(jokbo_filename))
+        needle_stem = _keyify(Path(jokbo_filename or '').stem)
+        needle_stem_stripped = _keyify(Path(_strip_prefix(jokbo_filename) or '').stem)
+
+        # 2) Exact sanitized filename match
+        candidate = mapping_full.get(needle_full)
+        if candidate and candidate.exists():
+            self.log_debug(f"Matched jokbo file by exact full name: '{jokbo_filename}' -> '{candidate.name}'")
+            return candidate
+
+        # 3) Prefix-stripped exact filename match
+        if needle_full_stripped and needle_full_stripped != needle_full:
+            candidate = mapping_full_stripped.get(needle_full_stripped)
+            if candidate and candidate.exists():
+                self.log_debug(f"Matched by prefix-stripped jokbo name: '{jokbo_filename}' -> '{candidate.name}'")
+                return candidate
+
+        # 4) Exact sanitized stem match (unique)
+        if needle_stem:
+            candidates = mapping_stem.get(needle_stem) or []
+            if len(candidates) == 1 and candidates[0].exists():
+                self.log_debug(f"Matched jokbo by exact stem: '{jokbo_filename}' -> '{candidates[0].name}'")
+                return candidates[0]
+
+        # 5) Prefix-stripped sanitized stem match (unique)
+        if needle_stem_stripped and needle_stem_stripped != needle_stem:
+            candidates = mapping_stem_stripped.get(needle_stem_stripped) or []
+            if len(candidates) == 1 and candidates[0].exists():
+                self.log_debug(f"Matched jokbo by prefix-stripped stem: '{jokbo_filename}' -> '{candidates[0].name}'")
+                return candidates[0]
+
+        # Not found or ambiguous — avoid fuzzy matching
+        self.log_debug(f"Jokbo file not found or ambiguous: '{jokbo_filename}' in {jokbo_dir}")
+        return direct
     def _resolve_lesson_path(self, lesson_dir: str, lesson_filename: str) -> Path:
         """Resolve a lesson file in directory with strict, deterministic matching.
 
@@ -240,7 +348,7 @@ class PDFCreator:
         self.log_debug(f"  is_last_question_on_page: {is_last_question_on_page}")
         self.log_debug(f"  question_numbers_on_page: {question_numbers_on_page}")
         
-        jokbo_path = Path(jokbo_dir) / jokbo_filename
+        jokbo_path = self._resolve_jokbo_path(jokbo_dir, jokbo_filename)
         if not jokbo_path.exists():
             print(f"Warning: Jokbo file not found: {jokbo_path}")
             self.log_debug(f"  ERROR: Jokbo file not found: {jokbo_path}")

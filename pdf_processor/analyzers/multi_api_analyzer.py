@@ -34,6 +34,18 @@ class MultiAPIAnalyzer:
         # Do not bind a shared FileManager across different API keys.
         # We'll create a per-client FileManager in each operation call.
         self.file_manager = None
+        # Optional: relevance threshold to propagate to created analyzers
+        self.min_relevance_score: Optional[int] = None
+
+    def set_relevance_threshold(self, score: Optional[int]) -> None:
+        """Set a relevance threshold that will be applied to analyzers created by this wrapper."""
+        try:
+            if score is None:
+                self.min_relevance_score = None
+            else:
+                self.min_relevance_score = max(0, min(int(score), 110))
+        except Exception:
+            self.min_relevance_score = None
         
     def analyze_lesson_centric(self, jokbo_path: str, lesson_path: str) -> Dict[str, Any]:
         """
@@ -52,6 +64,12 @@ class MultiAPIAnalyzer:
             analyzer = LessonCentricAnalyzer(
                 api_client, fm, self.session_id, self.debug_dir
             )
+            # Propagate threshold if configured
+            try:
+                if self.min_relevance_score is not None:
+                    analyzer.set_relevance_threshold(self.min_relevance_score)
+            except Exception:
+                pass
             return analyzer.analyze(jokbo_path, lesson_path)
         
         return self.api_manager.execute_with_failover(operation)
@@ -115,6 +133,11 @@ class MultiAPIAnalyzer:
                 analyzer = LessonCentricAnalyzer(
                     api_client, fm, self.session_id, self.debug_dir
                 )
+                try:
+                    if self.min_relevance_score is not None:
+                        analyzer.set_relevance_threshold(self.min_relevance_score)
+                except Exception:
+                    pass
                 result = analyzer.analyze(jokbo_path, lesson_path)
                 # Nothing to normalize for lesson-centric here
                 return result
@@ -201,6 +224,11 @@ class MultiAPIAnalyzer:
                 analyzer = LessonCentricAnalyzer(
                     api_client, fm, self.session_id, self.debug_dir
                 )
+                try:
+                    if self.min_relevance_score is not None:
+                        analyzer.set_relevance_threshold(self.min_relevance_score)
+                except Exception:
+                    pass
                 # Pass chunk_info so the analyzer can offset lesson_page correctly
                 result = analyzer.analyze(center_file_path, chunk_path, None, chunk_info=(start_page, end_page))
             else:
