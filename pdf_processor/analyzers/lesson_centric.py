@@ -34,6 +34,7 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         # Import from constants to avoid circular imports
         from constants import (
             COMMON_PROMPT_INTRO, COMMON_WARNINGS, RELEVANCE_CRITERIA,
+            EXPLANATION_GUIDELINES,
             LESSON_CENTRIC_TASK, LESSON_CENTRIC_OUTPUT_FORMAT
         )
         
@@ -47,6 +48,8 @@ class LessonCentricAnalyzer(BaseAnalyzer):
 {COMMON_WARNINGS}
 
 {RELEVANCE_CRITERIA}
+
+{EXPLANATION_GUIDELINES}
 
 {LESSON_CENTRIC_OUTPUT_FORMAT}
 """

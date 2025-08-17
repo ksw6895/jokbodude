@@ -36,6 +36,7 @@ class JokboCentricAnalyzer(BaseAnalyzer):
         # Import from constants to avoid circular imports
         from constants import (
             COMMON_PROMPT_INTRO, COMMON_WARNINGS, RELEVANCE_CRITERIA,
+            EXPLANATION_GUIDELINES,
             JOKBO_CENTRIC_TASK, JOKBO_CENTRIC_OUTPUT_FORMAT
         )
         
@@ -49,6 +50,8 @@ class JokboCentricAnalyzer(BaseAnalyzer):
 {COMMON_WARNINGS}
 
 {RELEVANCE_CRITERIA}
+
+{EXPLANATION_GUIDELINES}
 
 {JOKBO_CENTRIC_OUTPUT_FORMAT}
 """
