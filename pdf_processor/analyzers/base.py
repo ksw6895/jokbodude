@@ -39,8 +39,8 @@ class BaseAnalyzer(ABC):
         self.session_id = session_id
         self.debug_dir = debug_dir
         self.debug_dir.mkdir(parents=True, exist_ok=True)
-        # User-configurable minimum relevance score (0..110). Default 70.
-        self.min_relevance_score: int = 70
+        # User-configurable minimum relevance score (0..110). Default 80.
+        self.min_relevance_score: int = 80
         
     @abstractmethod
     def get_mode(self) -> str:
@@ -180,7 +180,7 @@ class BaseAnalyzer(ABC):
         return result
     
     def filter_connections(self, connections: List[Dict[str, Any]], 
-                         min_score: int = 70, max_connections: int = 2) -> List[Dict[str, Any]]:
+                         min_score: int = 80, max_connections: int = 2) -> List[Dict[str, Any]]:
         """
         Filter connections by relevance score.
         
@@ -193,7 +193,7 @@ class BaseAnalyzer(ABC):
             Filtered connections
         """
         # Use explicit min_score if passed, otherwise fall back to instance threshold
-        effective_min = min_score if min_score is not None else getattr(self, 'min_relevance_score', 70)
+        effective_min = min_score if min_score is not None else getattr(self, 'min_relevance_score', 80)
         return ResultMerger.filter_connections_by_score(
             connections, effective_min, max_connections
         )
@@ -203,7 +203,7 @@ class BaseAnalyzer(ABC):
         try:
             v = int(score)
         except Exception:
-            v = 70
+            v = 80
         v = max(0, min(v, 110))
         self.min_relevance_score = v
 

@@ -195,7 +195,7 @@ The multi‑API layer distributes work across multiple keys and transparently fa
 
 - Models: Controlled by `GEMINI_MODEL` or API parameter (`pro|flash|flash-lite`).
 - Multi‑API: Enabled when multiple keys exist (`GEMINI_API_KEYS` via `config.py`). Keys are masked in logs.
-- Relevance Threshold: `min_relevance_score` defaults to 70; callers can set via API (`min_relevance`) and it propagates to analyzers. Used in both lesson/jokbo workflows when filtering connections.
+- Relevance Threshold: `min_relevance_score` defaults to 80; callers can set via API (`min_relevance`) and it propagates to analyzers. Used in both lesson/jokbo workflows when filtering connections.
 - Chunk Size: Default 30 pages; adjust in `PDFOperations.split_pdf_for_chunks` or override per call sites if needed.
 
 
@@ -224,4 +224,3 @@ The multi‑API layer distributes work across multiple keys and transparently fa
 - Alternate Chunk Sizes: Update `PDFOperations.split_pdf_for_chunks` or make it configurable per request.
 - Additional Failover Logic: Enhance `APIKeyStatus` (e.g., long‑term health scoring) or dynamic max_workers in `distribute_tasks`.
 - New Output Shapes: Extend `ResponseParser._sanitize_parsed_response` and `PDFCreator` if schema evolves.
-

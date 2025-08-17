@@ -73,7 +73,7 @@ class PDFProcessor:
         try:
             v = int(score)
         except Exception:
-            v = 70
+            v = 80
         v = max(0, min(v, 110))
         try:
             self.lesson_analyzer.set_relevance_threshold(v)
@@ -314,17 +314,112 @@ class PDFProcessor:
     
     # Utility methods
     def _merge_lesson_centric_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Merge lesson-centric results."""
-        all_slides = []
-        
-        for result in results:
-            if "error" not in result and "related_slides" in result:
-                all_slides.extend(result["related_slides"])
-        
-        # Sort by page number (normalize to int)
-        all_slides.sort(key=lambda x: int(str(x.get("lesson_page", 0)) or 0))
-        
-        return {"related_slides": all_slides}
+        """Merge lesson-centric results including all eligible questions per slide.
+
+        Behavior:
+        - Keep every lesson slide in the final PDF (handled by PDFCreator),
+          but only attach the single highest-relevance jokbo question per slide
+          in the merged analysis result so insertion is one-per-slide.
+        - Across multiple jokbo analyses, we aggregate candidates for each
+          lesson page and select the max by `relevance_score` (ties resolved
+          by stable order as encountered).
+        - Preserve slide-level optional fields (`importance_score`,
+          `key_concepts`) from the slide that contributed the chosen question.
+        """
+        from typing import Tuple
+
+        # page -> list of (question_dict, importance_score, key_concepts)
+        candidates_by_page: Dict[int, List[Tuple[Dict[str, Any], Optional[int], List[Any]]]] = {}
+
+        for result in results or []:
+            if not isinstance(result, dict) or "error" in result:
+                continue
+            slides = result.get("related_slides") or []
+            if not isinstance(slides, list):
+                continue
+            for slide in slides:
+                if not isinstance(slide, dict):
+                    continue
+                try:
+                    page_num = int(str(slide.get("lesson_page", 0)) or 0)
+                except Exception:
+                    page_num = 0
+                if page_num <= 0:
+                    continue
+                importance = slide.get("importance_score")
+                key_concepts = slide.get("key_concepts") if isinstance(slide.get("key_concepts"), list) else []
+                for q in (slide.get("related_jokbo_questions") or []):
+                    if not isinstance(q, dict):
+                        continue
+                    # Normalize score to int; ResponseParser already clamps but be defensive
+                    try:
+                        score = int(str(q.get("relevance_score", 0)) or 0)
+                    except Exception:
+                        score = 0
+                    # Store question as-is; PDFCreator expects these fields
+                    q_copy = dict(q)
+                    q_copy["relevance_score"] = score
+                    candidates_by_page.setdefault(page_num, []).append((q_copy, importance, key_concepts))
+
+        final_slides: List[Dict[str, Any]] = []
+        total_questions = 0
+        # Determine threshold from analyzer (defaults to 80 after change)
+        try:
+            min_thr = int(getattr(self.lesson_analyzer, 'min_relevance_score', 80))
+        except Exception:
+            min_thr = 80
+        # Iterate pages in ascending order for deterministic output
+        for page_num in sorted(candidates_by_page.keys()):
+            cand_list = candidates_by_page.get(page_num) or []
+            if not cand_list:
+                continue
+            # Include all questions meeting threshold; sort by score desc
+            filtered = [q for (q, _imp, _kc) in cand_list if int(q.get("relevance_score", 0)) >= min_thr]
+            if not filtered:
+                continue
+            # Deduplicate on (jokbo_filename, jokbo_page, question_number)
+            seen_keys = set()
+            uniq: List[Dict[str, Any]] = []
+            for q in filtered:
+                key = (str(q.get("jokbo_filename") or '').lower(), int(q.get("jokbo_page", 0)), str(q.get("question_number") or ''))
+                if key in seen_keys:
+                    continue
+                seen_keys.add(key)
+                uniq.append(q)
+            uniq.sort(key=lambda x: int(str(x.get("relevance_score", 0)) or 0), reverse=True)
+            # Choose a representative slide-level meta from the best-scoring candidate
+            rep_idx = 0
+            rep_importance = None
+            rep_kc: List[Any] = []
+            if cand_list:
+                try:
+                    rep_idx = max(range(len(cand_list)), key=lambda i: int(cand_list[i][0].get("relevance_score", 0)))
+                except Exception:
+                    rep_idx = 0
+                rep_importance = cand_list[rep_idx][1]
+                rep_kc = cand_list[rep_idx][2] or []
+            slide_entry: Dict[str, Any] = {
+                "lesson_page": page_num,
+                "related_jokbo_questions": uniq,
+            }
+            if rep_importance is not None:
+                slide_entry["importance_score"] = rep_importance
+            if rep_kc:
+                slide_entry["key_concepts"] = rep_kc
+            final_slides.append(slide_entry)
+            total_questions += len(uniq)
+
+        merged = {"related_slides": final_slides}
+        # Attach lightweight summary for downstream display (best-effort)
+        try:
+            merged["summary"] = {
+                "total_related_slides": len(final_slides),
+                "total_questions": total_questions,
+                "key_topics": [],
+            }
+        except Exception:
+            pass
+        return merged
     
     def save_processing_state(self, state: Dict[str, Any]) -> None:
         """Save processing state to session directory."""

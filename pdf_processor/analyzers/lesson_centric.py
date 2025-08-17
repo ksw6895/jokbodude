@@ -230,9 +230,9 @@ class LessonCentricAnalyzer(BaseAnalyzer):
                     )
                     # Then, apply user-configurable relevance threshold if present
                     try:
-                        min_thr = int(getattr(self, 'min_relevance_score', 70))
+                        min_thr = int(getattr(self, 'min_relevance_score', 80))
                     except Exception:
-                        min_thr = 70
+                        min_thr = 80
                     filtered_qs = []
                     for q in (qs or []):
                         try:

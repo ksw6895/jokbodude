@@ -418,7 +418,7 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                 }
             
             # Filter connections with user-configured threshold
-            filtered_connections = self.filter_connections(connections, min_score=getattr(self, 'min_relevance_score', 70))
+            filtered_connections = self.filter_connections(connections, min_score=getattr(self, 'min_relevance_score', 80))
             
             # Add question with filtered connections
             question_data["related_lesson_slides"] = filtered_connections

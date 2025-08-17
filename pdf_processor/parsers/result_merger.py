@@ -85,7 +85,7 @@ class ResultMerger:
     
     @staticmethod
     def filter_connections_by_score(connections: List[Dict[str, Any]], 
-                                  min_score: int = 70,
+                                  min_score: int = 80,
                                   max_connections: int = 2) -> List[Dict[str, Any]]:
         """
         Filter connections by relevance score.

@@ -120,7 +120,7 @@ async def analyze_jokbo_centric(
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
     multi_api: bool = Query(False),
-    min_relevance: Optional[int] = Query(70, ge=0, le=110),
+    min_relevance: Optional[int] = Query(80, ge=0, le=110),
     # Also accept multi_api via multipart form for robustness
     multi_api_form: Optional[bool] = Form(None),
     min_relevance_form: Optional[int] = Form(None),
@@ -218,7 +218,7 @@ async def analyze_lesson_centric(
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
     multi_api: bool = Query(False),
-    min_relevance: Optional[int] = Query(70, ge=0, le=110),
+    min_relevance: Optional[int] = Query(80, ge=0, le=110),
     # Also accept multi_api via multipart form for robustness
     multi_api_form: Optional[bool] = Form(None),
     min_relevance_form: Optional[int] = Form(None),
