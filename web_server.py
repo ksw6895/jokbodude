@@ -98,6 +98,21 @@ def build_content_disposition(original_name: str) -> str:
 def read_root():
     return FileResponse('frontend/index.html')
 
+@app.get("/config")
+def get_config():
+    """Expose server capabilities for the frontend UI."""
+    try:
+        # Lazy import to avoid hard dependency at module import time
+        from config import API_KEYS as _API_KEYS  # type: ignore
+        keys_count = len(_API_KEYS) if isinstance(_API_KEYS, list) else (1 if _API_KEYS else 0)
+    except Exception:
+        keys_count = 0
+    return {
+        "multi_api_available": keys_count > 1,
+        "api_keys_count": keys_count,
+        "models": ["pro", "flash", "flash-lite"],
+    }
+
 @app.post("/analyze/jokbo-centric", status_code=202)
 async def analyze_jokbo_centric(
     request: Request,
@@ -105,6 +120,8 @@ async def analyze_jokbo_centric(
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
     multi_api: bool = Query(False),
+    # Also accept multi_api via multipart form for robustness
+    multi_api_form: Optional[bool] = Form(None),
     user_id: Optional[str] = Query(None)
 ):
     job_id = str(uuid.uuid4())
@@ -154,12 +171,15 @@ async def analyze_jokbo_centric(
         except Exception:
             pass
         
+        # Determine effective multi_api value (form overrides query if provided)
+        effective_multi = (multi_api_form if multi_api_form is not None else multi_api)
+
         # Store job metadata
         metadata = {
             "jokbo_keys": jokbo_keys,
             "lesson_keys": lesson_keys,
             "model": model,
-            "multi_api": multi_api,
+            "multi_api": effective_multi,
             "user_id": user_id
         }
         storage_manager.store_job_metadata(job_id, metadata)
@@ -170,7 +190,7 @@ async def analyze_jokbo_centric(
         task = celery_app.send_task(
             "tasks.run_jokbo_analysis",
             args=[job_id],
-            kwargs={"model_type": model, "multi_api": multi_api}
+            kwargs={"model_type": model, "multi_api": effective_multi}
         )
         try:
             storage_manager.set_job_task(job_id, task.id)
@@ -187,6 +207,8 @@ async def analyze_lesson_centric(
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
     multi_api: bool = Query(False),
+    # Also accept multi_api via multipart form for robustness
+    multi_api_form: Optional[bool] = Form(None),
     user_id: Optional[str] = Query(None)
 ):
     job_id = str(uuid.uuid4())
@@ -224,12 +246,15 @@ async def analyze_lesson_centric(
         except Exception:
             pass
         
+        # Determine effective multi_api value (form overrides query if provided)
+        effective_multi = (multi_api_form if multi_api_form is not None else multi_api)
+
         # Store metadata in Redis
         metadata = {
             "jokbo_keys": jokbo_keys,
             "lesson_keys": lesson_keys,
             "model": model,
-            "multi_api": multi_api,
+            "multi_api": effective_multi,
             "user_id": user_id
         }
         storage_manager.store_job_metadata(job_id, metadata)
@@ -240,7 +265,7 @@ async def analyze_lesson_centric(
         task = celery_app.send_task(
             "tasks.run_lesson_analysis",
             args=[job_id],
-            kwargs={"model_type": model, "multi_api": multi_api}
+            kwargs={"model_type": model, "multi_api": effective_multi}
         )
         try:
             storage_manager.set_job_task(job_id, task.id)

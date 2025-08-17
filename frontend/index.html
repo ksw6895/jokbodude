@@ -631,6 +631,35 @@
         .status-message { color: var(--muted); }
         .progress-bar { background: rgba(255,255,255,0.06); border: 1px solid var(--border); }
         .progress-fill { background: linear-gradient(90deg, var(--primary) 0%, var(--primary-2) 100%); }
+
+        /* Toggle group for processing mode */
+        .toggle-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 0;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.06);
+        }
+        .toggle-option {
+            padding: 0.5rem 0.9rem;
+            background: transparent;
+            color: var(--muted);
+            border: none;
+            border-right: 1px solid var(--border);
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        .toggle-option:last-of-type { border-right: none; }
+        .toggle-option.active {
+            background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.08));
+            color: var(--text);
+            box-shadow: inset 0 0 0 1px var(--border);
+        }
+        .toggle-option.disabled { opacity: 0.45; cursor: not-allowed; }
+        .toggle-note { margin-left: 0.6rem; color: var(--muted); font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -711,10 +740,12 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="jokbo_multi_api" style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
-                                    <input type="checkbox" id="jokbo_multi_api" />
-                                    <span>Use Multi-API (distribute work across keys)</span>
-                                </label>
+                                <label>Processing Mode</label>
+                                <div class="toggle-group" id="jokbo_multi_api_group" aria-label="Processing mode">
+                                    <button type="button" class="toggle-option" data-value="single">Single API</button>
+                                    <button type="button" class="toggle-option" data-value="multi">Multi-API</button>
+                                    <span class="toggle-note" id="jokbo_multi_api_note"></span>
+                                </div>
                             </div>
                         </div>
                         
@@ -768,10 +799,12 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="lesson_multi_api" style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
-                                    <input type="checkbox" id="lesson_multi_api" />
-                                    <span>Use Multi-API (distribute work across keys)</span>
-                                </label>
+                                <label>Processing Mode</label>
+                                <div class="toggle-group" id="lesson_multi_api_group" aria-label="Processing mode">
+                                    <button type="button" class="toggle-option" data-value="single">Single API</button>
+                                    <button type="button" class="toggle-option" data-value="multi">Multi-API</button>
+                                    <span class="toggle-note" id="lesson_multi_api_note"></span>
+                                </div>
                             </div>
                         </div>
                         
@@ -837,6 +870,80 @@
     
     <script>
         const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+        let JD_CONFIG = { multi_api_available: false, api_keys_count: 0 };
+
+        // Initialize processing mode toggles with server capabilities
+        async function initConfigAndToggles() {
+            try {
+                const res = await fetch('/config');
+                if (res.ok) {
+                    JD_CONFIG = await res.json();
+                }
+            } catch (e) { /* ignore; use defaults */ }
+
+            initProcessingToggle(
+                'jokbo_multi_api_group',
+                'jokbo_multi_api_note',
+                'jd_multi_api_jokbo',
+                JD_CONFIG.multi_api_available,
+                JD_CONFIG.api_keys_count
+            );
+            initProcessingToggle(
+                'lesson_multi_api_group',
+                'lesson_multi_api_note',
+                'jd_multi_api_lesson',
+                JD_CONFIG.multi_api_available,
+                JD_CONFIG.api_keys_count
+            );
+        }
+
+        function initProcessingToggle(groupId, noteId, storageKey, available, keysCount) {
+            const group = document.getElementById(groupId);
+            const note = document.getElementById(noteId);
+            const [singleBtn, multiBtn] = group.querySelectorAll('.toggle-option');
+
+            // Show availability note
+            if (available) {
+                note.textContent = `· ${keysCount} API keys available`;
+                multiBtn.classList.remove('disabled');
+            } else {
+                note.textContent = '· Multi-API unavailable (1 key)';
+                multiBtn.classList.add('disabled');
+            }
+
+            // Restore saved preference; default to available? true : false
+            const saved = localStorage.getItem(storageKey);
+            const preferMulti = saved !== null ? (saved === 'true') : !!available;
+            setToggleActive(singleBtn, multiBtn, preferMulti && available);
+
+            // Wire up clicks
+            singleBtn.onclick = () => {
+                setToggleActive(singleBtn, multiBtn, false);
+                localStorage.setItem(storageKey, 'false');
+            };
+            multiBtn.onclick = () => {
+                if (multiBtn.classList.contains('disabled')) return;
+                setToggleActive(singleBtn, multiBtn, true);
+                localStorage.setItem(storageKey, 'true');
+            };
+        }
+
+        function setToggleActive(singleBtn, multiBtn, useMulti) {
+            if (useMulti) {
+                singleBtn.classList.remove('active');
+                multiBtn.classList.add('active');
+            } else {
+                multiBtn.classList.remove('active');
+                singleBtn.classList.add('active');
+            }
+        }
+
+        function getMultiApiState(mode) {
+            const groupId = mode === 'jokbo-centric' ? 'jokbo_multi_api_group' : 'lesson_multi_api_group';
+            const group = document.getElementById(groupId);
+            const [singleBtn, multiBtn] = group.querySelectorAll('.toggle-option');
+            return multiBtn.classList.contains('active') && !multiBtn.classList.contains('disabled');
+        }
         
         // Tab switching
         function switchTab(tabName) {
@@ -900,6 +1007,9 @@
             }
         }
         
+        // Kick off config fetch and toggle init
+        initConfigAndToggles();
+
         // Attach file handlers
         document.getElementById('jokbo_files').addEventListener('change', () => 
             handleFileSelect('jokbo_files', 'jokbo_file_list', 'jokbo_error'));
@@ -961,11 +1071,11 @@
             }
             
             try {
-                const multiApi = (mode === 'jokbo-centric'
-                    ? document.getElementById('jokbo_multi_api').checked
-                    : document.getElementById('lesson_multi_api').checked);
+                const multiApi = getMultiApiState(mode);
                 const userId = (localStorage.getItem('jd_user_id') || '').trim();
                 const userParam = userId ? `&user_id=${encodeURIComponent(userId)}` : '';
+                // Send multi_api via both query and form for robustness
+                formData.append('multi_api', multiApi ? 'true' : 'false');
                 const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}${userParam}`, {
                     method: 'POST',
                     body: formData
@@ -979,11 +1089,12 @@
                 const data = await response.json();
                 
                 statusBadge.textContent = 'PROCESSING';
+                const modeText = multiApi ? 'Multi-API' : 'Single API';
                 statusContent.innerHTML = `
                     <div>
                         <div class="loader"></div>
                         <div class="status-message" style="margin-top: 1rem">
-                            Processing with ${model.toUpperCase()} model...<br>
+                            ${modeText} · ${model.toUpperCase()}<br>
                             <small style="color: var(--gray-500)">Job ID: ${data.job_id}</small>
                         </div>
                         <div class="progress-wrapper">
