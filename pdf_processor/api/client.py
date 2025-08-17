@@ -37,87 +37,11 @@ class GeminiAPIClient:
 
     # A permissive default schema covering both modes to stabilize JSON output
     # without over-constraining generations. Callers may override per-request.
-    DEFAULT_RESPONSE_SCHEMA: Dict[str, Any] = {
-        "type": "object",
-        "properties": {
-            "jokbo_pages": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "jokbo_page": {"type": ["integer", "string"]},
-                        "questions": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "jokbo_filename": {"type": ["string", "null"]},
-                                    "jokbo_page": {"type": ["integer", "string", "null"]},
-                                    "jokbo_end_page": {"type": ["integer", "string", "null"]},
-                                    "question_number": {"type": ["string", "integer", "null"]},
-                                    "question_numbers_on_page": {"type": ["array", "null"]},
-                                    "question_text": {"type": ["string", "null"]},
-                                    "answer": {"type": ["string", "null"]},
-                                    "explanation": {"type": ["string", "null"]},
-                                    "wrong_answer_explanations": {"type": ["object", "null"]},
-                                    "relevance_score": {"type": ["integer", "string", "null"]},
-                                    "relevance_reason": {"type": ["string", "null"]},
-                                    "related_lesson_slides": {
-                                        "type": ["array", "null"],
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "lesson_filename": {"type": ["string", "null"]},
-                                                "lesson_page": {"type": ["integer", "string", "null"]},
-                                                "relevance_score": {"type": ["integer", "string", "null"]},
-                                                "relevance_reason": {"type": ["string", "null"]},
-                                            },
-                                            "additionalProperties": True,
-                                        },
-                                    },
-                                },
-                                "additionalProperties": True,
-                            },
-                        },
-                    },
-                    "additionalProperties": True,
-                },
-            },
-            "related_slides": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "lesson_page": {"type": ["integer", "string"]},
-                        "related_jokbo_questions": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "jokbo_filename": {"type": ["string", "null"]},
-                                    "jokbo_page": {"type": ["integer", "string", "null"]},
-                                    "jokbo_end_page": {"type": ["integer", "string", "null"]},
-                                    "question_number": {"type": ["string", "integer", "null"]},
-                                    "question_numbers_on_page": {"type": ["array", "null"]},
-                                    "question_text": {"type": ["string", "null"]},
-                                    "answer": {"type": ["string", "null"]},
-                                    "explanation": {"type": ["string", "null"]},
-                                    "wrong_answer_explanations": {"type": ["object", "null"]},
-                                    "relevance_score": {"type": ["integer", "string", "null"]},
-                                    "relevance_reason": {"type": ["string", "null"]},
-                                },
-                                "additionalProperties": True,
-                            },
-                        },
-                        "importance_score": {"type": ["integer", "string", "null"]},
-                        "key_concepts": {"type": ["array", "null"]},
-                    },
-                    "additionalProperties": True,
-                },
-            },
-        },
-        "additionalProperties": True,
-    }
+    # Use a minimal permissive schema to avoid SDK schema conversion issues.
+    # Many versions of the SDK expect a "Schema" proto-like structure rather than
+    # full JSON Schema (which supports union types via lists). Keeping this minimal
+    # enforces object-only JSON without overconstraining nested properties.
+    DEFAULT_RESPONSE_SCHEMA: Dict[str, Any] = {"type": "object"}
             
     def upload_file(self, file_path: str, display_name: Optional[str] = None, 
                    mime_type: str = "application/pdf") -> Any:

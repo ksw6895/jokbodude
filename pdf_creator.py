@@ -438,7 +438,22 @@ class PDFCreator:
         print(f"  PDF 생성 시작: {len(jokbo_pages)}개 페이지, {total_questions}개 문제")
         
         if not jokbo_pages:
+            # Produce a minimal PDF with a friendly message so downstream
+            # storage does not fail when there are no matches.
             print(f"  경고: jokbo_pages가 비어있습니다. PDF를 생성할 내용이 없습니다.")
+            doc = fitz.open()
+            page = doc.new_page()
+            fontname = self._register_font(page)
+            msg = (
+                "분석 결과 없음\n\n"
+                "선택한 족보와 강의자료 조합에서 연결된 문제가 없습니다.\n"
+                "입력 파일, 모델 설정, 또는 분석 기준을 확인하세요."
+            )
+            rect = fitz.Rect(72, 72, page.rect.width - 72, page.rect.height - 72)
+            page.insert_textbox(rect, msg, fontsize=14, fontname=fontname, align=fitz.TEXT_ALIGN_LEFT)
+            doc.save(output_path)
+            doc.close()
+            print(f"Placeholder PDF created: {output_path}")
             return
         
         doc = fitz.open()
