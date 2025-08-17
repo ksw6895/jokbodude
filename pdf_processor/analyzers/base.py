@@ -197,6 +197,29 @@ class BaseAnalyzer(ABC):
     # --------------------
     # Internal helpers
     # --------------------
+    def _is_empty_result(self, data: Dict[str, Any], mode: str) -> bool:
+        """Check if the parsed result is semantically empty for the given mode."""
+        try:
+            if mode == "jokbo-centric":
+                pages = data.get("jokbo_pages") or []
+                if not isinstance(pages, list) or not pages:
+                    return True
+                total_q = 0
+                for p in pages:
+                    total_q += len((p or {}).get("questions", []) or [])
+                return total_q == 0
+            else:
+                slides = data.get("related_slides") or []
+                if not isinstance(slides, list) or not slides:
+                    return True
+                total_q = 0
+                for s in slides:
+                    total_q += len((s or {}).get("related_jokbo_questions", []) or [])
+                return total_q == 0
+        except Exception:
+            # If anything is off, don't incorrectly treat as empty
+            return False
+
     def _generate_with_quality_retry(self, content: List[Any], retries: int = 1) -> str:
         """
         Generate content and retry if output looks suspicious per parser heuristics.
@@ -211,6 +234,17 @@ class BaseAnalyzer(ABC):
                 text = response.text
                 try:
                     parsed = ResponseParser.parse_response(text, mode)
+                    # Treat empty results as valid (no matches) rather than fatal
+                    if self._is_empty_result(parsed, mode):
+                        logger.warning(
+                            f"Empty {mode} result detected; treating as valid with no matches"
+                        )
+                        try:
+                            # Return normalized JSON to ensure downstream parser consistency
+                            return json.dumps(parsed, ensure_ascii=False)
+                        except Exception:
+                            # Fallback to raw text if serialization fails
+                            return text
                     if ResponseParser.is_result_suspicious(parsed, mode):
                         logger.warning(f"Suspicious {mode} result detected (attempt {attempt}/{attempts}); retrying...")
                         if attempt < attempts:

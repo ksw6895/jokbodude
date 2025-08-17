@@ -34,6 +34,90 @@ class GeminiAPIClient:
         """Configure the API with the provided or environment API key."""
         if api_key:
             genai.configure(api_key=api_key)
+
+    # A permissive default schema covering both modes to stabilize JSON output
+    # without over-constraining generations. Callers may override per-request.
+    DEFAULT_RESPONSE_SCHEMA: Dict[str, Any] = {
+        "type": "object",
+        "properties": {
+            "jokbo_pages": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "jokbo_page": {"type": ["integer", "string"]},
+                        "questions": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "jokbo_filename": {"type": ["string", "null"]},
+                                    "jokbo_page": {"type": ["integer", "string", "null"]},
+                                    "jokbo_end_page": {"type": ["integer", "string", "null"]},
+                                    "question_number": {"type": ["string", "integer", "null"]},
+                                    "question_numbers_on_page": {"type": ["array", "null"]},
+                                    "question_text": {"type": ["string", "null"]},
+                                    "answer": {"type": ["string", "null"]},
+                                    "explanation": {"type": ["string", "null"]},
+                                    "wrong_answer_explanations": {"type": ["object", "null"]},
+                                    "relevance_score": {"type": ["integer", "string", "null"]},
+                                    "relevance_reason": {"type": ["string", "null"]},
+                                    "related_lesson_slides": {
+                                        "type": ["array", "null"],
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "lesson_filename": {"type": ["string", "null"]},
+                                                "lesson_page": {"type": ["integer", "string", "null"]},
+                                                "relevance_score": {"type": ["integer", "string", "null"]},
+                                                "relevance_reason": {"type": ["string", "null"]},
+                                            },
+                                            "additionalProperties": True,
+                                        },
+                                    },
+                                },
+                                "additionalProperties": True,
+                            },
+                        },
+                    },
+                    "additionalProperties": True,
+                },
+            },
+            "related_slides": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "lesson_page": {"type": ["integer", "string"]},
+                        "related_jokbo_questions": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "jokbo_filename": {"type": ["string", "null"]},
+                                    "jokbo_page": {"type": ["integer", "string", "null"]},
+                                    "jokbo_end_page": {"type": ["integer", "string", "null"]},
+                                    "question_number": {"type": ["string", "integer", "null"]},
+                                    "question_numbers_on_page": {"type": ["array", "null"]},
+                                    "question_text": {"type": ["string", "null"]},
+                                    "answer": {"type": ["string", "null"]},
+                                    "explanation": {"type": ["string", "null"]},
+                                    "wrong_answer_explanations": {"type": ["object", "null"]},
+                                    "relevance_score": {"type": ["integer", "string", "null"]},
+                                    "relevance_reason": {"type": ["string", "null"]},
+                                },
+                                "additionalProperties": True,
+                            },
+                        },
+                        "importance_score": {"type": ["integer", "string", "null"]},
+                        "key_concepts": {"type": ["array", "null"]},
+                    },
+                    "additionalProperties": True,
+                },
+            },
+        },
+        "additionalProperties": True,
+    }
             
     def upload_file(self, file_path: str, display_name: Optional[str] = None, 
                    mime_type: str = "application/pdf") -> Any:
@@ -119,8 +203,16 @@ class GeminiAPIClient:
             logger.error(f"Failed to list files: {str(e)}")
             return []
     
-    def generate_content(self, content: Any, max_retries: int = 3, 
-                        backoff_factor: int = 2) -> Any:
+    def generate_content(
+        self,
+        content: Any,
+        max_retries: int = 3,
+        backoff_factor: int = 2,
+        *,
+        response_mime_type: str = "application/json",
+        response_schema: Optional[Dict[str, Any]] = None,
+        max_output_tokens: Optional[int] = None,
+    ) -> Any:
         """
         Generate content with retry logic and error handling.
         
@@ -139,7 +231,20 @@ class GeminiAPIClient:
             try:
                 # Ensure correct API key context for this client before generation
                 self._configure_api(self.api_key)
-                response = self.model.generate_content(content)
+
+                # Enforce JSON mode and allow optional schema/limits per-call
+                gen_config: Dict[str, Any] = {"response_mime_type": response_mime_type}
+                # Apply caller-provided schema if given; otherwise use a permissive default
+                schema_to_use = response_schema or self.DEFAULT_RESPONSE_SCHEMA
+                if schema_to_use:
+                    gen_config["response_schema"] = schema_to_use
+                if isinstance(max_output_tokens, int) and max_output_tokens > 0:
+                    gen_config["max_output_tokens"] = max_output_tokens
+
+                response = self.model.generate_content(
+                    content,
+                    generation_config=gen_config or None,
+                )
                 
                 # Check for empty response
                 if not response.text or len(response.text) == 0:
