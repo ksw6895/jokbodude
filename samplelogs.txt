@@ -1,0 +1,878 @@
+2025-08-17T11:04:59.912162518Z 2025-08-17 11:04:59 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k3:***0zpw]
+2025-08-17T11:05:00.083129897Z 2025-08-17 11:05:00 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k1:***nBNs]
+2025-08-17T11:05:00.083640997Z 2025-08-17 11:05:00 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k1:***nBNs]
+2025-08-17T11:05:00.083675159Z 2025-08-17 11:05:00 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:05:00.083748643Z 2025-08-17 11:05:00 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k1:***nBNs]
+2025-08-17T11:05:00.264141672Z 2025-08-17 11:05:00 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k2:***_8Bo]
+2025-08-17T11:05:00.264679993Z 2025-08-17 11:05:00 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k2:***_8Bo]
+2025-08-17T11:05:00.264725366Z 2025-08-17 11:05:00 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:05:00.264778789Z 2025-08-17 11:05:00 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k2:***_8Bo]
+2025-08-17T11:05:00.470945446Z 2025-08-17 11:05:00 - pdf_processor.api.file_manager - INFO - Found 3 uploaded files [key=k3:***0zpw]
+2025-08-17T11:05:00.470978058Z 2025-08-17 11:05:00 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 3 total [key=k3:***0zpw]
+2025-08-17T11:05:00.471002589Z 2025-08-17 11:05:00 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:05:00.471052832Z 2025-08-17 11:05:00 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k3:***0zpw]
+2025-08-17T11:05:01.769538419Z 2025-08-17 11:05:01 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k1:***nBNs]
+2025-08-17T11:05:01.76956666Z 2025-08-17 11:05:01 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpo0gfh_gy.pdf [key=k1:***nBNs]
+2025-08-17T11:05:03.212897157Z 2025-08-17 11:05:03 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k2:***_8Bo]
+2025-08-17T11:05:03.212934289Z 2025-08-17 11:05:03 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpzxg9a_be.pdf [key=k2:***_8Bo]
+2025-08-17T11:05:04.90452469Z 2025-08-17 11:05:04 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k3:***0zpw]
+2025-08-17T11:05:04.904548432Z 2025-08-17 11:05:04 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpzxg9a_be.pdf [key=k3:***0zpw]
+2025-08-17T11:05:07.731755952Z 2025-08-17 11:05:07 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpo0gfh_gy.pdf [key=k1:***nBNs]
+2025-08-17T11:05:08.746643662Z 2025-08-17 11:05:08 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k1:***nBNs]: 400 Request contains an invalid argument.
+2025-08-17T11:05:08.746669774Z 2025-08-17 11:05:08 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k1:***nBNs]
+2025-08-17T11:05:09.025654019Z 2025-08-17 11:05:09 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpzxg9a_be.pdf [key=k2:***_8Bo]
+2025-08-17T11:05:10.737196786Z 2025-08-17 11:05:10 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpzxg9a_be.pdf [key=k3:***0zpw]
+2025-08-17T11:05:11.624829389Z 2025-08-17 11:05:11 - pdf_processor.api.client - ERROR - Content generation failed (attempt 2/3) [key=k1:***nBNs]: 400 Request contains an invalid argument.
+2025-08-17T11:05:11.6248496Z 2025-08-17 11:05:11 - pdf_processor.api.client - INFO - Retrying in 2 seconds... [key=k1:***nBNs]
+2025-08-17T11:05:14.383135128Z 2025-08-17 11:05:14 - pdf_processor.api.client - ERROR - Content generation failed (attempt 3/3) [key=k1:***nBNs]: 400 Request contains an invalid argument.
+2025-08-17T11:05:14.3831623Z 2025-08-17 11:05:14 - pdf_processor.analyzers.base - ERROR - Generation failed on attempt 1/2: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:05:15.141704878Z 2025-08-17 11:05:15 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k1:***nBNs]: 400 Request contains an invalid argument.
+2025-08-17T11:05:15.141772302Z 2025-08-17 11:05:15 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k1:***nBNs]
+2025-08-17T11:05:16.959234733Z 2025-08-17 11:05:16 - pdf_processor.api.client - ERROR - Content generation failed (attempt 2/3) [key=k1:***nBNs]: 400 Request contains an invalid argument.
+2025-08-17T11:05:16.959255504Z 2025-08-17 11:05:16 - pdf_processor.api.client - INFO - Retrying in 2 seconds... [key=k1:***nBNs]
+2025-08-17T11:05:19.686842236Z 2025-08-17 11:05:19 - pdf_processor.api.client - ERROR - Content generation failed (attempt 3/3) [key=k1:***nBNs]: 400 Request contains an invalid argument.
+2025-08-17T11:05:19.686875038Z 2025-08-17 11:05:19 - pdf_processor.analyzers.base - ERROR - Generation failed on attempt 2/2: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:05:20.149863357Z 2025-08-17 11:05:20 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k1:***nBNs]
+2025-08-17T11:05:20.1498983Z 2025-08-17 11:05:20 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:05:20.505047883Z 2025-08-17 11:05:20 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpo0gfh_gy.pdf [key=k1:***nBNs]
+2025-08-17T11:05:20.505085506Z 2025-08-17 11:05:20 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpo0gfh_gy.pdf
+2025-08-17T11:05:20.505111367Z 2025-08-17 11:05:20 - pdf_processor.analyzers.jokbo_centric - ERROR - Analysis failed: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:05:20.505177631Z 2025-08-17 11:05:20 - pdf_processor.api.multi_api_manager - ERROR - API key 1 (***nBNs) failed: Failed to analyze PDFs: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:05:20.505250495Z 2025-08-17 11:05:20 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 4 (***HJNw)
+2025-08-17T11:05:20.505393464Z 2025-08-17 11:05:20 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpzxg9a_be.pdf' with jokbo '230824 본1 진단의 기본_정답포함.pdf'
+2025-08-17T11:05:20.506028131Z 2025-08-17 11:05:20 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k4:***HJNw]
+2025-08-17T11:05:20.632787489Z 2025-08-17 11:05:20 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k4:***HJNw]
+2025-08-17T11:05:20.632807551Z 2025-08-17 11:05:20 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k4:***HJNw]
+2025-08-17T11:05:20.632817491Z 2025-08-17 11:05:20 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:05:20.632855604Z 2025-08-17 11:05:20 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k4:***HJNw]
+2025-08-17T11:05:22.138626061Z 2025-08-17 11:05:22 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k4:***HJNw]
+2025-08-17T11:05:22.138658793Z 2025-08-17 11:05:22 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpzxg9a_be.pdf [key=k4:***HJNw]
+2025-08-17T11:05:23.849659883Z 2025-08-17 11:05:23 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpzxg9a_be.pdf [key=k4:***HJNw]
+2025-08-17T11:06:47.215552656Z 2025-08-17 11:06:47 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:06:47.215811702Z 2025-08-17 11:06:47 - pdf_processor.analyzers.base - WARNING - Empty jokbo-centric result detected; treating as valid with no matches
+2025-08-17T11:06:47.949828032Z 2025-08-17 11:06:47 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k4:***HJNw]
+2025-08-17T11:06:47.949852783Z 2025-08-17 11:06:47 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:06:48.493254985Z 2025-08-17 11:06:48 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpzxg9a_be.pdf [key=k4:***HJNw]
+2025-08-17T11:06:48.493290817Z 2025-08-17 11:06:48 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpzxg9a_be.pdf
+2025-08-17T11:06:48.664803733Z 2025-08-17 11:06:48 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k4:***HJNw]
+2025-08-17T11:06:48.665302952Z 2025-08-17 11:06:48 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:06:48.665356916Z 2025-08-17 11:06:48 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 4 (***HJNw)
+2025-08-17T11:06:48.672021111Z [2025-08-17 11:06:48,671: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:07:13.38429765Z [2025-08-17 11:07:13,384: INFO/MainProcess] Task tasks.run_jokbo_analysis[24ee389f-6bef-4c7a-a7e5-d0332ee5423d] received
+2025-08-17T11:07:13.394091661Z [2025-08-17 11:07:13,393: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:07:16.073123029Z 2025-08-17 11:07:16 - pdf_processor.pdf.operations - INFO - Split YES 0811_3,4교시_고판우_운동실조_문준영_230813_152230.pdf into 2 chunks (73 pages total)
+2025-08-17T11:07:16.074012202Z 2025-08-17 11:07:16 - pdf_processor.pdf.operations - INFO - Split YES 0814_1,2교시_운동실조 TBL  고판우_강연우(1).pdf into 3 chunks (86 pages total)
+2025-08-17T11:07:16.074425627Z 2025-08-17 11:07:16 - pdf_processor.pdf.operations - INFO - Split YES 0814_1,2교시_운동실조 TBL  고판우_강연우.pdf into 3 chunks (86 pages total)
+2025-08-17T11:07:16.074963988Z 2025-08-17 11:07:16 - pdf_processor.pdf.operations - INFO - Split YES 0814_6교시_이현석 설사CP_신호준.pdf into 2 chunks (66 pages total)
+2025-08-17T11:07:16.076660629Z 2025-08-17 11:07:16 - pdf_processor.pdf.operations - INFO - Split YES 0816_3교시_안병철 핵의학_신호준.pdf into 2 chunks (43 pages total)
+2025-08-17T11:07:16.077239814Z 2025-08-17 11:07:16 - pdf_processor.pdf.operations - INFO - Split YES 0816_4교시_안병철_분자영상입문_남창진.pdf into 2 chunks (63 pages total)
+2025-08-17T11:07:16.082100902Z 2025-08-17 11:07:16 - pdf_processor.pdf.cache - INFO - Created global PDF cache
+2025-08-17T11:07:16.082144265Z 2025-08-17 11:07:16 - pdf_processor.core.processor - INFO - Initialized PDFProcessor with session ID: 9ebf850e-db2d-47f4-8eaa-32697e8d7674
+2025-08-17T11:07:16.086350104Z 2025-08-17 11:07:16 - pdf_processor.core.processor - INFO - Starting multi-API jokbo-centric analysis with 7 keys
+2025-08-17T11:07:16.086656292Z 2025-08-17 11:07:16 - pdf_processor.api.multi_api_manager - INFO - Initialized MultiAPIManager with 7 API keys: k0:***h3VU, k1:***nBNs, k2:***_8Bo, k3:***0zpw, k4:***HJNw, k5:***ZQkw, k6:***ZqkU
+2025-08-17T11:07:16.089113918Z 2025-08-17 11:07:16 - pdf_processor.pdf.operations - INFO - Split YES 0811_3,4교시_고판우_운동실조_문준영_230813_152230.pdf into 2 chunks (73 pages total)
+2025-08-17T11:07:16.089174502Z 2025-08-17 11:07:16 - pdf_processor.core.processor - INFO - Lesson YES 0811_3,4교시_고판우_운동실조_문준영_230813_152230.pdf will be processed in 2 chunks
+2025-08-17T11:07:16.089925456Z 2025-08-17 11:07:16 - pdf_processor.pdf.operations - INFO - Split YES 0814_1,2교시_운동실조 TBL  고판우_강연우(1).pdf into 3 chunks (86 pages total)
+2025-08-17T11:07:16.089973059Z 2025-08-17 11:07:16 - pdf_processor.core.processor - INFO - Lesson YES 0814_1,2교시_운동실조 TBL  고판우_강연우(1).pdf will be processed in 3 chunks
+2025-08-17T11:07:16.090348381Z 2025-08-17 11:07:16 - pdf_processor.pdf.operations - INFO - Split YES 0814_1,2교시_운동실조 TBL  고판우_강연우.pdf into 3 chunks (86 pages total)
+2025-08-17T11:07:16.090384403Z 2025-08-17 11:07:16 - pdf_processor.core.processor - INFO - Lesson YES 0814_1,2교시_운동실조 TBL  고판우_강연우.pdf will be processed in 3 chunks
+2025-08-17T11:07:16.090911335Z 2025-08-17 11:07:16 - pdf_processor.pdf.operations - INFO - Split YES 0814_6교시_이현석 설사CP_신호준.pdf into 2 chunks (66 pages total)
+2025-08-17T11:07:16.090946027Z 2025-08-17 11:07:16 - pdf_processor.core.processor - INFO - Lesson YES 0814_6교시_이현석 설사CP_신호준.pdf will be processed in 2 chunks
+2025-08-17T11:07:16.092154499Z 2025-08-17 11:07:16 - pdf_processor.pdf.operations - INFO - Split YES 0816_3교시_안병철 핵의학_신호준.pdf into 2 chunks (43 pages total)
+2025-08-17T11:07:16.092194131Z 2025-08-17 11:07:16 - pdf_processor.core.processor - INFO - Lesson YES 0816_3교시_안병철 핵의학_신호준.pdf will be processed in 2 chunks
+2025-08-17T11:07:16.092746644Z 2025-08-17 11:07:16 - pdf_processor.pdf.operations - INFO - Split YES 0816_4교시_안병철_분자영상입문_남창진.pdf into 2 chunks (63 pages total)
+2025-08-17T11:07:16.092763785Z 2025-08-17 11:07:16 - pdf_processor.core.processor - INFO - Lesson YES 0816_4교시_안병철_분자영상입문_남창진.pdf will be processed in 2 chunks
+2025-08-17T11:07:16.094486187Z 2025-08-17 11:07:16 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 0 (***h3VU)
+2025-08-17T11:07:16.094587003Z 2025-08-17 11:07:16 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'YES 0807_8교시_고혜진_피로_남창진.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:07:16.097086781Z 2025-08-17 11:07:16 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k0:***h3VU]
+2025-08-17T11:07:16.297081779Z 2025-08-17 11:07:16 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k0:***h3VU]
+2025-08-17T11:07:16.29711177Z 2025-08-17 11:07:16 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 2 total [key=k0:***h3VU]
+2025-08-17T11:07:16.297115441Z 2025-08-17 11:07:16 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:07:16.297178554Z 2025-08-17 11:07:16 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k0:***h3VU]
+2025-08-17T11:07:17.878784905Z 2025-08-17 11:07:17 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k0:***h3VU]
+2025-08-17T11:07:17.878837368Z 2025-08-17 11:07:17 - pdf_processor.api.client - INFO - Uploading file: 강의자료_YES 0807_8교시_고혜진_피로_남창진.pdf [key=k0:***h3VU]
+2025-08-17T11:07:19.769842348Z 2025-08-17 11:07:19 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_YES 0807_8교시_고혜진_피로_남창진.pdf [key=k0:***h3VU]
+2025-08-17T11:07:53.06678634Z 2025-08-17 11:07:53 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 7 pages, 7 questions
+2025-08-17T11:07:53.484408265Z 2025-08-17 11:07:53 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k3:***0zpw]
+2025-08-17T11:07:53.484434116Z 2025-08-17 11:07:53 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:07:54.071075172Z 2025-08-17 11:07:54 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpzxg9a_be.pdf [key=k3:***0zpw]
+2025-08-17T11:07:54.071107934Z 2025-08-17 11:07:54 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpzxg9a_be.pdf
+2025-08-17T11:07:54.262229076Z 2025-08-17 11:07:54 - pdf_processor.api.file_manager - INFO - Found 3 uploaded files [key=k3:***0zpw]
+2025-08-17T11:07:54.263094437Z 2025-08-17 11:07:54 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 7 pages, 7 questions
+2025-08-17T11:07:54.26313319Z 2025-08-17 11:07:54 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 3 (***0zpw)
+2025-08-17T11:07:54.269499668Z [2025-08-17 11:07:54,269: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:09:16.443089241Z 2025-08-17 11:09:16 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 8 pages, 8 questions
+2025-08-17T11:09:16.990460364Z 2025-08-17 11:09:16 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k0:***h3VU]
+2025-08-17T11:09:16.990493956Z 2025-08-17 11:09:16 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:09:17.62497047Z 2025-08-17 11:09:17 - pdf_processor.api.client - INFO - Deleted file: 강의자료_YES 0807_8교시_고혜진_피로_남창진.pdf [key=k0:***h3VU]
+2025-08-17T11:09:17.624999452Z 2025-08-17 11:09:17 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_YES 0807_8교시_고혜진_피로_남창진.pdf
+2025-08-17T11:09:17.80180649Z 2025-08-17 11:09:17 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k0:***h3VU]
+2025-08-17T11:09:17.803131138Z 2025-08-17 11:09:17 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 8 pages, 8 questions
+2025-08-17T11:09:17.803289978Z 2025-08-17 11:09:17 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 0 (***h3VU)
+2025-08-17T11:09:17.811119674Z [2025-08-17 11:09:17,810: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:09:17.818041977Z 2025-08-17 11:09:17 - pdf_processor.pdf.operations - INFO - Split YES 0811_3,4교시_고판우_운동실조_문준영_230813_152230.pdf into 2 chunks (73 pages total)
+2025-08-17T11:09:17.882297547Z 2025-08-17 11:09:17 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 1 (***nBNs)
+2025-08-17T11:09:17.882743363Z 2025-08-17 11:09:17 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmprb55zg6v.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:09:17.882940315Z 2025-08-17 11:09:17 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 2 (***_8Bo)
+2025-08-17T11:09:17.883074453Z 2025-08-17 11:09:17 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmprb55zg6v.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:09:17.884051601Z 2025-08-17 11:09:17 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k1:***nBNs]
+2025-08-17T11:09:17.88521023Z 2025-08-17 11:09:17 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k2:***_8Bo]
+2025-08-17T11:09:18.014887229Z 2025-08-17 11:09:18 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k1:***nBNs]
+2025-08-17T11:09:18.015456823Z 2025-08-17 11:09:18 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k1:***nBNs]
+2025-08-17T11:09:18.015500546Z 2025-08-17 11:09:18 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:09:18.015628153Z 2025-08-17 11:09:18 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k1:***nBNs]
+2025-08-17T11:09:18.188045159Z 2025-08-17 11:09:18 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k2:***_8Bo]
+2025-08-17T11:09:18.188079111Z 2025-08-17 11:09:18 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 2 total [key=k2:***_8Bo]
+2025-08-17T11:09:18.188099622Z 2025-08-17 11:09:18 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:09:18.188200708Z 2025-08-17 11:09:18 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k2:***_8Bo]
+2025-08-17T11:09:19.539716488Z 2025-08-17 11:09:19 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k1:***nBNs]
+2025-08-17T11:09:19.539768411Z 2025-08-17 11:09:19 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmprb55zg6v.pdf [key=k1:***nBNs]
+2025-08-17T11:09:21.0953166Z 2025-08-17 11:09:21 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k2:***_8Bo]
+2025-08-17T11:09:21.09581326Z 2025-08-17 11:09:21 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmprb55zg6v.pdf [key=k2:***_8Bo]
+2025-08-17T11:09:22.587658783Z 2025-08-17 11:09:22 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmprb55zg6v.pdf [key=k1:***nBNs]
+2025-08-17T11:09:23.722871771Z 2025-08-17 11:09:23 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmprb55zg6v.pdf [key=k2:***_8Bo]
+2025-08-17T11:10:17.390921117Z 2025-08-17 11:10:17 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k2:***_8Bo]: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none were returned. The candidate's [finish_reason](https://ai.google.dev/api/generate-content#finishreason) is 2.
+2025-08-17T11:10:17.390949338Z 2025-08-17 11:10:17 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k2:***_8Bo]
+2025-08-17T11:11:39.302277664Z 2025-08-17 11:11:39 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 6 pages, 7 questions
+2025-08-17T11:11:39.625679357Z 2025-08-17 11:11:39 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k1:***nBNs]
+2025-08-17T11:11:39.625711059Z 2025-08-17 11:11:39 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:11:40.164371022Z 2025-08-17 11:11:40 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmprb55zg6v.pdf [key=k1:***nBNs]
+2025-08-17T11:11:40.164410174Z 2025-08-17 11:11:40 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmprb55zg6v.pdf
+2025-08-17T11:11:40.298346946Z 2025-08-17 11:11:40 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k1:***nBNs]
+2025-08-17T11:11:40.299196917Z 2025-08-17 11:11:40 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 6 pages, 7 questions
+2025-08-17T11:11:40.29925446Z 2025-08-17 11:11:40 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 1 (***nBNs)
+2025-08-17T11:11:40.305508343Z [2025-08-17 11:11:40,305: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:13:31.945371177Z 2025-08-17 11:13:31 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 5 pages, 6 questions
+2025-08-17T11:13:32.391708376Z 2025-08-17 11:13:32 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k2:***_8Bo]
+2025-08-17T11:13:32.391738818Z 2025-08-17 11:13:32 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:13:32.842224105Z 2025-08-17 11:13:32 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmprb55zg6v.pdf [key=k2:***_8Bo]
+2025-08-17T11:13:32.842244626Z 2025-08-17 11:13:32 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmprb55zg6v.pdf
+2025-08-17T11:13:33.03225648Z 2025-08-17 11:13:33 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k2:***_8Bo]
+2025-08-17T11:13:33.033077709Z 2025-08-17 11:13:33 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 5 pages, 6 questions
+2025-08-17T11:13:33.03309186Z 2025-08-17 11:13:33 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 2 (***_8Bo)
+2025-08-17T11:13:33.0398158Z [2025-08-17 11:13:33,039: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:13:33.044632607Z 2025-08-17 11:13:33 - pdf_processor.parsers.result_merger - INFO - Merged 2 chunks into 5 pages
+2025-08-17T11:13:33.049141536Z 2025-08-17 11:13:33 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 3 (***0zpw)
+2025-08-17T11:13:33.049290545Z 2025-08-17 11:13:33 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'YES 0811_6교시_황양하_반사감각검사_남창진.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:13:33.050070491Z 2025-08-17 11:13:33 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k3:***0zpw]
+2025-08-17T11:13:33.250710439Z 2025-08-17 11:13:33 - pdf_processor.api.file_manager - INFO - Found 3 uploaded files [key=k3:***0zpw]
+2025-08-17T11:13:33.25073612Z 2025-08-17 11:13:33 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 3 total [key=k3:***0zpw]
+2025-08-17T11:13:33.250793544Z 2025-08-17 11:13:33 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:13:33.250864878Z 2025-08-17 11:13:33 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k3:***0zpw]
+2025-08-17T11:13:34.622492099Z 2025-08-17 11:13:34 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k3:***0zpw]
+2025-08-17T11:13:34.622531742Z 2025-08-17 11:13:34 - pdf_processor.api.client - INFO - Uploading file: 강의자료_YES 0811_6교시_황양하_반사감각검사_남창진.pdf [key=k3:***0zpw]
+2025-08-17T11:13:35.900252018Z 2025-08-17 11:13:35 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_YES 0811_6교시_황양하_반사감각검사_남창진.pdf [key=k3:***0zpw]
+2025-08-17T11:14:43.788575935Z 2025-08-17 11:14:43 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 3 pages, 3 questions
+2025-08-17T11:14:44.242165286Z 2025-08-17 11:14:44 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k3:***0zpw]
+2025-08-17T11:14:44.242185067Z 2025-08-17 11:14:44 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:14:44.74011171Z 2025-08-17 11:14:44 - pdf_processor.api.client - INFO - Deleted file: 강의자료_YES 0811_6교시_황양하_반사감각검사_남창진.pdf [key=k3:***0zpw]
+2025-08-17T11:14:44.740130861Z 2025-08-17 11:14:44 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_YES 0811_6교시_황양하_반사감각검사_남창진.pdf
+2025-08-17T11:14:44.933174586Z 2025-08-17 11:14:44 - pdf_processor.api.file_manager - INFO - Found 3 uploaded files [key=k3:***0zpw]
+2025-08-17T11:14:44.933833915Z 2025-08-17 11:14:44 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 3 pages, 3 questions
+2025-08-17T11:14:44.933850066Z 2025-08-17 11:14:44 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 3 (***0zpw)
+2025-08-17T11:14:44.941238316Z [2025-08-17 11:14:44,941: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:14:44.946292907Z 2025-08-17 11:14:44 - pdf_processor.pdf.operations - INFO - Split YES 0814_1,2교시_운동실조 TBL  고판우_강연우(1).pdf into 3 chunks (86 pages total)
+2025-08-17T11:14:47.088139438Z 2025-08-17 11:14:47 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 4 (***HJNw)
+2025-08-17T11:14:47.088376432Z 2025-08-17 11:14:47 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpoat3eomd.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:14:47.08868468Z 2025-08-17 11:14:47 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 5 (***ZQkw)
+2025-08-17T11:14:47.08985238Z 2025-08-17 11:14:47 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k4:***HJNw]
+2025-08-17T11:14:47.090447395Z 2025-08-17 11:14:47 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpoat3eomd.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:14:47.090735723Z 2025-08-17 11:14:47 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 6 (***ZqkU)
+2025-08-17T11:14:47.091472607Z 2025-08-17 11:14:47 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpachrv64m.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:14:47.091983957Z 2025-08-17 11:14:47 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k5:***ZQkw]
+2025-08-17T11:14:47.092412043Z 2025-08-17 11:14:47 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k6:***ZqkU]
+2025-08-17T11:14:47.267156066Z 2025-08-17 11:14:47 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k4:***HJNw]
+2025-08-17T11:14:47.267567341Z 2025-08-17 11:14:47 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k4:***HJNw]
+2025-08-17T11:14:47.267586382Z 2025-08-17 11:14:47 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:14:47.267690528Z 2025-08-17 11:14:47 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k4:***HJNw]
+2025-08-17T11:14:47.415747981Z 2025-08-17 11:14:47 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k5:***ZQkw]
+2025-08-17T11:14:47.415790204Z 2025-08-17 11:14:47 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k5:***ZQkw]
+2025-08-17T11:14:47.415802155Z 2025-08-17 11:14:47 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:14:47.415808895Z 2025-08-17 11:14:47 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k5:***ZQkw]
+2025-08-17T11:14:47.558205471Z 2025-08-17 11:14:47 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k6:***ZqkU]
+2025-08-17T11:14:47.558224992Z 2025-08-17 11:14:47 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k6:***ZqkU]
+2025-08-17T11:14:47.558235843Z 2025-08-17 11:14:47 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:14:47.558288806Z 2025-08-17 11:14:47 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k6:***ZqkU]
+2025-08-17T11:14:49.366517965Z 2025-08-17 11:14:49 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k4:***HJNw]
+2025-08-17T11:14:49.367088409Z 2025-08-17 11:14:49 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpoat3eomd.pdf [key=k4:***HJNw]
+2025-08-17T11:14:50.640803505Z 2025-08-17 11:14:50 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k5:***ZQkw]
+2025-08-17T11:14:50.640843067Z 2025-08-17 11:14:50 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpoat3eomd.pdf [key=k5:***ZQkw]
+2025-08-17T11:14:52.35500816Z 2025-08-17 11:14:52 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k6:***ZqkU]
+2025-08-17T11:14:52.355619746Z 2025-08-17 11:14:52 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpachrv64m.pdf [key=k6:***ZqkU]
+2025-08-17T11:14:55.571152112Z 2025-08-17 11:14:55 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpoat3eomd.pdf [key=k4:***HJNw]
+2025-08-17T11:14:58.39575465Z 2025-08-17 11:14:58 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpoat3eomd.pdf [key=k5:***ZQkw]
+2025-08-17T11:15:00.095952661Z 2025-08-17 11:15:00 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpachrv64m.pdf [key=k6:***ZqkU]
+2025-08-17T11:15:01.13011759Z 2025-08-17 11:15:01 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k5:***ZQkw]: 400 Request contains an invalid argument.
+2025-08-17T11:15:01.130142422Z 2025-08-17 11:15:01 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k5:***ZQkw]
+2025-08-17T11:15:01.186633508Z 2025-08-17 11:15:01 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k4:***HJNw]: 400 Request contains an invalid argument.
+2025-08-17T11:15:01.186648769Z 2025-08-17 11:15:01 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k4:***HJNw]
+2025-08-17T11:15:02.912588364Z 2025-08-17 11:15:02 - pdf_processor.api.client - ERROR - Content generation failed (attempt 2/3) [key=k5:***ZQkw]: 400 Request contains an invalid argument.
+2025-08-17T11:15:02.912643367Z 2025-08-17 11:15:02 - pdf_processor.api.client - INFO - Retrying in 2 seconds... [key=k5:***ZQkw]
+2025-08-17T11:15:03.110426804Z 2025-08-17 11:15:03 - pdf_processor.api.client - ERROR - Content generation failed (attempt 2/3) [key=k4:***HJNw]: 400 Request contains an invalid argument.
+2025-08-17T11:15:03.110465506Z 2025-08-17 11:15:03 - pdf_processor.api.client - INFO - Retrying in 2 seconds... [key=k4:***HJNw]
+2025-08-17T11:15:05.717196371Z 2025-08-17 11:15:05 - pdf_processor.api.client - ERROR - Content generation failed (attempt 3/3) [key=k5:***ZQkw]: 400 Request contains an invalid argument.
+2025-08-17T11:15:05.717321688Z 2025-08-17 11:15:05 - pdf_processor.analyzers.base - ERROR - Generation failed on attempt 1/2: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:15:05.94707943Z 2025-08-17 11:15:05 - pdf_processor.api.client - ERROR - Content generation failed (attempt 3/3) [key=k4:***HJNw]: 400 Request contains an invalid argument.
+2025-08-17T11:15:05.947102762Z 2025-08-17 11:15:05 - pdf_processor.analyzers.base - ERROR - Generation failed on attempt 1/2: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:15:06.52717849Z 2025-08-17 11:15:06 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k5:***ZQkw]: 400 Request contains an invalid argument.
+2025-08-17T11:15:06.527209982Z 2025-08-17 11:15:06 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k5:***ZQkw]
+2025-08-17T11:15:06.654479567Z 2025-08-17 11:15:06 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k4:***HJNw]: 400 Request contains an invalid argument.
+2025-08-17T11:15:06.654507868Z 2025-08-17 11:15:06 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k4:***HJNw]
+2025-08-17T11:15:08.365925958Z 2025-08-17 11:15:08 - pdf_processor.api.client - ERROR - Content generation failed (attempt 2/3) [key=k4:***HJNw]: 400 Request contains an invalid argument.
+2025-08-17T11:15:08.365943299Z 2025-08-17 11:15:08 - pdf_processor.api.client - INFO - Retrying in 2 seconds... [key=k4:***HJNw]
+2025-08-17T11:15:08.38223424Z 2025-08-17 11:15:08 - pdf_processor.api.client - ERROR - Content generation failed (attempt 2/3) [key=k5:***ZQkw]: 400 Request contains an invalid argument.
+2025-08-17T11:15:08.382256031Z 2025-08-17 11:15:08 - pdf_processor.api.client - INFO - Retrying in 2 seconds... [key=k5:***ZQkw]
+2025-08-17T11:15:09.584439523Z 2025-08-17 11:15:09 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 3 pages, 3 questions
+2025-08-17T11:15:10.09217139Z 2025-08-17 11:15:10 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k2:***_8Bo]
+2025-08-17T11:15:10.092191632Z 2025-08-17 11:15:10 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:15:10.4984112Z 2025-08-17 11:15:10 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpzxg9a_be.pdf [key=k2:***_8Bo]
+2025-08-17T11:15:10.498441701Z 2025-08-17 11:15:10 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpzxg9a_be.pdf
+2025-08-17T11:15:10.666788654Z 2025-08-17 11:15:10 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k2:***_8Bo]
+2025-08-17T11:15:10.667765782Z 2025-08-17 11:15:10 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 3 pages, 3 questions
+2025-08-17T11:15:10.667792084Z 2025-08-17 11:15:10 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 2 (***_8Bo)
+2025-08-17T11:15:10.674378516Z [2025-08-17 11:15:10,674: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:15:10.679130569Z 2025-08-17 11:15:10 - pdf_processor.parsers.result_merger - INFO - Merged 3 chunks into 3 pages
+2025-08-17T11:15:10.690684808Z 2025-08-17 11:15:10 - pdf_processor.pdf.operations - INFO - Split YES 0814_6교시_이현석 설사CP_신호준.pdf into 2 chunks (66 pages total)
+2025-08-17T11:15:11.069799201Z 2025-08-17 11:15:11 - pdf_processor.api.client - ERROR - Content generation failed (attempt 3/3) [key=k4:***HJNw]: 400 Request contains an invalid argument.
+2025-08-17T11:15:11.069838133Z 2025-08-17 11:15:11 - pdf_processor.analyzers.base - ERROR - Generation failed on attempt 2/2: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:15:11.105808607Z 2025-08-17 11:15:11 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 5 (***ZQkw)
+2025-08-17T11:15:11.106110915Z 2025-08-17 11:15:11 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmp5f0a92x8.pdf' with jokbo '230824 본1 진단의 기본_정답포함.pdf'
+2025-08-17T11:15:11.10637875Z 2025-08-17 11:15:11 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 6 (***ZqkU)
+2025-08-17T11:15:11.10654736Z 2025-08-17 11:15:11 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmp5f0a92x8.pdf' with jokbo '230824 본1 진단의 기본_정답포함.pdf'
+2025-08-17T11:15:11.107185639Z 2025-08-17 11:15:11 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k6:***ZqkU]
+2025-08-17T11:15:11.108121014Z 2025-08-17 11:15:11 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k5:***ZQkw]
+2025-08-17T11:15:11.207955834Z 2025-08-17 11:15:11 - pdf_processor.api.client - ERROR - Content generation failed (attempt 3/3) [key=k5:***ZQkw]: 400 Request contains an invalid argument.
+2025-08-17T11:15:11.207978885Z 2025-08-17 11:15:11 - pdf_processor.analyzers.base - ERROR - Generation failed on attempt 2/2: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:15:11.296966748Z 2025-08-17 11:15:11 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k6:***ZqkU]
+2025-08-17T11:15:11.29698546Z 2025-08-17 11:15:11 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 2 total [key=k6:***ZqkU]
+2025-08-17T11:15:11.2969996Z 2025-08-17 11:15:11 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:15:11.297037063Z 2025-08-17 11:15:11 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k6:***ZqkU]
+2025-08-17T11:15:11.460170744Z 2025-08-17 11:15:11 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k5:***ZQkw]
+2025-08-17T11:15:11.460202856Z 2025-08-17 11:15:11 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 2 total [key=k5:***ZQkw]
+2025-08-17T11:15:11.460213797Z 2025-08-17 11:15:11 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:15:11.460299972Z 2025-08-17 11:15:11 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k5:***ZQkw]
+2025-08-17T11:15:11.78043764Z 2025-08-17 11:15:11 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k4:***HJNw]
+2025-08-17T11:15:11.781040916Z 2025-08-17 11:15:11 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:15:12.168245471Z 2025-08-17 11:15:12 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k5:***ZQkw]
+2025-08-17T11:15:12.168297184Z 2025-08-17 11:15:12 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:15:12.8347384Z 2025-08-17 11:15:12 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k6:***ZqkU]
+2025-08-17T11:15:12.8352444Z 2025-08-17 11:15:12 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmp5f0a92x8.pdf [key=k6:***ZqkU]
+2025-08-17T11:15:12.838094659Z 2025-08-17 11:15:12 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpoat3eomd.pdf [key=k4:***HJNw]
+2025-08-17T11:15:12.838688915Z 2025-08-17 11:15:12 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpoat3eomd.pdf
+2025-08-17T11:15:12.838801122Z 2025-08-17 11:15:12 - pdf_processor.analyzers.jokbo_centric - ERROR - Analysis failed: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:15:12.838838314Z 2025-08-17 11:15:12 - pdf_processor.api.multi_api_manager - ERROR - API key 4 (***HJNw) failed: Failed to analyze PDFs: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:15:12.83894595Z 2025-08-17 11:15:12 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 0 (***h3VU)
+2025-08-17T11:15:12.839723917Z 2025-08-17 11:15:12 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpachrv64m.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:15:12.840307801Z 2025-08-17 11:15:12 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k0:***h3VU]
+2025-08-17T11:15:13.493486656Z 2025-08-17 11:15:13 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpoat3eomd.pdf [key=k5:***ZQkw]
+2025-08-17T11:15:13.493564891Z 2025-08-17 11:15:13 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpoat3eomd.pdf
+2025-08-17T11:15:13.493697379Z 2025-08-17 11:15:13 - pdf_processor.analyzers.jokbo_centric - ERROR - Analysis failed: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:15:13.493773574Z 2025-08-17 11:15:13 - pdf_processor.api.multi_api_manager - ERROR - API key 5 (***ZQkw) failed: Failed to analyze PDFs: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:15:13.493857228Z 2025-08-17 11:15:13 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 1 (***nBNs)
+2025-08-17T11:15:13.494463335Z 2025-08-17 11:15:13 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpachrv64m.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:15:13.495159286Z 2025-08-17 11:15:13 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k1:***nBNs]
+2025-08-17T11:15:13.660638207Z 2025-08-17 11:15:13 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k0:***h3VU]
+2025-08-17T11:15:13.661153988Z 2025-08-17 11:15:13 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 2 total [key=k0:***h3VU]
+2025-08-17T11:15:13.661161039Z 2025-08-17 11:15:13 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:15:13.661210052Z 2025-08-17 11:15:13 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k0:***h3VU]
+2025-08-17T11:15:13.795320684Z 2025-08-17 11:15:13 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k1:***nBNs]
+2025-08-17T11:15:13.795349346Z 2025-08-17 11:15:13 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k1:***nBNs]
+2025-08-17T11:15:13.795361236Z 2025-08-17 11:15:13 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:15:13.79543073Z 2025-08-17 11:15:13 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k1:***nBNs]
+2025-08-17T11:15:14.470434176Z 2025-08-17 11:15:14 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k5:***ZQkw]
+2025-08-17T11:15:14.470459527Z 2025-08-17 11:15:14 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmp5f0a92x8.pdf [key=k5:***ZQkw]
+2025-08-17T11:15:15.277618289Z 2025-08-17 11:15:15 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k0:***h3VU]
+2025-08-17T11:15:15.277653951Z 2025-08-17 11:15:15 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpachrv64m.pdf [key=k0:***h3VU]
+2025-08-17T11:15:15.718701865Z 2025-08-17 11:15:15 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmp5f0a92x8.pdf [key=k6:***ZqkU]
+2025-08-17T11:15:16.775994922Z 2025-08-17 11:15:16 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k1:***nBNs]
+2025-08-17T11:15:16.776503602Z 2025-08-17 11:15:16 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpachrv64m.pdf [key=k1:***nBNs]
+2025-08-17T11:15:17.462263069Z 2025-08-17 11:15:17 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmp5f0a92x8.pdf [key=k5:***ZQkw]
+2025-08-17T11:15:18.493423379Z 2025-08-17 11:15:18 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpachrv64m.pdf [key=k0:***h3VU]
+2025-08-17T11:15:20.210465244Z 2025-08-17 11:15:20 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpachrv64m.pdf [key=k1:***nBNs]
+2025-08-17T11:15:24.415508086Z 2025-08-17 11:15:24 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:15:24.415567089Z 2025-08-17 11:15:24 - pdf_processor.analyzers.base - WARNING - Empty jokbo-centric result detected; treating as valid with no matches
+2025-08-17T11:15:24.850631186Z 2025-08-17 11:15:24 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k6:***ZqkU]
+2025-08-17T11:15:24.850681529Z 2025-08-17 11:15:24 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:15:25.411702812Z 2025-08-17 11:15:25 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpachrv64m.pdf [key=k6:***ZqkU]
+2025-08-17T11:15:25.411731254Z 2025-08-17 11:15:25 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpachrv64m.pdf
+2025-08-17T11:15:25.622057708Z 2025-08-17 11:15:25 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k6:***ZqkU]
+2025-08-17T11:15:25.622566338Z 2025-08-17 11:15:25 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:15:25.622613511Z 2025-08-17 11:15:25 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 6 (***ZqkU)
+2025-08-17T11:15:25.628402086Z [2025-08-17 11:15:25,628: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:17:29.902260382Z 2025-08-17 11:17:29 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 3 pages, 3 questions
+2025-08-17T11:17:30.533039147Z 2025-08-17 11:17:30 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k5:***ZQkw]
+2025-08-17T11:17:30.53307828Z 2025-08-17 11:17:30 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:17:30.996235005Z 2025-08-17 11:17:30 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmp5f0a92x8.pdf [key=k5:***ZQkw]
+2025-08-17T11:17:30.996266727Z 2025-08-17 11:17:30 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmp5f0a92x8.pdf
+2025-08-17T11:17:31.120617318Z 2025-08-17 11:17:31 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k5:***ZQkw]
+2025-08-17T11:17:31.121396275Z 2025-08-17 11:17:31 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 3 pages, 3 questions
+2025-08-17T11:17:31.121459878Z 2025-08-17 11:17:31 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 5 (***ZQkw)
+2025-08-17T11:17:31.126937845Z [2025-08-17 11:17:31,126: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:18:15.618576446Z 2025-08-17 11:18:15 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 5 pages, 5 questions
+2025-08-17T11:18:16.251981198Z 2025-08-17 11:18:16 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k1:***nBNs]
+2025-08-17T11:18:16.252003069Z 2025-08-17 11:18:16 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:18:16.683129565Z 2025-08-17 11:18:16 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpachrv64m.pdf [key=k1:***nBNs]
+2025-08-17T11:18:16.683160257Z 2025-08-17 11:18:16 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpachrv64m.pdf
+2025-08-17T11:18:16.814317534Z 2025-08-17 11:18:16 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k1:***nBNs]
+2025-08-17T11:18:16.815248339Z 2025-08-17 11:18:16 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 5 pages, 5 questions
+2025-08-17T11:18:16.815288232Z 2025-08-17 11:18:16 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 1 (***nBNs)
+2025-08-17T11:18:16.823281088Z [2025-08-17 11:18:16,823: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:18:21.235852105Z 2025-08-17 11:18:21 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 3 pages, 3 questions
+2025-08-17T11:18:21.721278397Z 2025-08-17 11:18:21 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k6:***ZqkU]
+2025-08-17T11:18:21.721305249Z 2025-08-17 11:18:21 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:18:22.393466301Z 2025-08-17 11:18:22 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmp5f0a92x8.pdf [key=k6:***ZqkU]
+2025-08-17T11:18:22.393493812Z 2025-08-17 11:18:22 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmp5f0a92x8.pdf
+2025-08-17T11:18:22.581276554Z 2025-08-17 11:18:22 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k6:***ZqkU]
+2025-08-17T11:18:22.582161017Z 2025-08-17 11:18:22 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 3 pages, 3 questions
+2025-08-17T11:18:22.582189069Z 2025-08-17 11:18:22 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 6 (***ZqkU)
+2025-08-17T11:18:22.588468183Z [2025-08-17 11:18:22,588: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:18:22.593350954Z 2025-08-17 11:18:22 - pdf_processor.parsers.result_merger - INFO - Merged 2 chunks into 3 pages
+2025-08-17T11:18:22.599542003Z 2025-08-17 11:18:22 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 0 (***h3VU)
+2025-08-17T11:18:22.59965521Z 2025-08-17 11:18:22 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'YES 0814_7,8교시_정민규_황달,복부진찰TBL_문준영.pdf' with jokbo '230824 본1 진단의 기본_정답포함.pdf'
+2025-08-17T11:18:22.601518011Z 2025-08-17 11:18:22 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k0:***h3VU]
+2025-08-17T11:18:22.765802082Z 2025-08-17 11:18:22 - pdf_processor.api.file_manager - INFO - Found 4 uploaded files [key=k0:***h3VU]
+2025-08-17T11:18:22.765825284Z 2025-08-17 11:18:22 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 4 total [key=k0:***h3VU]
+2025-08-17T11:18:22.765843815Z 2025-08-17 11:18:22 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:18:22.765912689Z 2025-08-17 11:18:22 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k0:***h3VU]
+2025-08-17T11:18:24.394223529Z 2025-08-17 11:18:24 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k0:***h3VU]
+2025-08-17T11:18:24.394283542Z 2025-08-17 11:18:24 - pdf_processor.api.client - INFO - Uploading file: 강의자료_YES 0814_7,8교시_정민규_황달,복부진찰TBL_문준영.pdf [key=k0:***h3VU]
+2025-08-17T11:18:25.96114167Z 2025-08-17 11:18:25 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_YES 0814_7,8교시_정민규_황달,복부진찰TBL_문준영.pdf [key=k0:***h3VU]
+2025-08-17T11:19:02.902094533Z 2025-08-17 11:19:02 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:19:02.902117265Z 2025-08-17 11:19:02 - pdf_processor.analyzers.base - WARNING - Empty jokbo-centric result detected; treating as valid with no matches
+2025-08-17T11:19:03.478920683Z 2025-08-17 11:19:03 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k0:***h3VU]
+2025-08-17T11:19:03.478991947Z 2025-08-17 11:19:03 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:19:03.85855936Z 2025-08-17 11:19:03 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpachrv64m.pdf [key=k0:***h3VU]
+2025-08-17T11:19:03.858638175Z 2025-08-17 11:19:03 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpachrv64m.pdf
+2025-08-17T11:19:04.031447104Z 2025-08-17 11:19:04 - pdf_processor.api.file_manager - INFO - Found 4 uploaded files [key=k0:***h3VU]
+2025-08-17T11:19:04.031947124Z 2025-08-17 11:19:04 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:19:04.032034689Z 2025-08-17 11:19:04 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 0 (***h3VU)
+2025-08-17T11:19:04.038347035Z [2025-08-17 11:19:04,038: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:19:04.043317652Z 2025-08-17 11:19:04 - pdf_processor.parsers.result_merger - INFO - Merged 3 chunks into 0 pages
+2025-08-17T11:19:04.058939103Z 2025-08-17 11:19:04 - pdf_processor.pdf.operations - INFO - Split YES 0814_1,2교시_운동실조 TBL  고판우_강연우.pdf into 3 chunks (86 pages total)
+2025-08-17T11:19:06.145549987Z 2025-08-17 11:19:06 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 2 (***_8Bo)
+2025-08-17T11:19:06.145810463Z 2025-08-17 11:19:06 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 3 (***0zpw)
+2025-08-17T11:19:06.145922779Z 2025-08-17 11:19:06 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmp6ojllfhe.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:19:06.146184085Z 2025-08-17 11:19:06 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmp6ojllfhe.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:19:06.147009134Z 2025-08-17 11:19:06 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k2:***_8Bo]
+2025-08-17T11:19:06.147656333Z 2025-08-17 11:19:06 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 4 (***HJNw)
+2025-08-17T11:19:06.147842764Z 2025-08-17 11:19:06 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpusakt1jt.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:19:06.148346854Z 2025-08-17 11:19:06 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k4:***HJNw]
+2025-08-17T11:19:06.149507363Z 2025-08-17 11:19:06 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k3:***0zpw]
+2025-08-17T11:19:06.324858874Z 2025-08-17 11:19:06 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k2:***_8Bo]
+2025-08-17T11:19:06.325299461Z 2025-08-17 11:19:06 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k2:***_8Bo]
+2025-08-17T11:19:06.325334423Z 2025-08-17 11:19:06 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:19:06.325415248Z 2025-08-17 11:19:06 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k2:***_8Bo]
+2025-08-17T11:19:06.495130763Z 2025-08-17 11:19:06 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k4:***HJNw]
+2025-08-17T11:19:06.495159494Z 2025-08-17 11:19:06 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k4:***HJNw]
+2025-08-17T11:19:06.495169015Z 2025-08-17 11:19:06 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:19:06.4952577Z 2025-08-17 11:19:06 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k4:***HJNw]
+2025-08-17T11:19:06.693936232Z 2025-08-17 11:19:06 - pdf_processor.api.file_manager - INFO - Found 3 uploaded files [key=k3:***0zpw]
+2025-08-17T11:19:06.694562249Z 2025-08-17 11:19:06 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 3 total [key=k3:***0zpw]
+2025-08-17T11:19:06.69457498Z 2025-08-17 11:19:06 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:19:06.694661545Z 2025-08-17 11:19:06 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k3:***0zpw]
+2025-08-17T11:19:08.403664814Z 2025-08-17 11:19:08 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k2:***_8Bo]
+2025-08-17T11:19:08.404131351Z 2025-08-17 11:19:08 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmp6ojllfhe.pdf [key=k2:***_8Bo]
+2025-08-17T11:19:10.02018699Z 2025-08-17 11:19:10 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k4:***HJNw]
+2025-08-17T11:19:10.020220302Z 2025-08-17 11:19:10 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpusakt1jt.pdf [key=k4:***HJNw]
+2025-08-17T11:19:11.794238806Z 2025-08-17 11:19:11 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k3:***0zpw]
+2025-08-17T11:19:11.794691813Z 2025-08-17 11:19:11 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmp6ojllfhe.pdf [key=k3:***0zpw]
+2025-08-17T11:19:14.38839432Z 2025-08-17 11:19:14 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmp6ojllfhe.pdf [key=k2:***_8Bo]
+2025-08-17T11:19:15.663679149Z 2025-08-17 11:19:15 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpusakt1jt.pdf [key=k4:***HJNw]
+2025-08-17T11:19:17.87255054Z 2025-08-17 11:19:17 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmp6ojllfhe.pdf [key=k3:***0zpw]
+2025-08-17T11:19:18.734188134Z 2025-08-17 11:19:18 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k2:***_8Bo]: 400 Request contains an invalid argument.
+2025-08-17T11:19:18.734216306Z 2025-08-17 11:19:18 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k2:***_8Bo]
+2025-08-17T11:19:18.803481274Z 2025-08-17 11:19:18 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k3:***0zpw]: 400 Request contains an invalid argument.
+2025-08-17T11:19:18.803498436Z 2025-08-17 11:19:18 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k3:***0zpw]
+2025-08-17T11:19:20.508798283Z 2025-08-17 11:19:20 - pdf_processor.api.client - ERROR - Content generation failed (attempt 2/3) [key=k2:***_8Bo]: 400 Request contains an invalid argument.
+2025-08-17T11:19:20.508825065Z 2025-08-17 11:19:20 - pdf_processor.api.client - INFO - Retrying in 2 seconds... [key=k2:***_8Bo]
+2025-08-17T11:19:20.564986502Z 2025-08-17 11:19:20 - pdf_processor.api.client - ERROR - Content generation failed (attempt 2/3) [key=k3:***0zpw]: 400 Request contains an invalid argument.
+2025-08-17T11:19:20.565022944Z 2025-08-17 11:19:20 - pdf_processor.api.client - INFO - Retrying in 2 seconds... [key=k3:***0zpw]
+2025-08-17T11:19:21.01192827Z 2025-08-17 11:19:21 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:19:21.011951871Z 2025-08-17 11:19:21 - pdf_processor.analyzers.base - WARNING - Empty jokbo-centric result detected; treating as valid with no matches
+2025-08-17T11:19:21.394240346Z 2025-08-17 11:19:21 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k0:***h3VU]
+2025-08-17T11:19:21.394270668Z 2025-08-17 11:19:21 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:19:21.81778496Z 2025-08-17 11:19:21 - pdf_processor.api.client - INFO - Deleted file: 강의자료_YES 0814_7,8교시_정민규_황달,복부진찰TBL_문준영.pdf [key=k0:***h3VU]
+2025-08-17T11:19:21.817833433Z 2025-08-17 11:19:21 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_YES 0814_7,8교시_정민규_황달,복부진찰TBL_문준영.pdf
+2025-08-17T11:19:21.97667408Z 2025-08-17 11:19:21 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k0:***h3VU]
+2025-08-17T11:19:21.977097095Z 2025-08-17 11:19:21 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:19:21.977129647Z 2025-08-17 11:19:21 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 0 (***h3VU)
+2025-08-17T11:19:21.982508598Z [2025-08-17 11:19:21,982: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:19:21.987008856Z 2025-08-17 11:19:21 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 1 (***nBNs)
+2025-08-17T11:19:21.98708601Z 2025-08-17 11:19:21 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'YES 0816_1_2_이현석_교수님_설사_TBL_이정현.pdf' with jokbo '230824 본1 진단의 기본_정답포함.pdf'
+2025-08-17T11:19:21.990809183Z 2025-08-17 11:19:21 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k1:***nBNs]
+2025-08-17T11:19:22.16040231Z 2025-08-17 11:19:22 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k1:***nBNs]
+2025-08-17T11:19:22.160417181Z 2025-08-17 11:19:22 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k1:***nBNs]
+2025-08-17T11:19:22.160433712Z 2025-08-17 11:19:22 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:19:22.160441093Z 2025-08-17 11:19:22 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k1:***nBNs]
+2025-08-17T11:19:23.249742956Z 2025-08-17 11:19:23 - pdf_processor.api.client - ERROR - Content generation failed (attempt 3/3) [key=k2:***_8Bo]: 400 Request contains an invalid argument.
+2025-08-17T11:19:23.249769118Z 2025-08-17 11:19:23 - pdf_processor.analyzers.base - ERROR - Generation failed on attempt 1/2: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:19:23.329372062Z 2025-08-17 11:19:23 - pdf_processor.api.client - ERROR - Content generation failed (attempt 3/3) [key=k3:***0zpw]: 400 Request contains an invalid argument.
+2025-08-17T11:19:23.329429706Z 2025-08-17 11:19:23 - pdf_processor.analyzers.base - ERROR - Generation failed on attempt 1/2: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:19:23.380784806Z 2025-08-17 11:19:23 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k1:***nBNs]
+2025-08-17T11:19:23.380829849Z 2025-08-17 11:19:23 - pdf_processor.api.client - INFO - Uploading file: 강의자료_YES 0816_1_2_이현석_교수님_설사_TBL_이정현.pdf [key=k1:***nBNs]
+2025-08-17T11:19:23.997427629Z 2025-08-17 11:19:23 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k2:***_8Bo]: 400 Request contains an invalid argument.
+2025-08-17T11:19:23.9974479Z 2025-08-17 11:19:23 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k2:***_8Bo]
+2025-08-17T11:19:24.166004206Z 2025-08-17 11:19:24 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k3:***0zpw]: 400 Request contains an invalid argument.
+2025-08-17T11:19:24.166045499Z 2025-08-17 11:19:24 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k3:***0zpw]
+2025-08-17T11:19:25.194385439Z 2025-08-17 11:19:25 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_YES 0816_1_2_이현석_교수님_설사_TBL_이정현.pdf [key=k1:***nBNs]
+2025-08-17T11:19:25.719828466Z 2025-08-17 11:19:25 - pdf_processor.api.client - ERROR - Content generation failed (attempt 2/3) [key=k2:***_8Bo]: 400 Request contains an invalid argument.
+2025-08-17T11:19:25.719852387Z 2025-08-17 11:19:25 - pdf_processor.api.client - INFO - Retrying in 2 seconds... [key=k2:***_8Bo]
+2025-08-17T11:19:26.098402669Z 2025-08-17 11:19:26 - pdf_processor.api.client - ERROR - Content generation failed (attempt 2/3) [key=k3:***0zpw]: 400 Request contains an invalid argument.
+2025-08-17T11:19:26.09842259Z 2025-08-17 11:19:26 - pdf_processor.api.client - INFO - Retrying in 2 seconds... [key=k3:***0zpw]
+2025-08-17T11:19:28.467850731Z 2025-08-17 11:19:28 - pdf_processor.api.client - ERROR - Content generation failed (attempt 3/3) [key=k2:***_8Bo]: 400 Request contains an invalid argument.
+2025-08-17T11:19:28.467882563Z 2025-08-17 11:19:28 - pdf_processor.analyzers.base - ERROR - Generation failed on attempt 2/2: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:19:28.877296464Z 2025-08-17 11:19:28 - pdf_processor.api.client - ERROR - Content generation failed (attempt 3/3) [key=k3:***0zpw]: 400 Request contains an invalid argument.
+2025-08-17T11:19:28.877315275Z 2025-08-17 11:19:28 - pdf_processor.analyzers.base - ERROR - Generation failed on attempt 2/2: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:19:28.961732666Z 2025-08-17 11:19:28 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k2:***_8Bo]
+2025-08-17T11:19:28.962195844Z 2025-08-17 11:19:28 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:19:29.430091161Z 2025-08-17 11:19:29 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k3:***0zpw]
+2025-08-17T11:19:29.430626313Z 2025-08-17 11:19:29 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:19:29.80607272Z 2025-08-17 11:19:29 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmp6ojllfhe.pdf [key=k2:***_8Bo]
+2025-08-17T11:19:29.806103172Z 2025-08-17 11:19:29 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmp6ojllfhe.pdf
+2025-08-17T11:19:29.806172306Z 2025-08-17 11:19:29 - pdf_processor.analyzers.jokbo_centric - ERROR - Analysis failed: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:19:29.80624758Z 2025-08-17 11:19:29 - pdf_processor.api.multi_api_manager - ERROR - API key 2 (***_8Bo) failed: Failed to analyze PDFs: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:19:29.806556459Z 2025-08-17 11:19:29 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 5 (***ZQkw)
+2025-08-17T11:19:29.807205317Z 2025-08-17 11:19:29 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpusakt1jt.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:19:29.807946752Z 2025-08-17 11:19:29 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k5:***ZQkw]
+2025-08-17T11:19:30.284004955Z 2025-08-17 11:19:30 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmp6ojllfhe.pdf [key=k3:***0zpw]
+2025-08-17T11:19:30.284033567Z 2025-08-17 11:19:30 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmp6ojllfhe.pdf
+2025-08-17T11:19:30.284109541Z 2025-08-17 11:19:30 - pdf_processor.analyzers.jokbo_centric - ERROR - Analysis failed: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:19:30.284129422Z 2025-08-17 11:19:30 - pdf_processor.api.multi_api_manager - ERROR - API key 3 (***0zpw) failed: Failed to analyze PDFs: Failed to generate content after 3 attempts: 400 Request contains an invalid argument.
+2025-08-17T11:19:30.284190246Z 2025-08-17 11:19:30 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 6 (***ZqkU)
+2025-08-17T11:19:30.284351446Z 2025-08-17 11:19:30 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpusakt1jt.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:19:30.285546497Z 2025-08-17 11:19:30 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k6:***ZqkU]
+2025-08-17T11:19:30.439346164Z 2025-08-17 11:19:30 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k5:***ZQkw]
+2025-08-17T11:19:30.439371395Z 2025-08-17 11:19:30 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k5:***ZQkw]
+2025-08-17T11:19:30.439387016Z 2025-08-17 11:19:30 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:19:30.439446099Z 2025-08-17 11:19:30 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k5:***ZQkw]
+2025-08-17T11:19:30.611843094Z 2025-08-17 11:19:30 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k6:***ZqkU]
+2025-08-17T11:19:30.61227321Z 2025-08-17 11:19:30 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k6:***ZqkU]
+2025-08-17T11:19:30.612296932Z 2025-08-17 11:19:30 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:19:30.612328714Z 2025-08-17 11:19:30 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k6:***ZqkU]
+2025-08-17T11:19:32.236004626Z 2025-08-17 11:19:32 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k5:***ZQkw]
+2025-08-17T11:19:32.236042068Z 2025-08-17 11:19:32 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpusakt1jt.pdf [key=k5:***ZQkw]
+2025-08-17T11:19:33.642017236Z 2025-08-17 11:19:33 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k6:***ZqkU]
+2025-08-17T11:19:33.642643524Z 2025-08-17 11:19:33 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpusakt1jt.pdf [key=k6:***ZqkU]
+2025-08-17T11:19:35.245884888Z 2025-08-17 11:19:35 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpusakt1jt.pdf [key=k5:***ZQkw]
+2025-08-17T11:19:36.574492544Z 2025-08-17 11:19:36 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpusakt1jt.pdf [key=k6:***ZqkU]
+2025-08-17T11:20:15.153023421Z 2025-08-17 11:20:15 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:20:15.153056073Z 2025-08-17 11:20:15 - pdf_processor.analyzers.base - WARNING - Empty jokbo-centric result detected; treating as valid with no matches
+2025-08-17T11:20:15.735146725Z 2025-08-17 11:20:15 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k1:***nBNs]
+2025-08-17T11:20:15.735170917Z 2025-08-17 11:20:15 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:20:16.37163321Z 2025-08-17 11:20:16 - pdf_processor.api.client - INFO - Deleted file: 강의자료_YES 0816_1_2_이현석_교수님_설사_TBL_이정현.pdf [key=k1:***nBNs]
+2025-08-17T11:20:16.371657552Z 2025-08-17 11:20:16 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_YES 0816_1_2_이현석_교수님_설사_TBL_이정현.pdf
+2025-08-17T11:20:16.540184736Z 2025-08-17 11:20:16 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k1:***nBNs]
+2025-08-17T11:20:16.540808703Z 2025-08-17 11:20:16 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:20:16.540835305Z 2025-08-17 11:20:16 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 1 (***nBNs)
+2025-08-17T11:20:16.547020414Z [2025-08-17 11:20:16,546: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:20:16.556701191Z 2025-08-17 11:20:16 - pdf_processor.pdf.operations - INFO - Split YES 0816_3교시_안병철 핵의학_신호준.pdf into 2 chunks (43 pages total)
+2025-08-17T11:20:16.815336145Z 2025-08-17 11:20:16 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 2 (***_8Bo)
+2025-08-17T11:20:16.815494144Z 2025-08-17 11:20:16 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpupxko15p.pdf' with jokbo '230824 본1 진단의 기본_정답포함.pdf'
+2025-08-17T11:20:16.816294212Z 2025-08-17 11:20:16 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k2:***_8Bo]
+2025-08-17T11:20:16.816989874Z 2025-08-17 11:20:16 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 3 (***0zpw)
+2025-08-17T11:20:16.817083429Z 2025-08-17 11:20:16 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmp_7jn0r2l.pdf' with jokbo '230824 본1 진단의 기본_정답포함.pdf'
+2025-08-17T11:20:16.818469462Z 2025-08-17 11:20:16 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k3:***0zpw]
+2025-08-17T11:20:16.978138128Z 2025-08-17 11:20:16 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k2:***_8Bo]
+2025-08-17T11:20:16.978625477Z 2025-08-17 11:20:16 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k2:***_8Bo]
+2025-08-17T11:20:16.978634748Z 2025-08-17 11:20:16 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:20:16.97867855Z 2025-08-17 11:20:16 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k2:***_8Bo]
+2025-08-17T11:20:17.171023774Z 2025-08-17 11:20:17 - pdf_processor.api.file_manager - INFO - Found 3 uploaded files [key=k3:***0zpw]
+2025-08-17T11:20:17.171507983Z 2025-08-17 11:20:17 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 3 total [key=k3:***0zpw]
+2025-08-17T11:20:17.171525044Z 2025-08-17 11:20:17 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:20:17.171569387Z 2025-08-17 11:20:17 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k3:***0zpw]
+2025-08-17T11:20:18.595397558Z 2025-08-17 11:20:18 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k2:***_8Bo]
+2025-08-17T11:20:18.595954401Z 2025-08-17 11:20:18 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpupxko15p.pdf [key=k2:***_8Bo]
+2025-08-17T11:20:20.329398865Z 2025-08-17 11:20:20 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k3:***0zpw]
+2025-08-17T11:20:20.329943257Z 2025-08-17 11:20:20 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmp_7jn0r2l.pdf [key=k3:***0zpw]
+2025-08-17T11:20:22.219462163Z 2025-08-17 11:20:22 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpupxko15p.pdf [key=k2:***_8Bo]
+2025-08-17T11:20:23.446654355Z 2025-08-17 11:20:23 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmp_7jn0r2l.pdf [key=k3:***0zpw]
+2025-08-17T11:20:54.865395329Z 2025-08-17 11:20:54 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:20:54.86542284Z 2025-08-17 11:20:54 - pdf_processor.analyzers.base - WARNING - Empty jokbo-centric result detected; treating as valid with no matches
+2025-08-17T11:20:55.234329997Z 2025-08-17 11:20:55 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k6:***ZqkU]
+2025-08-17T11:20:55.234353539Z 2025-08-17 11:20:55 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:20:55.663369468Z 2025-08-17 11:20:55 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpusakt1jt.pdf [key=k6:***ZqkU]
+2025-08-17T11:20:55.663389359Z 2025-08-17 11:20:55 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpusakt1jt.pdf
+2025-08-17T11:20:55.826922516Z 2025-08-17 11:20:55 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k6:***ZqkU]
+2025-08-17T11:20:55.827289508Z 2025-08-17 11:20:55 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:20:55.827337081Z 2025-08-17 11:20:55 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 6 (***ZqkU)
+2025-08-17T11:20:55.834000498Z [2025-08-17 11:20:55,833: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:21:13.551333461Z 2025-08-17 11:21:13 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 2 pages, 2 questions
+2025-08-17T11:21:13.95702324Z 2025-08-17 11:21:13 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k3:***0zpw]
+2025-08-17T11:21:13.957057142Z 2025-08-17 11:21:13 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:21:14.414700478Z 2025-08-17 11:21:14 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmp_7jn0r2l.pdf [key=k3:***0zpw]
+2025-08-17T11:21:14.41472892Z 2025-08-17 11:21:14 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmp_7jn0r2l.pdf
+2025-08-17T11:21:14.600994281Z 2025-08-17 11:21:14 - pdf_processor.api.file_manager - INFO - Found 3 uploaded files [key=k3:***0zpw]
+2025-08-17T11:21:14.601533193Z 2025-08-17 11:21:14 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 2 pages, 2 questions
+2025-08-17T11:21:14.601610778Z 2025-08-17 11:21:14 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 3 (***0zpw)
+2025-08-17T11:21:14.610100544Z [2025-08-17 11:21:14,609: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:23:49.435612298Z 2025-08-17 11:23:49 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 6 pages, 6 questions
+2025-08-17T11:23:49.812633278Z 2025-08-17 11:23:49 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k2:***_8Bo]
+2025-08-17T11:23:49.812651059Z 2025-08-17 11:23:49 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:23:50.53298719Z 2025-08-17 11:23:50 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpupxko15p.pdf [key=k2:***_8Bo]
+2025-08-17T11:23:50.533010841Z 2025-08-17 11:23:50 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpupxko15p.pdf
+2025-08-17T11:23:50.697723938Z 2025-08-17 11:23:50 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k2:***_8Bo]
+2025-08-17T11:23:50.698475362Z 2025-08-17 11:23:50 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 6 pages, 6 questions
+2025-08-17T11:23:50.698538766Z 2025-08-17 11:23:50 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 2 (***_8Bo)
+2025-08-17T11:23:50.706630239Z [2025-08-17 11:23:50,706: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:23:50.711629866Z 2025-08-17 11:23:50 - pdf_processor.parsers.result_merger - INFO - Merged 2 chunks into 8 pages
+2025-08-17T11:23:50.71957473Z 2025-08-17 11:23:50 - pdf_processor.pdf.operations - INFO - Split YES 0816_4교시_안병철_분자영상입문_남창진.pdf into 2 chunks (63 pages total)
+2025-08-17T11:23:50.965574441Z 2025-08-17 11:23:50 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 4 (***HJNw)
+2025-08-17T11:23:50.966082101Z 2025-08-17 11:23:50 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 5 (***ZQkw)
+2025-08-17T11:23:50.96622192Z 2025-08-17 11:23:50 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpjhx0t6fw.pdf' with jokbo '230824 본1 진단의 기본_정답포함.pdf'
+2025-08-17T11:23:50.966411541Z 2025-08-17 11:23:50 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpjhx0t6fw.pdf' with jokbo '230824 본1 진단의 기본_정답포함.pdf'
+2025-08-17T11:23:50.966990516Z 2025-08-17 11:23:50 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k4:***HJNw]
+2025-08-17T11:23:50.967825875Z 2025-08-17 11:23:50 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k5:***ZQkw]
+2025-08-17T11:23:51.156678911Z 2025-08-17 11:23:51 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k4:***HJNw]
+2025-08-17T11:23:51.156701372Z 2025-08-17 11:23:51 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 2 total [key=k4:***HJNw]
+2025-08-17T11:23:51.156745925Z 2025-08-17 11:23:51 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:23:51.156829379Z 2025-08-17 11:23:51 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k4:***HJNw]
+2025-08-17T11:23:51.362196749Z 2025-08-17 11:23:51 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k5:***ZQkw]
+2025-08-17T11:23:51.362223021Z 2025-08-17 11:23:51 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 2 total [key=k5:***ZQkw]
+2025-08-17T11:23:51.362228321Z 2025-08-17 11:23:51 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:23:51.362289355Z 2025-08-17 11:23:51 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k5:***ZQkw]
+2025-08-17T11:23:53.147392904Z 2025-08-17 11:23:53 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k4:***HJNw]
+2025-08-17T11:23:53.147434976Z 2025-08-17 11:23:53 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpjhx0t6fw.pdf [key=k4:***HJNw]
+2025-08-17T11:23:55.23563992Z 2025-08-17 11:23:55 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k5:***ZQkw]
+2025-08-17T11:23:55.236196753Z 2025-08-17 11:23:55 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpjhx0t6fw.pdf [key=k5:***ZQkw]
+2025-08-17T11:23:56.792664576Z 2025-08-17 11:23:56 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpjhx0t6fw.pdf [key=k4:***HJNw]
+2025-08-17T11:23:58.551377512Z 2025-08-17 11:23:58 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpjhx0t6fw.pdf [key=k5:***ZQkw]
+2025-08-17T11:24:17.077886799Z 2025-08-17 11:24:17 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k5:***ZQkw]: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none were returned. The candidate's [finish_reason](https://ai.google.dev/api/generate-content#finishreason) is 2.
+2025-08-17T11:24:17.077914491Z 2025-08-17 11:24:17 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k5:***ZQkw]
+2025-08-17T11:24:28.960821519Z 2025-08-17 11:24:28 - pdf_processor.api.client - WARNING - Response truncated due to token limit (length: 71369) [key=k4:***HJNw]
+2025-08-17T11:24:28.961993699Z 2025-08-17 11:24:28 - pdf_processor.parsers.response_parser - WARNING - JSON parsing error (direct): Expecting ',' delimiter: line 1425 column 10 (char 70439)
+2025-08-17T11:24:28.967350978Z 2025-08-17 11:24:28 - pdf_processor.parsers.response_parser - WARNING - JSON parsing error (after repair): Expecting ',' delimiter: line 1425 column 10 (char 70439)
+2025-08-17T11:24:28.974360436Z 2025-08-17 11:24:28 - pdf_processor.parsers.response_parser - INFO - Attempting partial parsing...
+2025-08-17T11:24:28.987199271Z 2025-08-17 11:24:28 - pdf_processor.parsers.response_parser - INFO - Partial parsing success! Recovered 26 pages, 56 questions total
+2025-08-17T11:24:28.991235001Z 2025-08-17 11:24:28 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 26 pages, 56 questions
+2025-08-17T11:24:29.561487197Z 2025-08-17 11:24:29 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k4:***HJNw]
+2025-08-17T11:24:29.561508188Z 2025-08-17 11:24:29 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:24:30.151557554Z 2025-08-17 11:24:30 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpusakt1jt.pdf [key=k4:***HJNw]
+2025-08-17T11:24:30.151612038Z 2025-08-17 11:24:30 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpusakt1jt.pdf
+2025-08-17T11:24:30.340037667Z 2025-08-17 11:24:30 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k4:***HJNw]
+2025-08-17T11:24:30.341861396Z 2025-08-17 11:24:30 - pdf_processor.parsers.response_parser - WARNING - JSON parsing error (direct): Expecting ',' delimiter: line 1425 column 10 (char 70439)
+2025-08-17T11:24:30.346819582Z 2025-08-17 11:24:30 - pdf_processor.parsers.response_parser - WARNING - JSON parsing error (after repair): Expecting ',' delimiter: line 1425 column 10 (char 70439)
+2025-08-17T11:24:30.353857621Z 2025-08-17 11:24:30 - pdf_processor.parsers.response_parser - INFO - Attempting partial parsing...
+2025-08-17T11:24:30.366481973Z 2025-08-17 11:24:30 - pdf_processor.parsers.response_parser - INFO - Partial parsing success! Recovered 26 pages, 56 questions total
+2025-08-17T11:24:30.367535386Z 2025-08-17 11:24:30 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 26 pages, 56 questions
+2025-08-17T11:24:30.367622011Z 2025-08-17 11:24:30 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 4 (***HJNw)
+2025-08-17T11:24:30.37431727Z [2025-08-17 11:24:30,374: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:26:03.102736039Z 2025-08-17 11:26:03 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 4 pages, 4 questions
+2025-08-17T11:26:03.591008829Z 2025-08-17 11:26:03 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k4:***HJNw]
+2025-08-17T11:26:03.59103089Z 2025-08-17 11:26:03 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:26:04.162414643Z 2025-08-17 11:26:04 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpjhx0t6fw.pdf [key=k4:***HJNw]
+2025-08-17T11:26:04.162440524Z 2025-08-17 11:26:04 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpjhx0t6fw.pdf
+2025-08-17T11:26:04.325190774Z 2025-08-17 11:26:04 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k4:***HJNw]
+2025-08-17T11:26:04.325903886Z 2025-08-17 11:26:04 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 4 pages, 4 questions
+2025-08-17T11:26:04.325926297Z 2025-08-17 11:26:04 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 4 (***HJNw)
+2025-08-17T11:26:04.333745883Z [2025-08-17 11:26:04,333: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:26:44.532323668Z 2025-08-17 11:26:44 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 2 pages, 2 questions
+2025-08-17T11:26:45.175217382Z 2025-08-17 11:26:45 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k5:***ZQkw]
+2025-08-17T11:26:45.175243684Z 2025-08-17 11:26:45 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:26:45.708337575Z 2025-08-17 11:26:45 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpjhx0t6fw.pdf [key=k5:***ZQkw]
+2025-08-17T11:26:45.708369566Z 2025-08-17 11:26:45 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpjhx0t6fw.pdf
+2025-08-17T11:26:45.879279082Z 2025-08-17 11:26:45 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k5:***ZQkw]
+2025-08-17T11:26:45.879830165Z 2025-08-17 11:26:45 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 2 pages, 2 questions
+2025-08-17T11:26:45.879865057Z 2025-08-17 11:26:45 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 5 (***ZQkw)
+2025-08-17T11:26:45.885873485Z [2025-08-17 11:26:45,885: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:26:45.890794398Z 2025-08-17 11:26:45 - pdf_processor.parsers.result_merger - INFO - Merged 2 chunks into 2 pages
+2025-08-17T11:26:45.894940465Z 2025-08-17 11:26:45 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 6 (***ZqkU)
+2025-08-17T11:26:45.895024541Z 2025-08-17 11:26:45 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'YES 0816_7교시_김아솔_체중감소_문준영_230818_133232.pdf' with jokbo '230824 본1 진단의 기본_정답포함.pdf'
+2025-08-17T11:26:45.920283896Z 2025-08-17 11:26:45 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k6:***ZqkU]
+2025-08-17T11:26:46.089117228Z 2025-08-17 11:26:46 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k6:***ZqkU]
+2025-08-17T11:26:46.089139289Z 2025-08-17 11:26:46 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k6:***ZqkU]
+2025-08-17T11:26:46.08916484Z 2025-08-17 11:26:46 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:26:46.089207613Z 2025-08-17 11:26:46 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k6:***ZqkU]
+2025-08-17T11:26:47.368791052Z 2025-08-17 11:26:47 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k6:***ZqkU]
+2025-08-17T11:26:47.368835705Z 2025-08-17 11:26:47 - pdf_processor.api.client - INFO - Uploading file: 강의자료_YES 0816_7교시_김아솔_체중감소_문준영_230818_133232.pdf [key=k6:***ZqkU]
+2025-08-17T11:26:49.264537253Z 2025-08-17 11:26:49 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_YES 0816_7교시_김아솔_체중감소_문준영_230818_133232.pdf [key=k6:***ZqkU]
+2025-08-17T11:27:17.649763827Z 2025-08-17 11:27:17 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:27:17.649785959Z 2025-08-17 11:27:17 - pdf_processor.analyzers.base - WARNING - Empty jokbo-centric result detected; treating as valid with no matches
+2025-08-17T11:27:18.155694399Z 2025-08-17 11:27:18 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k5:***ZQkw]
+2025-08-17T11:27:18.155733091Z 2025-08-17 11:27:18 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:27:18.56462265Z 2025-08-17 11:27:18 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpusakt1jt.pdf [key=k5:***ZQkw]
+2025-08-17T11:27:18.564651091Z 2025-08-17 11:27:18 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpusakt1jt.pdf
+2025-08-17T11:27:18.686296641Z 2025-08-17 11:27:18 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k5:***ZQkw]
+2025-08-17T11:27:18.686751648Z 2025-08-17 11:27:18 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:27:18.686764449Z 2025-08-17 11:27:18 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 5 (***ZQkw)
+2025-08-17T11:27:18.693349511Z [2025-08-17 11:27:18,693: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:27:18.697988498Z 2025-08-17 11:27:18 - pdf_processor.parsers.result_merger - INFO - Merged 3 chunks into 0 pages
+2025-08-17T11:27:18.725804306Z 2025-08-17 11:27:18 - pdf_processor.pdf.operations - INFO - Split YES 0814_6교시_이현석 설사CP_신호준.pdf into 2 chunks (66 pages total)
+2025-08-17T11:27:19.151183817Z 2025-08-17 11:27:19 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 0 (***h3VU)
+2025-08-17T11:27:19.151417611Z 2025-08-17 11:27:19 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 1 (***nBNs)
+2025-08-17T11:27:19.151613842Z 2025-08-17 11:27:19 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmp_k0ad29k.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:27:19.151811144Z 2025-08-17 11:27:19 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmp_k0ad29k.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:27:19.152395959Z 2025-08-17 11:27:19 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k0:***h3VU]
+2025-08-17T11:27:19.153856456Z 2025-08-17 11:27:19 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k1:***nBNs]
+2025-08-17T11:27:19.375403769Z 2025-08-17 11:27:19 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k0:***h3VU]
+2025-08-17T11:27:19.375425401Z 2025-08-17 11:27:19 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 2 total [key=k0:***h3VU]
+2025-08-17T11:27:19.375452212Z 2025-08-17 11:27:19 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:27:19.375461673Z 2025-08-17 11:27:19 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k0:***h3VU]
+2025-08-17T11:27:19.550881757Z 2025-08-17 11:27:19 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k1:***nBNs]
+2025-08-17T11:27:19.550911319Z 2025-08-17 11:27:19 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k1:***nBNs]
+2025-08-17T11:27:19.55092453Z 2025-08-17 11:27:19 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:27:19.55092732Z 2025-08-17 11:27:19 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k1:***nBNs]
+2025-08-17T11:27:21.240333993Z 2025-08-17 11:27:21 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k0:***h3VU]
+2025-08-17T11:27:21.240359954Z 2025-08-17 11:27:21 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmp_k0ad29k.pdf [key=k0:***h3VU]
+2025-08-17T11:27:22.617255963Z 2025-08-17 11:27:22 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k1:***nBNs]
+2025-08-17T11:27:22.617279654Z 2025-08-17 11:27:22 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmp_k0ad29k.pdf [key=k1:***nBNs]
+2025-08-17T11:27:24.241693503Z 2025-08-17 11:27:24 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmp_k0ad29k.pdf [key=k0:***h3VU]
+2025-08-17T11:27:25.643607333Z 2025-08-17 11:27:25 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmp_k0ad29k.pdf [key=k1:***nBNs]
+2025-08-17T11:28:32.831140354Z 2025-08-17 11:28:32 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 3 pages, 3 questions
+2025-08-17T11:28:33.181737908Z 2025-08-17 11:28:33 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k6:***ZqkU]
+2025-08-17T11:28:33.181763349Z 2025-08-17 11:28:33 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:28:33.65899463Z 2025-08-17 11:28:33 - pdf_processor.api.client - INFO - Deleted file: 강의자료_YES 0816_7교시_김아솔_체중감소_문준영_230818_133232.pdf [key=k6:***ZqkU]
+2025-08-17T11:28:33.659020132Z 2025-08-17 11:28:33 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_YES 0816_7교시_김아솔_체중감소_문준영_230818_133232.pdf
+2025-08-17T11:28:33.780285429Z 2025-08-17 11:28:33 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k6:***ZqkU]
+2025-08-17T11:28:33.781545944Z 2025-08-17 11:28:33 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 3 pages, 3 questions
+2025-08-17T11:28:33.781618168Z 2025-08-17 11:28:33 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 6 (***ZqkU)
+2025-08-17T11:28:33.787971657Z [2025-08-17 11:28:33,787: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:28:33.792180078Z 2025-08-17 11:28:33 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 0 (***h3VU)
+2025-08-17T11:28:33.792343597Z 2025-08-17 11:28:33 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'YES 0817_1,2교시_고혜진 피로TBL_신호준.pdf' with jokbo '230824 본1 진단의 기본_정답포함.pdf'
+2025-08-17T11:28:33.797215498Z 2025-08-17 11:28:33 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k0:***h3VU]
+2025-08-17T11:28:34.0152259Z 2025-08-17 11:28:34 - pdf_processor.api.file_manager - INFO - Found 4 uploaded files [key=k0:***h3VU]
+2025-08-17T11:28:34.015259532Z 2025-08-17 11:28:34 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 4 total [key=k0:***h3VU]
+2025-08-17T11:28:34.015292694Z 2025-08-17 11:28:34 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:28:34.015356768Z 2025-08-17 11:28:34 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k0:***h3VU]
+2025-08-17T11:28:35.564016782Z 2025-08-17 11:28:35 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k0:***h3VU]
+2025-08-17T11:28:35.564047714Z 2025-08-17 11:28:35 - pdf_processor.api.client - INFO - Uploading file: 강의자료_YES 0817_1,2교시_고혜진 피로TBL_신호준.pdf [key=k0:***h3VU]
+2025-08-17T11:28:36.949428447Z 2025-08-17 11:28:36 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_YES 0817_1,2교시_고혜진 피로TBL_신호준.pdf [key=k0:***h3VU]
+2025-08-17T11:29:15.709382914Z 2025-08-17 11:29:15 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 3 pages, 3 questions
+2025-08-17T11:29:16.164870139Z 2025-08-17 11:29:16 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k0:***h3VU]
+2025-08-17T11:29:16.164906091Z 2025-08-17 11:29:16 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:29:16.726554173Z 2025-08-17 11:29:16 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmp_k0ad29k.pdf [key=k0:***h3VU]
+2025-08-17T11:29:16.726582905Z 2025-08-17 11:29:16 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmp_k0ad29k.pdf
+2025-08-17T11:29:16.895886994Z 2025-08-17 11:29:16 - pdf_processor.api.file_manager - INFO - Found 4 uploaded files [key=k0:***h3VU]
+2025-08-17T11:29:16.896880043Z 2025-08-17 11:29:16 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 3 pages, 3 questions
+2025-08-17T11:29:16.896951078Z 2025-08-17 11:29:16 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 0 (***h3VU)
+2025-08-17T11:29:16.902733323Z [2025-08-17 11:29:16,902: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:30:07.681897676Z 2025-08-17 11:30:07 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 6 pages, 6 questions
+2025-08-17T11:30:08.118036787Z 2025-08-17 11:30:08 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k0:***h3VU]
+2025-08-17T11:30:08.118057159Z 2025-08-17 11:30:08 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:30:08.713208577Z 2025-08-17 11:30:08 - pdf_processor.api.client - INFO - Deleted file: 강의자료_YES 0817_1,2교시_고혜진 피로TBL_신호준.pdf [key=k0:***h3VU]
+2025-08-17T11:30:08.713240589Z 2025-08-17 11:30:08 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_YES 0817_1,2교시_고혜진 피로TBL_신호준.pdf
+2025-08-17T11:30:08.878133086Z 2025-08-17 11:30:08 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k0:***h3VU]
+2025-08-17T11:30:08.879675468Z 2025-08-17 11:30:08 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 6 pages, 6 questions
+2025-08-17T11:30:08.879703629Z 2025-08-17 11:30:08 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 0 (***h3VU)
+2025-08-17T11:30:08.885173305Z [2025-08-17 11:30:08,885: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:30:08.889121711Z 2025-08-17 11:30:08 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 1 (***nBNs)
+2025-08-17T11:30:08.889235327Z 2025-08-17 11:30:08 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'YES 0818_1_2_김아솔_교수님_체중감소(TBL)_이정현.pdf' with jokbo '230824 본1 진단의 기본_정답포함.pdf'
+2025-08-17T11:30:08.893626329Z 2025-08-17 11:30:08 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k1:***nBNs]
+2025-08-17T11:30:09.118286858Z 2025-08-17 11:30:09 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k1:***nBNs]
+2025-08-17T11:30:09.11832831Z 2025-08-17 11:30:09 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 2 total [key=k1:***nBNs]
+2025-08-17T11:30:09.118338391Z 2025-08-17 11:30:09 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:30:09.118386944Z 2025-08-17 11:30:09 - pdf_processor.api.client - INFO - Uploading file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k1:***nBNs]
+2025-08-17T11:30:10.65049481Z 2025-08-17 11:30:10 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k1:***nBNs]
+2025-08-17T11:30:10.650542313Z 2025-08-17 11:30:10 - pdf_processor.api.client - INFO - Uploading file: 강의자료_YES 0818_1_2_김아솔_교수님_체중감소(TBL)_이정현.pdf [key=k1:***nBNs]
+2025-08-17T11:30:12.220201067Z 2025-08-17 11:30:12 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_YES 0818_1_2_김아솔_교수님_체중감소(TBL)_이정현.pdf [key=k1:***nBNs]
+2025-08-17T11:31:54.304145964Z 2025-08-17 11:31:54 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:31:54.304186316Z 2025-08-17 11:31:54 - pdf_processor.analyzers.base - WARNING - Empty jokbo-centric result detected; treating as valid with no matches
+2025-08-17T11:31:54.769910281Z 2025-08-17 11:31:54 - pdf_processor.api.client - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf [key=k1:***nBNs]
+2025-08-17T11:31:54.769938182Z 2025-08-17 11:31:54 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_230824 본1 진단의 기본_정답포함.pdf
+2025-08-17T11:31:55.164298154Z 2025-08-17 11:31:55 - pdf_processor.api.client - INFO - Deleted file: 강의자료_YES 0818_1_2_김아솔_교수님_체중감소(TBL)_이정현.pdf [key=k1:***nBNs]
+2025-08-17T11:31:55.164333426Z 2025-08-17 11:31:55 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_YES 0818_1_2_김아솔_교수님_체중감소(TBL)_이정현.pdf
+2025-08-17T11:31:55.360283904Z 2025-08-17 11:31:55 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k1:***nBNs]
+2025-08-17T11:31:55.360771303Z 2025-08-17 11:31:55 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:31:55.360794224Z 2025-08-17 11:31:55 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 1 (***nBNs)
+2025-08-17T11:31:55.366904368Z [2025-08-17 11:31:55,366: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:31:55.370864844Z 2025-08-17 11:31:55 - pdf_processor.core.processor - INFO - API Status: 7/7 available
+2025-08-17T11:31:55.371257908Z 2025-08-17 11:31:55 - pdf_processor.analyzers.jokbo_centric - INFO - Merged results: 30 pages, 34 questions
+2025-08-17T11:31:55.376185211Z [2025-08-17 11:31:55,376: WARNING/ForkPoolWorker-32]   PDF 생성 시작: 30개 페이지, 34개 문제
+2025-08-17T11:31:55.377045183Z [2025-08-17 11:31:55,376: WARNING/ForkPoolWorker-32]   문제 번호 순서대로 정렬됨: ['1', '4', '8', '14', '14', '16', '22', '25', '26', '28']...
+2025-08-17T11:31:55.501524691Z [2025-08-17 11:31:55,501: WARNING/ForkPoolWorker-32] DEBUG: Question 14 is last on page 8, questions: [13, 14]
+2025-08-17T11:31:55.502021861Z [2025-08-17 11:31:55,501: WARNING/ForkPoolWorker-32]   DEBUG: Question 14 is last in ['13', '14'] on page 8
+2025-08-17T11:31:55.502105326Z [2025-08-17 11:31:55,502: WARNING/ForkPoolWorker-32]   DEBUG: Including next page 9 (PDF has 49 pages)
+2025-08-17T11:31:55.515792251Z [2025-08-17 11:31:55,515: WARNING/ForkPoolWorker-32]   DEBUG: Question 16 on page 10, not last or no next page (page list: ['16', '17'])
+2025-08-17T11:31:55.655297375Z [2025-08-17 11:31:55,655: WARNING/ForkPoolWorker-32] Warning: Page 114 does not exist in YES 0814_6교시_이현석 설사CP_신호준.pdf (total: 66 pages)
+2025-08-17T11:31:55.681135815Z [2025-08-17 11:31:55,680: WARNING/ForkPoolWorker-32]   DEBUG: Question 26 on page 19, not last or no next page (page list: ['26', '27', '28'])
+2025-08-17T11:31:55.763752618Z [2025-08-17 11:31:55,763: WARNING/ForkPoolWorker-32] DEBUG: Question 28 is last on page 20, questions: [28]
+2025-08-17T11:31:55.76429016Z [2025-08-17 11:31:55,764: WARNING/ForkPoolWorker-32]   DEBUG: Question 28 is last in ['28'] on page 20
+2025-08-17T11:31:55.764298041Z [2025-08-17 11:31:55,764: WARNING/ForkPoolWorker-32]   DEBUG: Including next page 21 (PDF has 49 pages)
+2025-08-17T11:31:55.802931613Z [2025-08-17 11:31:55,802: WARNING/ForkPoolWorker-32]   DEBUG: Question 33 on page 22, not last or no next page (page list: ['32', '33', '34', '35'])
+2025-08-17T11:31:55.824512139Z [2025-08-17 11:31:55,824: WARNING/ForkPoolWorker-32]   DEBUG: Question 34 on page 23, not last or no next page (page list: ['34', '35'])
+2025-08-17T11:31:55.841623019Z [2025-08-17 11:31:55,841: WARNING/ForkPoolWorker-32] DEBUG: Question 35 is last on page 23, questions: [34, 35]
+2025-08-17T11:31:55.8421422Z [2025-08-17 11:31:55,842: WARNING/ForkPoolWorker-32]   DEBUG: Question 35 is last in ['34', '35'] on page 23
+2025-08-17T11:31:55.8421496Z [2025-08-17 11:31:55,842: WARNING/ForkPoolWorker-32]   DEBUG: Including next page 24 (PDF has 49 pages)
+2025-08-17T11:31:55.930970733Z [2025-08-17 11:31:55,930: WARNING/ForkPoolWorker-32] Warning: Page 113 does not exist in YES 0814_6교시_이현석 설사CP_신호준.pdf (total: 66 pages)
+2025-08-17T11:31:55.939849153Z [2025-08-17 11:31:55,939: WARNING/ForkPoolWorker-32]   DEBUG: Question 58 on page 36, not last or no next page (page list: ['58', '59'])
+2025-08-17T11:31:55.960759819Z [2025-08-17 11:31:55,960: WARNING/ForkPoolWorker-32] Warning: Page 111 does not exist in YES 0814_6교시_이현석 설사CP_신호준.pdf (total: 66 pages)
+2025-08-17T11:31:55.96128316Z [2025-08-17 11:31:55,961: WARNING/ForkPoolWorker-32] Warning: Page 108 does not exist in YES 0814_6교시_이현석 설사CP_신호준.pdf (total: 66 pages)
+2025-08-17T11:31:56.026846967Z [2025-08-17 11:31:56,026: WARNING/ForkPoolWorker-32]   DEBUG: Question 68 on page 40, not last or no next page (page list: ['68', '69', '70'])
+2025-08-17T11:31:56.113039334Z [2025-08-17 11:31:56,112: WARNING/ForkPoolWorker-32] Warning: Page 126 does not exist in YES 0814_1,2교시_운동실조 TBL  고판우_강연우(1).pdf (total: 86 pages)
+2025-08-17T11:31:56.113750646Z [2025-08-17 11:31:56,113: WARNING/ForkPoolWorker-32] Warning: Page 127 does not exist in YES 0814_1,2교시_운동실조 TBL  고판우_강연우(1).pdf (total: 86 pages)
+2025-08-17T11:31:56.123528629Z [2025-08-17 11:31:56,123: WARNING/ForkPoolWorker-32]   DEBUG: Question 84 on page 47, not last or no next page (page list: ['84', '85'])
+2025-08-17T11:31:56.14569723Z [2025-08-17 11:31:56,145: WARNING/ForkPoolWorker-32]   DEBUG: Question 86 on page 48, not last or no next page (page list: ['86', '87', '88'])
+2025-08-17T11:31:56.221441714Z [2025-08-17 11:31:56,221: WARNING/ForkPoolWorker-32] Filtered PDF created: /tmp/tmp_abtdqhv/output/jokbo_centric_230824 본1 진단의 기본_정답포함_all_lessons.pdf
+2025-08-17T11:31:56.903225785Z 2025-08-17 11:31:56 - pdf_processor.core.processor - INFO - Starting multi-API jokbo-centric analysis with 7 keys
+2025-08-17T11:31:56.903873023Z 2025-08-17 11:31:56 - pdf_processor.api.multi_api_manager - INFO - Initialized MultiAPIManager with 7 API keys: k0:***h3VU, k1:***nBNs, k2:***_8Bo, k3:***0zpw, k4:***HJNw, k5:***ZQkw, k6:***ZqkU
+2025-08-17T11:31:56.906808648Z 2025-08-17 11:31:56 - pdf_processor.pdf.operations - INFO - Split YES 0811_3,4교시_고판우_운동실조_문준영_230813_152230.pdf into 2 chunks (73 pages total)
+2025-08-17T11:31:56.906886443Z 2025-08-17 11:31:56 - pdf_processor.core.processor - INFO - Lesson YES 0811_3,4교시_고판우_운동실조_문준영_230813_152230.pdf will be processed in 2 chunks
+2025-08-17T11:31:56.907655568Z 2025-08-17 11:31:56 - pdf_processor.pdf.operations - INFO - Split YES 0814_1,2교시_운동실조 TBL  고판우_강연우(1).pdf into 3 chunks (86 pages total)
+2025-08-17T11:31:56.907705781Z 2025-08-17 11:31:56 - pdf_processor.core.processor - INFO - Lesson YES 0814_1,2교시_운동실조 TBL  고판우_강연우(1).pdf will be processed in 3 chunks
+2025-08-17T11:31:56.908098015Z 2025-08-17 11:31:56 - pdf_processor.pdf.operations - INFO - Split YES 0814_1,2교시_운동실조 TBL  고판우_강연우.pdf into 3 chunks (86 pages total)
+2025-08-17T11:31:56.908138377Z 2025-08-17 11:31:56 - pdf_processor.core.processor - INFO - Lesson YES 0814_1,2교시_운동실조 TBL  고판우_강연우.pdf will be processed in 3 chunks
+2025-08-17T11:31:56.908676489Z 2025-08-17 11:31:56 - pdf_processor.pdf.operations - INFO - Split YES 0814_6교시_이현석 설사CP_신호준.pdf into 2 chunks (66 pages total)
+2025-08-17T11:31:56.90868606Z 2025-08-17 11:31:56 - pdf_processor.core.processor - INFO - Lesson YES 0814_6교시_이현석 설사CP_신호준.pdf will be processed in 2 chunks
+2025-08-17T11:31:56.910626555Z 2025-08-17 11:31:56 - pdf_processor.pdf.operations - INFO - Split YES 0816_3교시_안병철 핵의학_신호준.pdf into 2 chunks (43 pages total)
+2025-08-17T11:31:56.910645587Z 2025-08-17 11:31:56 - pdf_processor.core.processor - INFO - Lesson YES 0816_3교시_안병철 핵의학_신호준.pdf will be processed in 2 chunks
+2025-08-17T11:31:56.911139656Z 2025-08-17 11:31:56 - pdf_processor.pdf.operations - INFO - Split YES 0816_4교시_안병철_분자영상입문_남창진.pdf into 2 chunks (63 pages total)
+2025-08-17T11:31:56.911164427Z 2025-08-17 11:31:56 - pdf_processor.core.processor - INFO - Lesson YES 0816_4교시_안병철_분자영상입문_남창진.pdf will be processed in 2 chunks
+2025-08-17T11:31:56.913466735Z 2025-08-17 11:31:56 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 0 (***h3VU)
+2025-08-17T11:31:56.91355336Z 2025-08-17 11:31:56 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'YES 0807_8교시_고혜진_피로_남창진.pdf' with jokbo '241021 본1 진단의 기본_정답.pdf'
+2025-08-17T11:31:56.913961034Z 2025-08-17 11:31:56 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k0:***h3VU]
+2025-08-17T11:31:57.090905529Z 2025-08-17 11:31:57 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k0:***h3VU]
+2025-08-17T11:31:57.09092486Z 2025-08-17 11:31:57 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 2 total [key=k0:***h3VU]
+2025-08-17T11:31:57.090935501Z 2025-08-17 11:31:57 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:31:57.090979774Z 2025-08-17 11:31:57 - pdf_processor.api.client - INFO - Uploading file: 족보_241021 본1 진단의 기본_정답.pdf [key=k0:***h3VU]
+2025-08-17T11:31:58.658566713Z 2025-08-17 11:31:58 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_241021 본1 진단의 기본_정답.pdf [key=k0:***h3VU]
+2025-08-17T11:31:58.658646378Z 2025-08-17 11:31:58 - pdf_processor.api.client - INFO - Uploading file: 강의자료_YES 0807_8교시_고혜진_피로_남창진.pdf [key=k0:***h3VU]
+2025-08-17T11:32:00.400423418Z 2025-08-17 11:32:00 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_YES 0807_8교시_고혜진_피로_남창진.pdf [key=k0:***h3VU]
+2025-08-17T11:32:00.457282316Z 2025-08-17 11:32:00 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 34 pages, 73 questions
+2025-08-17T11:32:00.98424352Z 2025-08-17 11:32:00 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k1:***nBNs]
+2025-08-17T11:32:00.984271822Z 2025-08-17 11:32:00 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:32:01.544982127Z 2025-08-17 11:32:01 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmp_k0ad29k.pdf [key=k1:***nBNs]
+2025-08-17T11:32:01.545025589Z 2025-08-17 11:32:01 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmp_k0ad29k.pdf
+2025-08-17T11:32:01.700290292Z 2025-08-17 11:32:01 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k1:***nBNs]
+2025-08-17T11:32:01.703574878Z 2025-08-17 11:32:01 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 34 pages, 73 questions
+2025-08-17T11:32:01.703794871Z 2025-08-17 11:32:01 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 1 (***nBNs)
+2025-08-17T11:32:01.709895285Z [2025-08-17 11:32:01,709: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:32:01.714751484Z 2025-08-17 11:32:01 - pdf_processor.parsers.result_merger - INFO - Merged 2 chunks into 34 pages
+2025-08-17T11:32:01.718292075Z 2025-08-17 11:32:01 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 2 (***_8Bo)
+2025-08-17T11:32:01.71838265Z 2025-08-17 11:32:01 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'YES 0814_7,8교시_정민규_황달,복부진찰TBL_문준영.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:32:01.720270073Z 2025-08-17 11:32:01 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k2:***_8Bo]
+2025-08-17T11:32:01.913120096Z 2025-08-17 11:32:01 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k2:***_8Bo]
+2025-08-17T11:32:01.91319197Z 2025-08-17 11:32:01 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k2:***_8Bo]
+2025-08-17T11:32:01.913226622Z 2025-08-17 11:32:01 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:32:01.913241463Z 2025-08-17 11:32:01 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k2:***_8Bo]
+2025-08-17T11:32:03.432334852Z 2025-08-17 11:32:03 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k2:***_8Bo]
+2025-08-17T11:32:03.432363744Z 2025-08-17 11:32:03 - pdf_processor.api.client - INFO - Uploading file: 강의자료_YES 0814_7,8교시_정민규_황달,복부진찰TBL_문준영.pdf [key=k2:***_8Bo]
+2025-08-17T11:32:05.302471052Z 2025-08-17 11:32:05 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_YES 0814_7,8교시_정민규_황달,복부진찰TBL_문준영.pdf [key=k2:***_8Bo]
+2025-08-17T11:33:40.454502217Z 2025-08-17 11:33:40 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 2 pages, 2 questions
+2025-08-17T11:33:40.843383932Z 2025-08-17 11:33:40 - pdf_processor.api.client - INFO - Deleted file: 족보_241021 본1 진단의 기본_정답.pdf [key=k0:***h3VU]
+2025-08-17T11:33:40.843412184Z 2025-08-17 11:33:40 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_241021 본1 진단의 기본_정답.pdf
+2025-08-17T11:33:41.505268076Z 2025-08-17 11:33:41 - pdf_processor.api.client - INFO - Deleted file: 강의자료_YES 0807_8교시_고혜진_피로_남창진.pdf [key=k0:***h3VU]
+2025-08-17T11:33:41.505312629Z 2025-08-17 11:33:41 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_YES 0807_8교시_고혜진_피로_남창진.pdf
+2025-08-17T11:33:41.719888866Z 2025-08-17 11:33:41 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k0:***h3VU]
+2025-08-17T11:33:41.72045786Z 2025-08-17 11:33:41 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 2 pages, 2 questions
+2025-08-17T11:33:41.720498482Z 2025-08-17 11:33:41 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 0 (***h3VU)
+2025-08-17T11:33:41.726978059Z [2025-08-17 11:33:41,726: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:33:41.733117184Z 2025-08-17 11:33:41 - pdf_processor.pdf.operations - INFO - Split YES 0811_3,4교시_고판우_운동실조_문준영_230813_152230.pdf into 2 chunks (73 pages total)
+2025-08-17T11:33:41.81962768Z 2025-08-17 11:33:41 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 1 (***nBNs)
+2025-08-17T11:33:41.820093988Z 2025-08-17 11:33:41 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 2 (***_8Bo)
+2025-08-17T11:33:41.820259337Z 2025-08-17 11:33:41 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpf5xwa8u0.pdf' with jokbo '241021 본1 진단의 기본_정답.pdf'
+2025-08-17T11:33:41.820418257Z 2025-08-17 11:33:41 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpf5xwa8u0.pdf' with jokbo '241021 본1 진단의 기본_정답.pdf'
+2025-08-17T11:33:41.821122909Z 2025-08-17 11:33:41 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k1:***nBNs]
+2025-08-17T11:33:41.821905806Z 2025-08-17 11:33:41 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k2:***_8Bo]
+2025-08-17T11:33:41.987055408Z 2025-08-17 11:33:41 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k1:***nBNs]
+2025-08-17T11:33:41.987658444Z 2025-08-17 11:33:41 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k1:***nBNs]
+2025-08-17T11:33:41.987678825Z 2025-08-17 11:33:41 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:33:41.987749129Z 2025-08-17 11:33:41 - pdf_processor.api.client - INFO - Uploading file: 족보_241021 본1 진단의 기본_정답.pdf [key=k1:***nBNs]
+2025-08-17T11:33:42.173537511Z 2025-08-17 11:33:42 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k2:***_8Bo]
+2025-08-17T11:33:42.173558592Z 2025-08-17 11:33:42 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 2 total [key=k2:***_8Bo]
+2025-08-17T11:33:42.173569672Z 2025-08-17 11:33:42 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:33:42.173581673Z 2025-08-17 11:33:42 - pdf_processor.api.client - INFO - Uploading file: 족보_241021 본1 진단의 기본_정답.pdf [key=k2:***_8Bo]
+2025-08-17T11:33:43.24193524Z 2025-08-17 11:33:43 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_241021 본1 진단의 기본_정답.pdf [key=k1:***nBNs]
+2025-08-17T11:33:43.242035286Z 2025-08-17 11:33:43 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpf5xwa8u0.pdf [key=k1:***nBNs]
+2025-08-17T11:33:44.667145584Z 2025-08-17 11:33:44 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_241021 본1 진단의 기본_정답.pdf [key=k2:***_8Bo]
+2025-08-17T11:33:44.667571239Z 2025-08-17 11:33:44 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpf5xwa8u0.pdf [key=k2:***_8Bo]
+2025-08-17T11:33:45.853730457Z 2025-08-17 11:33:45 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpf5xwa8u0.pdf [key=k1:***nBNs]
+2025-08-17T11:33:47.520052668Z 2025-08-17 11:33:47 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpf5xwa8u0.pdf [key=k2:***_8Bo]
+2025-08-17T11:36:00.101085034Z 2025-08-17 11:36:00 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 2 pages, 2 questions
+2025-08-17T11:36:00.493123176Z 2025-08-17 11:36:00 - pdf_processor.api.client - INFO - Deleted file: 족보_241021 본1 진단의 기본_정답.pdf [key=k2:***_8Bo]
+2025-08-17T11:36:00.493168469Z 2025-08-17 11:36:00 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_241021 본1 진단의 기본_정답.pdf
+2025-08-17T11:36:01.127684172Z 2025-08-17 11:36:01 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpf5xwa8u0.pdf [key=k2:***_8Bo]
+2025-08-17T11:36:01.127728794Z 2025-08-17 11:36:01 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpf5xwa8u0.pdf
+2025-08-17T11:36:01.314082649Z 2025-08-17 11:36:01 - pdf_processor.api.file_manager - INFO - Found 2 uploaded files [key=k2:***_8Bo]
+2025-08-17T11:36:01.314972922Z 2025-08-17 11:36:01 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 2 pages, 2 questions
+2025-08-17T11:36:01.315175915Z 2025-08-17 11:36:01 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 2 (***_8Bo)
+2025-08-17T11:36:01.329723112Z [2025-08-17 11:36:01,326: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:36:09.315924301Z 2025-08-17 11:36:09 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:36:09.315959603Z 2025-08-17 11:36:09 - pdf_processor.analyzers.base - WARNING - Empty jokbo-centric result detected; treating as valid with no matches
+2025-08-17T11:36:09.794239715Z 2025-08-17 11:36:09 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k2:***_8Bo]
+2025-08-17T11:36:09.794280777Z 2025-08-17 11:36:09 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:36:10.200431601Z 2025-08-17 11:36:10 - pdf_processor.api.client - INFO - Deleted file: 강의자료_YES 0814_7,8교시_정민규_황달,복부진찰TBL_문준영.pdf [key=k2:***_8Bo]
+2025-08-17T11:36:10.200462012Z 2025-08-17 11:36:10 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_YES 0814_7,8교시_정민규_황달,복부진찰TBL_문준영.pdf
+2025-08-17T11:36:10.359243005Z 2025-08-17 11:36:10 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k2:***_8Bo]
+2025-08-17T11:36:10.359712693Z 2025-08-17 11:36:10 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:36:10.359746435Z 2025-08-17 11:36:10 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 2 (***_8Bo)
+2025-08-17T11:36:10.365977616Z [2025-08-17 11:36:10,365: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:36:10.369915331Z 2025-08-17 11:36:10 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 3 (***0zpw)
+2025-08-17T11:36:10.370036108Z 2025-08-17 11:36:10 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'YES 0816_1_2_이현석_교수님_설사_TBL_이정현.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:36:10.373777641Z 2025-08-17 11:36:10 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k3:***0zpw]
+2025-08-17T11:36:10.601353022Z 2025-08-17 11:36:10 - pdf_processor.api.file_manager - INFO - Found 3 uploaded files [key=k3:***0zpw]
+2025-08-17T11:36:10.601384784Z 2025-08-17 11:36:10 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 3 total [key=k3:***0zpw]
+2025-08-17T11:36:10.601397215Z 2025-08-17 11:36:10 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:36:10.60147581Z 2025-08-17 11:36:10 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k3:***0zpw]
+2025-08-17T11:36:12.370269037Z 2025-08-17 11:36:12 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k3:***0zpw]
+2025-08-17T11:36:12.37032646Z 2025-08-17 11:36:12 - pdf_processor.api.client - INFO - Uploading file: 강의자료_YES 0816_1_2_이현석_교수님_설사_TBL_이정현.pdf [key=k3:***0zpw]
+2025-08-17T11:36:13.989795539Z 2025-08-17 11:36:13 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_YES 0816_1_2_이현석_교수님_설사_TBL_이정현.pdf [key=k3:***0zpw]
+2025-08-17T11:36:34.734306606Z 2025-08-17 11:36:34 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:36:34.734349649Z 2025-08-17 11:36:34 - pdf_processor.analyzers.base - WARNING - Empty jokbo-centric result detected; treating as valid with no matches
+2025-08-17T11:36:35.237811331Z 2025-08-17 11:36:35 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k3:***0zpw]
+2025-08-17T11:36:35.237842663Z 2025-08-17 11:36:35 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:36:35.62392374Z 2025-08-17 11:36:35 - pdf_processor.api.client - INFO - Deleted file: 강의자료_YES 0816_1_2_이현석_교수님_설사_TBL_이정현.pdf [key=k3:***0zpw]
+2025-08-17T11:36:35.623958823Z 2025-08-17 11:36:35 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_YES 0816_1_2_이현석_교수님_설사_TBL_이정현.pdf
+2025-08-17T11:36:35.817031468Z 2025-08-17 11:36:35 - pdf_processor.api.file_manager - INFO - Found 3 uploaded files [key=k3:***0zpw]
+2025-08-17T11:36:35.817434292Z 2025-08-17 11:36:35 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 0 pages, 0 questions
+2025-08-17T11:36:35.817533998Z 2025-08-17 11:36:35 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 3 (***0zpw)
+2025-08-17T11:36:35.824175084Z [2025-08-17 11:36:35,823: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:36:35.833220743Z 2025-08-17 11:36:35 - pdf_processor.pdf.operations - INFO - Split YES 0816_3교시_안병철 핵의학_신호준.pdf into 2 chunks (43 pages total)
+2025-08-17T11:36:36.094402808Z 2025-08-17 11:36:36 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 4 (***HJNw)
+2025-08-17T11:36:36.094562667Z 2025-08-17 11:36:36 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpt_gd7ugw.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:36:36.095025255Z 2025-08-17 11:36:36 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 5 (***ZQkw)
+2025-08-17T11:36:36.096072747Z 2025-08-17 11:36:36 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k4:***HJNw]
+2025-08-17T11:36:36.096764788Z 2025-08-17 11:36:36 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'tmpkrpflzwd.pdf' with jokbo '220825 본1 진단의기본(정답포함).pdf'
+2025-08-17T11:36:36.098102678Z 2025-08-17 11:36:36 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k5:***ZQkw]
+2025-08-17T11:36:36.265677084Z 2025-08-17 11:36:36 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k4:***HJNw]
+2025-08-17T11:36:36.265691875Z 2025-08-17 11:36:36 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k4:***HJNw]
+2025-08-17T11:36:36.265706656Z 2025-08-17 11:36:36 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:36:36.26577276Z 2025-08-17 11:36:36 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k4:***HJNw]
+2025-08-17T11:36:36.406554909Z 2025-08-17 11:36:36 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k5:***ZQkw]
+2025-08-17T11:36:36.406577221Z 2025-08-17 11:36:36 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 0 total [key=k5:***ZQkw]
+2025-08-17T11:36:36.406615193Z 2025-08-17 11:36:36 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:36:36.406650505Z 2025-08-17 11:36:36 - pdf_processor.api.client - INFO - Uploading file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k5:***ZQkw]
+2025-08-17T11:36:37.857687876Z 2025-08-17 11:36:37 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k4:***HJNw]
+2025-08-17T11:36:37.857713047Z 2025-08-17 11:36:37 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpt_gd7ugw.pdf [key=k4:***HJNw]
+2025-08-17T11:36:39.510969919Z 2025-08-17 11:36:39 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpt_gd7ugw.pdf [key=k4:***HJNw]
+2025-08-17T11:36:40.846263482Z 2025-08-17 11:36:40 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_220825 본1 진단의기본(정답포함).pdf [key=k5:***ZQkw]
+2025-08-17T11:36:40.846289984Z 2025-08-17 11:36:40 - pdf_processor.api.client - INFO - Uploading file: 강의자료_tmpkrpflzwd.pdf [key=k5:***ZQkw]
+2025-08-17T11:36:42.084345682Z 2025-08-17 11:36:42 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_tmpkrpflzwd.pdf [key=k5:***ZQkw]
+2025-08-17T11:37:07.308309826Z 2025-08-17 11:37:07 - pdf_processor.api.client - ERROR - Content generation failed (attempt 1/3) [key=k1:***nBNs]: 500 An internal error has occurred. Please retry or report in https://developers.generativeai.google/guide/troubleshooting
+2025-08-17T11:37:07.308331378Z 2025-08-17 11:37:07 - pdf_processor.api.client - INFO - Retrying in 1 seconds... [key=k1:***nBNs]
+2025-08-17T11:38:26.490984089Z 2025-08-17 11:38:26 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 1 pages, 1 questions
+2025-08-17T11:38:26.942859497Z 2025-08-17 11:38:26 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k5:***ZQkw]
+2025-08-17T11:38:26.942891579Z 2025-08-17 11:38:26 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:38:27.431547609Z 2025-08-17 11:38:27 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpkrpflzwd.pdf [key=k5:***ZQkw]
+2025-08-17T11:38:27.431585641Z 2025-08-17 11:38:27 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpkrpflzwd.pdf
+2025-08-17T11:38:27.571989938Z 2025-08-17 11:38:27 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k5:***ZQkw]
+2025-08-17T11:38:27.572750843Z 2025-08-17 11:38:27 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 1 pages, 1 questions
+2025-08-17T11:38:27.572777775Z 2025-08-17 11:38:27 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 5 (***ZQkw)
+2025-08-17T11:38:27.578930192Z [2025-08-17 11:38:27,578: INFO/ForkPoolWorker-1] Redis connection established
+2025-08-17T11:38:48.172919012Z [2025-08-17 11:38:48,172: INFO/MainProcess] Terminating 24ee389f-6bef-4c7a-a7e5-d0332ee5423d (15)
+2025-08-17T11:39:53.080336208Z 2025-08-17 11:39:53 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 8 pages, 8 questions
+2025-08-17T11:39:53.644288764Z 2025-08-17 11:39:53 - pdf_processor.api.client - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf [key=k4:***HJNw]
+2025-08-17T11:39:53.644325527Z 2025-08-17 11:39:53 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_220825 본1 진단의기본(정답포함).pdf
+2025-08-17T11:39:54.133339337Z 2025-08-17 11:39:54 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpt_gd7ugw.pdf [key=k4:***HJNw]
+2025-08-17T11:39:54.133353808Z 2025-08-17 11:39:54 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpt_gd7ugw.pdf
+2025-08-17T11:39:54.256665066Z 2025-08-17 11:39:54 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k4:***HJNw]
+2025-08-17T11:39:54.25805891Z 2025-08-17 11:39:54 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 8 pages, 8 questions
+2025-08-17T11:39:54.258079711Z 2025-08-17 11:39:54 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 4 (***HJNw)
+2025-08-17T11:40:08.974647088Z 2025-08-17 11:40:08 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 2 pages, 2 questions
+2025-08-17T11:40:09.363462589Z 2025-08-17 11:40:09 - pdf_processor.api.client - INFO - Deleted file: 족보_241021 본1 진단의 기본_정답.pdf [key=k1:***nBNs]
+2025-08-17T11:40:09.363516892Z 2025-08-17 11:40:09 - pdf_processor.api.file_manager - INFO - Deleted file: 족보_241021 본1 진단의 기본_정답.pdf
+2025-08-17T11:40:09.731369753Z 2025-08-17 11:40:09 - pdf_processor.api.client - INFO - Deleted file: 강의자료_tmpf5xwa8u0.pdf [key=k1:***nBNs]
+2025-08-17T11:40:09.731417655Z 2025-08-17 11:40:09 - pdf_processor.api.file_manager - INFO - Deleted file: 강의자료_tmpf5xwa8u0.pdf
+2025-08-17T11:40:09.896198535Z 2025-08-17 11:40:09 - pdf_processor.api.file_manager - INFO - Found 0 uploaded files [key=k1:***nBNs]
+2025-08-17T11:40:09.89679118Z 2025-08-17 11:40:09 - pdf_processor.parsers.response_parser - INFO - Sanitized jokbo response: 2 pages, 2 questions
+2025-08-17T11:40:09.896864885Z 2025-08-17 11:40:09 - pdf_processor.api.multi_api_manager - INFO - Operation successful with API key 1 (***nBNs)
+2025-08-17T11:40:09.902747965Z [2025-08-17 11:40:09,902: INFO/ForkPoolWorker-32] Redis connection established
+2025-08-17T11:40:09.90736229Z 2025-08-17 11:40:09 - pdf_processor.parsers.result_merger - INFO - Merged 2 chunks into 2 pages
+2025-08-17T11:40:09.910150966Z 2025-08-17 11:40:09 - pdf_processor.api.multi_api_manager - INFO - Attempting operation with API key 3 (***0zpw)
+2025-08-17T11:40:09.910225711Z 2025-08-17 11:40:09 - pdf_processor.analyzers.jokbo_centric - INFO - Analyzing lesson 'YES 0811_6교시_황양하_반사감각검사_남창진.pdf' with jokbo '241021 본1 진단의 기본_정답.pdf'
+2025-08-17T11:40:09.910811896Z 2025-08-17 11:40:09 - pdf_processor.analyzers.jokbo_centric - INFO - Cleaning up existing uploaded files... [key=k3:***0zpw]
+2025-08-17T11:40:10.109122533Z 2025-08-17 11:40:10 - pdf_processor.api.file_manager - INFO - Found 3 uploaded files [key=k3:***0zpw]
+2025-08-17T11:40:10.109162746Z 2025-08-17 11:40:10 - pdf_processor.api.file_manager - INFO - Cleanup scope: 0 tracked / 3 total [key=k3:***0zpw]
+2025-08-17T11:40:10.109176366Z 2025-08-17 11:40:10 - pdf_processor.api.file_manager - INFO - No files to delete
+2025-08-17T11:40:10.109213809Z 2025-08-17 11:40:10 - pdf_processor.api.client - INFO - Uploading file: 족보_241021 본1 진단의 기본_정답.pdf [key=k3:***0zpw]
+2025-08-17T11:40:11.503979534Z 2025-08-17 11:40:11 - pdf_processor.api.client - INFO - Successfully uploaded: 족보_241021 본1 진단의 기본_정답.pdf [key=k3:***0zpw]
+2025-08-17T11:40:11.504012306Z 2025-08-17 11:40:11 - pdf_processor.api.client - INFO - Uploading file: 강의자료_YES 0811_6교시_황양하_반사감각검사_남창진.pdf [key=k3:***0zpw]
+2025-08-17T11:40:12.998744119Z 2025-08-17 11:40:12 - pdf_processor.api.client - INFO - Successfully uploaded: 강의자료_YES 0811_6교시_황양하_반사감각검사_남창진.pdf [key=k3:***0zpw]

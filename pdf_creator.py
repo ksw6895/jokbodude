@@ -85,74 +85,113 @@ class PDFCreator:
 
     # ---------- File resolution helpers ----------
     def _resolve_lesson_path(self, lesson_dir: str, lesson_filename: str) -> Path:
-        """Resolve a lesson file in directory, with normalization and fuzzy fallback.
+        """Resolve a lesson file in directory with strict, deterministic matching.
 
-        Handles Hangul normalization differences, minor separator differences, and
-        AI/display-name prefixes like '강의자료_<name>.pdf'.
+        Matching strategy (in order):
+        1) Direct path exists
+        2) Exact sanitized filename match
+        3) Prefix-stripped sanitized filename exact match (strip: 강의자료/강의/lesson/lecture)
+        4) Exact sanitized stem match (unique only)
+        5) Prefix-stripped sanitized stem exact match (unique only)
+
+        We intentionally avoid fuzzy "contains" matching to prevent selecting
+        the wrong file when multiple similarly named PDFs exist. If no match is
+        found, we return the direct path (likely non-existent) and let callers
+        skip insertion rather than insert the wrong slide.
         """
         base_dir = Path(lesson_dir)
         direct = base_dir / (lesson_filename or '')
         if direct.exists():
             return direct
 
-        # Build directory cache once
+        # Build directory cache once per directory
         cache_key = str(base_dir.resolve())
         if cache_key not in self._lesson_dir_cache:
             try:
                 files = list(base_dir.glob('*.pdf'))
             except Exception:
                 files = []
-            mapping = {}
+            mapping_full = {}
+            mapping_full_stripped = {}
+            mapping_stem = {}
+            mapping_stem_stripped = {}
             for p in files:
-                key = self._normalize_korean(p.name)
-                key = re.sub(r"[\s_\-]+", "", key)
-                mapping[key.lower()] = p
-            self._lesson_dir_cache[cache_key] = mapping
+                name_norm = self._normalize_korean(p.name)
+                name_key = re.sub(r"[\s_\-]+", "", name_norm).lower()
+                mapping_full[name_key] = p
+                # Stem without extension
+                stem_norm = self._normalize_korean(p.stem)
+                stem_key = re.sub(r"[\s_\-]+", "", stem_norm).lower()
+                mapping_stem.setdefault(stem_key, []).append(p)
+                # Prefix-stripped variants
+                try:
+                    stripped_full_norm = re.sub(r"^(강의자료|강의|lesson|lecture)[\s_\-]+", "", name_norm, flags=re.IGNORECASE)
+                except Exception:
+                    stripped_full_norm = name_norm
+                full_stripped_key = re.sub(r"[\s_\-]+", "", stripped_full_norm).lower()
+                mapping_full_stripped[full_stripped_key] = p
+                try:
+                    stripped_stem_norm = re.sub(r"^(강의자료|강의|lesson|lecture)[\s_\-]+", "", stem_norm, flags=re.IGNORECASE)
+                except Exception:
+                    stripped_stem_norm = stem_norm
+                stem_stripped_key = re.sub(r"[\s_\-]+", "", stripped_stem_norm).lower()
+                mapping_stem_stripped.setdefault(stem_stripped_key, []).append(p)
+            self._lesson_dir_cache[cache_key] = {
+                'full': mapping_full,
+                'full_stripped': mapping_full_stripped,
+                'stem': mapping_stem,
+                'stem_stripped': mapping_stem_stripped,
+            }
 
-        mapping = self._lesson_dir_cache.get(cache_key, {})
+        cache = self._lesson_dir_cache.get(cache_key, {})
+        mapping_full = cache.get('full', {})
+        mapping_full_stripped = cache.get('full_stripped', {})
+        mapping_stem = cache.get('stem', {})
+        mapping_stem_stripped = cache.get('stem_stripped', {})
 
-        # Helper to sanitize for matching
+        # Helpers to sanitize for matching
         def _keyify(name: str) -> str:
             n = self._normalize_korean(name or '')
             return re.sub(r"[\s_\-]+", "", n).lower()
 
-        # Try exact sanitized match
-        needle_key = _keyify(lesson_filename)
-        candidate = mapping.get(needle_key)
+        def _strip_prefix(name: str) -> str:
+            return re.sub(r"^(강의자료|강의|lesson|lecture)[\s_\-]+", "", (name or ''), flags=re.IGNORECASE)
+
+        # Prepare candidate keys (full + stem)
+        needle_full = _keyify(lesson_filename)
+        needle_full_stripped = _keyify(_strip_prefix(lesson_filename))
+        needle_stem = _keyify(Path(lesson_filename or '').stem)
+        needle_stem_stripped = _keyify(Path(_strip_prefix(lesson_filename) or '').stem)
+
+        # 2) Exact sanitized filename match
+        candidate = mapping_full.get(needle_full)
         if candidate and candidate.exists():
-            self.log_debug(f"Fuzzy-matched lesson file: '{lesson_filename}' -> '{candidate.name}'")
+            self.log_debug(f"Matched lesson file by exact full name: '{lesson_filename}' -> '{candidate.name}'")
             return candidate
 
-        # Try removing common prefixes like '강의자료_', '강의_', 'lesson_', 'lecture_'
-        reduced = re.sub(r"^(강의자료|강의|lesson|lecture)[\s_\-]+", "", (lesson_filename or ''), flags=re.IGNORECASE)
-        if reduced != (lesson_filename or ''):
-            reduced_key = _keyify(reduced)
-            candidate = mapping.get(reduced_key)
+        # 3) Prefix-stripped exact filename match
+        if needle_full_stripped and needle_full_stripped != needle_full:
+            candidate = mapping_full_stripped.get(needle_full_stripped)
             if candidate and candidate.exists():
-                self.log_debug(f"Prefix-stripped match: '{lesson_filename}' -> '{candidate.name}'")
+                self.log_debug(f"Matched by prefix-stripped full name: '{lesson_filename}' -> '{candidate.name}'")
                 return candidate
 
-        # Last resort: bidirectional contains/suffix match on sanitized names
-        best = None
-        best_len = 0
-        try:
-            for k, p in mapping.items():
-                if not needle_key:
-                    continue
-                # If filename from AI includes extra prefix/suffix, prefer longest overlap
-                if needle_key in k or k in needle_key:
-                    l = min(len(k), len(needle_key))
-                    if l > best_len:
-                        best = p
-                        best_len = l
-        except Exception:
-            pass
-        if best and best.exists():
-            self.log_debug(f"Contains-matched lesson file: '{lesson_filename}' -> '{best.name}'")
-            return best
+        # 4) Exact sanitized stem match (unique)
+        if needle_stem:
+            candidates = mapping_stem.get(needle_stem) or []
+            if len(candidates) == 1 and candidates[0].exists():
+                self.log_debug(f"Matched lesson file by exact stem: '{lesson_filename}' -> '{candidates[0].name}'")
+                return candidates[0]
 
-        # Not found
-        self.log_debug(f"Lesson file not found (after fallback): {lesson_filename} in {lesson_dir}")
+        # 5) Prefix-stripped sanitized stem match (unique)
+        if needle_stem_stripped and needle_stem_stripped != needle_stem:
+            candidates = mapping_stem_stripped.get(needle_stem_stripped) or []
+            if len(candidates) == 1 and candidates[0].exists():
+                self.log_debug(f"Matched by prefix-stripped stem: '{lesson_filename}' -> '{candidates[0].name}'")
+                return candidates[0]
+
+        # Not found or ambiguous — avoid fuzzy contains to prevent wrong pages
+        self.log_debug(f"Lesson file not found or ambiguous: '{lesson_filename}' in {lesson_dir}")
         return direct
         
     def _register_font(self, page: fitz.Page) -> str:

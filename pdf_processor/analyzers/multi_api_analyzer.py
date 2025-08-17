@@ -201,7 +201,8 @@ class MultiAPIAnalyzer:
                 analyzer = LessonCentricAnalyzer(
                     api_client, fm, self.session_id, self.debug_dir
                 )
-                result = analyzer.analyze(center_file_path, chunk_path)
+                # Pass chunk_info so the analyzer can offset lesson_page correctly
+                result = analyzer.analyze(center_file_path, chunk_path, None, chunk_info=(start_page, end_page))
             else:
                 fm = FileManager(api_client)
                 analyzer = JokboCentricAnalyzer(

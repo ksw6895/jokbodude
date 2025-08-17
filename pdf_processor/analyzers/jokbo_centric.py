@@ -219,11 +219,15 @@ class JokboCentricAnalyzer(BaseAnalyzer):
     def _post_process_results(self, result: Dict[str, Any],
                             chunk_info: Optional[Tuple[int, int]] = None,
                             context_lesson_path: Optional[str] = None) -> Dict[str, Any]:
-        """Post-process analysis results.
+        """Post-process analysis results for chunked lessons.
 
-        Applies chunk page offset only to slides that belong to the current lesson
-        and clamps to the lesson's total pages to avoid runaway indices when
-        responses mix references across lessons.
+        Gemini sees chunk pages starting at 1. When a lesson is split into
+        chunks (start_page..end_page), we must offset every referenced
+        lesson_page by (start_page - 1) to map back to the original PDF.
+
+        We apply the offset to all slides in this chunk result, regardless of
+        how the model labeled lesson_filename (which may be a temp chunk name),
+        and clamp to the original lesson's page count when available.
         """
         if not (chunk_info and isinstance(result, dict) and "jokbo_pages" in result):
             return result
@@ -231,20 +235,8 @@ class JokboCentricAnalyzer(BaseAnalyzer):
         start_page, _ = chunk_info
         offset = max(0, int(start_page) - 1)
 
-        # Prepare normalized expected lesson filename for comparison
-        expected_name_norm = None
-        total_pages = None
-        try:
-            from pathlib import Path as _P
-            if context_lesson_path:
-                expected_name = _P(context_lesson_path).name
-                # Strip common AI-added prefixes and normalize for robust match
-                import re as _re
-                expected_name_norm = _re.sub(r"^(강의자료|강의|lesson|lecture)[\s_\-]+", "", expected_name, flags=_re.IGNORECASE).strip().lower()
-        except Exception:
-            expected_name_norm = None
-
         # Lazy-load total pages for clamping if we have a known lesson path
+        total_pages = None
         def _get_total_pages() -> int:
             nonlocal total_pages
             if total_pages is None:
@@ -255,33 +247,11 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                     total_pages = 0
             return total_pages or 0
 
-        import re as _re
         for page_info in (result.get("jokbo_pages") or []):
             for question in (page_info.get("questions") or []):
                 for slide in (question.get("related_lesson_slides") or []):
                     if not isinstance(slide, dict):
                         continue
-                    if "lesson_page" not in slide:
-                        continue
-                    # Decide whether this slide belongs to the current lesson
-                    try:
-                        lf_raw = (slide.get("lesson_filename") or "").strip()
-                        lf_norm = _re.sub(r"^(강의자료|강의|lesson|lecture)[\s_\-]+", "", lf_raw, flags=_re.IGNORECASE).strip().lower()
-                    except Exception:
-                        lf_norm = ""
-
-                    belongs_here = False
-                    if expected_name_norm:
-                        # Apply offset only if filename is empty/unknown or matches current lesson
-                        belongs_here = (lf_norm == "" or lf_norm == expected_name_norm)
-                    else:
-                        # If we don't know expected filename, conservatively apply offset
-                        belongs_here = True
-
-                    if not belongs_here:
-                        continue
-
-                    # Apply offset
                     try:
                         lp = int(slide.get("lesson_page", 0))
                     except Exception:
