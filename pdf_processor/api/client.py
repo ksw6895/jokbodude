@@ -134,6 +134,7 @@ class GeminiAPIClient:
         backoff_factor: int = 2,
         *,
         response_mime_type: str = "application/json",
+        # NOTE: response_schema intentionally ignored for stability until validated
         response_schema: Optional[Dict[str, Any]] = None,
         max_output_tokens: Optional[int] = None,
     ) -> Any:
@@ -157,11 +158,10 @@ class GeminiAPIClient:
                 self._configure_api(self.api_key)
 
                 # Enforce JSON mode and allow optional schema/limits per-call
-                gen_config: Dict[str, Any] = {"response_mime_type": response_mime_type}
-                # Apply caller-provided schema if given; otherwise use a permissive default
-                schema_to_use = response_schema or self.DEFAULT_RESPONSE_SCHEMA
-                if schema_to_use:
-                    gen_config["response_schema"] = schema_to_use
+                gen_config: Dict[str, Any] = {}
+                # Enforce JSON MIME type only; avoid response_schema to prevent 400s
+                if response_mime_type:
+                    gen_config["response_mime_type"] = response_mime_type
                 if isinstance(max_output_tokens, int) and max_output_tokens > 0:
                     gen_config["max_output_tokens"] = max_output_tokens
 
