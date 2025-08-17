@@ -103,10 +103,11 @@ class MultiAPIManager:
             self.models.append(model)
             
             # Create API client
-            client = GeminiAPIClient(model, api_key)
+            client = GeminiAPIClient(model, api_key, key_index=i)
             self.api_clients.append(client)
             
-        logger.info(f"Initialized MultiAPIManager with {len(api_keys)} API keys")
+        safe_ids = [f"k{i}:***{(k or '')[-4:] if k else '????'}" for i, k in enumerate(api_keys)]
+        logger.info(f"Initialized MultiAPIManager with {len(api_keys)} API keys: {', '.join(safe_ids)}")
     
     def get_next_available_api(self) -> Optional[int]:
         """
@@ -190,20 +191,21 @@ class MultiAPIManager:
             status = self.api_statuses[api_index]
             
             try:
-                logger.info(f"Attempting operation with API key {api_index}")
+                key_suffix = (self.api_keys[api_index] or "")[-4:] if self.api_keys else "????"
+                logger.info(f"Attempting operation with API key {api_index} (***{key_suffix})")
                 
                 # Execute operation
                 result = operation(api_client, model)
                 
                 # Record success
                 status.record_success()
-                logger.info(f"Operation successful with API key {api_index}")
+                logger.info(f"Operation successful with API key {api_index} (***{key_suffix})")
                 
                 return result
                 
             except Exception as e:
                 error_msg = str(e)
-                logger.error(f"API key {api_index} failed: {error_msg}")
+                logger.error(f"API key {api_index} (***{key_suffix}) failed: {error_msg}")
                 
                 # Record failure
                 status.record_failure(error_msg)
@@ -211,9 +213,9 @@ class MultiAPIManager:
                 
                 # Check for specific errors that should trigger immediate failover
                 if "429" in error_msg or "quota" in error_msg.lower():
-                    logger.warning(f"API key {api_index} hit quota limit")
+                    logger.warning(f"API key {api_index} (***{key_suffix}) hit quota limit")
                 elif "403" in error_msg:
-                    logger.warning(f"API key {api_index} has permission issues")
+                    logger.warning(f"API key {api_index} (***{key_suffix}) has permission issues")
                 
                 total_attempts += 1
         

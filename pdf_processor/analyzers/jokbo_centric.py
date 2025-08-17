@@ -166,8 +166,15 @@ class JokboCentricAnalyzer(BaseAnalyzer):
     def _analyze_with_uploads(self, prompt: str, lesson_path: str, jokbo_path: str,
                              lesson_filename: str, jokbo_filename: str) -> str:
         """Analyze with uploading both files."""
-        # Delete existing files first
-        logger.info("Cleaning up existing uploaded files...")
+        # Delete existing files first (tracked for this client only)
+        try:
+            key_tag = self.file_manager.api_client._key_tag() if getattr(self.file_manager, 'api_client', None) else None
+        except Exception:
+            key_tag = None
+        if key_tag:
+            logger.info(f"Cleaning up existing uploaded files... [key={key_tag}]")
+        else:
+            logger.info("Cleaning up existing uploaded files...")
         self.file_manager.delete_all_uploaded_files()
         
         # Upload and analyze

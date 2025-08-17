@@ -67,10 +67,16 @@ class FileManager:
                 files = self.api_client.list_files()
             else:
                 files = list(genai.list_files())
-            logger.info(f"Found {len(files)} uploaded files")
+            if self.api_client is not None:
+                logger.info(f"Found {len(files)} uploaded files [key={self.api_client._key_tag()}]")
+            else:
+                logger.info(f"Found {len(files)} uploaded files")
             return files
         except Exception as e:
-            logger.error(f"Failed to list files: {str(e)}")
+            if self.api_client is not None:
+                logger.error(f"Failed to list files [key={self.api_client._key_tag()}]: {str(e)}")
+            else:
+                logger.error(f"Failed to list files: {str(e)}")
             return []
     
     def delete_file_safe(self, file: Any, max_retries: int = 3) -> bool:
@@ -116,7 +122,12 @@ class FileManager:
             Number of files deleted
         """
         # Only delete files that were tracked by this manager (uploaded by this client)
-        files = [f for f in self.list_uploaded_files() if f.name in self._tracked_files]
+        all_files = self.list_uploaded_files()
+        files = [f for f in all_files if f.name in self._tracked_files]
+        if self.api_client is not None:
+            logger.info(
+                f"Cleanup scope: {len(files)} tracked / {len(all_files)} total [key={self.api_client._key_tag()}]"
+            )
         if not files:
             logger.info("No files to delete")
             return 0
@@ -157,7 +168,10 @@ class FileManager:
                 if file.display_name != center_file_display_name:
                     self.delete_file_safe(file)
                 else:
-                    logger.info(f"Keeping center file: {center_file_display_name}")
+                    if self.api_client is not None:
+                        logger.info(f"Keeping center file: {center_file_display_name} [key={self.api_client._key_tag()}]")
+                    else:
+                        logger.info(f"Keeping center file: {center_file_display_name}")
         except Exception as e:
             logger.error(f"Error during cleanup: {str(e)}")
     
