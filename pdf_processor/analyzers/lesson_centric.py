@@ -181,13 +181,15 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         
         try:
             response_text = self.upload_and_analyze(files_to_upload, prompt)
-            
-            # Clean up except center file
+            # On success: remove jokbo upload, keep lesson as center file
             self.file_manager.cleanup_except_center_file(f"강의자료_{lesson_filename}")
-            
             return response_text
-            
         except Exception as e:
+            # On any error: cleanup everything we uploaded
+            try:
+                self.file_manager.cleanup_tracked_files()
+            except Exception:
+                pass
             logger.error(f"Analysis failed: {str(e)}")
             raise PDFProcessorError(f"Failed to analyze PDFs: {str(e)}")
     

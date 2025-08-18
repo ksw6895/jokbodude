@@ -143,22 +143,23 @@ class BaseAnalyzer(ABC):
             API response text
         """
         uploaded_files = []
-        
-        try:
-            # Upload all files
-            for file_path, display_name in files_to_upload:
-                uploaded_file = self.api_client.upload_file(file_path, display_name)
-                uploaded_files.append(uploaded_file)
-                self.file_manager.track_file(uploaded_file)
 
-            # Prepare content and attempt quality-aware generation
-            content = [prompt] + uploaded_files
-            return self._generate_with_quality_retry(content)
+        # Upload files for this call and return raw response.
+        # IMPORTANT: Do not auto-delete here. Callers decide what to keep
+        # (e.g., keep jokbo, delete lesson chunk) and handle cleanup on error.
+        # This prevents stale lesson-chunk files from bleeding into the next
+        # request while allowing the center file to persist for the job.
+        #
+        # Callers MUST:
+        #  - On success: delete all non-center uploads
+        #  - On exception: delete all tracked uploads
+        for file_path, display_name in files_to_upload:
+            uploaded_file = self.api_client.upload_file(file_path, display_name)
+            uploaded_files.append(uploaded_file)
+            self.file_manager.track_file(uploaded_file)
 
-        finally:
-            # Clean up uploaded files
-            for file in uploaded_files:
-                self.file_manager.delete_file_safe(file)
+        content = [prompt] + uploaded_files
+        return self._generate_with_quality_retry(content)
     
     def parse_and_validate_response(self, response_text: str) -> Dict[str, Any]:
         """
