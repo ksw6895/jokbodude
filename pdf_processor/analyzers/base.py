@@ -145,21 +145,20 @@ class BaseAnalyzer(ABC):
         uploaded_files = []
 
         # Upload files for this call and return raw response.
-        # IMPORTANT: Do not auto-delete here. Callers decide what to keep
-        # (e.g., keep jokbo, delete lesson chunk) and handle cleanup on error.
-        # This prevents stale lesson-chunk files from bleeding into the next
-        # request while allowing the center file to persist for the job.
-        #
-        # Callers MUST:
-        #  - On success: delete all non-center uploads
-        #  - On exception: delete all tracked uploads
-        for file_path, display_name in files_to_upload:
-            uploaded_file = self.api_client.upload_file(file_path, display_name)
-            uploaded_files.append(uploaded_file)
-            self.file_manager.track_file(uploaded_file)
+        # Simpler, safer policy: always delete all uploads after generation
+        # (no center-file retention). Each call starts with a clean slate via
+        # pre-upload purge at the analyzer-level.
+        try:
+            for file_path, display_name in files_to_upload:
+                uploaded_file = self.api_client.upload_file(file_path, display_name)
+                uploaded_files.append(uploaded_file)
+                self.file_manager.track_file(uploaded_file)
 
-        content = [prompt] + uploaded_files
-        return self._generate_with_quality_retry(content)
+            content = [prompt] + uploaded_files
+            return self._generate_with_quality_retry(content)
+        finally:
+            for file in uploaded_files:
+                self.file_manager.delete_file_safe(file)
     
     def parse_and_validate_response(self, response_text: str) -> Dict[str, Any]:
         """

@@ -170,13 +170,12 @@ class JokboCentricAnalyzer(BaseAnalyzer):
     def _analyze_with_uploads(self, prompt: str, lesson_path: str, jokbo_path: str,
                              lesson_filename: str, jokbo_filename: str) -> str:
         """Analyze with uploading both files."""
-        # Aggressive purge: remove lesson chunk uploads for this API key before new upload.
-        # Keep any existing jokbo_* center file if present by not deleting that prefix.
+        # Aggressive purge: remove ALL uploads for this API key before new upload.
         try:
             from ..api.upload_cleanup import purge_key_files
             key_tag = self.api_client._key_tag()
-            logger.info(f"Purging existing lesson uploads before analysis [key={key_tag}]")
-            purge_key_files(self.api_client, delete_prefixes=["강의자료_"], keep_display_names={f"족보_{jokbo_filename}"}, log_context="jokbo_centric_preupload")
+            logger.info(f"Purging ALL uploads before analysis [key={key_tag}]")
+            purge_key_files(self.api_client, delete_prefixes=[], keep_display_names=set(), delete_all=True, log_context="jokbo_centric_preupload")
         except Exception:
             logger.info("Purge skipped due to error; continuing")
         
@@ -188,40 +187,17 @@ class JokboCentricAnalyzer(BaseAnalyzer):
         
         try:
             response_text = self.upload_and_analyze(files_to_upload, prompt)
-            # On success: remove lesson chunk, keep jokbo as center file for continuity
-            self.file_manager.cleanup_except_center_file(f"족보_{jokbo_filename}")
             return response_text
         except Exception as e:
-            # On any error: best-effort cleanup of all tracked uploads to avoid bleed-over
-            try:
-                self.file_manager.cleanup_tracked_files()
-            except Exception:
-                pass
             logger.error(f"Analysis failed: {str(e)}")
             raise PDFProcessorError(f"Failed to analyze PDFs: {str(e)}")
     
     def _analyze_with_preloaded_jokbo(self, prompt: str, lesson_path: str,
                                      jokbo_file: Any, lesson_filename: str) -> str:
         """Analyze with pre-uploaded jokbo file."""
-        # Purge leftover lesson uploads for this key before uploading
-        try:
-            from ..api.upload_cleanup import purge_key_files
-            purge_key_files(self.api_client, delete_prefixes=["강의자료_"], log_context="jokbo_centric_preupload_preloaded")
-        except Exception:
-            pass
-        # Upload only lesson
-        lesson_file = self.api_client.upload_file(lesson_path, f"강의자료_{lesson_filename}")
-        self.file_manager.track_file(lesson_file)
-        
-        try:
-            # Prepare content and generate with quality-aware retry
-            content = [prompt, jokbo_file, lesson_file]
-            response_text = self._generate_with_quality_retry(content)
-            return response_text
-            
-        finally:
-            # Delete lesson file
-            self.file_manager.delete_file_safe(lesson_file)
+        # Preloaded jokbo path is deprecated for safety (always upload both)
+        # Fall back to standard uploads path
+        return self._analyze_with_uploads(prompt, lesson_path, jokbo_path, lesson_filename, jokbo_filename)
     
     def _post_process_results(self, result: Dict[str, Any],
                             chunk_info: Optional[Tuple[int, int]] = None,
@@ -301,48 +277,38 @@ class JokboCentricAnalyzer(BaseAnalyzer):
             'started_at': datetime.now().isoformat()
         }
         
-        # Pre-upload jokbo file for efficiency
-        logger.info(f"Pre-uploading jokbo file: {jokbo_filename}")
-        jokbo_file = self.api_client.upload_file(jokbo_path, f"족보_{jokbo_filename}")
-        self.file_manager.track_file(jokbo_file)
-        
         all_connections = {}  # {question_id: {question_data, connections}}
         lesson_results = []
         
-        try:
-            for idx, lesson_path in enumerate(lesson_paths):
-                logger.info(f"Analyzing lesson {idx+1}/{len(lesson_paths)}: {Path(lesson_path).name}")
-                
+        for idx, lesson_path in enumerate(lesson_paths):
+            logger.info(f"Analyzing lesson {idx+1}/{len(lesson_paths)}: {Path(lesson_path).name}")
+            
+            try:
+                # Perform analysis (may chunk internally). Always upload both per-call
+                result = self.analyze(lesson_path, jokbo_path, None)
+                # If lesson processed without chunking, count as one chunk
                 try:
-                    # Perform analysis (may chunk internally)
-                    result = self.analyze(lesson_path, jokbo_path, jokbo_file)
-                    # If lesson processed without chunking, count as one chunk
-                    try:
-                        from ..pdf.operations import PDFOperations
-                        chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
-                        if len(chunks) <= 1:
-                            from storage_manager import StorageManager
-                            StorageManager().increment_chunk(self.session_id, 1,
-                                f"파일 완료: {Path(lesson_path).name}")
-                    except Exception:
-                        pass
-                    
-                    if save_intermediate:
-                        # Save intermediate result
-                        self._save_intermediate_result(idx, lesson_path, result)
-                    
-                    lesson_results.append(result)
-                    
-                    # Update session info
-                    session_info['processed_lessons'] = idx + 1
-                    
-                except Exception as e:
-                    logger.error(f"Failed to analyze {lesson_path}: {str(e)}")
-                    lesson_results.append({"error": str(e), "lesson_path": lesson_path})
-                    
-        finally:
-            # Clean up jokbo file
-            self.file_manager.delete_file_safe(jokbo_file)
+                    from ..pdf.operations import PDFOperations
+                    chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
+                    if len(chunks) <= 1:
+                        from storage_manager import StorageManager
+                        StorageManager().increment_chunk(self.session_id, 1,
+                            f"파일 완료: {Path(lesson_path).name}")
+                except Exception:
+                    pass
+                
+                if save_intermediate:
+                    # Save intermediate result
+                    self._save_intermediate_result(idx, lesson_path, result)
+                
+                lesson_results.append(result)
+                
+                # Update session info
+                session_info['processed_lessons'] = idx + 1
+                
+            except Exception as e:
+                logger.error(f"Failed to analyze {lesson_path}: {str(e)}")
+                lesson_results.append({"error": str(e), "lesson_path": lesson_path})
         
         # Merge all results
         return self._merge_lesson_results(lesson_results, jokbo_path)
