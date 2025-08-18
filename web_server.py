@@ -16,6 +16,7 @@ from storage_manager import StorageManager
 from urllib.parse import quote
 import re
 from pdf_processor.pdf.cache import get_global_cache, clear_global_cache
+import time
 
 # --- Configuration ---
 # Use an environment variable for the storage path, essential for Render.
@@ -30,6 +31,30 @@ async def lifespan(app: FastAPI):
     # Initialize StorageManager and PDF cache
     app.state.storage_manager = StorageManager(REDIS_URL)
     get_global_cache()
+    # Best-effort auto-prune of old debug/temp files on startup (configurable)
+    try:
+        _ret_hours = int(os.getenv("DEBUG_RETENTION_HOURS", "168"))  # 7 days default
+        _prune_dirs = [Path("output/debug"), Path("output/temp/sessions")]
+        now = time.time()
+        for d in _prune_dirs:
+            if not d.exists():
+                continue
+            for p in d.rglob("*"):
+                try:
+                    if p.is_file():
+                        age_hours = (now - p.stat().st_mtime) / 3600.0
+                        if age_hours >= _ret_hours:
+                            p.unlink(missing_ok=True)
+                    # Remove empty dirs opportunistically
+                    if p.is_dir():
+                        try:
+                            next(p.iterdir())
+                        except StopIteration:
+                            p.rmdir()
+                except Exception:
+                    continue
+    except Exception:
+        pass
     yield
     # Application shutdown: clean up resources
     print("Application shutdown: Cleaning up resources...")
@@ -484,3 +509,64 @@ async def health_check(request: Request):
         },
         status_code=status_code
     )
+
+# --- Admin: Cleanup / Cache Clear ---
+def _delete_path_contents(base: Path, older_than_hours: int | None = None) -> dict:
+    deleted_files = 0
+    deleted_dirs = 0
+    now = time.time()
+    if not base.exists():
+        return {"files": 0, "dirs": 0}
+    # Walk bottom-up to delete files then empty dirs
+    for p in sorted(base.rglob("*"), key=lambda x: len(str(x)), reverse=True):
+        try:
+            if p.is_file():
+                if older_than_hours is not None:
+                    age_hours = (now - p.stat().st_mtime) / 3600.0
+                    if age_hours < older_than_hours:
+                        continue
+                p.unlink(missing_ok=True)
+                deleted_files += 1
+            elif p.is_dir():
+                # Attempt to remove empty dirs
+                try:
+                    next(p.iterdir())
+                except StopIteration:
+                    p.rmdir()
+                    deleted_dirs += 1
+        except Exception:
+            continue
+    return {"files": deleted_files, "dirs": deleted_dirs}
+
+@app.post("/admin/cleanup")
+def admin_cleanup(
+    clear_cache: bool = Query(True),
+    clear_debug: bool = Query(True),
+    clear_temp_sessions: bool = Query(True),
+    older_than_hours: int | None = Query(None, ge=1, description="Only delete files older than this many hours")
+):
+    """Administrative cleanup: clear in-memory cache and prune debug/temp files.
+
+    - clear_cache: clears in-memory PDF page-count cache
+    - clear_debug: deletes files under output/debug (optionally older-than filter)
+    - clear_temp_sessions: deletes files under output/temp/sessions (optionally older-than)
+    - older_than_hours: if provided, only deletes files older than the threshold
+    """
+    summary: dict[str, dict | bool] = {}
+    if clear_cache:
+        try:
+            clear_global_cache()
+            summary["cache_cleared"] = True
+        except Exception as e:
+            summary["cache_cleared"] = {"error": str(e)}
+    if clear_debug:
+        try:
+            summary["debug_deleted"] = _delete_path_contents(Path("output/debug"), older_than_hours)
+        except Exception as e:
+            summary["debug_deleted"] = {"error": str(e)}
+    if clear_temp_sessions:
+        try:
+            summary["temp_sessions_deleted"] = _delete_path_contents(Path("output/temp/sessions"), older_than_hours)
+        except Exception as e:
+            summary["temp_sessions_deleted"] = {"error": str(e)}
+    return summary

@@ -673,6 +673,7 @@
                 <div style="display:flex;align-items:center;gap:0.5rem;">
                     <input id="user_id_input" placeholder="User ID" style="padding:0.4rem 0.6rem;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.08);color:var(--text);min-width:140px;" />
                     <button id="save_user_id_btn" class="tab" style="padding:0.4rem 0.8rem;">Save</button>
+                    <button id="clear_cache_btn" class="tab" style="padding:0.4rem 0.8rem;" title="Clear cache and debug files">Clear Cache</button>
                 </div>
             </div>
         </div>
@@ -1242,6 +1243,29 @@
             e.preventDefault();
             const model = document.getElementById('lesson_model').value;
             await submitAnalysis('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
+        });
+
+        // Admin cleanup: POST /admin/cleanup with optional older-than filter
+        async function adminCleanup(olderHours = null) {
+            try {
+                const params = new URLSearchParams();
+                params.set('clear_cache', 'true');
+                params.set('clear_debug', 'true');
+                params.set('clear_temp_sessions', 'true');
+                if (olderHours && olderHours > 0) params.set('older_than_hours', String(olderHours));
+                const res = await fetch(`/admin/cleanup?${params.toString()}`, { method: 'POST' });
+                if (!res.ok) throw new Error('Cleanup request failed');
+                const data = await res.json();
+                alert('Cleanup done. Details: ' + JSON.stringify(data));
+            } catch (e) {
+                alert('Cleanup error: ' + e.message);
+            }
+        }
+        document.getElementById('clear_cache_btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            const older = prompt('Delete only files older than N hours? (Leave empty for all)', '');
+            const n = older ? parseInt(older, 10) : null;
+            adminCleanup(isNaN(n) ? null : n);
         });
 
         // User ID handling

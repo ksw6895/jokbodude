@@ -4,6 +4,7 @@ Multi-API analyzer wrapper that provides failover support for analyzers.
 
 from typing import Dict, Any, List, Optional, Union
 from pathlib import Path
+import json
 
 from .base import BaseAnalyzer
 from .lesson_centric import LessonCentricAnalyzer
@@ -273,6 +274,29 @@ class MultiAPIAnalyzer:
                 if idx is not None and 0 <= idx < len(ordered_results):
                     ordered_results[idx] = {"error": entry.get("error", "Unknown error")}
 
+        # Persist each chunk's result to disk with deterministic filenames for audit and
+        # optional post-merge reprocessing. This guards against any in-memory ordering glitches
+        # and gives us a durable trace when investigating mis-merges.
+        try:
+            base = f"{mode}-{Path(file_path).stem}"
+            chunk_dir = Path("output/temp/sessions") / self.session_id / "chunks" / base
+            chunk_dir.mkdir(parents=True, exist_ok=True)
+            for i, res in enumerate(ordered_results):
+                out = {
+                    "session_id": self.session_id,
+                    "mode": mode,
+                    "file": str(file_path),
+                    "center_file": str(center_file_path),
+                    "chunk_index": i,
+                    "chunk_info": list(chunks[i][1:]) if (i < len(chunks)) else None,
+                    "result": res,
+                }
+                with open(chunk_dir / f"chunk_{i:03d}.json", "w", encoding="utf-8") as f:
+                    json.dump(out, f, ensure_ascii=False, indent=2)
+        except Exception:
+            # Best effort persistence; do not fail analysis if disk is unavailable
+            pass
+
         # Normalize lesson filenames when chunking is orchestrated externally (multi-API path).
         # For jokbo-centric mode, ensure related_lesson_slides[].lesson_filename shows the original
         # lesson PDF name instead of temporary chunk filenames (e.g., tmp*.pdf).
@@ -296,8 +320,37 @@ class MultiAPIAnalyzer:
             if ordered_results[i] is None:
                 ordered_results[i] = {"error": "No result"}
         
+        # Optional: attempt a deterministic merge from persisted files, if all
+        # chunk files exist. Fallback to in-memory ordered_results if any missing.
+        merged: Optional[Dict[str, Any]] = None
+        try:
+            from ..parsers.result_merger import ResultMerger
+            all_paths = []
+            for i in range(len(tasks)):
+                p = (Path("output/temp/sessions") / self.session_id / "chunks" / base / f"chunk_{i:03d}.json")
+                if not p.exists():
+                    all_paths = []
+                    break
+                all_paths.append(p)
+            if all_paths:
+                loaded_results: List[Dict[str, Any]] = []
+                for p in all_paths:
+                    try:
+                        with open(p, "r", encoding="utf-8") as f:
+                            payload = json.load(f)
+                        res = payload.get("result") if isinstance(payload, dict) else None
+                        if isinstance(res, dict):
+                            loaded_results.append(res)
+                        else:
+                            loaded_results.append(res or {})
+                    except Exception:
+                        loaded_results.append({"error": "load_failed"})
+                merged = ResultMerger.merge_chunk_results(loaded_results, mode)
+        except Exception:
+            merged = None
+
         from ..parsers.result_merger import ResultMerger
-        return ResultMerger.merge_chunk_results(ordered_results, mode)
+        return merged if isinstance(merged, dict) and merged else ResultMerger.merge_chunk_results(ordered_results, mode)
     
     def get_api_status(self) -> Dict[str, Any]:
         """Get the status of all API keys."""
