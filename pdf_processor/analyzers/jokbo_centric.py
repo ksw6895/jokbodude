@@ -170,16 +170,15 @@ class JokboCentricAnalyzer(BaseAnalyzer):
     def _analyze_with_uploads(self, prompt: str, lesson_path: str, jokbo_path: str,
                              lesson_filename: str, jokbo_filename: str) -> str:
         """Analyze with uploading both files."""
-        # Delete existing files first (tracked for this client only)
+        # Aggressive purge: remove lesson chunk uploads for this API key before new upload.
+        # Keep any existing jokbo_* center file if present by not deleting that prefix.
         try:
-            key_tag = self.file_manager.api_client._key_tag() if getattr(self.file_manager, 'api_client', None) else None
+            from ..api.upload_cleanup import purge_key_files
+            key_tag = self.api_client._key_tag()
+            logger.info(f"Purging existing lesson uploads before analysis [key={key_tag}]")
+            purge_key_files(self.api_client, delete_prefixes=["강의자료_"], keep_display_names={f"족보_{jokbo_filename}"}, log_context="jokbo_centric_preupload")
         except Exception:
-            key_tag = None
-        if key_tag:
-            logger.info(f"Cleaning up existing uploaded files... [key={key_tag}]")
-        else:
-            logger.info("Cleaning up existing uploaded files...")
-        self.file_manager.delete_all_uploaded_files()
+            logger.info("Purge skipped due to error; continuing")
         
         # Upload and analyze
         files_to_upload = [
@@ -204,6 +203,12 @@ class JokboCentricAnalyzer(BaseAnalyzer):
     def _analyze_with_preloaded_jokbo(self, prompt: str, lesson_path: str,
                                      jokbo_file: Any, lesson_filename: str) -> str:
         """Analyze with pre-uploaded jokbo file."""
+        # Purge leftover lesson uploads for this key before uploading
+        try:
+            from ..api.upload_cleanup import purge_key_files
+            purge_key_files(self.api_client, delete_prefixes=["강의자료_"], log_context="jokbo_centric_preupload_preloaded")
+        except Exception:
+            pass
         # Upload only lesson
         lesson_file = self.api_client.upload_file(lesson_path, f"강의자료_{lesson_filename}")
         self.file_manager.track_file(lesson_file)

@@ -162,16 +162,14 @@ class LessonCentricAnalyzer(BaseAnalyzer):
     def _analyze_with_uploads(self, prompt: str, jokbo_path: str, lesson_path: str,
                              jokbo_filename: str, lesson_filename: str) -> str:
         """Analyze with uploading both files."""
-        # Delete existing files first (tracked for this client only)
+        # Aggressive purge: remove jokbo uploads for this API key before new upload.
         try:
-            key_tag = self.file_manager.api_client._key_tag() if getattr(self.file_manager, 'api_client', None) else None
+            from ..api.upload_cleanup import purge_key_files
+            key_tag = self.api_client._key_tag()
+            logger.info(f"Purging existing jokbo uploads before analysis [key={key_tag}]")
+            purge_key_files(self.api_client, delete_prefixes=["족보_"], keep_display_names={f"강의자료_{lesson_filename}"}, log_context="lesson_centric_preupload")
         except Exception:
-            key_tag = None
-        if key_tag:
-            logger.info(f"Cleaning up existing uploaded files... [key={key_tag}]")
-        else:
-            logger.info("Cleaning up existing uploaded files...")
-        self.file_manager.delete_all_uploaded_files()
+            logger.info("Purge skipped due to error; continuing")
         
         # Upload and analyze
         files_to_upload = [
@@ -196,6 +194,12 @@ class LessonCentricAnalyzer(BaseAnalyzer):
     def _analyze_with_preloaded_lesson(self, prompt: str, jokbo_path: str,
                                       lesson_file: Any, jokbo_filename: str) -> str:
         """Analyze with pre-uploaded lesson file."""
+        # Purge leftover jokbo uploads for this key before uploading
+        try:
+            from ..api.upload_cleanup import purge_key_files
+            purge_key_files(self.api_client, delete_prefixes=["족보_"], log_context="lesson_centric_preupload_preloaded")
+        except Exception:
+            pass
         # Upload only jokbo
         jokbo_file = self.api_client.upload_file(jokbo_path, f"족보_{jokbo_filename}")
         self.file_manager.track_file(jokbo_file)
