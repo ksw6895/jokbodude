@@ -45,14 +45,76 @@ class FileManager:
     def untrack_file(self, file: Any) -> None:
         """
         Remove a file from tracking.
-        
-        Args:
-            file: File object to untrack
+        Accepts SDK file object; falls back to name/display_name matching to
+        avoid identity mismatches between upload and list APIs.
         """
-        if file in self.uploaded_files:
-            self.uploaded_files.remove(file)
-        self._tracked_files.discard(file.name)
-        logger.debug(f"Untracked file: {file.display_name}")
+        try:
+            file_name = getattr(file, 'name', None)
+            display_name = getattr(file, 'display_name', None)
+        except Exception:
+            file_name = None
+            display_name = None
+
+        removed = False
+        # Prefer identity removal when possible
+        try:
+            if file in self.uploaded_files:
+                self.uploaded_files.remove(file)
+                removed = True
+        except Exception:
+            pass
+        # Fall back to name/display_name based removal
+        if not removed:
+            try:
+                new_list = []
+                for f in self.uploaded_files:
+                    try:
+                        same = False
+                        if file_name and getattr(f, 'name', None) == file_name:
+                            same = True
+                        elif display_name and getattr(f, 'display_name', None) == display_name:
+                            same = True
+                        if not same:
+                            new_list.append(f)
+                    except Exception:
+                        new_list.append(f)
+                if len(new_list) != len(self.uploaded_files):
+                    removed = True
+                self.uploaded_files = new_list
+            except Exception:
+                pass
+
+        if file_name:
+            self._tracked_files.discard(file_name)
+        # Also prune any tracked entries that match by display name
+        if display_name:
+            try:
+                to_remove = [n for n in list(self._tracked_files) if n.endswith(display_name)]
+                for n in to_remove:
+                    self._tracked_files.discard(n)
+            except Exception:
+                pass
+        try:
+            dn = display_name or file_name or "(unknown)"
+            logger.debug(f"Untracked file: {dn}")
+        except Exception:
+            pass
+
+    def untrack_by_display_name(self, display_name: str) -> None:
+        """Remove any tracked entries matching the given display name."""
+        try:
+            # Remove from uploaded_files by display name
+            self.uploaded_files = [
+                f for f in self.uploaded_files
+                if getattr(f, 'display_name', None) != display_name
+            ]
+            # Attempt to remove corresponding name keys as well
+            to_remove = [n for n in list(self._tracked_files) if n.endswith(display_name)]
+            for n in to_remove:
+                self._tracked_files.discard(n)
+            logger.debug(f"Untracked by display_name: {display_name}")
+        except Exception:
+            pass
     
     def list_uploaded_files(self) -> List[Any]:
         """
@@ -105,8 +167,17 @@ class FileManager:
                     self.untrack_file(file)
                     return True
             except Exception as e:
+                msg = str(e)
+                # Treat missing/forbidden (already deleted or different key context) as success to prevent churn
+                if ('403' in msg and ('may not exist' in msg or 'permission' in msg or 'not found' in msg)):
+                    try:
+                        self.untrack_file(file)
+                    except Exception:
+                        pass
+                    logger.info(f"Treating as deleted (already removed): {getattr(file, 'display_name', '(unknown)')}")
+                    return True
                 logger.warning(
-                    f"Failed to delete {file.display_name} (attempt {attempt + 1}/{max_retries}): {str(e)}"
+                    f"Failed to delete {getattr(file, 'display_name', '(unknown)')} (attempt {attempt + 1}/{max_retries}): {msg}"
                 )
             if attempt < max_retries - 1:
                 time.sleep(2 ** attempt)  # Exponential backoff
@@ -172,6 +243,8 @@ class FileManager:
                         logger.info(f"Keeping center file: {center_file_display_name} [key={self.api_client._key_tag()}]")
                     else:
                         logger.info(f"Keeping center file: {center_file_display_name}")
+            # Ensure the center file is not cleaned up later via __del__
+            self.untrack_by_display_name(center_file_display_name)
         except Exception as e:
             logger.error(f"Error during cleanup: {str(e)}")
     
