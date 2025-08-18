@@ -274,9 +274,27 @@ class MultiAPIAnalyzer:
                 if idx is not None and 0 <= idx < len(ordered_results):
                     ordered_results[idx] = {"error": entry.get("error", "Unknown error")}
 
-        # Persist each chunk's result to disk with deterministic filenames for audit and
-        # optional post-merge reprocessing. This guards against any in-memory ordering glitches
-        # and gives us a durable trace when investigating mis-merges.
+        # Normalize lesson filenames when chunking is orchestrated externally (multi-API path).
+        # For jokbo-centric mode, ensure related_lesson_slides[].lesson_filename shows the original
+        # lesson PDF name instead of temporary chunk filenames (e.g., tmp*.pdf).
+        if mode == "jokbo-centric":
+            try:
+                original_lesson_filename = Path(file_path).name
+                for res in ordered_results:
+                    if not isinstance(res, dict):
+                        continue
+                    for page in (res.get("jokbo_pages") or []):
+                        for q in (page.get("questions") or []):
+                            for slide in (q.get("related_lesson_slides") or []):
+                                if isinstance(slide, dict):
+                                    slide["lesson_filename"] = original_lesson_filename
+            except Exception:
+                # Best-effort normalization; continue if structure differs
+                pass
+
+        # Persist each chunk's result to disk (after normalization) with deterministic filenames
+        # for audit/optional re-merge. Saving normalized results ensures downstream consumers
+        # do not see temp chunk names.
         try:
             base = f"{mode}-{Path(file_path).stem}"
             chunk_dir = Path("output/temp/sessions") / self.session_id / "chunks" / base
@@ -296,24 +314,6 @@ class MultiAPIAnalyzer:
         except Exception:
             # Best effort persistence; do not fail analysis if disk is unavailable
             pass
-
-        # Normalize lesson filenames when chunking is orchestrated externally (multi-API path).
-        # For jokbo-centric mode, ensure related_lesson_slides[].lesson_filename shows the original
-        # lesson PDF name instead of temporary chunk filenames (e.g., tmp*.pdf).
-        if mode == "jokbo-centric":
-            try:
-                original_lesson_filename = Path(file_path).name
-                for res in ordered_results:
-                    if not isinstance(res, dict):
-                        continue
-                    for page in (res.get("jokbo_pages") or []):
-                        for q in (page.get("questions") or []):
-                            for slide in (q.get("related_lesson_slides") or []):
-                                if isinstance(slide, dict):
-                                    slide["lesson_filename"] = original_lesson_filename
-            except Exception:
-                # Best-effort normalization; continue if structure differs
-                pass
 
         # Replace any missing entries with error placeholders
         for i in range(len(ordered_results)):
@@ -339,10 +339,18 @@ class MultiAPIAnalyzer:
                         with open(p, "r", encoding="utf-8") as f:
                             payload = json.load(f)
                         res = payload.get("result") if isinstance(payload, dict) else None
-                        if isinstance(res, dict):
-                            loaded_results.append(res)
-                        else:
-                            loaded_results.append(res or {})
+                        # Re-apply filename normalization defensively on loaded chunk results
+                        if isinstance(res, dict) and mode == "jokbo-centric":
+                            try:
+                                orig = Path(file_path).name
+                                for page in (res.get("jokbo_pages") or []):
+                                    for q in (page.get("questions") or []):
+                                        for slide in (q.get("related_lesson_slides") or []):
+                                            if isinstance(slide, dict):
+                                                slide["lesson_filename"] = orig
+                            except Exception:
+                                pass
+                        loaded_results.append(res if isinstance(res, dict) else (res or {}))
                     except Exception:
                         loaded_results.append({"error": "load_failed"})
                 merged = ResultMerger.merge_chunk_results(loaded_results, mode)
