@@ -10,6 +10,7 @@ from pdf_processor.core.processor import PDFProcessor
 from pdf_creator import PDFCreator
 from storage_manager import StorageManager
 from pdf_processor.pdf.operations import PDFOperations
+from celery import group, chord
 
 # --- Configuration ---
 # Use /tmp for initial file storage if persistent storage not available
@@ -375,4 +376,163 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
             
     except Exception as e:
         # Celery will catch this exception and store it in the task result backend
+        raise e
+
+
+# --- Batch (multi-request in one server call) ---
+@celery_app.task(name="tasks.batch_analyze_single")
+def batch_analyze_single(
+    job_id: str,
+    mode: str,
+    sub_index: int,
+    primary_key: str,
+    other_keys: list[str],
+    model_type: Optional[str] = None,
+    min_relevance: Optional[int] = None,
+    multi_api: Optional[bool] = None,
+):
+    """Execute a single, isolated sub-analysis.
+
+    - mode: 'jokbo-centric' => primary is jokbo, others are lessons
+            'lesson-centric' => primary is lesson, others are jokbos
+    Each subtask keeps Gemini context strictly to the provided files only.
+    """
+    storage_manager = StorageManager()
+    try:
+        # Cooperative cancel check
+        try:
+            if storage_manager.is_cancelled(job_id):
+                storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
+                current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+                raise Ignore()
+        except Ignore:
+            raise
+        except Exception:
+            pass
+
+        # Refresh TTLs upfront
+        try:
+            storage_manager.refresh_ttls([primary_key] + list(other_keys))
+        except Exception:
+            pass
+
+        # Configure API and create model
+        configure_api()
+        selected_model = model_type or MODEL_TYPE
+        model = create_model(selected_model)
+        processor = PDFProcessor(model, session_id=f"{job_id}:{mode}:{sub_index}")
+        if min_relevance is not None:
+            try:
+                processor.set_relevance_threshold(int(min_relevance))
+            except Exception:
+                pass
+        creator = PDFCreator()
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            a_dir = temp_path / ("jokbo" if mode == "jokbo-centric" else "lesson")
+            b_dir = temp_path / ("lesson" if mode == "jokbo-centric" else "jokbo")
+            out_dir = temp_path / "output"
+            a_dir.mkdir(parents=True, exist_ok=True)
+            b_dir.mkdir(parents=True, exist_ok=True)
+            out_dir.mkdir(parents=True, exist_ok=True)
+
+            # Download primary
+            a_name = primary_key.split(":")[-2]
+            a_path = a_dir / a_name
+            storage_manager.save_file_locally(primary_key, a_path)
+
+            # Download others
+            b_paths: list[str] = []
+            for k in other_keys:
+                name = k.split(":")[-2]
+                p = b_dir / name
+                storage_manager.save_file_locally(k, p)
+                b_paths.append(str(p))
+
+            # Do analysis isolated to this pair-set
+            if mode == "jokbo-centric":
+                analysis_result = (
+                    processor.analyze_jokbo_centric_multi_api(b_paths, str(a_path), api_keys=API_KEYS)
+                    if (multi_api and len(API_KEYS) > 1)
+                    else processor.analyze_jokbo_centric(b_paths, str(a_path))
+                )
+                if "error" in analysis_result:
+                    raise Exception(f"Analysis error for {a_path.name}: {analysis_result['error']}")
+                output_filename = f"jokbo_centric_{a_path.stem}_all_lessons.pdf"
+                output_path = out_dir / output_filename
+                creator.create_jokbo_centric_pdf(
+                    str(a_path), analysis_result, str(output_path), str(b_dir)
+                )
+            else:
+                analysis_result = (
+                    processor.analyze_lesson_centric_multi_api(b_paths, str(a_path), api_keys=API_KEYS)
+                    if (multi_api and len(API_KEYS) > 1)
+                    else processor.analyze_lesson_centric(b_paths, str(a_path))
+                )
+                if "error" in analysis_result:
+                    raise Exception(f"Analysis error for {a_path.name}: {analysis_result['error']}")
+                output_filename = f"filtered_{a_path.stem}_all_jokbos.pdf"
+                output_path = out_dir / output_filename
+                creator.create_lesson_centric_pdf(
+                    str(a_path), analysis_result, str(output_path), str(b_dir)
+                )
+
+            # Persist result
+            storage_manager.store_result(job_id, output_path)
+
+            # Update progress by one completed subtask
+            try:
+                storage_manager.increment_chunk(job_id, 1, message=f"서브작업 완료: {a_path.name}")
+            except Exception:
+                pass
+
+            # Cleanup
+            try:
+                processor.cleanup_session()
+            except Exception:
+                pass
+
+            return {
+                "status": "OK",
+                "job_id": job_id,
+                "mode": mode,
+                "index": sub_index,
+                "output": output_filename,
+            }
+    except Exception as e:
+        raise e
+
+
+@celery_app.task(name="tasks.aggregate_batch")
+def aggregate_batch(results: list, job_id: str):
+    """Finalize a batch job after all subtasks completed.
+
+    - Marks job progress as complete
+    - Writes a simple manifest JSON alongside PDFs (best-effort)
+    """
+    sm = StorageManager()
+    try:
+        # Finalize progress
+        try:
+            sm.finalize_progress(job_id, "완료")
+        except Exception:
+            pass
+
+        # Persist a manifest file to results directory for bookkeeping
+        try:
+            from pathlib import Path
+            import json as _json
+            manifest = {
+                "job_id": job_id,
+                "generated": [r.get("output") for r in (results or []) if isinstance(r, dict)],
+                "count": len([r for r in (results or []) if isinstance(r, dict)]),
+            }
+            dest_dir = sm.results_dir / job_id
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            (dest_dir / "manifest.json").write_text(_json.dumps(manifest, ensure_ascii=False, indent=2))
+        except Exception:
+            pass
+        return {"job_id": job_id, "subtask_results": results}
+    except Exception as e:
         raise e

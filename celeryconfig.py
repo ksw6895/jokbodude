@@ -83,6 +83,8 @@ task_queues = (
 task_routes = {
     'tasks.run_jokbo_analysis': {'queue': 'analysis'},
     'tasks.run_lesson_analysis': {'queue': 'analysis'},
+    'tasks.batch_analyze_single': {'queue': 'analysis'},
+    'tasks.aggregate_batch': {'queue': 'analysis'},
 }
 
 # Logging configuration
@@ -136,6 +138,16 @@ task_annotations = {
         'rate_limit': '5/s', 
         'time_limit': 90000,  # ~25 hours
         'soft_time_limit': 86400,  # 24 hours
+    },
+    'tasks.batch_analyze_single': {
+        'rate_limit': '10/s',
+        'time_limit': 90000,
+        'soft_time_limit': 86400,
+    },
+    'tasks.aggregate_batch': {
+        'rate_limit': '10/s',
+        'time_limit': 3600,
+        'soft_time_limit': 3600,
     }
 }
 

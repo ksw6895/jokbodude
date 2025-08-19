@@ -12,6 +12,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from celery import Celery
+from celery import group, chord
 from storage_manager import StorageManager
 from urllib.parse import quote
 import re
@@ -389,6 +390,137 @@ def delete_all_result_files(request: Request, job_id: str):
     storage_manager = request.app.state.storage_manager
     count = storage_manager.delete_all_results(job_id)
     return {"status": "deleted", "job_id": job_id, "deleted_count": int(count)}
+
+@app.post("/analyze/batch", status_code=202)
+async def analyze_batch(
+    request: Request,
+    jokbo_files: list[UploadFile] = File(...),
+    lesson_files: list[UploadFile] = File(...),
+    mode: str = Query("jokbo-centric", regex="^(jokbo-centric|lesson-centric)$"),
+    model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
+    multi_api: bool = Query(False),
+    min_relevance: Optional[int] = Query(80, ge=0, le=110),
+    multi_api_form: Optional[bool] = Form(None),
+    min_relevance_form: Optional[int] = Form(None),
+    user_id: Optional[str] = Query(None)
+):
+    """Submit a batch job that fans out into isolated subtasks.
+
+    - mode=jokbo-centric: one subtask per jokbo vs all lessons
+    - mode=lesson-centric: one subtask per lesson vs all jokbos
+    """
+    job_id = str(uuid.uuid4())
+    storage_manager = request.app.state.storage_manager
+    try:
+        # Validate sizes
+        for f in jokbo_files + lesson_files:
+            if f.size and f.size > MAX_FILE_SIZE:
+                raise HTTPException(status_code=413, detail=f"File {f.filename} exceeds maximum size of 50MB")
+
+        jokbo_keys: list[str] = []
+        lesson_keys: list[str] = []
+        # Save to temp then storage manager
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tdir = Path(temp_dir)
+            for f in jokbo_files:
+                p = tdir / f.filename
+                content = await f.read()
+                p.write_bytes(content)
+                k = storage_manager.store_file(p, job_id, "jokbo")
+                jokbo_keys.append(k)
+                if not storage_manager.verify_file_available(k):
+                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+            for f in lesson_files:
+                p = tdir / f.filename
+                content = await f.read()
+                p.write_bytes(content)
+                k = storage_manager.store_file(p, job_id, "lesson")
+                lesson_keys.append(k)
+                if not storage_manager.verify_file_available(k):
+                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+
+        # Refresh TTLs
+        try:
+            storage_manager.refresh_ttls(jokbo_keys + lesson_keys)
+        except Exception:
+            pass
+
+        # Effective options
+        effective_multi = (multi_api_form if multi_api_form is not None else multi_api)
+        effective_min_rel = None
+        try:
+            eff = min_relevance_form if min_relevance_form is not None else min_relevance
+            if eff is not None:
+                effective_min_rel = max(0, min(int(eff), 110))
+        except Exception:
+            effective_min_rel = None
+
+        # Persist job metadata (for bookkeeping/UI)
+        metadata = {
+            "mode": mode,
+            "jokbo_keys": jokbo_keys,
+            "lesson_keys": lesson_keys,
+            "model": model,
+            "multi_api": effective_multi,
+            "min_relevance": effective_min_rel,
+            "user_id": user_id,
+            "batch": True,
+        }
+        storage_manager.store_job_metadata(job_id, metadata)
+        if user_id:
+            storage_manager.add_user_job(user_id, job_id)
+
+        # Init coarse progress: one chunk per subtask
+        sub_count = len(jokbo_keys) if mode == "jokbo-centric" else len(lesson_keys)
+        if sub_count == 0:
+            raise HTTPException(status_code=400, detail="No input files provided for batch")
+        storage_manager.init_progress(job_id, sub_count, f"배치 시작: 총 {sub_count}건")
+
+        # Build group of isolated subtasks
+        header = []
+        if mode == "jokbo-centric":
+            for idx, pk in enumerate(jokbo_keys):
+                header.append(
+                    celery_app.signature(
+                        "tasks.batch_analyze_single",
+                        args=[job_id, mode, idx, pk, lesson_keys],
+                        kwargs={
+                            "model_type": model,
+                            "min_relevance": effective_min_rel,
+                            "multi_api": effective_multi,
+                        },
+                        queue="analysis",
+                    )
+                )
+        else:
+            for idx, pk in enumerate(lesson_keys):
+                header.append(
+                    celery_app.signature(
+                        "tasks.batch_analyze_single",
+                        args=[job_id, mode, idx, pk, jokbo_keys],
+                        kwargs={
+                            "model_type": model,
+                            "min_relevance": effective_min_rel,
+                            "multi_api": effective_multi,
+                        },
+                        queue="analysis",
+                    )
+                )
+
+        # Aggregate with chord callback
+        callback = celery_app.signature("tasks.aggregate_batch", args=[job_id], queue="analysis")
+        async_result = chord(group(header))(callback)
+
+        # Map job to the chord result id for status polling
+        try:
+            storage_manager.set_job_task(job_id, async_result.id)
+        except Exception:
+            pass
+        return {"job_id": job_id, "task_id": async_result.id, "subtasks": sub_count}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Batch submission failed: {str(e)}")
 
 @app.get("/progress/{job_id}")
 def get_job_progress(request: Request, job_id: str):

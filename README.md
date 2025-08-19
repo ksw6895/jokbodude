@@ -54,6 +54,21 @@ curl http://localhost:8000/results/<job_id>
 curl -OJ http://localhost:8000/result/<job_id>/<filename>
 ```
 
+### 배치 처리(한 번의 API로 여러 하위 요청)
+서버가 요청을 팬아웃하여 각 하위 작업을 격리 실행합니다(요청 간 오염 방지).
+```
+curl -F "jokbo_files=@jokbo/sample.pdf" -F "lesson_files=@lesson/sample.pdf" \
+     "http://localhost:8000/analyze/batch?mode=jokbo-centric&model=flash"
+```
+- mode=jokbo-centric: 각 족보 파일 × 모든 강의자료로 N개의 하위 작업 실행
+- mode=lesson-centric: 각 강의자료 × 모든 족보로 N개의 하위 작업 실행
+- 진행/결과는 동일 엔드포인트(`/progress/{job_id}`, `/results/{job_id}`) 사용
+
+배치 스모크 테스트:
+```
+bash scripts/smoke_batch.sh
+```
+
 프런트엔드는 `/`에서 정적 파일로 제공됩니다.
 
 ## Render 배포(요약)
@@ -81,4 +96,3 @@ AGPLv3. 네트워크 서비스로 제공 시 수정본 소스 공개 의무가 �
 
 ## 기여
 이슈/PR 환영합니다. 개선 아이디어/버그 리포트 부탁드립니다.
-
