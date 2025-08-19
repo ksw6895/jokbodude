@@ -300,9 +300,11 @@ class MultiAPIManager:
                 
                 for task in tasks:
                     # Submit task with failover
+                    # IMPORTANT: bind current task as default arg to avoid late-binding bug
+                    # that would make all lambdas capture the final loop value.
                     future = executor.submit(
                         self.execute_with_failover,
-                        lambda api_client, model: operation(task, api_client, model)
+                        (lambda api_client, model, _task=task: operation(_task, api_client, model))
                     )
                     future_to_task[future] = task
                 
