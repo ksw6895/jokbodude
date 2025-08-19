@@ -496,12 +496,14 @@ class ResponseParser:
                             continue
                         sc = ResponseParser._snap_score(s.get("relevance_score"), allow_zero=True)
                         rs = (s.get("relevance_reason") or s.get("reason") or "").strip()
-                        norm_slides.append({
-                            "lesson_filename": lf,
-                            "lesson_page": lp,
-                            "relevance_score": sc,
-                            "relevance_reason": rs
-                        })
+                        # Parser-level filtering: drop slides with score < 80
+                        if sc >= 80:
+                            norm_slides.append({
+                                "lesson_filename": lf,
+                                "lesson_page": lp,
+                                "relevance_score": sc,
+                                "relevance_reason": rs
+                            })
                     # Keep at most 2 slides by score desc
                     norm_slides.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)
                     norm_slides = norm_slides[:2]
@@ -586,6 +588,11 @@ class ResponseParser:
                 else:
                     qn_on_page = []
 
+                # Parser-level filtering: drop questions with relevance_score < 80
+                rs_val = max(0, min(ResponseParser._to_int_safe(q.get("relevance_score"), 0), 110))
+                if rs_val < 80:
+                    continue
+
                 norm_qs.append({
                     "jokbo_filename": (q.get("jokbo_filename") or "").strip(),
                     "jokbo_page": ResponseParser._to_int_safe(q.get("jokbo_page"), 0),
@@ -596,7 +603,7 @@ class ResponseParser:
                     "answer": ans,
                     "explanation": expl,
                     "wrong_answer_explanations": ResponseParser._norm_wrong_answer_explanations(q.get("wrong_answer_explanations")),
-                    "relevance_score": max(0, min(ResponseParser._to_int_safe(q.get("relevance_score"), 0), 110)),
+                    "relevance_score": rs_val,
                     "relevance_reason": (q.get("relevance_reason") or q.get("reason") or "").strip(),
                 })
             # Skip slides that ended up with no valid questions
