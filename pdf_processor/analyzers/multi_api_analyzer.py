@@ -171,7 +171,8 @@ class MultiAPIAnalyzer:
         # Determine workers: default to using all API keys up to number of tasks
         if max_workers is None:
             try:
-                max_workers = min(len(file_pairs), len(self.api_manager.api_keys)) or 1
+                capacity = len(self.api_manager.api_keys) * max(1, int(getattr(self.api_manager, 'per_key_limit', 1)))
+                max_workers = min(len(file_pairs), max(1, capacity))
             except Exception:
                 max_workers = min(len(file_pairs), 3) or 1
         # Increment progress for each completed non-chunk task to keep totals consistent
@@ -211,9 +212,8 @@ class MultiAPIAnalyzer:
         
         # Determine a suitable level of parallelism
         try:
-            max_workers = min(len(tasks), len(self.api_manager.api_keys))
-            if max_workers <= 0:
-                max_workers = 1
+            capacity = len(self.api_manager.api_keys) * max(1, int(getattr(self.api_manager, 'per_key_limit', 1)))
+            max_workers = min(len(tasks), max(1, capacity))
         except Exception:
             max_workers = min(len(tasks), 3)
         
