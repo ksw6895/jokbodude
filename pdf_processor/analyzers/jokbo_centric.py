@@ -374,7 +374,7 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                     # Add related slides
                     for slide in question.get("related_lesson_slides", []):
                         all_connections[question_id]["connections"].append(slide)
-        
+
         # Build final result with filtered connections
         final_pages = {}
         
@@ -391,7 +391,18 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                 }
             
             # Filter connections with user-configured threshold
-            filtered_connections = self.filter_connections(connections, min_score=getattr(self, 'min_relevance_score', 80))
+            min_thr = getattr(self, 'min_relevance_score', 80)
+            filtered_connections = self.filter_connections(connections, min_score=min_thr)
+            try:
+                logger.debug(
+                    f"merge_jokbo: Q={question_data.get('question_number')} @page={jokbo_page}"
+                    f" connections={len(connections)} -> kept={len(filtered_connections)} (min={min_thr})"
+                )
+                qnums = question_data.get("question_numbers_on_page")
+                if qnums:
+                    logger.debug(f"merge_jokbo: Q={question_data.get('question_number')} page_qnums={qnums}")
+            except Exception:
+                pass
             
             # Add question with filtered connections
             question_data["related_lesson_slides"] = filtered_connections

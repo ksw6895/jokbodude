@@ -344,9 +344,9 @@ class PDFCreator:
     
     def extract_jokbo_question(self, jokbo_filename: str, jokbo_page: int, question_number, question_text: str, jokbo_dir: str = "jokbo", jokbo_end_page: int = None, is_last_question_on_page: bool = False, question_numbers_on_page = None):
         """Extract full page containing the question from jokbo PDF"""
-        self.log_debug(f"extract_jokbo_question called for Q{question_number} on page {jokbo_page}")
-        self.log_debug(f"  is_last_question_on_page: {is_last_question_on_page}")
-        self.log_debug(f"  question_numbers_on_page: {question_numbers_on_page}")
+        self.log_debug(f"extract_jokbo_question: Q={question_number}, start_page={jokbo_page}, initial_end={jokbo_end_page}")
+        self.log_debug(f"  is_last_question_on_page={is_last_question_on_page}")
+        self.log_debug(f"  question_numbers_on_page(raw)={question_numbers_on_page}")
         
         jokbo_path = self._resolve_jokbo_path(jokbo_dir, jokbo_filename)
         if not jokbo_path.exists():
@@ -363,6 +363,8 @@ class PDFCreator:
             return None
         
         # Determine the end page
+        decision_reason = ""
+        explicit_end = jokbo_end_page
         if jokbo_end_page is None:
             # Normalize question number and page list to digits for robust matching
             qnum_int = self._safe_int(question_number, 0)
@@ -389,35 +391,43 @@ class PDFCreator:
                     jokbo_end_page = jokbo_page + 1
                     print(f"  DEBUG: Question {question_number} is last in {page_qnums} on page {jokbo_page}")
                     print(f"  DEBUG: Including next page {jokbo_end_page} (PDF has {pdf_page_count} pages)")
-                    self.log_debug(f"  LAST QUESTION: Including next page {jokbo_end_page}")
+                    decision_reason = "last_on_page_numbers"
+                    self.log_debug(f"  DECISION: last_on_page -> include next page {jokbo_end_page}")
                 else:
                     jokbo_end_page = jokbo_page
                     print(f"  DEBUG: Question {question_number} on page {jokbo_page}, not last or no next page (page list: {page_qnums})")
-                    self.log_debug(f"  NOT LAST: Using single page {jokbo_end_page}")
+                    decision_reason = "not_last_by_numbers"
+                    self.log_debug(f"  DECISION: not_last_by_numbers -> use single page {jokbo_end_page}")
             # Fallback to is_last_question_on_page flag
             elif is_last_question_on_page and jokbo_page < pdf_page_count:
                 # Automatically include the next page
                 jokbo_end_page = jokbo_page + 1
                 print(f"  Question {question_number} is last on page {jokbo_page}, including next page")
-                self.log_debug(f"  FALLBACK: Using is_last_question_on_page flag")
+                decision_reason = "last_flag"
+                self.log_debug(f"  DECISION: last_flag -> include next page {jokbo_end_page}")
             else:
                 jokbo_end_page = jokbo_page
-                self.log_debug(f"  NO CONDITIONS MET: Using single page")
+                decision_reason = "default_single"
+                self.log_debug(f"  DECISION: default_single -> use single page {jokbo_end_page}")
         
         # Validate end page
         if jokbo_end_page > pdf_page_count or jokbo_end_page < jokbo_page:
             print(f"Warning: Invalid end page {jokbo_end_page}, using single page")
+            self.log_debug(f"  VALIDATION: clamped end_page from {jokbo_end_page} to {jokbo_page}")
             jokbo_end_page = jokbo_page
         
         # Extract the full page(s) containing the question
-        self.log_debug(f"  Final extraction: pages {jokbo_page} to {jokbo_end_page} (0-indexed: {jokbo_page-1} to {jokbo_end_page-1})")
+        self.log_debug(
+            f"  Final extraction: start={jokbo_page}, end={jokbo_end_page}, 0-based={jokbo_page-1}..{jokbo_end_page-1},"
+            f" explicit_end_param={explicit_end}, decision={decision_reason}"
+        )
         question_doc = fitz.open()
         
         # Extract pages
         jokbo_pdf = self.get_jokbo_pdf(str(jokbo_path))  # get_jokbo_pdf already handles locking
         question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_end_page-1)
         
-        self.log_debug(f"  Extracted document has {len(question_doc)} pages")
+        self.log_debug(f"  Extracted document pages={len(question_doc)}")
         
         return question_doc
     
@@ -675,6 +685,7 @@ class PDFCreator:
                     self.log_debug(f"  WARN: could not compute last-on-page for Q{question_num}")
                 
                 # Extract the question pages (handles multi-page questions)
+                before_pages = len(doc)
                 question_doc = self.extract_jokbo_question(
                     jokbo_filename,
                     jokbo_page_num,
@@ -687,8 +698,19 @@ class PDFCreator:
                     question_numbers
                 )
                 if question_doc:
+                    try:
+                        self.log_debug(
+                            f"insert_question: Q={question_num}, src_page={jokbo_page_num},"
+                            f" doc_pages_before={before_pages}, insert_pages={len(question_doc)}"
+                        )
+                    except Exception:
+                        pass
                     doc.insert_pdf(question_doc)
                     question_doc.close()
+                    after_pages = len(doc)
+                    self.log_debug(
+                        f"insert_question_done: Q={question_num}, total_pages_now={after_pages}"
+                    )
                 
                 # Add related lesson slides for this specific question
                 for slide_info in related_slides:
@@ -709,8 +731,13 @@ class PDFCreator:
                         lesson_dir
                     )
                     if slide_doc:
+                        before_slide_insert = len(doc)
                         doc.insert_pdf(slide_doc)
                         slide_doc.close()
+                        self.log_debug(
+                            f"insert_slide: lesson='{lesson_filename}', page={lesson_page},"
+                            f" pages_before={before_slide_insert}, total_pages_now={len(doc)}"
+                        )
                     else:
                         self.log_debug(f"SKIP inserting slide: file='{lesson_filename}', page={lesson_page}")
                 

@@ -89,6 +89,9 @@ class MultiAPIManager:
         self.api_statuses = [APIKeyStatus(key, i) for i, key in enumerate(api_keys)]
         self.current_index = 0
         self._lock = threading.Lock()
+        # Track keys currently in use to avoid concurrent operations on the same key
+        self._in_use: set[int] = set()
+        self._cv = threading.Condition(self._lock)
         
         # Create API clients for each key
         self.api_clients = []
@@ -109,30 +112,40 @@ class MultiAPIManager:
         safe_ids = [f"k{i}:***{(k or '')[-4:] if k else '????'}" for i, k in enumerate(api_keys)]
         logger.info(f"Initialized MultiAPIManager with {len(api_keys)} API keys: {', '.join(safe_ids)}")
     
-    def get_next_available_api(self) -> Optional[int]:
+    def _acquire_api_index(self, wait: bool = True, timeout: Optional[float] = None) -> Optional[int]:
         """
-        Get the next available API index using round-robin with availability checking.
-        
-        Returns:
-            API index or None if no APIs available
+        Acquire an available, not-in-use API index. Optionally wait until one is free.
+        Ensures at most one concurrent operation per key to avoid cross-upload interference.
         """
-        with self._lock:
-            # Try to find an available API starting from current index
-            attempts = 0
-            while attempts < len(self.api_keys):
-                # Check if current API is available
-                if self.api_statuses[self.current_index].check_availability():
-                    selected_index = self.current_index
-                    # Move to next index for next call
-                    self.current_index = (self.current_index + 1) % len(self.api_keys)
-                    return selected_index
-                
-                # Try next API
-                self.current_index = (self.current_index + 1) % len(self.api_keys)
-                attempts += 1
-            
-            # No available APIs
-            return None
+        with self._cv:
+            end_time = None if timeout is None else (time.time() + timeout)
+            while True:
+                # Scan for an available, idle key starting from current_index
+                n = len(self.api_keys)
+                for _ in range(n):
+                    idx = self.current_index
+                    self.current_index = (self.current_index + 1) % n
+                    status = self.api_statuses[idx]
+                    if status.check_availability() and idx not in self._in_use:
+                        self._in_use.add(idx)
+                        return idx
+                # None found
+                if not wait:
+                    return None
+                # Wait for a key to be released or become available
+                if timeout is not None:
+                    remaining = end_time - time.time()
+                    if remaining <= 0:
+                        return None
+                    self._cv.wait(timeout=remaining)
+                else:
+                    self._cv.wait(0.5)
+    
+    def _release_api_index(self, idx: int) -> None:
+        with self._cv:
+            if idx in self._in_use:
+                self._in_use.remove(idx)
+            self._cv.notify_all()
     
     def get_best_api(self) -> Optional[int]:
         """
@@ -176,13 +189,10 @@ class MultiAPIManager:
         total_attempts = 0
         
         while total_attempts < max_retries:
-            # Get next available API
-            api_index = self.get_next_available_api()
-            
+            # Acquire an available, idle API key index (block briefly if needed)
+            api_index = self._acquire_api_index(wait=True, timeout=60.0)
             if api_index is None:
-                # No available APIs, wait and retry
-                logger.warning("No available APIs, waiting 30 seconds...")
-                time.sleep(30)
+                logger.warning("No available APIs after waiting; retrying...")
                 total_attempts += 1
                 continue
             
@@ -218,6 +228,9 @@ class MultiAPIManager:
                     logger.warning(f"API key {api_index} (***{key_suffix}) has permission issues")
                 
                 total_attempts += 1
+            finally:
+                # Release the API key for other tasks
+                self._release_api_index(api_index)
         
         # All attempts failed
         raise APIError(f"All API attempts failed after {total_attempts} tries. Errors: {'; '.join(errors)}")
@@ -257,7 +270,7 @@ class MultiAPIManager:
                 logger.info(f"Reset status for API key {api_index}")
     
     def distribute_tasks(self, tasks: List[Any], operation: Callable,
-                        parallel: bool = True, max_workers: int = 3,
+                        parallel: bool = True, max_workers: Optional[int] = None,
                         on_progress: Optional[Callable[[Any], None]] = None) -> List[Any]:
         """
         Distribute tasks across multiple API keys.
@@ -278,7 +291,8 @@ class MultiAPIManager:
             
             # Clamp workers to number of API keys and number of tasks
             try:
-                safe_workers = max(1, min(max_workers or 1, len(self.api_keys), len(tasks)))
+                desired = max_workers if isinstance(max_workers, int) and max_workers > 0 else len(self.api_keys)
+                safe_workers = max(1, min(desired, len(self.api_keys), len(tasks)))
             except Exception:
                 safe_workers = max_workers or 1
             with ThreadPoolExecutor(max_workers=safe_workers) as executor:

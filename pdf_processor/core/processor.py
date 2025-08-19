@@ -133,7 +133,7 @@ class PDFProcessor:
     
     # Multi-API support
     def analyze_lesson_centric_multi_api(self, jokbo_paths: List[str], lesson_path: str,
-                                        api_keys: List[str], max_workers: int = 3) -> Dict[str, Any]:
+                                        api_keys: List[str], max_workers: Optional[int] = None) -> Dict[str, Any]:
         """
         Analyze multiple jokbos using multi-API support (lesson-centric mode).
         
@@ -186,8 +186,11 @@ class PDFProcessor:
         else:
             # Distribute jokbos across APIs without chunking
             file_pairs = [(jokbo_path, lesson_path) for jokbo_path in jokbo_paths]
-            # Use all API keys up to number of pairs
-            workers = min(len(api_keys), len(file_pairs)) if api_keys else min(3, len(file_pairs))
+            # Use all API keys up to number of pairs (or explicit max_workers)
+            if isinstance(max_workers, int) and max_workers > 0:
+                workers = min(max_workers, len(api_keys), len(file_pairs))
+            else:
+                workers = min(len(api_keys), len(file_pairs)) if api_keys else min(1, len(file_pairs))
             results = multi_analyzer.analyze_multiple_with_distribution(
                 "lesson-centric", file_pairs, parallel=True, max_workers=workers
             )
@@ -200,7 +203,7 @@ class PDFProcessor:
         return self._merge_lesson_centric_results(results)
     
     def analyze_jokbo_centric_multi_api(self, lesson_paths: List[str], jokbo_path: str,
-                                       api_keys: List[str], max_workers: int = 3) -> Dict[str, Any]:
+                                       api_keys: List[str], max_workers: Optional[int] = None) -> Dict[str, Any]:
         """
         Analyze multiple lessons using multi-API support (jokbo-centric mode).
         
@@ -246,8 +249,11 @@ class PDFProcessor:
         else:
             # All lessons are single files
             file_pairs = [(lesson_path, jokbo_path) for lesson_path in lesson_paths]
-            # Use all API keys up to number of pairs
-            workers = min(len(api_keys), len(file_pairs)) if api_keys else min(3, len(file_pairs))
+            # Use all API keys up to number of pairs (or explicit max_workers)
+            if isinstance(max_workers, int) and max_workers > 0:
+                workers = min(max_workers, len(api_keys), len(file_pairs))
+            else:
+                workers = min(len(api_keys), len(file_pairs)) if api_keys else min(1, len(file_pairs))
             results = multi_analyzer.analyze_multiple_with_distribution(
                 "jokbo-centric", file_pairs, parallel=(workers > 1), max_workers=workers
             )

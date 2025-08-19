@@ -39,14 +39,36 @@ class ResultMerger:
     def _merge_jokbo_results(chunk_results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Merge jokbo-centric results from chunks."""
         merged = {"jokbo_pages": []}
-        
+
+        # Per-chunk summary for debugging
+        try:
+            for idx, result in enumerate(chunk_results):
+                pages = result.get("jokbo_pages") if isinstance(result, dict) else None
+                if isinstance(pages, list):
+                    q_total = sum(len(p.get("questions", [])) for p in pages if isinstance(p, dict))
+                    logger.debug(f"Chunk {idx}: pages={len(pages)}, questions={q_total}")
+        except Exception:
+            pass
+
         for result in chunk_results:
             if "jokbo_pages" in result:
                 merged["jokbo_pages"].extend(result["jokbo_pages"])
-        
+
         # Sort by page number (normalize to int)
         merged["jokbo_pages"].sort(key=lambda x: int(str(x.get("jokbo_page", 0)) or 0))
-        
+
+        # Duplicate detection for debugging
+        try:
+            counts = {}
+            for p in merged["jokbo_pages"]:
+                n = int(str(p.get("jokbo_page", 0)) or 0)
+                counts[n] = counts.get(n, 0) + 1
+            dups = [k for k, v in counts.items() if v > 1]
+            if dups:
+                logger.info(f"Duplicate jokbo_page entries detected in chunk merge: {dups}")
+        except Exception:
+            pass
+
         logger.info(f"Merged {len(chunk_results)} chunks into {len(merged['jokbo_pages'])} pages")
         return merged
     
@@ -130,22 +152,32 @@ class ResultMerger:
         if mode == "jokbo-centric":
             # Collect all pages from all results
             all_pages = []
-            for result in results:
-                if "jokbo_pages" in result:
-                    all_pages.extend(result["jokbo_pages"])
-            
+            for i, result in enumerate(results):
+                pages = result.get("jokbo_pages") if isinstance(result, dict) else None
+                if isinstance(pages, list):
+                    all_pages.extend(pages)
+                    logger.debug(
+                        f"API result {i}: pages={len(pages)}, questions={sum(len(p.get('questions', [])) for p in pages if isinstance(p, dict))}"
+                    )
+
             # Remove duplicates based on page number
             seen_pages = set()
             unique_pages = []
+            dup_pages = []
             for page in all_pages:
                 page_num = page.get("jokbo_page")
-                if page_num not in seen_pages:
-                    seen_pages.add(page_num)
-                    unique_pages.append(page)
-            
+                if page_num in seen_pages:
+                    dup_pages.append(page_num)
+                    continue
+                seen_pages.add(page_num)
+                unique_pages.append(page)
+
+            if dup_pages:
+                logger.info(f"merge_api_results: removed duplicate jokbo_page entries: {sorted(set(dup_pages))}")
+
             # Sort by page number (normalize to int)
             unique_pages.sort(key=lambda x: int(str(x.get("jokbo_page", 0)) or 0))
-            
+
             return {"jokbo_pages": unique_pages}
         
         else:  # lesson-centric
