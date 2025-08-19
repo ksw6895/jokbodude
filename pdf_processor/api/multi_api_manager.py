@@ -4,6 +4,7 @@ Provides load balancing, failure tracking, and automatic failover.
 """
 
 import time
+import os
 import random
 from typing import List, Dict, Any, Optional, Callable
 from datetime import datetime, timedelta
@@ -89,8 +90,13 @@ class MultiAPIManager:
         self.api_statuses = [APIKeyStatus(key, i) for i, key in enumerate(api_keys)]
         self.current_index = 0
         self._lock = threading.Lock()
-        # Track keys currently in use to avoid concurrent operations on the same key
-        self._in_use: set[int] = set()
+        # Per-key concurrency limit (allow >1 to enable parallel ops on same key)
+        try:
+            self.per_key_limit = max(1, int(os.getenv("GEMINI_PER_KEY_CONCURRENCY", "1")))
+        except Exception:
+            self.per_key_limit = 1
+        # Track per-key in-flight counts
+        self._in_use_counts: dict[int, int] = {}
         self._cv = threading.Condition(self._lock)
         
         # Create API clients for each key
@@ -126,8 +132,10 @@ class MultiAPIManager:
                     idx = self.current_index
                     self.current_index = (self.current_index + 1) % n
                     status = self.api_statuses[idx]
-                    if status.check_availability() and idx not in self._in_use:
-                        self._in_use.add(idx)
+                    in_use = self._in_use_counts.get(idx, 0)
+                    if status.check_availability() and in_use < self.per_key_limit:
+                        # reserve a slot
+                        self._in_use_counts[idx] = in_use + 1
                         return idx
                 # None found
                 if not wait:
@@ -143,8 +151,12 @@ class MultiAPIManager:
     
     def _release_api_index(self, idx: int) -> None:
         with self._cv:
-            if idx in self._in_use:
-                self._in_use.remove(idx)
+            cur = self._in_use_counts.get(idx, 0)
+            if cur > 1:
+                self._in_use_counts[idx] = cur - 1
+            elif cur == 1:
+                del self._in_use_counts[idx]
+            # Wake waiters
             self._cv.notify_all()
     
     def get_best_api(self) -> Optional[int]:

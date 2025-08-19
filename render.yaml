@@ -39,7 +39,7 @@ services:
     plan: starter
     runtime: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "cd /opt/render/project/src && celery -A tasks worker --loglevel=info"
+    startCommand: "cd /opt/render/project/src && celery -A tasks:celery_app worker -Q analysis,default --loglevel=info --concurrency ${CELERY_CONCURRENCY:-1}"
     envVars:
       - key: REDIS_URL
         fromService:
@@ -56,3 +56,9 @@ services:
         value: pro # Options: pro, flash, flash-lite
       - key: PYTHONPATH
         value: /opt/render/project/src
+      - key: CELERY_CONCURRENCY
+        value: "1" # Adjust in dashboard for parallelism (e.g., 2-4)
+      - key: GEMINI_PER_KEY_CONCURRENCY
+        sync: false # Optional: allow >1 concurrent ops per API key (e.g., 2)
+      - key: GEMINI_PURGE_BEFORE_UPLOAD
+        value: "false" # Keep false to avoid cross-task deletions

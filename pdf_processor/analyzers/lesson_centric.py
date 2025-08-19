@@ -162,14 +162,21 @@ class LessonCentricAnalyzer(BaseAnalyzer):
     def _analyze_with_uploads(self, prompt: str, jokbo_path: str, lesson_path: str,
                              jokbo_filename: str, lesson_filename: str) -> str:
         """Analyze with uploading both files."""
-        # Aggressive purge: remove ALL uploads for this API key before new upload.
+        # Optional purge: disabled by default. Gemini requests only see provided contents.
+        # Enable by setting GEMINI_PURGE_BEFORE_UPLOAD=true if you really want a hard reset.
         try:
-            from ..api.upload_cleanup import purge_key_files
-            key_tag = self.api_client._key_tag()
-            logger.info(f"Purging ALL uploads before analysis [key={key_tag}]")
-            purge_key_files(self.api_client, delete_prefixes=[], keep_display_names=set(), delete_all=True, log_context="lesson_centric_preupload")
+            import os
+            _purge = str(os.getenv("GEMINI_PURGE_BEFORE_UPLOAD", "false")).strip().lower() in ("1","true","t","y","yes")
         except Exception:
-            logger.info("Purge skipped due to error; continuing")
+            _purge = False
+        if _purge:
+            try:
+                from ..api.upload_cleanup import purge_key_files
+                key_tag = self.api_client._key_tag()
+                logger.info(f"Purging ALL uploads before analysis [key={key_tag}]")
+                purge_key_files(self.api_client, delete_prefixes=[], keep_display_names=set(), delete_all=True, log_context="lesson_centric_preupload")
+            except Exception:
+                logger.info("Purge skipped due to error; continuing")
         
         # Upload and analyze
         files_to_upload = [

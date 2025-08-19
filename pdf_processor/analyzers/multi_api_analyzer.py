@@ -220,18 +220,24 @@ class MultiAPIAnalyzer:
         # Define how to process a single chunk with a specific API client
         def operation(task, api_client, model):
             idx, (chunk_path, start_page, end_page) = task
-            # Purge any previously uploaded files for this API key before each chunk
+            # Optional purge per chunk (disabled by default)
             try:
-                from ..api.upload_cleanup import purge_key_files
-                purge_key_files(
-                    api_client,
-                    delete_prefixes=[],
-                    keep_display_names=set(),
-                    delete_all=True,
-                    log_context=f"{mode}_chunk_preupload#{idx}"
-                )
+                import os
+                _purge = str(os.getenv("GEMINI_PURGE_BEFORE_UPLOAD", "false")).strip().lower() in ("1","true","t","y","yes")
             except Exception:
-                logger.info("Chunk preupload purge skipped due to error; continuing")
+                _purge = False
+            if _purge:
+                try:
+                    from ..api.upload_cleanup import purge_key_files
+                    purge_key_files(
+                        api_client,
+                        delete_prefixes=[],
+                        keep_display_names=set(),
+                        delete_all=True,
+                        log_context=f"{mode}_chunk_preupload#{idx}"
+                    )
+                except Exception:
+                    logger.info("Chunk preupload purge skipped due to error; continuing")
             if mode == "lesson-centric":
                 fm = FileManager(api_client)
                 analyzer = LessonCentricAnalyzer(

@@ -90,6 +90,10 @@ RENDER_STORAGE_PATH=/var/data  # 쓰기 가능 경로
 - 개인 PDF/비밀키 커밋 금지. `.env`로 관리
 - 멀티 키 사용 시 처리량/안정성 향상(`GEMINI_API_KEYS`)
 - Render에서는 `REDIS_URL`과 쓰기 가능한 `RENDER_STORAGE_PATH`를 설정하세요
+- 병렬 처리 관련 환경 변수:
+  - `CELERY_CONCURRENCY`: 워커 프로세스 동시성(예: 2~4)
+  - `GEMINI_PER_KEY_CONCURRENCY`: 같은 API 키에서 동시 처리 허용 수(기본 1)
+  - `GEMINI_PURGE_BEFORE_UPLOAD`: 업로드 전 전체 삭제 플래그(기본 false; 병렬 시 비권장)
 
 ## 라이선스
 AGPLv3. 네트워크 서비스로 제공 시 수정본 소스 공개 의무가 있습니다. 자세한 내용은 라이선스 전문을 참조하세요.
