@@ -222,41 +222,104 @@ class PDFProcessor:
         model_config = self._get_model_config()
         api_manager = MultiAPIManager(api_keys, model_config)
         
-        # Create multi-API analyzer
+        # Create multi-API analyzer (kept for threshold propagation if needed)
         multi_analyzer = MultiAPIAnalyzer(api_manager, self.session_id, self.debug_dir)
-        
-        # Check if we need chunking for lessons
+
+        # Build a global list of chunk tasks across all lessons to maximize key utilization
         from ..pdf.operations import PDFOperations
-        chunked_lessons = []
-        
-        for lesson_path in lesson_paths:
-            chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
-            if len(chunks) > 1:
-                # This lesson needs chunking
-                logger.info(f"Lesson {Path(lesson_path).name} will be processed in {len(chunks)} chunks")
-                for chunk_info in chunks:
-                    chunked_lessons.append((lesson_path, chunk_info))
-            else:
-                # Process as single file
-                chunked_lessons.append((lesson_path, None))
-        
-        # Process with multi-API support
-        if any(chunk_info for _, chunk_info in chunked_lessons):
-            # Some lessons need chunking - handle specially
-            results = self._process_chunked_lessons_multi_api(
-                chunked_lessons, jokbo_path, multi_analyzer
-            )
-        else:
-            # All lessons are single files
-            file_pairs = [(lesson_path, jokbo_path) for lesson_path in lesson_paths]
-            # Use all API keys up to number of pairs (or explicit max_workers)
+        global_tasks: List[tuple] = []  # (lesson_idx, lesson_path, chunk_path, start_page, end_page)
+        created_chunks: List[Path] = []
+        try:
+            for lidx, lesson_path in enumerate(lesson_paths):
+                chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
+                if len(chunks) <= 1:
+                    # Extract full as a single chunk for uniform handling
+                    _, s, e = chunks[0]
+                    cpath = PDFOperations.extract_pages(lesson_path, s, e)
+                    created_chunks.append(Path(cpath))
+                    global_tasks.append((lidx, lesson_path, cpath, s, e))
+                else:
+                    logger.info(f"Lesson {Path(lesson_path).name} will be processed in {len(chunks)} chunks")
+                    for _, s, e in chunks:
+                        cpath = PDFOperations.extract_pages(lesson_path, s, e)
+                        created_chunks.append(Path(cpath))
+                        global_tasks.append((lidx, lesson_path, cpath, s, e))
+
+            # Determine worker count
+            try:
+                capacity = len(api_manager.api_keys) * max(1, int(getattr(api_manager, 'per_key_limit', 1)))
+                workers = min(len(global_tasks), capacity)
+            except Exception:
+                workers = min(len(global_tasks), len(api_manager.api_keys) or 1)
             if isinstance(max_workers, int) and max_workers > 0:
-                workers = min(max_workers, len(api_keys), len(file_pairs))
-            else:
-                workers = min(len(api_keys), len(file_pairs)) if api_keys else min(1, len(file_pairs))
-            results = multi_analyzer.analyze_multiple_with_distribution(
-                "jokbo-centric", file_pairs, parallel=(workers > 1), max_workers=workers
+                workers = max(1, min(workers, max_workers))
+
+            # Define chunk operation for distribution
+            def _op(task, api_client, model):
+                lidx, lpath, cpath, start, end = task
+                fm = FileManager(api_client)
+                analyzer = JokboCentricAnalyzer(api_client, fm, self.session_id, self.debug_dir)
+                # Propagate jokbo-centric threshold if configured
+                try:
+                    thr = getattr(self.jokbo_analyzer, 'min_relevance_score', None)
+                    if thr is not None:
+                        analyzer.set_relevance_threshold(thr)
+                except Exception:
+                    pass
+                res = analyzer.analyze(
+                    cpath, jokbo_path, preloaded_jokbo_file=None,
+                    chunk_info=(start, end), original_lesson_path=lpath
+                )
+                # Normalize slide filenames to original lesson
+                try:
+                    orig = Path(lpath).name
+                    if isinstance(res, dict):
+                        for page in (res.get("jokbo_pages") or []):
+                            for q in (page.get("questions") or []):
+                                for slide in (q.get("related_lesson_slides") or []):
+                                    if isinstance(slide, dict):
+                                        slide["lesson_filename"] = orig
+                except Exception:
+                    pass
+                return (lidx, res)
+
+            # Progress callback per completed chunk
+            def _on_progress(_task):
+                try:
+                    from storage_manager import StorageManager
+                    StorageManager().increment_chunk(self.session_id, 1)
+                except Exception:
+                    pass
+
+            # Distribute all chunk tasks globally
+            raw_results = api_manager.distribute_tasks(
+                global_tasks, _op, parallel=True, max_workers=workers, on_progress=_on_progress
             )
+
+            # Group results by lesson and merge per-lesson
+            per_lesson: Dict[int, List[Dict[str, Any]]] = {}
+            for entry in raw_results:
+                if isinstance(entry, tuple) and len(entry) == 2:
+                    lidx, res = entry
+                    if isinstance(res, dict):
+                        per_lesson.setdefault(lidx, []).append(res)
+                # Errors are logged inside distribute_tasks; skip here
+
+            from ..parsers.result_merger import ResultMerger as _RM
+            results: List[Dict[str, Any]] = []
+            for lidx in range(len(lesson_paths)):
+                cresults = per_lesson.get(lidx, [])
+                if not cresults:
+                    results.append({"jokbo_pages": []})
+                else:
+                    results.append(_RM.merge_chunk_results(cresults, "jokbo-centric"))
+        finally:
+            # Always clean up temp chunk files
+            for p in created_chunks:
+                try:
+                    p.unlink(missing_ok=True)
+                except Exception:
+                    pass
         
         # Log API status
         status = api_manager.get_status_report()

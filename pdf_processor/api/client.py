@@ -201,16 +201,66 @@ class GeminiAPIClient:
                     generation_config=gen_config or None,
                 )
                 
-                # Check for empty response
-                if not response.text or len(response.text) == 0:
-                    logger.warning(f"Empty response received (attempt {attempt + 1}/{max_retries}) [key={self._key_tag()}]")
+                # Blocked prompt handling (avoid touching response.text/parts when blocked)
+                try:
+                    pf = getattr(response, "prompt_feedback", None)
+                    block_reason = getattr(pf, "block_reason", None) if pf is not None else None
+                except Exception:
+                    pf, block_reason = None, None
+                if block_reason:
+                    msg = f"Prompt blocked: block_reason={block_reason}"
+                    logger.warning(f"{msg} [key={self._key_tag()}]")
                     if attempt < max_retries - 1:
                         wait_time = backoff_factor ** attempt
                         logger.info(f"Retrying in {wait_time} seconds... [key={self._key_tag()}]")
                         time.sleep(wait_time)
                         continue
-                    else:
-                        raise ContentGenerationError("Empty response from API")
+                    raise ContentGenerationError(msg)
+
+                # Guard against empty candidates before accessing response.text
+                try:
+                    cand_count = len(getattr(response, "candidates", []) or [])
+                except Exception:
+                    cand_count = 0
+
+                if cand_count == 0:
+                    logger.warning(f"No candidates in response (attempt {attempt + 1}/{max_retries}) [key={self._key_tag()}]")
+                    if attempt < max_retries - 1:
+                        wait_time = backoff_factor ** attempt
+                        logger.info(f"Retrying in {wait_time} seconds... [key={self._key_tag()}]")
+                        time.sleep(wait_time)
+                        continue
+                    raise ContentGenerationError("Empty candidates from API")
+
+                # Check for empty text safely now that candidates exist
+                safe_text = None
+                try:
+                    safe_text = response.text
+                except Exception as _e:
+                    # Fallback: try to reconstruct minimal text from first candidate parts
+                    try:
+                        c0 = response.candidates[0]
+                        parts = getattr(getattr(c0, "content", None), "parts", None) or []
+                        texts = []
+                        for p in parts:
+                            try:
+                                t = getattr(p, "text", None)
+                                if t:
+                                    texts.append(t)
+                            except Exception:
+                                pass
+                        safe_text = "\n".join(texts) if texts else None
+                    except Exception:
+                        safe_text = None
+
+                if not safe_text or len(safe_text) == 0:
+                    logger.warning(f"Empty response text (attempt {attempt + 1}/{max_retries}) [key={self._key_tag()}]")
+                    if attempt < max_retries - 1:
+                        wait_time = backoff_factor ** attempt
+                        logger.info(f"Retrying in {wait_time} seconds... [key={self._key_tag()}]")
+                        time.sleep(wait_time)
+                        continue
+                    raise ContentGenerationError("Empty response from API")
                 
                 # Check finish reason
                 if response.candidates:
