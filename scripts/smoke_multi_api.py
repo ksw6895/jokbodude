@@ -46,7 +46,7 @@ def main() -> None:
     ap.add_argument('--jokbo', help='Path to jokbo PDF')
     ap.add_argument('--lessons', nargs='+', help='Paths to lesson PDFs')
     ap.add_argument('--workers', type=int, default=2, help='Max workers for multi-API')
-    ap.add_argument('--model', choices=['pro','flash','flash-lite'], default=os.getenv('GEMINI_MODEL','pro'))
+    ap.add_argument('--model', choices=['flash'], default=os.getenv('GEMINI_MODEL','flash'))
     ap.add_argument('--output', default='output/smoke_result.json')
     args = ap.parse_args()
 
@@ -95,4 +95,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-

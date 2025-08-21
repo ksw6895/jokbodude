@@ -2,7 +2,7 @@
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
-족보(기출)와 강의자료를 AI로 분석하여 관련 슬라이드와 해설을 묶은 PDF를 생성하는 FastAPI + Celery 기반 서비스입니다. Google Gemini(2.5 Pro/Flash/Flash‑lite)와 멀티 API 키 분산을 지원합니다.
+족보(기출)와 강의자료를 AI로 분석하여 관련 슬라이드와 해설을 묶은 PDF를 생성하는 FastAPI + Celery 기반 서비스입니다. Google Gemini 2.5 Flash와 멀티 API 키 분산을 지원합니다.
 
 ## 주요 기능
 - AI 연관성 분석: 족보 ↔ 강의 슬라이드 자동 매칭
@@ -76,7 +76,7 @@ bash scripts/smoke_batch.sh
 2) 환경변수:
 ```
 GEMINI_API_KEY=...        # 또는 GEMINI_API_KEYS=key1,key2,...
-GEMINI_MODEL=pro|flash|flash-lite
+GEMINI_MODEL=flash        # 모델은 flash로 고정
 REDIS_URL=redis://...
 RENDER_STORAGE_PATH=/var/data  # 쓰기 가능 경로
 ```

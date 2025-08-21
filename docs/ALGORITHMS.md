@@ -172,7 +172,7 @@ The multi‑API layer distributes work across multiple keys and transparently fa
 
 ### Web → Worker → PDF
 
-- FastAPI Endpoints (`web_server.py`): Accept jokbo/lesson uploads, choose `model` (`pro|flash|flash-lite`), optional `multi_api`, and `min_relevance`. Files are stored via `StorageManager` with TTL verification.
+- FastAPI Endpoints (`web_server.py`): Accept jokbo/lesson uploads, fixed `model` (`flash`), optional `multi_api`, and `min_relevance`. Files are stored via `StorageManager` with TTL verification.
 - Celery Workers (`tasks.py`):
   - Initialize chunk‑based progress: total chunks reflect lesson chunk count × partner file count so the progress bar matches actual work.
   - Choose analysis path:
@@ -193,7 +193,7 @@ The multi‑API layer distributes work across multiple keys and transparently fa
 
 ## Configuration and Tuning
 
-- Models: Controlled by `GEMINI_MODEL` or API parameter (`pro|flash|flash-lite`).
+- Models: Fixed to `flash` (via `GEMINI_MODEL=flash`).
 - Multi‑API: Enabled when multiple keys exist (`GEMINI_API_KEYS` via `config.py`). Keys are masked in logs.
 - Relevance Threshold: `min_relevance_score` defaults to 80; callers can set via API (`min_relevance`) and it propagates to analyzers. Used in both lesson/jokbo workflows when filtering connections.
 - Chunk Size: Default 30 pages; adjust in `PDFOperations.split_pdf_for_chunks` or override per call sites if needed.

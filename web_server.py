@@ -124,6 +124,10 @@ def build_content_disposition(original_name: str) -> str:
 def read_root():
     return FileResponse('frontend/index.html')
 
+@app.get("/guide")
+def read_guide():
+    return FileResponse('frontend/guide.html')
+
 @app.get("/config")
 def get_config():
     """Expose server capabilities for the frontend UI."""
@@ -136,7 +140,7 @@ def get_config():
     return {
         "multi_api_available": keys_count > 1,
         "api_keys_count": keys_count,
-        "models": ["pro", "flash", "flash-lite"],
+        "models": ["flash"],
     }
 
 @app.post("/analyze/jokbo-centric", status_code=202)
@@ -144,7 +148,7 @@ async def analyze_jokbo_centric(
     request: Request,
     jokbo_files: list[UploadFile] = File(...), 
     lesson_files: list[UploadFile] = File(...),
-    model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
+    model: Optional[str] = Query("flash", regex="^(flash)$"),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     # Also accept multi_api via multipart form for robustness
@@ -242,7 +246,7 @@ async def analyze_lesson_centric(
     request: Request,
     jokbo_files: list[UploadFile] = File(...), 
     lesson_files: list[UploadFile] = File(...),
-    model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
+    model: Optional[str] = Query("flash", regex="^(flash)$"),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     # Also accept multi_api via multipart form for robustness
@@ -397,7 +401,7 @@ async def analyze_batch(
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
     mode: str = Query("jokbo-centric", regex="^(jokbo-centric|lesson-centric)$"),
-    model: Optional[str] = Query("flash", regex="^(pro|flash|flash-lite)$"),
+    model: Optional[str] = Query("flash", regex="^(flash)$"),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     multi_api_form: Optional[bool] = Form(None),

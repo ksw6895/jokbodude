@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JokboDude · Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #5046e5;
+      --primary-dark: #4338ca;
+      --primary-light: #6366f1;
+      --secondary: #06b6d4;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-900: #0f172a;
+      --gray-800: #1e293b;
+      --gray-700: #334155;
+      --gray-600: #475569;
+      --gray-500: #64748b;
+      --gray-400: #94a3b8;
+      --gray-300: #cbd5e1;
+      --gray-200: #e2e8f0;
+      --gray-100: #f1f5f9;
+      --gray-50: #f8fafc;
+      --text: #ecf0ff;
+      --muted: #b8c0ff;
+      --border: rgba(255, 255, 255, 0.18);
+      --glass: rgba(255, 255, 255, 0.08);
+      --glass-strong: rgba(255, 255, 255, 0.14);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 10% -10%, #2c2d72 0%, transparent 55%),
+                  radial-gradient(1200px 800px at 110% 10%, #2b5876 0%, transparent 55%),
+                  linear-gradient(160deg, #0f1226, #1b2340);
+      min-height: 100vh;
+    }
+    .navbar { position: sticky; top: 0; z-index: 50; background: linear-gradient(180deg, rgba(15,18,38,0.65), rgba(15,18,38,0.35)); border-bottom: 1px solid var(--border); }
+    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display:flex; align-items:center; gap:.75rem; color: var(--text); font-weight: 700; font-size: 1.25rem; }
+    .logo-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#0b1024; background: linear-gradient(135deg, var(--primary) 0%, #51e1ff 100%); box-shadow: inset 0 0 12px rgba(255,255,255,0.25), 0 8px 20px rgba(81,225,255,0.2); }
+    .nav-links { display:flex; align-items:center; gap:1rem; }
+    .nav-link { color: var(--muted); text-decoration:none; font-weight:600; padding:.4rem .7rem; border-radius:8px; }
+    .nav-link:hover { color: var(--text); background: var(--glass); }
+    .lang-toggle { border:1px solid var(--border); background: var(--glass); color: var(--text); padding:.4rem .7rem; border-radius:8px; cursor:pointer; font-weight:600; }
+    .container { max-width: 1100px; margin: 2rem auto; padding: 1.25rem; }
+    .hero { text-align:center; margin: 1rem auto 2rem auto; }
+    .hero h1 { font-size: 2rem; font-weight:800; letter-spacing:.01em; }
+    .hero p { color: var(--muted); margin-top:.5rem; }
+    .card { background: var(--glass); border:1px solid var(--border); border-radius:14px; box-shadow: var(--shadow-xl); overflow: hidden; margin-bottom: 1rem; }
+    .card h2 { padding: 1rem 1.25rem; border-bottom:1px solid var(--border); font-size: 1.1rem; }
+    .card .content { padding: 1rem 1.25rem; color: var(--muted); }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+    .list { margin-left: 1.25rem; }
+    .list li { margin: .4rem 0; }
+    .badge { display:inline-block; background: linear-gradient(135deg, var(--primary) 0%, #51e1ff 100%); color:#0b1024; border-radius:9999px; padding:.2rem .6rem; font-weight:700; font-size:.8rem; margin-right:.4rem; }
+    .footer { text-align:center; color: var(--muted); font-size:.9rem; margin: 2rem 0 1rem; }
+    @media (max-width: 640px) { .hero h1 { font-size: 1.6rem; } }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <div class="logo-icon">🎓</div>
+        <span>JokboDude</span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link" href="/guide">Guide</a>
+        <button id="langBtn" class="lang-toggle" aria-label="Toggle Language">🇺🇸 EN</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+    <section class="hero">
+      <h1 id="t_title">Welcome to JokboDude</h1>
+      <p id="t_subtitle">AI-powered study companion for everyday students</p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2 id="t_intent_h">What Is JokboDude?</h2>
+        <div class="content" id="t_intent">
+          <!-- filled by JS -->
+        </div>
+      </article>
+
+      <article class="card">
+        <h2 id="t_modes_h">Modes: When to Use Which?</h2>
+        <div class="content">
+          <ul class="list" id="t_modes">
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2 id="t_steps_h">Quick Start</h2>
+        <div class="content">
+          <ol class="list" id="t_steps"></ol>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2 id="t_outputs_h">Outputs</h2>
+        <div class="content" id="t_outputs"></div>
+      </article>
+
+      <article class="card">
+        <h2 id="t_tips_h">Practical Tips</h2>
+        <div class="content">
+          <ul class="list" id="t_tips"></ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2 id="t_faq_h">FAQ</h2>
+        <div class="content">
+          <ul class="list" id="t_faq"></ul>
+        </div>
+      </article>
+    </section>
+
+    <p class="footer" id="t_footer">Built for students. No grades, just growth.</p>
+  </main>
+
+  <script>
+    const i18n = {
+      en: {
+        langBtn: '🇺🇸 EN',
+        title: 'Welcome to JokboDude',
+        subtitle: 'AI-powered study companion for everyday students',
+        intent_h: 'What Is JokboDude?',
+        intent: `JokboDude analyzes your exam PDFs (jokbo) and lecture slides to help you study smarter, not longer.
+                 It finds which slides are most relevant to each question, summarizes key ideas, and explains answers.
+                 The goal is to connect questions with the right learning context so you can focus on understanding.`,
+        modes_h: 'Modes: When to Use Which?',
+        modes: [
+          '<span class="badge">Exam-Centric</span> Upload one or more exam PDFs and your lecture slides. The app lists questions and attaches the most related slides with explanations.',
+          '<span class="badge">Lecture-Centric</span> Upload lecture slides and exam PDFs. The app goes slide-by-slide and adds the single most relevant question for each slide.'
+        ],
+        steps_h: 'Quick Start',
+        steps: [
+          'Open Home and choose Exam-Centric or Lecture-Centric.',
+          'Upload your PDFs (max 50MB each).',
+          'Optionally enable Multi-API if multiple Gemini keys are configured (faster).',
+          'Set the minimum relevance threshold if you want stricter filtering.',
+          'Click Start and watch the progress bar. Results appear under Results and can be downloaded as PDFs.'
+        ],
+        outputs_h: 'Outputs',
+        outputs: `You receive one or more PDFs in Results. Each file contains extracted content:
+                  for Exam-Centric, questions with matched slides and a brief explanation; for Lecture-Centric, every slide
+                  remains in order with the top related question inserted.`,
+        tips_h: 'Practical Tips',
+        tips: [
+          'Use clear, final versions of slides and exams; scan quality matters.',
+          'If nothing matches, try lowering the relevance threshold.',
+          'Large files are chunked automatically; multiple API keys help speed.',
+          'Privacy: PDFs are processed temporarily for analysis and output only.'
+        ],
+        faq_h: 'FAQ',
+        faq: [
+          '<b>Which model is used?</b> Gemini 2.5 Flash only.',
+          '<b>What is Multi-API?</b> If you provide multiple API keys, requests are distributed for throughput and resilience.',
+          '<b>What file types?</b> PDF only (.pdf).',
+          '<b>Where is my result?</b> After processing, check Results or download directly from the link shown.'
+        ],
+        footer: 'Built for students. No grades, just growth.'
+      },
+      ko: {
+        langBtn: '🇰🇷 KO',
+        title: 'JokboDude 사용 가이드',
+        subtitle: '일반 학생을 위한 AI 학습 도우미',
+        intent_h: 'JokboDude란?',
+        intent: `JokboDude는 족보(기출) PDF와 강의 슬라이드를 분석해 학습을 더 똑똑하게 도와줍니다.
+                 각 문제와 가장 관련 있는 슬라이드를 연결하고 핵심 개념과 간단한 해설을 제공합니다.
+                 목표는 ‘정답’이 아니라, 문제를 이해하는 데 필요한 컨텍스트를 빠르게 찾도록 돕는 것입니다.`,
+        modes_h: '모드: 언제 무엇을 쓰나요?',
+        modes: [
+          '<span class="badge">Exam-Centric</span> 여러 족보 PDF와 강의자료를 올리면, 문제별로 관련 슬라이드와 해설을 묶어줍니다.',
+          '<span class="badge">Lecture-Centric</span> 강의 슬라이드 중심으로 각 슬라이드에 가장 관련 있는 문제를 1개씩 연결합니다.'
+        ],
+        steps_h: '빠른 시작',
+        steps: [
+          '홈에서 Exam-Centric 또는 Lecture-Centric을 선택합니다.',
+          'PDF를 업로드합니다(파일당 최대 50MB).',
+          '여러 Gemini 키가 있으면 Multi-API를 켭니다(속도 향상).',
+          '필요하면 최소 관련성 점수를 조정해 더 엄격하게 필터링합니다.',
+          '시작을 누르고 진행률을 확인합니다. 완료되면 Results에서 PDF를 다운로드하세요.'
+        ],
+        outputs_h: '결과물',
+        outputs: `결과 PDF가 Results에 생성됩니다. Exam-Centric은 문제와 매칭된 슬라이드/해설을, Lecture-Centric은 슬라이드 순서를 유지하면서 각 슬라이드에 가장 관련 있는 문제를 삽입합니다.`,
+        tips_h: '실전 팁',
+        tips: [
+          '가능한 선명한 최종 버전의 슬라이드/족보를 사용하세요(스캔 품질 중요).',
+          '매칭이 적다면 관련성 임계값을 낮춰보세요.',
+          '큰 PDF는 자동 청크 처리됩니다. API 키가 많을수록 더 빠릅니다.',
+          '개인정보: 업로드된 PDF는 분석과 출력에만 사용되며 일시적으로 보관됩니다.'
+        ],
+        faq_h: '자주 묻는 질문',
+        faq: [
+          '<b>어떤 모델을 쓰나요?</b> Gemini 2.5 Flash만 사용합니다.',
+          '<b>Multi-API란?</b> 여러 API 키가 있으면 요청을 분산해 더 빠르고 안정적으로 처리합니다.',
+          '<b>파일 형식?</b> PDF(.pdf)만 지원합니다.',
+          '<b>결과는 어디서 보나요?</b> 처리 완료 후 Results에서 파일 목록을 확인하고 다운로드할 수 있습니다.'
+        ],
+        footer: '학생을 위한 도구 — 성적보다 성장.'
+      }
+    };
+
+    const el = id => document.getElementById(id);
+    function render(lang) {
+      const t = i18n[lang];
+      el('langBtn').textContent = t.langBtn;
+      el('t_title').textContent = t.title;
+      el('t_subtitle').textContent = t.subtitle;
+      el('t_intent_h').textContent = t.intent_h;
+      el('t_intent').innerHTML = t.intent;
+      el('t_modes_h').textContent = t.modes_h;
+      el('t_modes').innerHTML = t.modes.map(m => `<li>${m}</li>`).join('');
+      el('t_steps_h').textContent = t.steps_h;
+      el('t_steps').innerHTML = t.steps.map(s => `<li>${s}</li>`).join('');
+      el('t_outputs_h').textContent = t.outputs_h;
+      el('t_outputs').innerHTML = t.outputs;
+      el('t_tips_h').textContent = t.tips_h;
+      el('t_tips').innerHTML = t.tips.map(s => `<li>${s}</li>`).join('');
+      el('t_faq_h').textContent = t.faq_h;
+      el('t_faq').innerHTML = t.faq.map(s => `<li>${s}</li>`).join('');
+      el('t_footer').textContent = t.footer;
+      localStorage.setItem('jd_lang', lang);
+    }
+
+    const saved = localStorage.getItem('jd_lang') || 'en';
+    let current = saved === 'ko' ? 'ko' : 'en';
+    render(current);
+    el('langBtn').addEventListener('click', () => {
+      current = current === 'en' ? 'ko' : 'en';
+      render(current);
+    });
+  </script>
+</body>
+</html>
+

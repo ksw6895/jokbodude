@@ -579,8 +579,8 @@ class AnalysisRequest(BaseModel):
     
     @validator('model')
     def validate_model(cls, v):
-        if v not in ['pro', 'flash', 'flash-lite']:
-            raise ValueError('Invalid model')
+        if v != 'flash':
+            raise ValueError('Invalid model (only flash supported)')
         return v
     
     @validator('webhook_url')

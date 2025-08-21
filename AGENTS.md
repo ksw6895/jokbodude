@@ -43,4 +43,4 @@
 
 ## Security & Configuration Tips
 - Do not commit secrets or personal PDFs. Configure `GEMINI_API_KEY` or `GEMINI_API_KEYS`; set `REDIS_URL` for web/worker; on Render ensure `RENDER_STORAGE_PATH` is writable.
-- Choose model via `GEMINI_MODEL` (`pro|flash|flash-lite`); prefer multi-API for throughput.
+- `GEMINI_MODEL` is fixed to `flash`; prefer multi-API for throughput.

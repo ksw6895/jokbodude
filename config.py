@@ -56,30 +56,27 @@ SAFETY_SETTINGS = [
 
 # Model name mapping
 MODEL_NAMES = {
-    "pro": "gemini-2.5-pro",
     "flash": "gemini-2.5-flash",
-    "flash-lite": "gemini-2.5-flash-lite"
 }
 
-def create_model(model_type: str = "pro", thinking_budget: Optional[int] = None):
+def create_model(model_type: str = "flash", thinking_budget: Optional[int] = None):
     """
     Create a Gemini model with specified configuration.
     
     Args:
-        model_type: "pro", "flash", or "flash-lite"
-        thinking_budget: Thinking budget for flash/flash-lite models (0-24576, -1 for auto)
-                        None for pro model (doesn't support thinking budget)
+        model_type: Only "flash" is supported
+        thinking_budget: Optional thinking budget for flash model (0-24576, -1 for auto)
     
     Returns:
         Configured GenerativeModel instance
     """
-    model_name = MODEL_NAMES.get(model_type, MODEL_NAMES["pro"])
+    model_name = MODEL_NAMES.get(model_type, MODEL_NAMES["flash"])
     
     # Copy base generation config
     config = GENERATION_CONFIG.copy()
     
-    # Add thinking budget for flash/flash-lite models
-    if model_type in ["flash", "flash-lite"] and thinking_budget is not None:
+    # Add thinking budget for flash model
+    if model_type in ["flash"] and thinking_budget is not None:
         # Note: The thinking_config parameter may need to be passed differently
         # depending on the exact API version. This is a placeholder implementation.
         # The actual implementation might require using a different parameter name
@@ -96,7 +93,7 @@ def create_model(model_type: str = "pro", thinking_budget: Optional[int] = None)
 
 # Default model (for backward compatibility)
 # NOTE: Model creation is now done after explicit configuration
-# model = create_model("pro")
+# model = create_model("flash")
 
 def configure_api(api_key: Optional[str] = None):
     """Explicitly configure the API with the given key or default"""

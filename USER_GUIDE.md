@@ -99,7 +99,7 @@ GEMINI_API_KEY=your_single_api_key_here
 GEMINI_API_KEYS=key1,key2,key3
 
 # 선택사항
-GEMINI_MODEL=flash  # pro, flash, flash-lite 중 선택
+GEMINI_MODEL=flash  # flash만 지원
 ```
 
 #### 2. jokbodude-worker
