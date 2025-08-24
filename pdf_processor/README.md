@@ -141,7 +141,7 @@ To migrate from the old monolithic `PDFProcessor`:
 ## Configuration
 
 Environment variables:
-- `MAX_PAGES_PER_CHUNK`: Maximum pages per chunk (default: 40)
+- `MAX_PAGES_PER_CHUNK`: Maximum pages per chunk (default: 30)
 
 Python configuration:
 ```python

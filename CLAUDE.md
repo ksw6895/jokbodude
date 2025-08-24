@@ -47,7 +47,7 @@ python main.py --model flash-lite --thinking-budget 0    # Fastest, cheapest
 python main.py --mode jokbo-centric --multi-api           # Use multiple API keys
 
 # Chunk size optimization (for large PDFs or API limits)
-export MAX_PAGES_PER_CHUNK=30                             # Reduce from default 40
+export MAX_PAGES_PER_CHUNK=30                             # Override default 30 if needed
 python main.py --parallel
 ```
 
@@ -134,7 +134,7 @@ ls output/debug/
 
 ### Key Design Decisions
 
-- **Chunking Strategy**: Large PDFs split into 40-page chunks (configurable)
+- **Chunking Strategy**: Large PDFs split into 30-page chunks (configurable)
 - **Thread Safety**: PDF cache protected by threading.Lock
 - **Session Management**: Single session ID shared across all threads in parallel processing
 - **Retry Logic**: 3 attempts with exponential backoff for API calls
@@ -173,7 +173,7 @@ ls output/debug/
   - 빈 응답도 실패로 카운트
 - **청크 크기 최적화 가이드**: 
   - 환경변수 MAX_PAGES_PER_CHUNK 설정 방법 문서화
-  - 기본값 40 → 30 권장 (토큰 제한 문제 해결)
+  - 기본값 30 권장 (토큰 제한 완화)
 
 ## 이전 개선사항 (2025-08-01)
 
@@ -356,7 +356,7 @@ ls output/debug/
 - Failed chunk retry with different API keys
 
 ### Chunk Size Optimization
-- Default chunk size: 40 pages (configurable via MAX_PAGES_PER_CHUNK)
+- Default chunk size: 30 pages (configurable via MAX_PAGES_PER_CHUNK)
 - Recommended: 30 pages for better stability with token limits
 - Monitor response failures to find optimal size for your use case
 

@@ -14,7 +14,7 @@ class ProcessingConfig:
     """Configuration constants for processing."""
     
     # Chunk processing
-    DEFAULT_CHUNK_SIZE = int(os.environ.get('MAX_PAGES_PER_CHUNK', '40'))
+    DEFAULT_CHUNK_SIZE = int(os.environ.get('MAX_PAGES_PER_CHUNK', '30'))
     
     # Parallel processing
     DEFAULT_THREAD_WORKERS = 3
