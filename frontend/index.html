@@ -879,6 +879,13 @@
     <script>
         const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
         let JD_CONFIG = { multi_api_available: false, api_keys_count: 0 };
+        // Staged file buckets to allow incremental adds and removals per input
+        const stagedFiles = {
+            'jokbo_files': [],
+            'jokbo_lesson_files': [],
+            'lesson_lesson_files': [],
+            'lesson_jokbo_files': []
+        };
 
         // Initialize processing mode toggles with server capabilities
         async function initConfigAndToggles() {
@@ -1018,15 +1025,93 @@
         // Kick off config fetch and toggle init
         initConfigAndToggles();
 
-        // Attach file handlers
+        // Staged file selection helpers (allow multi-step add/remove)
+        function addFilesToBucket(inputId, files, errorId) {
+            const bucket = stagedFiles[inputId];
+            const errorElement = document.getElementById(errorId);
+            let hasError = false;
+            for (const f of files) {
+                if (f.size > MAX_FILE_SIZE) { hasError = true; continue; }
+                const exists = bucket.some(b => b.name === f.name && b.size === f.size && b.lastModified === f.lastModified);
+                if (!exists) bucket.push(f);
+            }
+            if (hasError) {
+                errorElement.textContent = '⚠️ Some files exceeded 50MB and were skipped';
+                errorElement.classList.add('show');
+            } else {
+                errorElement.classList.remove('show');
+            }
+        }
+        function renderBucket(inputId, listId) {
+            const input = document.getElementById(inputId);
+            const uploadArea = input.nextElementSibling;
+            const fileList = document.getElementById(listId);
+            const bucket = stagedFiles[inputId] || [];
+            fileList.innerHTML = '';
+            if (bucket.length === 0) {
+                uploadArea.classList.remove('active');
+                return;
+            }
+            uploadArea.classList.add('active');
+            bucket.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div>
+                        <span class="file-name">${file.name}</span>
+                        <span class="file-size">${(file.size/1024/1024).toFixed(2)} MB</span>
+                    </div>
+                    <button type="button" class="file-remove" data-bucket="${inputId}" data-index="${index}" title="Remove">✕</button>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+        function handleFileSelectStaged(inputId, listId, errorId) {
+            const input = document.getElementById(inputId);
+            if (input.files && input.files.length > 0) {
+                addFilesToBucket(inputId, Array.from(input.files), errorId);
+                input.value = '';
+            }
+            renderBucket(inputId, listId);
+        }
+        function removeFileFromBucket(bucketId, index, listId) {
+            const arr = stagedFiles[bucketId] || [];
+            if (index >= 0 && index < arr.length) {
+                arr.splice(index, 1);
+                renderBucket(bucketId, listId);
+            }
+        }
+
+        // Attach file handlers (use staged logic)
         document.getElementById('jokbo_files').addEventListener('change', () => 
-            handleFileSelect('jokbo_files', 'jokbo_file_list', 'jokbo_error'));
+            handleFileSelectStaged('jokbo_files', 'jokbo_file_list', 'jokbo_error'));
         document.getElementById('jokbo_lesson_files').addEventListener('change', () => 
-            handleFileSelect('jokbo_lesson_files', 'jokbo_lesson_file_list', 'jokbo_lesson_error'));
+            handleFileSelectStaged('jokbo_lesson_files', 'jokbo_lesson_file_list', 'jokbo_lesson_error'));
         document.getElementById('lesson_lesson_files').addEventListener('change', () => 
-            handleFileSelect('lesson_lesson_files', 'lesson_lesson_file_list', 'lesson_lesson_error'));
+            handleFileSelectStaged('lesson_lesson_files', 'lesson_lesson_file_list', 'lesson_lesson_error'));
         document.getElementById('lesson_jokbo_files').addEventListener('change', () => 
-            handleFileSelect('lesson_jokbo_files', 'lesson_jokbo_file_list', 'lesson_jokbo_error'));
+            handleFileSelectStaged('lesson_jokbo_files', 'lesson_jokbo_file_list', 'lesson_jokbo_error'));
+        // Removal handlers via event delegation
+        document.getElementById('jokbo_file_list').addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('file-remove')) {
+                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'jokbo_file_list');
+            }
+        });
+        document.getElementById('jokbo_lesson_file_list').addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('file-remove')) {
+                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'jokbo_lesson_file_list');
+            }
+        });
+        document.getElementById('lesson_lesson_file_list').addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('file-remove')) {
+                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'lesson_lesson_file_list');
+            }
+        });
+        document.getElementById('lesson_jokbo_file_list').addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('file-remove')) {
+                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'lesson_jokbo_file_list');
+            }
+        });
         
         // Form submission
         async function submitAnalysis(mode, jokboInputId, lessonInputId, model) {
@@ -1034,9 +1119,9 @@
             const statusContent = document.getElementById('status-content');
             const statusMessage = document.getElementById('status-message');
             
-            // Validate files
-            const jokboFiles = document.getElementById(jokboInputId).files;
-            const lessonFiles = document.getElementById(lessonInputId).files;
+            // Validate files from staged buckets (supports multi-step add/remove)
+            const jokboFiles = stagedFiles[jokboInputId] || [];
+            const lessonFiles = stagedFiles[lessonInputId] || [];
             
             if (jokboFiles.length === 0 || lessonFiles.length === 0) {
                 statusBadge.className = 'status-badge error';
