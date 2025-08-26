@@ -47,6 +47,7 @@ celery -A tasks:celery_app worker -Q analysis,default --loglevel=info
 ```
 curl -F "jokbo_files=@jokbo/sample.pdf" -F "lesson_files=@lesson/sample.pdf" \
      "http://localhost:8000/analyze/jokbo-centric?model=flash"
+# Gemini 2.5 Pro requires ?model=pro&password=<your_secret>
 
 # 진행/결과 조회
 curl http://localhost:8000/progress/<job_id>
@@ -59,6 +60,7 @@ curl -OJ http://localhost:8000/result/<job_id>/<filename>
 ```
 curl -F "jokbo_files=@jokbo/sample.pdf" -F "lesson_files=@lesson/sample.pdf" \
      "http://localhost:8000/analyze/batch?mode=jokbo-centric&model=flash"
+# Gemini 2.5 Pro: add ?model=pro&password=<your_secret>
 ```
 - mode=jokbo-centric: 각 족보 파일 × 모든 강의자료로 N개의 하위 작업 실행
 - mode=lesson-centric: 각 강의자료 × 모든 족보로 N개의 하위 작업 실행
@@ -76,7 +78,8 @@ bash scripts/smoke_batch.sh
 2) 환경변수:
 ```
 GEMINI_API_KEY=...        # 또는 GEMINI_API_KEYS=key1,key2,...
-GEMINI_MODEL=flash        # 모델은 flash로 고정
+GEMINI_MODEL=flash        # 기본 flash (pro는 비밀번호 필요)
+PRO_MODEL_PASSWORD=...    # 선택: Pro 모델을 위한 비밀번호
 REDIS_URL=redis://...
 RENDER_STORAGE_PATH=/var/data  # 쓰기 가능 경로
 ```

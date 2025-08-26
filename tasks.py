@@ -22,7 +22,7 @@ STORAGE_PATH.mkdir(parents=True, exist_ok=True)
 
 # Check if multi-API mode is available
 USE_MULTI_API = len(API_KEYS) > 1 if 'API_KEYS' in globals() else False
-MODEL_TYPE = os.getenv("GEMINI_MODEL", "flash")  # Model fixed to 'flash' by default
+MODEL_TYPE = os.getenv("GEMINI_MODEL", "flash")  # Defaults to 'flash'; 'pro' requires password
 
 # --- Celery Initialization with Configuration ---
 celery_app = Celery("tasks")
