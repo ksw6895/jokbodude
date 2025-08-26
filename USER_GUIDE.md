@@ -99,7 +99,8 @@ GEMINI_API_KEY=your_single_api_key_here
 GEMINI_API_KEYS=key1,key2,key3
 
 # 선택사항
-GEMINI_MODEL=flash  # flash만 지원
+GEMINI_MODEL=flash  # 기본 flash (pro는 비밀번호 필요)
+PRO_MODEL_PASSWORD=...  # Pro 모델 비밀번호
 ```
 
 #### 2. jokbodude-worker
@@ -112,6 +113,7 @@ GEMINI_API_KEY=your_single_api_key_here
 GEMINI_API_KEYS=key1,key2,key3
 
 GEMINI_MODEL=flash
+PRO_MODEL_PASSWORD=...
 ```
 
 ### Gemini API 키 발급 방법

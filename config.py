@@ -57,6 +57,7 @@ SAFETY_SETTINGS = [
 # Model name mapping
 MODEL_NAMES = {
     "flash": "gemini-2.5-flash",
+    "pro": "gemini-2.5-pro",
 }
 
 def create_model(model_type: str = "flash", thinking_budget: Optional[int] = None):
@@ -64,7 +65,7 @@ def create_model(model_type: str = "flash", thinking_budget: Optional[int] = Non
     Create a Gemini model with specified configuration.
     
     Args:
-        model_type: Only "flash" is supported
+        model_type: "flash" (default) or "pro"
         thinking_budget: Optional thinking budget for flash model (0-24576, -1 for auto)
     
     Returns:

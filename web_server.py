@@ -23,6 +23,7 @@ import time
 # Use an environment variable for the storage path, essential for Render.
 STORAGE_PATH = Path(os.getenv("RENDER_STORAGE_PATH", "persistent_storage"))
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+PRO_MODEL_PASSWORD = os.getenv("PRO_MODEL_PASSWORD", "")
 
 # --- App & Celery Initialization ---
 @asynccontextmanager
@@ -129,7 +130,7 @@ def read_guide():
     return FileResponse('frontend/guide.html')
 
 @app.get("/config")
-def get_config():
+def get_config(password: Optional[str] = None):
     """Expose server capabilities for the frontend UI."""
     try:
         # Lazy import to avoid hard dependency at module import time
@@ -137,10 +138,13 @@ def get_config():
         keys_count = len(_API_KEYS) if isinstance(_API_KEYS, list) else (1 if _API_KEYS else 0)
     except Exception:
         keys_count = 0
+    models = ["flash"]
+    if password and PRO_MODEL_PASSWORD and password == PRO_MODEL_PASSWORD:
+        models.append("pro")
     return {
         "multi_api_available": keys_count > 1,
         "api_keys_count": keys_count,
-        "models": ["flash"],
+        "models": models,
     }
 
 @app.post("/analyze/jokbo-centric", status_code=202)
@@ -148,7 +152,8 @@ async def analyze_jokbo_centric(
     request: Request,
     jokbo_files: list[UploadFile] = File(...), 
     lesson_files: list[UploadFile] = File(...),
-    model: Optional[str] = Query("flash", regex="^(flash)$"),
+    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    password: Optional[str] = Query(None),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     # Also accept multi_api via multipart form for robustness
@@ -160,6 +165,10 @@ async def analyze_jokbo_centric(
     storage_manager = request.app.state.storage_manager
 
     try:
+        # Validate model password if needed
+        if model == "pro" and password != PRO_MODEL_PASSWORD:
+            raise HTTPException(status_code=403, detail="Invalid model password")
+
         # Validate file sizes
         for f in jokbo_files + lesson_files:
             if f.size and f.size > MAX_FILE_SIZE:
@@ -246,7 +255,8 @@ async def analyze_lesson_centric(
     request: Request,
     jokbo_files: list[UploadFile] = File(...), 
     lesson_files: list[UploadFile] = File(...),
-    model: Optional[str] = Query("flash", regex="^(flash)$"),
+    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    password: Optional[str] = Query(None),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     # Also accept multi_api via multipart form for robustness
@@ -258,6 +268,10 @@ async def analyze_lesson_centric(
     storage_manager = request.app.state.storage_manager
 
     try:
+        # Validate model password if needed
+        if model == "pro" and password != PRO_MODEL_PASSWORD:
+            raise HTTPException(status_code=403, detail="Invalid model password")
+
         # Validate file sizes
         for f in jokbo_files + lesson_files:
             if f.size and f.size > MAX_FILE_SIZE:
@@ -401,7 +415,8 @@ async def analyze_batch(
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
     mode: str = Query("jokbo-centric", regex="^(jokbo-centric|lesson-centric)$"),
-    model: Optional[str] = Query("flash", regex="^(flash)$"),
+    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    password: Optional[str] = Query(None),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     multi_api_form: Optional[bool] = Form(None),
@@ -416,6 +431,10 @@ async def analyze_batch(
     job_id = str(uuid.uuid4())
     storage_manager = request.app.state.storage_manager
     try:
+        # Validate model password if needed
+        if model == "pro" and password != PRO_MODEL_PASSWORD:
+            raise HTTPException(status_code=403, detail="Invalid model password")
+
         # Validate sizes
         for f in jokbo_files + lesson_files:
             if f.size and f.size > MAX_FILE_SIZE:

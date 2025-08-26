@@ -717,6 +717,10 @@
             </div>
             
             <div class="card-body">
+                <div class="form-group" style="max-width:300px;margin-bottom:1rem;">
+                    <label for="model_password">Model Password</label>
+                    <input type="password" id="model_password" placeholder="Enter password to unlock Pro" style="width:100%;padding:0.5rem 1rem;border:1px solid var(--gray-300);border-radius:8px;" />
+                </div>
                 <div class="tabs">
                     <button class="tab active" onclick="switchTab('jokbo')">
                         Exam-Centric Analysis
@@ -879,6 +883,7 @@
     <script>
         const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
         let JD_CONFIG = { multi_api_available: false, api_keys_count: 0 };
+        let modelPassword = localStorage.getItem('jd_model_password') || '';
         // Staged file buckets to allow incremental adds and removals per input
         const stagedFiles = {
             'jokbo_files': [],
@@ -959,6 +964,37 @@
             const [singleBtn, multiBtn] = group.querySelectorAll('.toggle-option');
             return multiBtn.classList.contains('active') && !multiBtn.classList.contains('disabled');
         }
+
+        async function checkModelPassword() {
+            const pwdInput = document.getElementById('model_password');
+            const pw = (pwdInput.value || '').trim();
+            try {
+                const res = await fetch(`/config?password=${encodeURIComponent(pw)}`);
+                const data = await res.json();
+                const selects = [document.getElementById('jokbo_model'), document.getElementById('lesson_model')];
+                const hasPro = data.models && data.models.includes('pro');
+                for (const sel of selects) {
+                    let opt = sel.querySelector('option[value="pro"]');
+                    if (hasPro) {
+                        if (!opt) {
+                            sel.insertAdjacentHTML('beforeend', '<option value="pro">Gemini 2.5 Pro - Quality</option>');
+                        }
+                    } else if (opt) {
+                        opt.remove();
+                        if (sel.value === 'pro') sel.value = 'flash';
+                    }
+                }
+                if (hasPro) {
+                    modelPassword = pw;
+                    localStorage.setItem('jd_model_password', pw);
+                } else {
+                    modelPassword = '';
+                    localStorage.removeItem('jd_model_password');
+                }
+            } catch (e) {
+                console.error('Password check failed', e);
+            }
+        }
         
         // Tab switching
         function switchTab(tabName) {
@@ -1024,6 +1060,11 @@
         
         // Kick off config fetch and toggle init
         initConfigAndToggles();
+        document.getElementById('model_password').addEventListener('input', checkModelPassword);
+        if (modelPassword) {
+            document.getElementById('model_password').value = modelPassword;
+            checkModelPassword();
+        }
 
         // Staged file selection helpers (allow multi-step add/remove)
         function addFilesToBucket(inputId, files, errorId) {
@@ -1177,7 +1218,8 @@
                 formData.append('multi_api', multiApi ? 'true' : 'false');
                 // Send min_relevance via both query and form
                 formData.append('min_relevance', String(minRel));
-                const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}&min_relevance=${minRel}${userParam}`, {
+                const pwdParam = modelPassword ? `&password=${encodeURIComponent(modelPassword)}` : '';
+                const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}&min_relevance=${minRel}${userParam}${pwdParam}`, {
                     method: 'POST',
                     body: formData
                 });
