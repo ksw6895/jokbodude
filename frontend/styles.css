@@ -1,0 +1,55 @@
+:root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --accent: #222222;
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --border-color: rgba(0, 0, 0, 0.2);
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.navbar, .tabs, .card, .file-upload-area {
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+}
+
+.tab {
+    background: transparent;
+    color: var(--text-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+.tab.active {
+    border-bottom: 2px solid var(--text-color);
+}
+
+.submit-btn, button {
+    background: var(--text-color);
+    color: var(--bg-color);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.file-upload-area {
+    padding: 1rem;
+    text-align: center;
+}
+
+.file-upload-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.file-list {
+    margin-top: 0.5rem;
+}

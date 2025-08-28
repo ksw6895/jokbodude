@@ -504,6 +504,89 @@ def batch_analyze_single(
         raise e
 
 
+@celery_app.task(name="tasks.generate_partial_jokbo")
+def generate_partial_jokbo(job_id: str) -> dict:
+    """Create a simplified partial jokbo PDF for the given job.
+
+    Gemini will eventually supply ``page_start`` and ``next_question_start``
+    values for each problem via the ``PARTIAL_JOKBO_TASK`` prompt.  For now,
+    this function demonstrates how those fields drive PDF slicing by using
+    placeholder metadata.
+    """
+
+    sm = StorageManager()
+    try:
+        metadata = sm.get_job_metadata(job_id)
+        if not metadata:
+            raise Exception(f"Job metadata not found for {job_id}")
+
+        jokbo_keys = metadata.get("jokbo_keys", [])
+        lesson_keys = metadata.get("lesson_keys", [])
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            jokbo_dir = temp_path / "jokbo"
+            lesson_dir = temp_path / "lesson"
+            output_dir = temp_path / "output"
+
+            jokbo_dir.mkdir(parents=True, exist_ok=True)
+            lesson_dir.mkdir(parents=True, exist_ok=True)
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+            jokbo_paths: list[str] = []
+            for key in jokbo_keys:
+                name = key.split(":")[-2]
+                local_path = jokbo_dir / name
+                sm.save_file_locally(key, local_path)
+                jokbo_paths.append(str(local_path))
+
+            for key in lesson_keys:
+                name = key.split(":")[-2]
+                local_path = lesson_dir / name
+                sm.save_file_locally(key, local_path)
+
+            questions: list[dict[str, str]] = []
+            for path in jokbo_paths:
+                # Placeholder metadata; future implementation will populate
+                # this via Gemini using the PARTIAL_JOKBO_TASK prompt.
+                question_ranges = [
+                    {
+                        "page_start": 1,
+                        "next_question_start": 2,
+                        "explanation": "자동 생성된 예시 해설입니다.",
+                    }
+                ]
+                for meta in question_ranges:
+                    try:
+                        q_pdf = PDFOperations.extract_question_region(
+                            path,
+                            meta["page_start"],
+                            meta.get("next_question_start"),
+                        )
+                        questions.append(
+                            {
+                                "question_pdf": q_pdf,
+                                "explanation": meta["explanation"],
+                            }
+                        )
+                    except Exception:
+                        continue
+
+            creator = PDFCreator()
+            output_path = output_dir / "partial_jokbo.pdf"
+            creator.create_partial_jokbo_pdf(questions, str(output_path))
+            sm.store_result(job_id, output_path)
+
+            try:
+                sm.finalize_progress(job_id, "완료")
+            except Exception:
+                pass
+
+            return {"status": "OK", "job_id": job_id, "output": output_path.name}
+    except Exception as exc:
+        raise exc
+
+
 @celery_app.task(name="tasks.aggregate_batch")
 def aggregate_batch(results: list, job_id: str):
     """Finalize a batch job after all subtasks completed.
