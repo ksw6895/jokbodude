@@ -15,7 +15,8 @@
 ## 아키텍처 개요
 - `pdf_processor/`: 분석 엔진
   - `core/`(오케스트레이션), `analyzers/`(lesson/jokbo/멀티API), `api/`(Gemini+파일), `parsers/`(응답/병합), `pdf/`(분할/추출), `utils/`
-- `web_server.py`: FastAPI 앱(업로드, 상태, 결과, 헬스)
+- `server/`: 모듈형 FastAPI 앱(분석/잡/헬스 라우터)
+- `web_server.py`: 배포 호환성을 위한 얇은 래퍼(`server.main:create_app`)
 - `tasks.py`: Celery 워커(분석 실행, 결과 PDF 저장)
 - `pdf_creator.py`: 결과 PDF 생성기
 - `storage_manager.py`: Redis 파일/진행도/TTL 관리
