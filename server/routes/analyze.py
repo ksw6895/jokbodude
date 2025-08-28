@@ -296,3 +296,55 @@ async def analyze_batch(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Batch submission failed: {str(e)}")
+
+
+@router.post("/analyze/partial-jokbo", status_code=202)
+async def analyze_partial_jokbo(
+    request: Request,
+    jokbo_files: list[UploadFile] = File(...),
+    lesson_files: list[UploadFile] = File(...),
+    user_id: Optional[str] = Query(None),
+):
+    """Endpoint to generate a partial jokbo PDF."""
+
+    job_id = str(uuid.uuid4())
+    storage_manager = request.app.state.storage_manager
+
+    try:
+        for f in jokbo_files + lesson_files:
+            if f.size and f.size > MAX_FILE_SIZE:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"File {f.filename} exceeds maximum size of 50MB",
+                )
+
+        jokbo_keys: list[str] = []
+        lesson_keys: list[str] = []
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tdir = Path(temp_dir)
+            for f in jokbo_files:
+                p = tdir / f.filename
+                content = await f.read()
+                p.write_bytes(content)
+                k = storage_manager.store_file(p, job_id, "jokbo")
+                jokbo_keys.append(k)
+            for f in lesson_files:
+                p = tdir / f.filename
+                content = await f.read()
+                p.write_bytes(content)
+                k = storage_manager.store_file(p, job_id, "lesson")
+                lesson_keys.append(k)
+
+        metadata = {"jokbo_keys": jokbo_keys, "lesson_keys": lesson_keys, "user_id": user_id}
+        storage_manager.store_job_metadata(job_id, metadata)
+        if user_id:
+            storage_manager.add_user_job(user_id, job_id)
+
+        task = celery_app.send_task("tasks.generate_partial_jokbo", args=[job_id])
+        try:
+            storage_manager.set_job_task(job_id, task.id)
+        except Exception:
+            pass
+        return {"job_id": job_id, "task_id": task.id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")

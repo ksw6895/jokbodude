@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JokboDude - Professional PDF Analysis Platform</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <style>
         :root {
             --primary: #5046e5;
@@ -728,6 +729,9 @@
                     <button class="tab" onclick="switchTab('lesson')">
                         Lecture-Centric Analysis
                     </button>
+                    <button class="tab" onclick="switchTab('partial')">
+                        Partial Jokbo
+                    </button>
                 </div>
                 
                 <!-- Jokbo-Centric Tab -->
@@ -791,7 +795,7 @@
                         </button>
                     </form>
                 </div>
-                
+
                 <!-- Lesson-Centric Tab -->
                 <div id="lesson-tab" class="tab-content">
                     <form id="lessonForm">
@@ -853,7 +857,40 @@
                         </button>
                     </form>
                 </div>
-                
+
+                <!-- Partial Jokbo Tab -->
+                <div id="partial-tab" class="tab-content">
+                    <form id="partialForm">
+                        <div class="form-section">
+                            <h3 class="form-section-title">File Upload</h3>
+                            <div class="form-group">
+                                <label>Exam PDF Files</label>
+                                <input type="file" id="partial_jokbo_files" multiple accept=".pdf">
+                                <div class="file-upload-area" onclick="document.getElementById('partial_jokbo_files').click()">
+                                    <div class="file-upload-icon">📄</div>
+                                    <div class="file-upload-text">Click to select exam PDFs</div>
+                                    <div class="file-list" id="partial_jokbo_file_list"></div>
+                                </div>
+                                <div class="error-message" id="partial_jokbo_error"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Lecture PDF Files</label>
+                                <input type="file" id="partial_lesson_files" multiple accept=".pdf">
+                                <div class="file-upload-area" onclick="document.getElementById('partial_lesson_files').click()">
+                                    <div class="file-upload-icon">📚</div>
+                                    <div class="file-upload-text">Click to select lecture PDFs</div>
+                                    <div class="file-list" id="partial_lesson_file_list"></div>
+                                </div>
+                                <div class="error-message" id="partial_lesson_error"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="submit-btn">
+                            <span>Create Partial Jokbo</span>
+                            <span>→</span>
+                        </button>
+                    </form>
+                </div>
+
                 <div class="status-section">
                     <div class="status-header">
                         <h3 class="status-title">Processing Status</h3>
@@ -889,7 +926,9 @@
             'jokbo_files': [],
             'jokbo_lesson_files': [],
             'lesson_lesson_files': [],
-            'lesson_jokbo_files': []
+            'lesson_jokbo_files': [],
+            'partial_jokbo_files': [],
+            'partial_lesson_files': []
         };
 
         // Initialize processing mode toggles with server capabilities
@@ -1130,8 +1169,12 @@
             handleFileSelectStaged('jokbo_lesson_files', 'jokbo_lesson_file_list', 'jokbo_lesson_error'));
         document.getElementById('lesson_lesson_files').addEventListener('change', () => 
             handleFileSelectStaged('lesson_lesson_files', 'lesson_lesson_file_list', 'lesson_lesson_error'));
-        document.getElementById('lesson_jokbo_files').addEventListener('change', () => 
+        document.getElementById('lesson_jokbo_files').addEventListener('change', () =>
             handleFileSelectStaged('lesson_jokbo_files', 'lesson_jokbo_file_list', 'lesson_jokbo_error'));
+        document.getElementById('partial_jokbo_files').addEventListener('change', () =>
+            handleFileSelectStaged('partial_jokbo_files', 'partial_jokbo_file_list', 'partial_jokbo_error'));
+        document.getElementById('partial_lesson_files').addEventListener('change', () =>
+            handleFileSelectStaged('partial_lesson_files', 'partial_lesson_file_list', 'partial_lesson_error'));
         // Removal handlers via event delegation
         document.getElementById('jokbo_file_list').addEventListener('click', (e) => {
             if (e.target && e.target.classList.contains('file-remove')) {
@@ -1151,6 +1194,16 @@
         document.getElementById('lesson_jokbo_file_list').addEventListener('click', (e) => {
             if (e.target && e.target.classList.contains('file-remove')) {
                 removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'lesson_jokbo_file_list');
+            }
+        });
+        document.getElementById('partial_jokbo_file_list').addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('file-remove')) {
+                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'partial_jokbo_file_list');
+            }
+        });
+        document.getElementById('partial_lesson_file_list').addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('file-remove')) {
+                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'partial_lesson_file_list');
             }
         });
         
@@ -1203,22 +1256,25 @@
             for (const file of lessonFiles) {
                 formData.append('lesson_files', file);
             }
-            
+
             try {
-                const multiApi = getMultiApiState(mode);
-                const minRel = (() => {
-                    const v = mode === 'jokbo-centric' ? document.getElementById('jokbo_min_rel').value : document.getElementById('lesson_min_rel').value;
-                    const n = parseInt(v, 10);
-                    if (isNaN(n)) return 70;
-                    return Math.max(0, Math.min(n, 110));
-                })();
+                const multiApi = mode === 'partial-jokbo' ? false : getMultiApiState(mode);
+                const minRel = mode === 'partial-jokbo'
+                    ? 0
+                    : (() => {
+                        const v = mode === 'jokbo-centric' ? document.getElementById('jokbo_min_rel').value : document.getElementById('lesson_min_rel').value;
+                        const n = parseInt(v, 10);
+                        if (isNaN(n)) return 70;
+                        return Math.max(0, Math.min(n, 110));
+                    })();
                 const userId = (localStorage.getItem('jd_user_id') || '').trim();
                 const userParam = userId ? `&user_id=${encodeURIComponent(userId)}` : '';
-                // Send multi_api via both query and form for robustness
-                formData.append('multi_api', multiApi ? 'true' : 'false');
-                // Send min_relevance via both query and form
-                formData.append('min_relevance', String(minRel));
-                const pwdParam = modelPassword ? `&password=${encodeURIComponent(modelPassword)}` : '';
+                // Send multi_api and min_relevance only for existing modes
+                if (mode !== 'partial-jokbo') {
+                    formData.append('multi_api', multiApi ? 'true' : 'false');
+                    formData.append('min_relevance', String(minRel));
+                }
+                const pwdParam = (modelPassword && mode !== 'partial-jokbo') ? `&password=${encodeURIComponent(modelPassword)}` : '';
                 const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}&min_relevance=${minRel}${userParam}${pwdParam}`, {
                     method: 'POST',
                     body: formData
@@ -1367,6 +1423,11 @@
             e.preventDefault();
             const model = document.getElementById('lesson_model').value;
             await submitAnalysis('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
+        });
+
+        document.getElementById('partialForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await submitAnalysis('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', 'flash');
         });
 
         // Admin cleanup: POST /admin/cleanup with optional older-than filter

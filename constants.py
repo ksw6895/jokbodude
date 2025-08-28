@@ -3,7 +3,8 @@ Constants for JokboDude - 프롬프트 및 설정 상수
 """
 
 # 공통 프롬프트 부분
-COMMON_PROMPT_INTRO = """당신은 병리학 교수입니다. 다음 두 개의 PDF가 업로드되어 있습니다: 족보 1개, 강의자료 1개.
+COMMON_PROMPT_INTRO = """당신은 해당 과목의 교수입니다. 다음 두 개의 PDF가 업로드되어 있습니다: 족보 1개, 강의자료 1개.
+모든 응답은 기본적으로 한국어로 작성하되, 의학 용어 등 전문 용어는 반드시 영어를 병기하세요.
 
 ⚠️ 매우 중요: 문제는 오직 족보 PDF에서만 추출하세요!
 강의자료에 있는 예제 문제는 절대 추출하지 마세요!"""
@@ -250,6 +251,28 @@ JOKBO_CENTRIC_OUTPUT_FORMAT = """출력 형식 (반드시 순수 JSON만 응답�
 ⚠️ 중요:
 - 관련 슬라이드가 없거나 모든 슬라이드가 50점 미만인 문제는 questions 배열에서 완전히 제외
 - 빈 questions 배열을 가진 페이지도 jokbo_pages에서 제외"""
+
+# 부분 족보 생성 모드 프롬프트
+PARTIAL_JOKBO_TASK = """작업 (부분 족보 생성):
+1. 업로드된 족보 PDF에서 각 문제를 분석하세요.
+2. 각 문제와 직접적으로 관련된 강의 슬라이드를 찾아 간단히 요약하세요.
+3. 각 문제의 페이지 범위를 page_start와 next_question_start로 보고하세요.
+4. 문제에 대한 간단한 해설을 explanation에 작성하세요.
+"""
+
+PARTIAL_JOKBO_OUTPUT_FORMAT = """출력 형식 (반드시 순수 JSON만 응답하세요):
+{
+  "questions": [
+    {
+      "question_number": "3",
+      "lecture_title": "Chapter 2 - Graphs",
+      "page_start": 5,
+      "next_question_start": 7,
+      "explanation": "강의자료 기반 요약 해설"
+    }
+  ]
+}
+"""
 
 # 기타 설정
 MAX_CONNECTIONS_PER_QUESTION = 2  # 족보 중심 모드에서 문제당 최대 연결 수
