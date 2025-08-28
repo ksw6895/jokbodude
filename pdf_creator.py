@@ -117,7 +117,7 @@ class PDFCreator:
             for p in files:
                 name_norm = self._normalize_korean(p.name)
                 name_key = re.sub(r"[\s_\-]+", "", name_norm).lower()
-                mapping_full[name_key] = p
+                mapping_full.setdefault(name_key, []).append(p)
                 # Stem without extension
                 stem_norm = self._normalize_korean(p.stem)
                 stem_key = re.sub(r"[\s_\-]+", "", stem_norm).lower()
@@ -128,7 +128,7 @@ class PDFCreator:
                 except Exception:
                     stripped_full_norm = name_norm
                 full_stripped_key = re.sub(r"[\s_\-]+", "", stripped_full_norm).lower()
-                mapping_full_stripped[full_stripped_key] = p
+                mapping_full_stripped.setdefault(full_stripped_key, []).append(p)
                 try:
                     stripped_stem_norm = re.sub(r"^(족보|jokbo|exam|시험|기출|중간|기말)[\s_\-]+", "", stem_norm, flags=re.IGNORECASE)
                 except Exception:
@@ -163,17 +163,17 @@ class PDFCreator:
         needle_stem_stripped = _keyify(Path(_strip_prefix(jokbo_filename) or '').stem)
 
         # 2) Exact sanitized filename match
-        candidate = mapping_full.get(needle_full)
-        if candidate and candidate.exists():
-            self.log_debug(f"Matched jokbo file by exact full name: '{jokbo_filename}' -> '{candidate.name}'")
-            return candidate
+        candidates = mapping_full.get(needle_full) or []
+        if len(candidates) == 1 and candidates[0].exists():
+            self.log_debug(f"Matched jokbo file by exact full name: '{jokbo_filename}' -> '{candidates[0].name}'")
+            return candidates[0]
 
         # 3) Prefix-stripped exact filename match
         if needle_full_stripped and needle_full_stripped != needle_full:
-            candidate = mapping_full_stripped.get(needle_full_stripped)
-            if candidate and candidate.exists():
-                self.log_debug(f"Matched by prefix-stripped jokbo name: '{jokbo_filename}' -> '{candidate.name}'")
-                return candidate
+            candidates = mapping_full_stripped.get(needle_full_stripped) or []
+            if len(candidates) == 1 and candidates[0].exists():
+                self.log_debug(f"Matched by prefix-stripped jokbo name: '{jokbo_filename}' -> '{candidates[0].name}'")
+                return candidates[0]
 
         # 4) Exact sanitized stem match (unique)
         if needle_stem:
@@ -197,8 +197,8 @@ class PDFCreator:
 
         Matching strategy (in order):
         1) Direct path exists
-        2) Exact sanitized filename match
-        3) Prefix-stripped sanitized filename exact match (strip: 강의자료/강의/lesson/lecture)
+        2) Exact sanitized filename match (unique only)
+        3) Prefix-stripped sanitized filename exact match (strip: 강의자료/강의/lesson/lecture; unique only)
         4) Exact sanitized stem match (unique only)
         5) Prefix-stripped sanitized stem exact match (unique only)
 
@@ -226,7 +226,7 @@ class PDFCreator:
             for p in files:
                 name_norm = self._normalize_korean(p.name)
                 name_key = re.sub(r"[\s_\-]+", "", name_norm).lower()
-                mapping_full[name_key] = p
+                mapping_full.setdefault(name_key, []).append(p)
                 # Stem without extension
                 stem_norm = self._normalize_korean(p.stem)
                 stem_key = re.sub(r"[\s_\-]+", "", stem_norm).lower()
@@ -237,7 +237,7 @@ class PDFCreator:
                 except Exception:
                     stripped_full_norm = name_norm
                 full_stripped_key = re.sub(r"[\s_\-]+", "", stripped_full_norm).lower()
-                mapping_full_stripped[full_stripped_key] = p
+                mapping_full_stripped.setdefault(full_stripped_key, []).append(p)
                 try:
                     stripped_stem_norm = re.sub(r"^(강의자료|강의|lesson|lecture)[\s_\-]+", "", stem_norm, flags=re.IGNORECASE)
                 except Exception:
@@ -272,17 +272,17 @@ class PDFCreator:
         needle_stem_stripped = _keyify(Path(_strip_prefix(lesson_filename) or '').stem)
 
         # 2) Exact sanitized filename match
-        candidate = mapping_full.get(needle_full)
-        if candidate and candidate.exists():
-            self.log_debug(f"Matched lesson file by exact full name: '{lesson_filename}' -> '{candidate.name}'")
-            return candidate
+        candidates = mapping_full.get(needle_full) or []
+        if len(candidates) == 1 and candidates[0].exists():
+            self.log_debug(f"Matched lesson file by exact full name: '{lesson_filename}' -> '{candidates[0].name}'")
+            return candidates[0]
 
         # 3) Prefix-stripped exact filename match
         if needle_full_stripped and needle_full_stripped != needle_full:
-            candidate = mapping_full_stripped.get(needle_full_stripped)
-            if candidate and candidate.exists():
-                self.log_debug(f"Matched by prefix-stripped full name: '{lesson_filename}' -> '{candidate.name}'")
-                return candidate
+            candidates = mapping_full_stripped.get(needle_full_stripped) or []
+            if len(candidates) == 1 and candidates[0].exists():
+                self.log_debug(f"Matched by prefix-stripped full name: '{lesson_filename}' -> '{candidates[0].name}'")
+                return candidates[0]
 
         # 4) Exact sanitized stem match (unique)
         if needle_stem:

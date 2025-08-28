@@ -165,7 +165,7 @@ The multi‑API layer distributes work across multiple keys and transparently fa
 
 - Produces a jokbo‑first sequence: questions (extracted from jokbo PDFs) followed by related lesson slides and an explanation page.
 - If there are no matches, generates a minimal “분석 결과 없음” PDF so downstream storage doesn’t fail.
-- `_resolve_lesson_path` normalizes lesson filenames to tolerate prefixes like `강의자료_` and minor naming differences; this is critical because upstream analyzers normalize filenames.
+ - `_resolve_lesson_path` and `_resolve_jokbo_path` normalize filenames to tolerate common prefixes and minor naming differences, and they refuse ambiguous matches so colliding filenames do not insert the wrong slide.
 
 
 ## Job Pipeline and Progress
