@@ -833,5 +833,43 @@ class PDFCreator:
         doc.save(output_path)
         doc.close()
         # Don't close jokbo_pdf since it's cached
-        
+
         print(f"Filtered PDF created: {output_path}")
+
+    def create_partial_jokbo_pdf(
+        self, questions: List[Dict[str, Any]], output_path: str
+    ) -> None:
+        """Create a PDF containing cropped jokbo questions with explanations.
+
+        Each entry in ``questions`` should contain:
+
+        - ``question_pdf``: path to a PDF with the extracted question
+          pages.
+        - ``explanation``: textual explanation for the question.
+
+        The output PDF is structured as ``[question pages] ->
+        [explanation page]`` for each question.
+        """
+
+        doc = fitz.open()
+        for q in questions or []:
+            q_pdf = q.get("question_pdf")
+            explanation = q.get("explanation", "")
+
+            if q_pdf and Path(q_pdf).exists():
+                with fitz.open(q_pdf) as src:
+                    doc.insert_pdf(src)
+
+            page = doc.new_page()
+            fontname = self._register_font(page)
+            text_rect = fitz.Rect(50, 50, page.rect.width - 50, page.rect.height - 50)
+            page.insert_textbox(
+                text_rect,
+                self._normalize_korean(explanation),
+                fontsize=11,
+                fontname=fontname,
+                align=fitz.TEXT_ALIGN_LEFT,
+            )
+
+        doc.save(output_path)
+        doc.close()

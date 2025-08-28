@@ -5,662 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JokboDude - Professional PDF Analysis Platform</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #5046e5;
-            --primary-dark: #4338ca;
-            --primary-light: #6366f1;
-            --secondary: #06b6d4;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --dark: #1e293b;
-            --gray-900: #0f172a;
-            --gray-800: #1e293b;
-            --gray-700: #334155;
-            --gray-600: #475569;
-            --gray-500: #64748b;
-            --gray-400: #94a3b8;
-            --gray-300: #cbd5e1;
-            --gray-200: #e2e8f0;
-            --gray-100: #f1f5f9;
-            --gray-50: #f8fafc;
-            --white: #ffffff;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: var(--gray-900);
-            line-height: 1.5;
-        }
-        
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
-            box-shadow: var(--shadow-md);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
-        
-        .navbar-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-        
-        .nav-link {
-            color: var(--gray-600);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-        
-        .nav-link:hover {
-            color: var(--primary);
-        }
-        
-        .main-container {
-            margin-top: 100px;
-            padding: 2rem;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .hero-section {
-            text-align: center;
-            margin-bottom: 3rem;
-            color: white;
-        }
-        
-        .hero-title {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .hero-subtitle {
-            font-size: 1.25rem;
-            opacity: 0.95;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .app-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: var(--shadow-xl);
-            overflow: hidden;
-        }
-        
-        .card-header {
-            background: var(--gray-50);
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid var(--gray-200);
-        }
-        
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--gray-900);
-            margin-bottom: 0.25rem;
-        }
-        
-        .card-description {
-            color: var(--gray-600);
-            font-size: 0.875rem;
-        }
-        
-        .card-body {
-            padding: 2rem;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            padding: 0.25rem;
-            background: var(--gray-100);
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 0.75rem 1.5rem;
-            background: transparent;
-            border: none;
-            color: var(--gray-600);
-            cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-        
-        .tab:hover {
-            color: var(--gray-900);
-        }
-        
-        .tab.active {
-            background: white;
-            color: var(--primary);
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .form-section {
-            margin-bottom: 2rem;
-        }
-        
-        .form-section-title {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--gray-700);
-            margin-bottom: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--gray-700);
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-        
-        .select-wrapper {
-            position: relative;
-        }
-        
-        .select-wrapper::after {
-            content: '▼';
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-            color: var(--gray-500);
-            font-size: 0.75rem;
-        }
-        
-        select {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            padding-right: 2.5rem;
-            border: 1px solid var(--gray-300);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            appearance: none;
-        }
-        
-        select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(80, 70, 229, 0.1);
-        }
-        
-        .file-upload-area {
-            border: 2px dashed var(--gray-300);
-            border-radius: 8px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.2s;
-            cursor: pointer;
-            background: var(--gray-50);
-        }
-        
-        .file-upload-area:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-            background: rgba(80, 70, 229, 0.02);
-        }
-        
-        .file-upload-area.active {
-            border-color: var(--primary);
-            background: rgba(80, 70, 229, 0.05);
-        }
-        
-        .file-upload-icon {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 1rem;
-            background: var(--primary);
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-        
-        .file-upload-text {
-            color: var(--gray-700);
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-        
-        .file-upload-hint {
-            color: var(--gray-500);
-            font-size: 0.875rem;
-        }
-        
-        .file-list {
-            margin-top: 1rem;
-            text-align: left;
-        }
-        
-        .file-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.5rem;
-            background: white;
-            border-radius: 6px;
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
-        }
-        
-        .file-name {
-            color: var(--gray-700);
-            font-weight: 500;
-        }
-        
-        .file-size {
-            color: var(--gray-500);
-            font-size: 0.75rem;
-        }
-        
-        .file-remove {
-            color: var(--danger);
-            cursor: pointer;
-            padding: 0.25rem;
-        }
-        
-        .submit-btn {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        
-        .submit-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(80, 70, 229, 0.3);
-        }
-        
-        .submit-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .status-section {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--gray-200);
-        }
-        
-        .status-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-        
-        .status-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--gray-900);
-        }
-        
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        .status-badge.idle {
-            background: var(--gray-100);
-            color: var(--gray-600);
-        }
-        
-        .status-badge.processing {
-            background: var(--warning);
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-        }
-        
-        .status-badge.success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
-        
-        .status-badge.error {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-        
-        .status-content {
-            padding: 1.5rem;
-            background: var(--gray-50);
-            border-radius: 8px;
-            min-height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .status-message {
-            color: var(--gray-700);
-            text-align: center;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--gray-200);
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 0.5rem 0;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        
-        .progress-wrapper {
-            margin-top: 1rem;
-            width: 100%;
-            height: 8px;
-            background: var(--gray-200);
-            border-radius: 9999px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-            border-radius: 9999px;
-            animation: pulse 2s ease-in-out infinite;
-            width: 0%;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-        
-        .loader {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid var(--gray-300);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .download-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            background: var(--success);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.2s;
-            margin-top: 1rem;
-        }
-        
-        .download-btn:hover {
-            background: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
-        }
-        
-        .error-message {
-            color: var(--danger);
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-            display: none;
-        }
-        
-        .error-message.show {
-            display: block;
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-            margin-top: 3rem;
-            margin-bottom: 2rem;
-        }
-        
-        .feature-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 1.5rem;
-            color: white;
-        }
-        
-        .feature-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-            font-size: 1.25rem;
-        }
-        
-        .feature-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        
-        .feature-description {
-            font-size: 0.875rem;
-            opacity: 0.9;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-        
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2rem;
-            }
-            
-            .main-container {
-                padding: 1rem;
-            }
-            
-            .card-body {
-                padding: 1rem;
-            }
-            
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-    <style>
-        /* Glassmorphism overrides */
-        :root {
-            --bg-start: #0f1226;
-            --bg-end: #1b2340;
-            --primary-2: #51e1ff;
-            --glass: rgba(255, 255, 255, 0.08);
-            --glass-strong: rgba(255, 255, 255, 0.14);
-            --border: rgba(255, 255, 255, 0.18);
-            --text: #ecf0ff;
-            --muted: #b8c0ff;
-        }
-        body {
-            color: var(--text);
-            background: radial-gradient(1200px 800px at 10% -10%, #2c2d72 0%, transparent 55%),
-                        radial-gradient(1200px 800px at 110% 10%, #2b5876 0%, transparent 55%),
-                        linear-gradient(160deg, var(--bg-start), var(--bg-end));
-        }
-        /* removed grid background per request */
-        .navbar { background: linear-gradient(180deg, rgba(15,18,38,0.65), rgba(15,18,38,0.35)); border-bottom: 1px solid var(--border); color: var(--text); }
-        .logo { color: var(--text); }
-        .logo-icon { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%); box-shadow: inset 0 0 12px rgba(255,255,255,0.25), 0 8px 20px rgba(81, 225, 255, 0.2); }
-        .nav-link { color: var(--muted); }
-        .nav-link:hover { color: var(--text); background: var(--glass); }
-        .hero-section { color: var(--text); }
-        .app-card { background: var(--glass); border: 1px solid var(--border); }
-        .card-header { background: rgba(255,255,255,0.06); border-bottom: 1px solid var(--border); }
-        .card-title { color: var(--text); }
-        .card-description { color: var(--muted); }
-        .tabs { background: rgba(255,255,255,0.06); border: 1px solid var(--border); }
-        .tab { color: var(--muted); border: 1px solid transparent; }
-        .tab:hover { color: var(--text); background: rgba(255,255,255,0.06); border-color: var(--border); }
-        .tab.active { background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06)); color: #fff; border-color: var(--border); }
-        label { color: var(--text); }
-        .select-wrapper::after { color: var(--muted); }
-        select { background: rgba(10,12,28,0.35); color: var(--text); border: 1px solid var(--border); backdrop-filter: blur(6px); }
-        .file-upload-area { background: rgba(255,255,255,0.06); border-color: var(--border); }
-        .file-upload-area:hover { border-color: rgba(124,108,255,0.8); background: rgba(124,108,255,0.065); }
-        .file-upload-area.active { border-color: var(--primary); background: rgba(124,108,255,0.09); }
-        .file-upload-icon { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%); color: #0b1024; }
-        .file-upload-text { color: var(--text); }
-        .file-upload-hint { color: var(--muted); }
-        .file-item { background: rgba(255,255,255,0.06); border: 1px solid var(--border); }
-        .file-name { color: var(--text); }
-        .file-size { color: var(--muted); }
-        .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%); color: #0b1024; box-shadow: 0 18px 30px rgba(124,108,255,0.35); }
-        .download-btn { background: linear-gradient(135deg, #9be7ff 0%, #7c6cff 100%); color: #0b1024; box-shadow: 0 12px 24px rgba(123,108,255,0.32); }
-        .status-title { color: var(--text); }
-        .status-badge { border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--muted); }
-        .status-content { background: rgba(255,255,255,0.06); border: 1px solid var(--border); }
-        .status-message { color: var(--muted); }
-        .progress-bar { background: rgba(255,255,255,0.06); border: 1px solid var(--border); }
-        .progress-fill { background: linear-gradient(90deg, var(--primary) 0%, var(--primary-2) 100%); }
-
-        /* Toggle group for processing mode */
-        .toggle-group {
-            display: inline-flex;
-            align-items: center;
-            gap: 0;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-            background: rgba(255,255,255,0.06);
-        }
-        .toggle-option {
-            padding: 0.5rem 0.9rem;
-            background: transparent;
-            color: var(--muted);
-            border: none;
-            border-right: 1px solid var(--border);
-            cursor: pointer;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-        }
-        .toggle-option:last-of-type { border-right: none; }
-        .toggle-option.active {
-            background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.08));
-            color: var(--text);
-            box-shadow: inset 0 0 0 1px var(--border);
-        }
-        .toggle-option.disabled { opacity: 0.45; cursor: not-allowed; }
-        .toggle-note { margin-left: 0.6rem; color: var(--muted); font-size: 0.85rem; }
-    </style>
+    <link rel="stylesheet" href="/styles.css">
+    
+    
 </head>
 <body>
     <nav class="navbar">
@@ -728,6 +75,9 @@
                     <button class="tab" onclick="switchTab('lesson')">
                         Lecture-Centric Analysis
                     </button>
+                    <button class="tab" onclick="switchTab('partial')">
+                        Partial Jokbo
+                    </button>
                 </div>
                 
                 <!-- Jokbo-Centric Tab -->
@@ -791,7 +141,7 @@
                         </button>
                     </form>
                 </div>
-                
+
                 <!-- Lesson-Centric Tab -->
                 <div id="lesson-tab" class="tab-content">
                     <form id="lessonForm">
@@ -853,7 +203,40 @@
                         </button>
                     </form>
                 </div>
-                
+
+                <!-- Partial Jokbo Tab -->
+                <div id="partial-tab" class="tab-content">
+                    <form id="partialForm">
+                        <div class="form-section">
+                            <h3 class="form-section-title">File Upload</h3>
+                            <div class="form-group">
+                                <label>Exam PDF Files</label>
+                                <input type="file" id="partial_jokbo_files" multiple accept=".pdf">
+                                <div class="file-upload-area" onclick="document.getElementById('partial_jokbo_files').click()">
+                                    <div class="file-upload-icon">📄</div>
+                                    <div class="file-upload-text">Click to select exam PDFs</div>
+                                    <div class="file-list" id="partial_jokbo_file_list"></div>
+                                </div>
+                                <div class="error-message" id="partial_jokbo_error"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Lecture PDF Files</label>
+                                <input type="file" id="partial_lesson_files" multiple accept=".pdf">
+                                <div class="file-upload-area" onclick="document.getElementById('partial_lesson_files').click()">
+                                    <div class="file-upload-icon">📚</div>
+                                    <div class="file-upload-text">Click to select lecture PDFs</div>
+                                    <div class="file-list" id="partial_lesson_file_list"></div>
+                                </div>
+                                <div class="error-message" id="partial_lesson_error"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="submit-btn">
+                            <span>Create Partial Jokbo</span>
+                            <span>→</span>
+                        </button>
+                    </form>
+                </div>
+
                 <div class="status-section">
                     <div class="status-header">
                         <h3 class="status-title">Processing Status</h3>
@@ -889,7 +272,9 @@
             'jokbo_files': [],
             'jokbo_lesson_files': [],
             'lesson_lesson_files': [],
-            'lesson_jokbo_files': []
+            'lesson_jokbo_files': [],
+            'partial_jokbo_files': [],
+            'partial_lesson_files': []
         };
 
         // Initialize processing mode toggles with server capabilities
@@ -1130,8 +515,12 @@
             handleFileSelectStaged('jokbo_lesson_files', 'jokbo_lesson_file_list', 'jokbo_lesson_error'));
         document.getElementById('lesson_lesson_files').addEventListener('change', () => 
             handleFileSelectStaged('lesson_lesson_files', 'lesson_lesson_file_list', 'lesson_lesson_error'));
-        document.getElementById('lesson_jokbo_files').addEventListener('change', () => 
+        document.getElementById('lesson_jokbo_files').addEventListener('change', () =>
             handleFileSelectStaged('lesson_jokbo_files', 'lesson_jokbo_file_list', 'lesson_jokbo_error'));
+        document.getElementById('partial_jokbo_files').addEventListener('change', () =>
+            handleFileSelectStaged('partial_jokbo_files', 'partial_jokbo_file_list', 'partial_jokbo_error'));
+        document.getElementById('partial_lesson_files').addEventListener('change', () =>
+            handleFileSelectStaged('partial_lesson_files', 'partial_lesson_file_list', 'partial_lesson_error'));
         // Removal handlers via event delegation
         document.getElementById('jokbo_file_list').addEventListener('click', (e) => {
             if (e.target && e.target.classList.contains('file-remove')) {
@@ -1151,6 +540,16 @@
         document.getElementById('lesson_jokbo_file_list').addEventListener('click', (e) => {
             if (e.target && e.target.classList.contains('file-remove')) {
                 removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'lesson_jokbo_file_list');
+            }
+        });
+        document.getElementById('partial_jokbo_file_list').addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('file-remove')) {
+                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'partial_jokbo_file_list');
+            }
+        });
+        document.getElementById('partial_lesson_file_list').addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('file-remove')) {
+                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'partial_lesson_file_list');
             }
         });
         
@@ -1203,22 +602,25 @@
             for (const file of lessonFiles) {
                 formData.append('lesson_files', file);
             }
-            
+
             try {
-                const multiApi = getMultiApiState(mode);
-                const minRel = (() => {
-                    const v = mode === 'jokbo-centric' ? document.getElementById('jokbo_min_rel').value : document.getElementById('lesson_min_rel').value;
-                    const n = parseInt(v, 10);
-                    if (isNaN(n)) return 70;
-                    return Math.max(0, Math.min(n, 110));
-                })();
+                const multiApi = mode === 'partial-jokbo' ? false : getMultiApiState(mode);
+                const minRel = mode === 'partial-jokbo'
+                    ? 0
+                    : (() => {
+                        const v = mode === 'jokbo-centric' ? document.getElementById('jokbo_min_rel').value : document.getElementById('lesson_min_rel').value;
+                        const n = parseInt(v, 10);
+                        if (isNaN(n)) return 70;
+                        return Math.max(0, Math.min(n, 110));
+                    })();
                 const userId = (localStorage.getItem('jd_user_id') || '').trim();
                 const userParam = userId ? `&user_id=${encodeURIComponent(userId)}` : '';
-                // Send multi_api via both query and form for robustness
-                formData.append('multi_api', multiApi ? 'true' : 'false');
-                // Send min_relevance via both query and form
-                formData.append('min_relevance', String(minRel));
-                const pwdParam = modelPassword ? `&password=${encodeURIComponent(modelPassword)}` : '';
+                // Send multi_api and min_relevance only for existing modes
+                if (mode !== 'partial-jokbo') {
+                    formData.append('multi_api', multiApi ? 'true' : 'false');
+                    formData.append('min_relevance', String(minRel));
+                }
+                const pwdParam = (modelPassword && mode !== 'partial-jokbo') ? `&password=${encodeURIComponent(modelPassword)}` : '';
                 const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}&min_relevance=${minRel}${userParam}${pwdParam}`, {
                     method: 'POST',
                     body: formData
@@ -1367,6 +769,11 @@
             e.preventDefault();
             const model = document.getElementById('lesson_model').value;
             await submitAnalysis('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
+        });
+
+        document.getElementById('partialForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await submitAnalysis('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', 'flash');
         });
 
         // Admin cleanup: POST /admin/cleanup with optional older-than filter

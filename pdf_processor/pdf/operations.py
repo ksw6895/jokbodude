@@ -114,13 +114,50 @@ class PDFOperations:
                 # Save the extracted pages
                 output.save(output_path)
                 output.close()
-                
+
                 logger.debug(f"Extracted pages {start_page}-{end_page} from {pdf_path} to {output_path}")
                 return output_path
-                
+
         except Exception as e:
             logger.error(f"Failed to extract pages from {pdf_path}: {str(e)}")
             raise PDFParsingError(f"Page extraction failed: {str(e)}")
+
+    @staticmethod
+    def extract_question_region(
+        pdf_path: str,
+        page_start: int,
+        next_question_start: Optional[int] = None,
+        output_path: Optional[str] = None,
+    ) -> str:
+        """Extract pages containing a single question.
+
+        This helper is used by the partial jokbo feature.  Given the
+        starting page of a question and the starting page of the next
+        question, the function extracts the corresponding page range
+        and returns a temporary PDF path.  The implementation currently
+        extracts full pages without cropping the precise question
+        region; however, it provides a simple and reliable foundation
+        that can be extended with OCR-based cropping in the future.
+
+        Args:
+            pdf_path: Source PDF path.
+            page_start: 1-based page number where the question begins.
+            next_question_start: 1-based page number of the next
+                question.  If ``None`` the extraction continues to the
+                end of the file.
+            output_path: Optional path for the output PDF.  A temporary
+                file is created when omitted.
+
+        Returns:
+            Path to a PDF containing the extracted question pages.
+        """
+
+        end_page = (
+            next_question_start - 1
+            if next_question_start and next_question_start > page_start
+            else PDFOperations.get_page_count(pdf_path)
+        )
+        return PDFOperations.extract_pages(pdf_path, page_start, end_page, output_path)
     
     @staticmethod
     def get_page_text(pdf_path: str, page_num: int) -> str:

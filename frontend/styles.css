@@ -1,0 +1,173 @@
+:root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --accent: #222222;
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --border-color: rgba(0, 0, 0, 0.2);
+    --border: rgba(0, 0, 0, 0.2);
+    --text: #000000;
+    --muted: #555555;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.navbar, .tabs, .card, .file-upload-area {
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+}
+
+.nav-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+}
+
+.logo-icon {
+    margin-right: 0.5rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-color);
+    margin-left: 1rem;
+}
+
+.main-container {
+    max-width: 900px;
+    margin: 4rem auto;
+    padding: 1rem;
+}
+
+.hero-section, .hero {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.hero-title, .hero h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.hero-subtitle, .hero p {
+    color: var(--muted);
+}
+
+.card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+
+.grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.features-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin-bottom: 2rem;
+}
+
+.feature-card {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.feature-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.feature-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.feature-description {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.list {
+    margin-left: 1rem;
+}
+
+.badge {
+    display: inline-block;
+    background: var(--text-color);
+    color: var(--bg-color);
+    padding: 0.2rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    margin-right: 0.25rem;
+}
+
+.lang-toggle {
+    border: 1px solid var(--border-color);
+    background: var(--glass-bg);
+    color: var(--text-color);
+    padding: 0.4rem 0.7rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.tab {
+    background: transparent;
+    color: var(--text-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+.tab.active {
+    border-bottom: 2px solid var(--text-color);
+}
+
+.submit-btn, button {
+    background: var(--text-color);
+    color: var(--bg-color);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.file-upload-area {
+    padding: 1rem;
+    text-align: center;
+}
+
+.file-upload-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.file-list {
+    margin-top: 0.5rem;
+}

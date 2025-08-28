@@ -23,6 +23,12 @@ def read_guide():
     return FileResponse("frontend/guide.html")
 
 
+@router.get("/styles.css")
+def read_stylesheet():
+    """Serve the shared frontend stylesheet."""
+    return FileResponse("frontend/styles.css")
+
+
 @router.get("/config")
 def get_config(password: Optional[str] = None):
     """Expose server capabilities for the frontend UI."""
