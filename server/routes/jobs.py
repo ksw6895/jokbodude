@@ -1,0 +1,151 @@
+from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi.responses import FileResponse
+
+from ..core import celery_app
+from ..utils import build_content_disposition
+
+router = APIRouter()
+
+
+@router.get("/status/{task_id}")
+def get_task_status(task_id: str):
+    task_result = celery_app.AsyncResult(task_id)
+    response = {"task_id": task_id, "status": task_result.status}
+    if task_result.successful():
+        response["result"] = task_result.get()
+    elif task_result.failed():
+        response["error"] = str(task_result.info)
+    return response
+
+
+@router.get("/result/{job_id}")
+def get_result_file(request: Request, job_id: str):
+    storage_manager = request.app.state.storage_manager
+    files = storage_manager.list_result_files(job_id)
+    if not files:
+        raise HTTPException(status_code=404, detail="Result not found or job not complete.")
+    filename = files[0]
+    path = storage_manager.get_result_path(job_id, filename)
+    if path and path.exists():
+        disposition = build_content_disposition(filename)
+        return FileResponse(path, media_type="application/pdf", filename=filename, headers={"Content-Disposition": disposition})
+    content = storage_manager.get_result(f"result:{job_id}:{filename}")
+    if not content:
+        raise HTTPException(status_code=404, detail="Generated PDF not found.")
+    disposition = build_content_disposition(filename)
+    return Response(content=content, media_type="application/pdf", headers={"Content-Disposition": disposition})
+
+
+@router.get("/results/{job_id}")
+def list_result_files(request: Request, job_id: str):
+    storage_manager = request.app.state.storage_manager
+    files = storage_manager.list_result_files(job_id)
+    if not files:
+        raise HTTPException(status_code=404, detail="Result not found or job not complete.")
+    return {"files": files}
+
+
+@router.get("/result/{job_id}/{filename}")
+def get_specific_result_file(request: Request, job_id: str, filename: str):
+    storage_manager = request.app.state.storage_manager
+    path = storage_manager.get_result_path(job_id, filename)
+    if path and path.exists():
+        disposition = build_content_disposition(filename)
+        return FileResponse(path, media_type="application/pdf", filename=filename, headers={"Content-Disposition": disposition})
+    result_key = f"result:{job_id}:{filename}"
+    content = storage_manager.get_result(result_key)
+    if not content:
+        raise HTTPException(status_code=404, detail="File not found.")
+    disposition = build_content_disposition(filename)
+    return Response(content=content, media_type="application/pdf", headers={"Content-Disposition": disposition})
+
+
+@router.delete("/result/{job_id}/{filename}")
+def delete_specific_result_file(request: Request, job_id: str, filename: str):
+    storage_manager = request.app.state.storage_manager
+    removed = storage_manager.delete_result(job_id, filename)
+    if not removed:
+        raise HTTPException(status_code=404, detail="File not found")
+    return {"status": "deleted", "job_id": job_id, "filename": filename}
+
+
+@router.delete("/results/{job_id}")
+def delete_all_result_files(request: Request, job_id: str):
+    storage_manager = request.app.state.storage_manager
+    count = storage_manager.delete_all_results(job_id)
+    return {"status": "deleted", "job_id": job_id, "deleted_count": int(count)}
+
+
+@router.get("/progress/{job_id}")
+def get_job_progress(request: Request, job_id: str):
+    storage_manager = request.app.state.storage_manager
+    progress_data = storage_manager.get_progress(job_id)
+    if not progress_data:
+        raise HTTPException(status_code=404, detail="Progress information not found")
+    return progress_data
+
+
+@router.get("/user/{user_id}/jobs")
+def get_user_jobs(request: Request, user_id: str, limit: int = 50):
+    storage_manager = request.app.state.storage_manager
+    job_ids = storage_manager.get_user_jobs(user_id, limit=limit) or []
+    results = []
+    for job_id in job_ids:
+        entry = {"job_id": job_id}
+        try:
+            task_id = storage_manager.get_job_task(job_id)
+            if task_id:
+                tr = celery_app.AsyncResult(task_id)
+                entry["status"] = tr.status
+            else:
+                entry["status"] = "UNKNOWN"
+        except Exception:
+            entry["status"] = "UNKNOWN"
+        try:
+            entry["progress"] = storage_manager.get_progress(job_id) or {}
+        except Exception:
+            entry["progress"] = None
+        try:
+            entry["files"] = storage_manager.list_result_files(job_id)
+        except Exception:
+            entry["files"] = []
+        results.append(entry)
+    return {"user_id": user_id, "jobs": results}
+
+
+@router.post("/jobs/{job_id}/cancel")
+def cancel_job(request: Request, job_id: str):
+    storage_manager = request.app.state.storage_manager
+    task_id = storage_manager.get_job_task(job_id)
+    try:
+        storage_manager.request_cancel(job_id)
+    except Exception:
+        pass
+    revoked = False
+    if task_id:
+        try:
+            celery_app.control.revoke(task_id, terminate=True, signal="SIGTERM")
+            revoked = True
+        except Exception:
+            revoked = False
+    return {"job_id": job_id, "task_id": task_id, "revoked": revoked}
+
+
+@router.delete("/jobs/{job_id}")
+def delete_job(request: Request, job_id: str, cancel_if_running: bool = True):
+    storage_manager = request.app.state.storage_manager
+    if cancel_if_running:
+        try:
+            task_id = storage_manager.get_job_task(job_id)
+            if task_id:
+                tr = celery_app.AsyncResult(task_id)
+                if tr.status in ("PENDING", "STARTED", "RETRY"):
+                    celery_app.control.revoke(task_id, terminate=True, signal="SIGTERM")
+        except Exception:
+            pass
+    try:
+        storage_manager.delete_all_results(job_id)
+    except Exception:
+        pass
+    storage_manager.cleanup_job(job_id)
+    return {"status": "deleted", "job_id": job_id}
