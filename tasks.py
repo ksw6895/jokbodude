@@ -140,6 +140,7 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             
             # Process each jokbo file with progress tracking
             total_jokbos = len(jokbo_paths)
+            aggregated_warnings = {"failed_files": [], "failed_chunks": 0}
             for idx, jokbo_path_str in enumerate(jokbo_paths, 1):
                 # Check cancellation between items
                 try:
@@ -170,6 +171,15 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
                 
                 if "error" in analysis_result:
                     raise Exception(f"Analysis error for {jokbo_path.name}: {analysis_result['error']}")
+                # Collect warnings from per-file result
+                try:
+                    w = analysis_result.get("warnings") or {}
+                    if isinstance(w.get("failed_files"), list):
+                        aggregated_warnings["failed_files"].extend([str(x) for x in w.get("failed_files")])
+                    if isinstance(w.get("failed_chunks"), int):
+                        aggregated_warnings["failed_chunks"] += int(w.get("failed_chunks"))
+                except Exception:
+                    pass
                 
                 # Update status message for PDF generation
                 try:
@@ -201,11 +211,29 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             except Exception:
                 pass
 
-            return {
+            result_payload = {
                 "status": "Complete",
                 "job_id": job_id,
                 "files_generated": len(list(output_dir.glob("*.pdf")))
             }
+            try:
+                if aggregated_warnings["failed_files"] or aggregated_warnings["failed_chunks"]:
+                    # Normalize failed_files unique and base names
+                    uniq = []
+                    seen = set()
+                    for f in aggregated_warnings["failed_files"]:
+                        name = Path(f).name
+                        if name not in seen:
+                            seen.add(name)
+                            uniq.append(name)
+                    result_payload["warnings"] = {
+                        "partial": True,
+                        "failed_files": uniq,
+                        "failed_chunks": int(aggregated_warnings["failed_chunks"]),
+                    }
+            except Exception:
+                pass
+            return result_payload
             
     except Exception as e:
         # Celery will catch this exception and store it in the task result backend
@@ -307,6 +335,7 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
             
             # Process each lesson file with progress tracking
             total_lessons = len(lesson_paths)
+            aggregated_warnings = {"failed_files": [], "failed_chunks": 0}
             for idx, lesson_path_str in enumerate(lesson_paths, 1):
                 # Check cancellation between items
                 try:
@@ -337,6 +366,15 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
                 
                 if "error" in analysis_result:
                     raise Exception(f"Analysis error for {lesson_path.name}: {analysis_result['error']}")
+                # Collect warnings from per-file result
+                try:
+                    w = analysis_result.get("warnings") or {}
+                    if isinstance(w.get("failed_files"), list):
+                        aggregated_warnings["failed_files"].extend([str(x) for x in w.get("failed_files")])
+                    if isinstance(w.get("failed_chunks"), int):
+                        aggregated_warnings["failed_chunks"] += int(w.get("failed_chunks"))
+                except Exception:
+                    pass
                 
                 # Update status message for PDF generation
                 try:
@@ -368,11 +406,28 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
             except Exception:
                 pass
             
-            return {
+            result_payload = {
                 "status": "Complete",
                 "job_id": job_id,
                 "files_generated": len(list(output_dir.glob("*.pdf")))
             }
+            try:
+                if aggregated_warnings["failed_files"] or aggregated_warnings["failed_chunks"]:
+                    uniq = []
+                    seen = set()
+                    for f in aggregated_warnings["failed_files"]:
+                        name = Path(f).name
+                        if name not in seen:
+                            seen.add(name)
+                            uniq.append(name)
+                    result_payload["warnings"] = {
+                        "partial": True,
+                        "failed_files": uniq,
+                        "failed_chunks": int(aggregated_warnings["failed_chunks"]),
+                    }
+            except Exception:
+                pass
+            return result_payload
             
     except Exception as e:
         # Celery will catch this exception and store it in the task result backend
@@ -553,8 +608,15 @@ def generate_partial_jokbo(job_id: str) -> dict:
             model = create_model(MODEL_TYPE)
             processor = PDFProcessor(model, session_id=job_id)
 
-            # Ask Gemini for question spans
-            analysis = processor.analyze_partial_jokbo(jokbo_paths, lesson_paths)
+            # Ask Gemini for question spans (prefer multi-API when multiple keys are configured)
+            try:
+                from config import API_KEYS as _API_KEYS  # type: ignore
+                if isinstance(_API_KEYS, list) and len(_API_KEYS) > 1:
+                    analysis = processor.analyze_partial_jokbo_multi_api(jokbo_paths, lesson_paths, api_keys=_API_KEYS)
+                else:
+                    analysis = processor.analyze_partial_jokbo(jokbo_paths, lesson_paths)
+            except Exception:
+                analysis = processor.analyze_partial_jokbo(jokbo_paths, lesson_paths)
 
             # Crop questions
             questions: list[dict[str, str]] = []
@@ -586,7 +648,10 @@ def generate_partial_jokbo(job_id: str) -> dict:
             except Exception:
                 pass
 
-            return {"status": "OK", "job_id": job_id, "output": output_path.name}
+            result = {"status": "OK", "job_id": job_id, "output": output_path.name}
+            if isinstance(analysis, dict) and analysis.get("warnings"):
+                result["warnings"] = analysis["warnings"]
+            return result
     except Exception as exc:
         raise exc
 

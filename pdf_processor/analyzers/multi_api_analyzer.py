@@ -9,6 +9,7 @@ import json
 from .base import BaseAnalyzer
 from .lesson_centric import LessonCentricAnalyzer
 from .jokbo_centric import JokboCentricAnalyzer
+from .partial_jokbo import PartialJokboAnalyzer
 from ..api.multi_api_manager import MultiAPIManager
 from ..api.file_manager import FileManager
 from ..utils.logging import get_logger
@@ -192,6 +193,36 @@ class MultiAPIAnalyzer:
         )
         
         return results
+
+    def analyze_partial_jokbo(self, jokbo_path: str, lesson_paths: List[str]) -> Dict[str, Any]:
+        """Run partial-jokbo analysis with failover across API keys (one key per attempt)."""
+        def operation(api_client, model):
+            fm = FileManager(api_client)
+            analyzer = PartialJokboAnalyzer(api_client, fm, self.session_id, self.debug_dir)
+            return analyzer.analyze(jokbo_path, lesson_paths or [])
+        try:
+            res = self.api_manager.execute_with_failover(operation, max_retries=max(1, len(self.api_manager.api_keys)))
+            return res if isinstance(res, dict) else {}
+        except Exception as e:
+            logger.error(f"Partial-jokbo failed: {e}")
+            return {"error": str(e)}
+
+    def analyze_partial_multiple(self, jokbo_paths: List[str], lesson_paths: List[str],
+                                 parallel: bool = True, max_workers: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Distribute partial-jokbo across jokbo files using multiple API keys."""
+        tasks = list(jokbo_paths or [])
+        def task_operation(jp, api_client, model):
+            fm = FileManager(api_client)
+            analyzer = PartialJokboAnalyzer(api_client, fm, self.session_id, self.debug_dir)
+            return analyzer.analyze(jp, lesson_paths or [])
+        # determine workers similar to other paths
+        if max_workers is None:
+            try:
+                capacity = len(self.api_manager.api_keys) * max(1, int(getattr(self.api_manager, 'per_key_limit', 1)))
+                max_workers = min(len(tasks), max(1, capacity))
+            except Exception:
+                max_workers = min(len(tasks), 3) or 1
+        return self.api_manager.distribute_tasks(tasks, task_operation, parallel=parallel, max_workers=max_workers)
     
     def analyze_with_chunk_retry(self, mode: str, file_path: str, 
                                center_file_path: str, chunks: List[tuple]) -> Dict[str, Any]:
@@ -290,7 +321,12 @@ class MultiAPIAnalyzer:
                 except Exception:
                     idx = None
                 if idx is not None and 0 <= idx < len(ordered_results):
-                    ordered_results[idx] = {"error": entry.get("error", "Unknown error")}
+                    # Preserve which chunk failed for potential adaptive retry
+                    try:
+                        _chunk_info = chunks[idx]
+                    except Exception:
+                        _chunk_info = None
+                    ordered_results[idx] = {"error": entry.get("error", "Unknown error"), "_chunk": _chunk_info}
 
         # Normalize lesson filenames when chunking is orchestrated externally (multi-API path).
         # For jokbo-centric mode, ensure related_lesson_slides[].lesson_filename shows the original
@@ -338,6 +374,48 @@ class MultiAPIAnalyzer:
             if ordered_results[i] is None:
                 ordered_results[i] = {"error": "No result"}
         
+        # Adaptive retry: split failed chunks once and try again cycling through all keys.
+        # This helps with token limits or safety blocks on larger spans.
+        try:
+            from ..pdf.operations import PDFOperations as _PDFOps
+            from ..parsers.result_merger import ResultMerger as _RM
+            failed_indices = [i for i, r in enumerate(ordered_results) if isinstance(r, dict) and r.get("error")]
+            for i in failed_indices:
+                try:
+                    chunk_path, start_page, end_page = chunks[i]
+                except Exception:
+                    continue
+                # Only split when there is more than one page
+                try:
+                    if int(end_page) <= int(start_page):
+                        continue
+                except Exception:
+                    continue
+                # Perform adaptive analyze on two halves and merge
+                try:
+                    mid = (int(start_page) + int(end_page)) // 2
+                    left_path = _PDFOps.extract_pages(file_path, int(start_page), int(mid))
+                    right_path = _PDFOps.extract_pages(file_path, int(mid) + 1, int(end_page))
+                    left_res = self._analyze_chunk_adaptive(mode, file_path, center_file_path, (left_path, int(start_page), int(mid)))
+                    right_res = self._analyze_chunk_adaptive(mode, file_path, center_file_path, (right_path, int(mid)+1, int(end_page)))
+                    merged = _RM.merge_chunk_results([left_res if isinstance(left_res, dict) else {}, right_res if isinstance(right_res, dict) else {}], mode)
+                    ordered_results[i] = merged if isinstance(merged, dict) else {"error": "merge_failed"}
+                except Exception:
+                    # keep original error if adaptive path also fails
+                    pass
+                finally:
+                    try:
+                        Path(left_path).unlink(missing_ok=True)
+                    except Exception:
+                        pass
+                    try:
+                        Path(right_path).unlink(missing_ok=True)
+                    except Exception:
+                        pass
+        except Exception:
+            # Best-effort; ignore adaptive retry failures
+            pass
+        
         # Optional: attempt a deterministic merge from persisted files, if all
         # chunk files exist. Fallback to in-memory ordered_results if any missing.
         merged: Optional[Dict[str, Any]] = None
@@ -377,6 +455,63 @@ class MultiAPIAnalyzer:
 
         from ..parsers.result_merger import ResultMerger
         return merged if isinstance(merged, dict) and merged else ResultMerger.merge_chunk_results(ordered_results, mode)
+
+    def _analyze_chunk_adaptive(self, mode: str, file_path: str, center_file_path: str, chunk: tuple) -> Dict[str, Any]:
+        """Analyze a specific chunk with failover across all keys; if it fails and spans multiple pages,
+        split once more (recursively limited to two halves). Returns a (possibly empty) result dict.
+        """
+        (chunk_path, start_page, end_page) = chunk
+        def _op(api_client, model):
+            fm = FileManager(api_client)
+            if mode == "lesson-centric":
+                analyzer = LessonCentricAnalyzer(api_client, fm, self.session_id, self.debug_dir)
+                # propagate threshold
+                try:
+                    if self.min_relevance_score is not None:
+                        analyzer.set_relevance_threshold(self.min_relevance_score)
+                except Exception:
+                    pass
+                return analyzer.analyze(center_file_path, chunk_path, None, chunk_info=(start_page, end_page))
+            else:
+                analyzer = JokboCentricAnalyzer(api_client, fm, self.session_id, self.debug_dir)
+                res = analyzer.analyze(chunk_path, center_file_path, preloaded_jokbo_file=None, chunk_info=(start_page, end_page), original_lesson_path=file_path)
+                # Normalize filenames back to original lesson (avoid tmp)
+                try:
+                    orig = Path(file_path).name
+                    if isinstance(res, dict):
+                        for page in (res.get("jokbo_pages") or []):
+                            for q in (page.get("questions") or []):
+                                for slide in (q.get("related_lesson_slides") or []):
+                                    if isinstance(slide, dict):
+                                        slide["lesson_filename"] = orig
+                except Exception:
+                    pass
+                return res
+        # Try each key once by setting retries to number of keys
+        try:
+            res = self.api_manager.execute_with_failover(_op, max_retries=max(1, len(self.api_manager.api_keys)))
+            return res if isinstance(res, dict) else {}
+        except Exception:
+            # If still fails and multi-page, split into two halves and merge
+            try:
+                if int(end_page) > int(start_page):
+                    from ..pdf.operations import PDFOperations as _PDFOps
+                    from ..parsers.result_merger import ResultMerger as _RM
+                    mid = (int(start_page) + int(end_page)) // 2
+                    left_path = _PDFOps.extract_pages(file_path, int(start_page), int(mid))
+                    right_path = _PDFOps.extract_pages(file_path, int(mid) + 1, int(end_page))
+                    left_res = self._analyze_chunk_adaptive(mode, file_path, center_file_path, (left_path, int(start_page), int(mid)))
+                    right_res = self._analyze_chunk_adaptive(mode, file_path, center_file_path, (right_path, int(mid)+1, int(end_page)))
+                    merged = _RM.merge_chunk_results([left_res if isinstance(left_res, dict) else {}, right_res if isinstance(right_res, dict) else {}], mode)
+                    try:
+                        Path(left_path).unlink(missing_ok=True)
+                        Path(right_path).unlink(missing_ok=True)
+                    except Exception:
+                        pass
+                    return merged
+            except Exception:
+                pass
+            return {"error": "adaptive_failed"}
     
     def get_api_status(self) -> Dict[str, Any]:
         """Get the status of all API keys."""

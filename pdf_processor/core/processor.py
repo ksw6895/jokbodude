@@ -225,6 +225,35 @@ class PDFProcessor:
                 logger.warning(f"Partial-jokbo analysis failed for {Path(jp).name}: {e}")
                 continue
         return {"questions": all_questions}
+
+    def analyze_partial_jokbo_multi_api(self, jokbo_paths: List[str], lesson_paths: List[str],
+                                        api_keys: List[str], max_workers: Optional[int] = None) -> Dict[str, Any]:
+        """Parallelize partial-jokbo across multiple API keys and aggregate results.
+
+        Each jokbo is analyzed independently, then concatenated. Failures are reported in warnings.
+        """
+        model_config = self._get_model_config()
+        api_manager = MultiAPIManager(api_keys, model_config)
+        multi = MultiAPIAnalyzer(api_manager, self.session_id, self.debug_dir)
+        results = multi.analyze_partial_multiple(jokbo_paths or [], lesson_paths or [], parallel=True, max_workers=max_workers)
+        all_questions: List[Dict[str, Any]] = []
+        failed_files: List[str] = []
+        for jp, res in zip(jokbo_paths or [], results or []):
+            if isinstance(res, dict) and not res.get("error"):
+                for q in (res.get("questions") or []):
+                    qq = dict(q)
+                    qq["_jokbo_path"] = str(jp)
+                    all_questions.append(qq)
+            else:
+                try:
+                    from pathlib import Path as _P
+                    failed_files.append(_P(jp).name)
+                except Exception:
+                    pass
+        out: Dict[str, Any] = {"questions": all_questions}
+        if failed_files:
+            out["warnings"] = {"partial": True, "failed_files": failed_files}
+        return out
     
     def analyze_jokbo_centric_multi_api(self, lesson_paths: List[str], jokbo_path: str,
                                        api_keys: List[str], max_workers: Optional[int] = None) -> Dict[str, Any]:
@@ -430,8 +459,17 @@ class PDFProcessor:
         # page -> list of (question_dict, importance_score, key_concepts)
         candidates_by_page: Dict[int, List[Tuple[Dict[str, Any], Optional[int], List[Any]]]] = {}
 
+        failed_files: List[str] = []
         for result in results or []:
             if not isinstance(result, dict) or "error" in result:
+                # Track which jokbo failed for user warnings
+                try:
+                    jp = result.get("jokbo_path")
+                    if jp:
+                        from pathlib import Path as _P
+                        failed_files.append(_P(jp).name)
+                except Exception:
+                    pass
                 continue
             slides = result.get("related_slides") or []
             if not isinstance(slides, list):
@@ -462,6 +500,8 @@ class PDFProcessor:
 
         final_slides: List[Dict[str, Any]] = []
         total_questions = 0
+        # Aggregate key topics across slides (best-effort)
+        aggregated_topics: List[str] = []
         # Determine threshold from analyzer (defaults to 80 after change)
         try:
             min_thr = int(getattr(self.lesson_analyzer, 'min_relevance_score', 80))
@@ -505,6 +545,12 @@ class PDFProcessor:
                 slide_entry["importance_score"] = rep_importance
             if rep_kc:
                 slide_entry["key_concepts"] = rep_kc
+                try:
+                    for t in rep_kc:
+                        if isinstance(t, str) and t.strip() and t.strip() not in aggregated_topics:
+                            aggregated_topics.append(t.strip())
+                except Exception:
+                    pass
             final_slides.append(slide_entry)
             total_questions += len(uniq)
 
@@ -514,10 +560,19 @@ class PDFProcessor:
             merged["summary"] = {
                 "total_related_slides": len(final_slides),
                 "total_questions": total_questions,
-                "key_topics": [],
+                "key_topics": aggregated_topics,
             }
         except Exception:
             pass
+        # Attach warnings when some jokbos failed
+        if failed_files:
+            try:
+                merged["warnings"] = {
+                    "partial": True,
+                    "failed_files": failed_files,
+                }
+            except Exception:
+                pass
         return merged
     
     def save_processing_state(self, state: Dict[str, Any]) -> None:

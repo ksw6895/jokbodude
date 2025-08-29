@@ -183,7 +183,7 @@ class MultiAPIManager:
             
             return available_apis[0][0]
     
-    def execute_with_failover(self, operation: Callable, max_retries: int = 3) -> Any:
+    def execute_with_failover(self, operation: Callable, max_retries: Optional[int] = None) -> Any:
         """
         Execute an operation with automatic failover to different API keys.
         
@@ -198,6 +198,12 @@ class MultiAPIManager:
             APIError: If all APIs fail
         """
         errors = []
+        # Default: try each API key once
+        if max_retries is None:
+            try:
+                max_retries = max(1, len(self.api_keys))
+            except Exception:
+                max_retries = 3
         total_attempts = 0
         
         while total_attempts < max_retries:

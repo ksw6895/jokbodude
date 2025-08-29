@@ -31,9 +31,19 @@ class ResultMerger:
             return {}
         
         if mode == "jokbo-centric":
-            return ResultMerger._merge_jokbo_results(chunk_results)
+            merged = ResultMerger._merge_jokbo_results(chunk_results)
         else:
-            return ResultMerger._merge_lesson_results(chunk_results)
+            merged = ResultMerger._merge_lesson_results(chunk_results)
+
+        # Attach warnings when some chunks failed
+        try:
+            failed = sum(1 for r in (chunk_results or []) if isinstance(r, dict) and r.get("error"))
+            if failed > 0 and isinstance(merged, dict):
+                merged.setdefault("warnings", {})
+                merged["warnings"].update({"failed_chunks": failed, "partial": True})
+        except Exception:
+            pass
+        return merged
     
     @staticmethod
     def _merge_jokbo_results(chunk_results: List[Dict[str, Any]]) -> Dict[str, Any]:
