@@ -127,37 +127,165 @@ class PDFOperations:
         pdf_path: str,
         page_start: int,
         next_question_start: Optional[int] = None,
+        question_number: Optional[object] = None,
         output_path: Optional[str] = None,
     ) -> str:
-        """Extract pages containing a single question.
+        """Extract just the question region across one or more pages.
 
-        This helper is used by the partial jokbo feature.  Given the
-        starting page of a question and the starting page of the next
-        question, the function extracts the corresponding page range
-        and returns a temporary PDF path.  The implementation currently
-        extracts full pages without cropping the precise question
-        region; however, it provides a simple and reliable foundation
-        that can be extended with OCR-based cropping in the future.
+        - Start page is cropped from the detected question-number marker
+          to the bottom of the page.
+        - Middle pages (if any) are included in full.
+        - If the next question starts on the same page, the end Y is
+          cropped to that next marker; otherwise the last page is kept
+          in full.
 
-        Args:
-            pdf_path: Source PDF path.
-            page_start: 1-based page number where the question begins.
-            next_question_start: 1-based page number of the next
-                question.  If ``None`` the extraction continues to the
-                end of the file.
-            output_path: Optional path for the output PDF.  A temporary
-                file is created when omitted.
-
-        Returns:
-            Path to a PDF containing the extracted question pages.
+        Falls back to full-page extraction if cropping is not possible.
+        Attempts OCR (pytesseract) only when text is not extractable.
         """
 
-        end_page = (
-            next_question_start - 1
-            if next_question_start and next_question_start > page_start
-            else PDFOperations.get_page_count(pdf_path)
-        )
-        return PDFOperations.extract_pages(pdf_path, page_start, end_page, output_path)
+        def _to_int(val: object, default: int = 0) -> int:
+            try:
+                if isinstance(val, bool):
+                    return default
+                if isinstance(val, (int, float)):
+                    return int(val)
+                import re
+                m = re.search(r"(\d+)", str(val) or "")
+                return int(m.group(1)) if m else default
+            except Exception:
+                return default
+
+        try:
+            with fitz.open(str(pdf_path)) as src:
+                total_pages = len(src)
+                if page_start < 1 or page_start > total_pages:
+                    raise ValueError("Invalid page_start")
+
+                # Determine page_end handling possible same-page next start
+                same_page_next = (
+                    next_question_start is not None and _to_int(next_question_start) == _to_int(page_start)
+                )
+                if next_question_start is None:
+                    page_end = total_pages
+                elif same_page_next:
+                    page_end = page_start
+                else:
+                    page_end = max(page_start, min(total_pages, int(next_question_start) - 1))
+
+                out_doc = fitz.open()
+                qnum_int = _to_int(question_number, 0) if question_number is not None else 0
+
+                def _find_marker_y(page: fitz.Page, target_num: int) -> Optional[float]:
+                    # Try text-based search first
+                    try:
+                        words = page.get_text("words") or []
+                    except Exception:
+                        words = []
+                    w = page.rect.width
+                    candidates: list[tuple[float, float]] = []  # (y0, x0)
+                    if words:
+                        import re
+                        # build pattern variants: 3, 3., 3), (3), 3번, Q3
+                        pats = [
+                            rf"^\(?{target_num}\)?[\.)]$",
+                            rf"^\(?{target_num}\)?$",
+                            rf"^{target_num}번$",
+                            rf"^Q\s*{target_num}$",
+                        ]
+                        compiled = [re.compile(p) for p in pats]
+                        for x0,y0,x1,y1,text, *_ in words:
+                            t = str(text or "").strip()
+                            if not t:
+                                continue
+                            # left margin constraint to reduce false positives
+                            if x0 > (w * 0.35):
+                                continue
+                            for cp in compiled:
+                                if cp.match(t):
+                                    candidates.append((y0, x0))
+                                    break
+                    # OCR fallback if no words or no match
+                    if not candidates:
+                        try:
+                            from PIL import Image
+                            import io
+                            import pytesseract
+                            pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                            img = Image.open(io.BytesIO(pix.tobytes("png")))
+                            data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
+                            ih = img.height
+                            # map pixels to PDF units
+                            scale_y = page.rect.height / float(ih or 1)
+                            import re
+                            pats = [
+                                rf"^\(?{target_num}\)?[\.)]$",
+                                rf"^\(?{target_num}\)?$",
+                                rf"^{target_num}번$",
+                                rf"^Q\s*{target_num}$",
+                            ]
+                            compiled = [re.compile(p) for p in pats]
+                            n = len(data.get("text", []))
+                            for i in range(n):
+                                t = (data["text"][i] or "").strip()
+                                if not t:
+                                    continue
+                                for cp in compiled:
+                                    if cp.match(t):
+                                        y0 = float(data["top"][i]) * scale_y
+                                        x0 = float(data["left"][i]) * (page.rect.width / float(img.width or 1))
+                                        if x0 <= (page.rect.width * 0.4):
+                                            candidates.append((y0, x0))
+                                        break
+                        except Exception:
+                            pass
+                    if not candidates:
+                        return None
+                    candidates.sort(key=lambda t: (t[0], t[1]))
+                    return candidates[0][0]
+
+                for pno in range(page_start, page_end + 1):
+                    page = src[pno - 1]
+                    rect = page.rect
+                    y0 = 0.0
+                    y1 = rect.height
+                    if pno == page_start:
+                        if qnum_int > 0:
+                            y_found = _find_marker_y(page, qnum_int)
+                            if y_found is not None:
+                                y0 = max(0.0, y_found - 4)  # small margin
+                        # If next question is also on this same page, crop to its marker
+                        if same_page_next and qnum_int > 0:
+                            yn = _find_marker_y(page, qnum_int + 1)
+                            if yn is not None and yn > y0:
+                                y1 = yn - 4
+                    elif pno == page_end and same_page_next is False:
+                        # last page of a multi-page question: keep full page (robust)
+                        y0 = 0.0
+                        y1 = rect.height
+                    clip = fitz.Rect(0, max(0, y0), rect.width, min(rect.height, y1))
+                    # Render into a cropped page of matching height
+                    new_h = max(10.0, clip.height)
+                    out_page = out_doc.new_page(width=rect.width, height=new_h)
+                    out_page.show_pdf_page(
+                        fitz.Rect(0, 0, rect.width, new_h), src, pno - 1, clip=clip
+                    )
+
+                # Persist output
+                if output_path is None:
+                    temp_file = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+                    output_path = temp_file.name
+                out_doc.save(output_path)
+                out_doc.close()
+                return output_path
+        except Exception as e:
+            logger.warning(f"Cropping failed; falling back to full pages: {e}")
+            # Fallback to page-span extraction
+            end_page = (
+                next_question_start - 1
+                if next_question_start and (int(next_question_start) > int(page_start))
+                else PDFOperations.get_page_count(pdf_path)
+            )
+            return PDFOperations.extract_pages(pdf_path, page_start, end_page, output_path)
     
     @staticmethod
     def get_page_text(pdf_path: str, page_num: int) -> str:

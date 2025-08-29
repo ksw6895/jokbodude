@@ -6,6 +6,7 @@ Pillow==11.0.0
 python-dotenv==1.0.1
 PyMuPDF==1.24.14
 tqdm==4.66.4
+pytesseract==0.3.10
 
 # Web service dependencies
 fastapi==0.111.0

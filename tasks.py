@@ -506,13 +506,7 @@ def batch_analyze_single(
 
 @celery_app.task(name="tasks.generate_partial_jokbo")
 def generate_partial_jokbo(job_id: str) -> dict:
-    """Create a simplified partial jokbo PDF for the given job.
-
-    Gemini will eventually supply ``page_start`` and ``next_question_start``
-    values for each problem via the ``PARTIAL_JOKBO_TASK`` prompt.  For now,
-    this function demonstrates how those fields drive PDF slicing by using
-    placeholder metadata.
-    """
+    """Generate a partial jokbo PDF with cropped question regions + explanations."""
 
     sm = StorageManager()
     try:
@@ -533,6 +527,7 @@ def generate_partial_jokbo(job_id: str) -> dict:
             lesson_dir.mkdir(parents=True, exist_ok=True)
             output_dir.mkdir(parents=True, exist_ok=True)
 
+            # Download inputs
             jokbo_paths: list[str] = []
             for key in jokbo_keys:
                 name = key.split(":")[-2]
@@ -540,37 +535,46 @@ def generate_partial_jokbo(job_id: str) -> dict:
                 sm.save_file_locally(key, local_path)
                 jokbo_paths.append(str(local_path))
 
+            lesson_paths: list[str] = []
             for key in lesson_keys:
                 name = key.split(":")[-2]
                 local_path = lesson_dir / name
                 sm.save_file_locally(key, local_path)
+                lesson_paths.append(str(local_path))
 
+            # Initialize progress
+            try:
+                sm.init_progress(job_id, max(1, len(jokbo_paths)), "부분 족보 분석 시작")
+            except Exception:
+                pass
+
+            # Configure API + model
+            configure_api()
+            model = create_model(MODEL_TYPE)
+            processor = PDFProcessor(model, session_id=job_id)
+
+            # Ask Gemini for question spans
+            analysis = processor.analyze_partial_jokbo(jokbo_paths, lesson_paths)
+
+            # Crop questions
             questions: list[dict[str, str]] = []
-            for path in jokbo_paths:
-                # Placeholder metadata; future implementation will populate
-                # this via Gemini using the PARTIAL_JOKBO_TASK prompt.
-                question_ranges = [
-                    {
-                        "page_start": 1,
-                        "next_question_start": 2,
-                        "explanation": "자동 생성된 예시 해설입니다.",
-                    }
-                ]
-                for meta in question_ranges:
-                    try:
-                        q_pdf = PDFOperations.extract_question_region(
-                            path,
-                            meta["page_start"],
-                            meta.get("next_question_start"),
-                        )
-                        questions.append(
-                            {
-                                "question_pdf": q_pdf,
-                                "explanation": meta["explanation"],
-                            }
-                        )
-                    except Exception:
+            for idx, q in enumerate(analysis.get("questions", []), 1):
+                try:
+                    src_path = q.get("_jokbo_path") or (jokbo_paths[0] if jokbo_paths else None)
+                    if not src_path:
                         continue
+                    q_pdf = PDFOperations.extract_question_region(
+                        src_path,
+                        int(q.get("page_start") or 1),
+                        q.get("next_question_start"),
+                        q.get("question_number"),
+                    )
+                    questions.append({
+                        "question_pdf": q_pdf,
+                        "explanation": q.get("explanation") or "",
+                    })
+                except Exception:
+                    continue
 
             creator = PDFCreator()
             output_path = output_dir / "partial_jokbo.pdf"

@@ -66,8 +66,11 @@ class ResponseParser:
         logger.info("Attempting partial parsing...")
         if mode == "jokbo-centric":
             partial_result = ResponseParser._parse_partial_jokbo(response_text)
-        else:
+        elif mode == "lesson-centric":
             partial_result = ResponseParser._parse_partial_lesson(response_text)
+        else:
+            # partial-jokbo and other new modes: fall back to generic extraction of array
+            partial_result = ResponseParser._parse_partial_partialjokbo(response_text)
 
         # If partial parsing completely failed, raise the original error
         if partial_result.get("error") and not partial_result.get("partial"):
@@ -359,8 +362,11 @@ class ResponseParser:
         """
         if mode == "jokbo-centric":
             return "jokbo_pages" in data and isinstance(data["jokbo_pages"], list)
-        else:
+        if mode == "lesson-centric":
             return "related_slides" in data and isinstance(data["related_slides"], list)
+        if mode == "partial-jokbo":
+            return "questions" in data and isinstance(data["questions"], list)
+        return False
 
     # --------------------
     # Sanitation / normalization
@@ -548,6 +554,36 @@ class ResponseParser:
                 pass
             return {"jokbo_pages": cleaned_pages}
 
+        # partial-jokbo normalization (page ranges + explanation)
+        if mode == "partial-jokbo":
+            qs = data.get("questions")
+            if not isinstance(qs, list):
+                return {"questions": []}
+            cleaned_qs: List[Dict[str, Any]] = []
+            for q in qs:
+                if not isinstance(q, dict):
+                    continue
+                qnum_raw = str(q.get("question_number", "")).strip()
+                qnum_int = ResponseParser._to_int_safe(qnum_raw, 0)
+                qnum = str(qnum_int) if qnum_int > 0 else qnum_raw
+                ps = ResponseParser._to_int_safe(q.get("page_start"), 0)
+                nqs = ResponseParser._to_int_safe(q.get("next_question_start"), 0) if q.get("next_question_start") is not None else None
+                expl = (q.get("explanation") or "").strip()
+                if ps <= 0 or not qnum:
+                    continue
+                cleaned_qs.append({
+                    "question_number": qnum,
+                    "lecture_title": (q.get("lecture_title") or "").strip(),
+                    "page_start": ps,
+                    "next_question_start": nqs if (isinstance(nqs, int) and nqs >= 0) else None,
+                    "explanation": expl,
+                })
+            try:
+                cleaned_qs.sort(key=lambda x: (x.get("page_start", 0), ResponseParser._to_int_safe(x.get("question_number"), 0)))
+            except Exception:
+                pass
+            return {"questions": cleaned_qs}
+
         # lesson-centric normalization
         slides = data.get("related_slides")
         if not isinstance(slides, list):
@@ -621,6 +657,24 @@ class ResponseParser:
         except Exception:
             pass
         return {"related_slides": cleaned_slides}
+
+    @staticmethod
+    def _parse_partial_partialjokbo(response_text: str) -> Dict[str, Any]:
+        """
+        Very lightweight recovery for partial-jokbo mode: try to find an array of
+        objects with keys like "questions" / "page_start" in the text.
+        """
+        try:
+            # Prefer fenced JSON block
+            cleaned = ResponseParser._preprocess_response_text(response_text)
+            repaired = ResponseParser._repair_common_json_issues(cleaned)
+            parsed = json.loads(repaired)
+            if isinstance(parsed, dict) and isinstance(parsed.get("questions"), list):
+                return parsed
+        except Exception:
+            pass
+        # Minimal fallback
+        return {"questions": []}
 
     # --------------------
     # Result quality checks

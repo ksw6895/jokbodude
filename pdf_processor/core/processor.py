@@ -17,6 +17,7 @@ from ..api.multi_api_manager import MultiAPIManager
 from ..analyzers.lesson_centric import LessonCentricAnalyzer
 from ..analyzers.jokbo_centric import JokboCentricAnalyzer
 from ..analyzers.multi_api_analyzer import MultiAPIAnalyzer
+from ..analyzers.partial_jokbo import PartialJokboAnalyzer
 from ..pdf.cache import get_global_cache, clear_global_cache
 from ..utils.logging import get_logger
 from ..utils.exceptions import PDFProcessorError
@@ -60,6 +61,9 @@ class PDFProcessor:
             self.api_client, self.file_manager, self.session_id, self.debug_dir
         )
         self.jokbo_analyzer = JokboCentricAnalyzer(
+            self.api_client, self.file_manager, self.session_id, self.debug_dir
+        )
+        self.partial_analyzer = PartialJokboAnalyzer(
             self.api_client, self.file_manager, self.session_id, self.debug_dir
         )
         
@@ -201,6 +205,26 @@ class PDFProcessor:
         
         # Merge results
         return self._merge_lesson_centric_results(results)
+
+    # Partial-jokbo (page-range extraction) methods
+    def analyze_partial_jokbo(self, jokbo_paths: List[str], lesson_paths: List[str]) -> Dict[str, Any]:
+        """Analyze one or more jokbo files to produce per-question page spans.
+
+        Each jokbo is analyzed independently; results are concatenated.
+        """
+        all_questions: List[Dict[str, Any]] = []
+        for jp in jokbo_paths or []:
+            try:
+                result = self.partial_analyzer.analyze(jp, lesson_paths or [])
+                for q in (result.get("questions") or []):
+                    # tag which jokbo this came from for downstream extraction
+                    qq = dict(q)
+                    qq["_jokbo_path"] = str(jp)
+                    all_questions.append(qq)
+            except Exception as e:
+                logger.warning(f"Partial-jokbo analysis failed for {Path(jp).name}: {e}")
+                continue
+        return {"questions": all_questions}
     
     def analyze_jokbo_centric_multi_api(self, lesson_paths: List[str], jokbo_path: str,
                                        api_keys: List[str], max_workers: Optional[int] = None) -> Dict[str, Any]:
