@@ -98,6 +98,7 @@ async def analyze_jokbo_centric(
             "tasks.run_jokbo_analysis",
             args=[job_id],
             kwargs={"model_type": model, "multi_api": effective_multi},
+            queue="analysis",
         )
         try:
             storage_manager.set_job_task(job_id, task.id)
@@ -194,6 +195,7 @@ async def analyze_lesson_centric(
             "tasks.run_lesson_analysis",
             args=[job_id],
             kwargs={"model_type": model, "multi_api": effective_multi},
+            queue="analysis",
         )
         try:
             storage_manager.set_job_task(job_id, task.id)
@@ -325,11 +327,20 @@ async def analyze_partial_jokbo(
     # Align parameters with other modes for consistent UX
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
     multi_api: bool = Query(False),
+    # Optional relevance cutoff for consistency (currently informational)
+    min_relevance: Optional[int] = Query(None, ge=0, le=110),
     # also allow form fallbacks if clients send as multipart fields
     multi_api_form: Optional[bool] = Form(None),
+    min_relevance_form: Optional[int] = Form(None),
     user: dict = Depends(require_user),
 ):
-    """Endpoint to generate a partial jokbo PDF."""
+    """Endpoint to generate a partial jokbo PDF.
+
+    Notes:
+    - min_relevance is accepted/stored for UX consistency with other modes.
+      The partial-jokbo analyzer primarily detects question spans; this
+      value may be used by downstream components in future iterations.
+    """
 
     job_id = str(uuid.uuid4())
     storage_manager = request.app.state.storage_manager
@@ -353,21 +364,42 @@ async def analyze_partial_jokbo(
                 p.write_bytes(content)
                 k = storage_manager.store_file(p, job_id, "jokbo")
                 jokbo_keys.append(k)
+                # Verify availability similar to other modes
+                if not storage_manager.verify_file_available(k):
+                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
             for f in lesson_files:
                 p = tdir / f.filename
                 content = await f.read()
                 p.write_bytes(content)
                 k = storage_manager.store_file(p, job_id, "lesson")
                 lesson_keys.append(k)
+                if not storage_manager.verify_file_available(k):
+                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+
+        # Best-effort TTL refresh to avoid expiry while queued
+        try:
+            storage_manager.refresh_ttls(jokbo_keys + lesson_keys)
+        except Exception:
+            pass
 
         # Resolve effective multi-API toggle (form overrides query if provided)
         effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        # Normalize min_relevance if provided (form overrides query)
+        effective_min_rel: Optional[int] = None
+        try:
+            mr = min_relevance_form if min_relevance_form is not None else min_relevance
+            if mr is not None:
+                effective_min_rel = max(0, min(int(mr), 110))
+        except Exception:
+            effective_min_rel = None
 
         metadata = {
             "jokbo_keys": jokbo_keys,
             "lesson_keys": lesson_keys,
             "model": model,
             "multi_api": effective_multi,
+            # Store for parity with other modes; analyzer may opt to use later
+            "min_relevance": effective_min_rel,
             "user_id": user.get("sub"),
         }
         storage_manager.store_job_metadata(job_id, metadata)
@@ -387,6 +419,7 @@ async def analyze_partial_jokbo(
             "tasks.generate_partial_jokbo",
             args=[job_id],
             kwargs={"model_type": model, "multi_api": effective_multi},
+            queue="analysis",
         )
         try:
             storage_manager.set_job_task(job_id, task.id)

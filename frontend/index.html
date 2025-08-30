@@ -89,7 +89,17 @@
                 <div id="jokbo-tab" class="tab-content active">
                     <form id="jokboForm">
                         <div class="form-section">
-                            <h3 class="form-section-title">Configuration</h3>
+                            <div class="form-section-title" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;">
+                                <h3 class="form-section-title" style="margin:0;">Configuration</h3>
+                                <button type="button" class="tab" aria-expanded="false" data-help-target="jokbo_help" style="padding:.35rem .6rem;">모드 설명</button>
+                            </div>
+                            <div id="jokbo_help" class="help-panel" style="display:none;">
+                                <div class="help-title">Exam-Centric Analysis</div>
+                                <div class="help-body">
+                                    하나의 족보를 중심으로 여러 강의자료를 매칭하여, 각 문제에 가장 관련성 높은 슬라이드 근거를 첨부합니다.
+                                    관련성 점수 커트라인 이상만 포함되며, 멀티 API를 사용하면 병렬 처리로 더 빠르게 진행됩니다.
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label for="jokbo_model">AI Model Selection</label>
                                 <div class="select-wrapper">
@@ -101,7 +111,10 @@
                         </div>
                         <div class="form-group">
                             <label for="jokbo_min_rel">Minimum Relevance Score (0–110)</label>
-                            <input id="jokbo_min_rel" type="number" min="0" max="110" value="70" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--gray-300); border-radius: 8px;" />
+                            <div class="range-row">
+                                <input id="jokbo_min_rel" type="range" min="0" max="110" value="70" step="5"/>
+                                <output id="jokbo_min_rel_out" for="jokbo_min_rel" class="range-out">70</output>
+                            </div>
                             <div class="form-hint" style="color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem;">Connections below this score will be excluded.</div>
                         </div>
                         <div class="form-group">
@@ -152,7 +165,17 @@
                 <div id="lesson-tab" class="tab-content">
                     <form id="lessonForm">
                         <div class="form-section">
-                            <h3 class="form-section-title">Configuration</h3>
+                            <div class="form-section-title" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;">
+                                <h3 class="form-section-title" style="margin:0;">Configuration</h3>
+                                <button type="button" class="tab" aria-expanded="false" data-help-target="lesson_help" style="padding:.35rem .6rem;">모드 설명</button>
+                            </div>
+                            <div id="lesson_help" class="help-panel" style="display:none;">
+                                <div class="help-title">Lecture-Centric Analysis</div>
+                                <div class="help-body">
+                                    하나의 강의자료를 기준으로 여러 족보 문제를 매칭합니다. 각 슬라이드에 가장 적합한 문제를 1개씩 첨부하며,
+                                    관련성 점수 커트라인으로 불필요한 매칭을 걸러냅니다. 멀티 API 사용 시 여러 파일을 병렬 처리합니다.
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label for="lesson_model">AI Model Selection</label>
                                 <div class="select-wrapper">
@@ -164,7 +187,10 @@
                             </div>
                             <div class="form-group">
                                 <label for="lesson_min_rel">Minimum Relevance Score (0–110)</label>
-                                <input id="lesson_min_rel" type="number" min="0" max="110" value="70" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--gray-300); border-radius: 8px;" />
+                                <div class="range-row">
+                                    <input id="lesson_min_rel" type="range" min="0" max="110" value="70" step="5"/>
+                                    <output id="lesson_min_rel_out" for="lesson_min_rel" class="range-out">70</output>
+                                </div>
                                 <div class="form-hint" style="color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem;">Connections below this score will be excluded.</div>
                             </div>
                             <div class="form-group">
@@ -215,15 +241,18 @@
                 <div id="partial-tab" class="tab-content">
                     <form id="partialForm">
                         <div class="form-section">
-                            <div class="card-description" style="margin-bottom:1rem; line-height:1.6;">
-                                <strong>Partial Jokbo 모드</strong>: 족보에서 문제 영역만 깔끔하게 추출해 해설과 함께 묶어주는 모드입니다.
-                                여러 족보와 강의자료를 함께 업로드하면, 각 문제의 시작 페이지를 감지해 <em>문제 페이지(+필요 시 다음 페이지)</em>를 잘라내고,
-                                관련 강의 슬라이드 맥락을 참고해 간단한 해설을 붙여 하나의 PDF로 만듭니다.
-                                <br>
-                                • 대용량 PDF는 내부적으로 쪼개 처리될 수 있으며, 일부 항목이 실패해도 나머지를 먼저 결과에 포함합니다.
-                                처리 중 일부 실패가 발생하면 완료 시 요약 경고로 알려드립니다.
+                            <div class="form-section-title" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;">
+                                <h3 class="form-section-title" style="margin:0;">Configuration</h3>
+                                <button type="button" class="tab" aria-expanded="false" data-help-target="partial_help" style="padding:.35rem .6rem;">모드 설명</button>
                             </div>
-                            <h3 class="form-section-title">Configuration</h3>
+                            <div id="partial_help" class="help-panel" style="display:none;">
+                                <div class="help-title">Partial Jokbo</div>
+                                <div class="help-body">
+                                    족보에서 문제 영역만 잘라 간단한 해설과 함께 묶습니다. 여러 족보/강의자료를 올리면 문제 시작 페이지를 자동 감지해
+                                    해당 페이지(+필요 시 다음 페이지)만 추출합니다. 일부 항목 실패 시에도 가능한 결과를 우선 생성하고, 완료 시 경고로 요약합니다.
+                                </div>
+                            </div>
+                            <h3 class="form-section-title" style="display:none;">Configuration</h3>
                             <div class="form-group">
                                 <label for="partial_model">AI Model Selection</label>
                                 <div class="select-wrapper">
@@ -232,6 +261,14 @@
                                         <option value="pro">Gemini 2.5 Pro - Quality</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="partial_min_rel">Minimum Relevance Score (0–110)</label>
+                                <div class="range-row">
+                                    <input id="partial_min_rel" type="range" min="0" max="110" value="50" step="5"/>
+                                    <output id="partial_min_rel_out" for="partial_min_rel" class="range-out">50</output>
+                                </div>
+                                <div class="form-hint" style="color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem;">현재 파셜 모드에서는 향후 적용을 위한 기준 값으로 저장됩니다.</div>
                             </div>
                             <div class="form-group">
                                 <label>Processing Mode</label>
@@ -644,19 +681,24 @@
 
             try {
                 const multiApi = getMultiApiState(mode);
-                const minRel = mode === 'partial-jokbo'
-                    ? 0
-                    : (() => {
-                        const v = mode === 'jokbo-centric' ? document.getElementById('jokbo_min_rel').value : document.getElementById('lesson_min_rel').value;
-                        const n = parseInt(v, 10);
-                        if (isNaN(n)) return 70;
-                        return Math.max(0, Math.min(n, 110));
-                    })();
-                // Send multi_api and min_relevance only for existing modes
-                if (mode !== 'partial-jokbo') {
-                    formData.append('multi_api', multiApi ? 'true' : 'false');
-                    formData.append('min_relevance', String(minRel));
-                }
+                const minRel = (() => {
+                    if (mode === 'jokbo-centric') {
+                        const n = parseInt(String(document.getElementById('jokbo_min_rel').value), 10);
+                        return isNaN(n) ? 70 : Math.max(0, Math.min(n, 110));
+                    }
+                    if (mode === 'lesson-centric') {
+                        const n = parseInt(String(document.getElementById('lesson_min_rel').value), 10);
+                        return isNaN(n) ? 70 : Math.max(0, Math.min(n, 110));
+                    }
+                    if (mode === 'partial-jokbo') {
+                        const n = parseInt(String(document.getElementById('partial_min_rel').value), 10);
+                        return isNaN(n) ? 50 : Math.max(0, Math.min(n, 110));
+                    }
+                    return 70;
+                })();
+                // Always include consistent params for parity
+                formData.append('multi_api', multiApi ? 'true' : 'false');
+                formData.append('min_relevance', String(minRel));
                 const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}&min_relevance=${minRel}`, {
                     method: 'POST',
                     body: formData
@@ -703,7 +745,9 @@
         async function checkStatus(taskId, jobId) {
             const statusBadge = document.getElementById('status-badge');
             const statusContent = document.getElementById('status-content');
-            
+            let lastPct = -1;
+            let lastUpdate = Date.now();
+            const startedAt = Date.now();
             const interval = setInterval(async () => {
                 try {
                     // Check progress first
@@ -714,15 +758,28 @@
                             const chunks = progressData.total_chunks ? ` · ${progressData.completed_chunks||0}/${progressData.total_chunks} chunks` : '';
                             const etaSecs = (progressData.eta_seconds && progressData.eta_seconds > 0) ? Math.round(progressData.eta_seconds) : null;
                             const etaText = etaSecs ? ` · ETA ${new Date(etaSecs*1000).toISOString().substr(11,8)}` : '';
+                            const pct = progressData.progress||0;
+                            if (pct !== lastPct) {
+                                lastPct = pct;
+                                lastUpdate = Date.now();
+                            }
                             statusContent.innerHTML = `
                                 <div class="status-message">
                                     <div style="margin-bottom: 0.5rem;">${progressData.message || ''}</div>
                                     <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${progressData.progress||0}%"></div>
+                                        <div class="progress-fill" style="width: ${pct}%"></div>
                                     </div>
                                     <div style="margin-top: 0.25rem; font-size: 0.875rem; color: #666;">
-                                        ${(progressData.progress||0)}% 완료${chunks}${etaText}
+                                        ${pct}% 완료${chunks}${etaText}
                                     </div>
+                                    ${(() => {
+                                        const minutesStuck = (Date.now() - lastUpdate) / 60000;
+                                        const totalMinutes = (Date.now() - startedAt) / 60000;
+                                        if (minutesStuck >= 8 || totalMinutes >= 20) {
+                                            return `<div style="margin-top:.5rem;color:var(--gray-500);">진행이 지연되는 것 같나요? <button class="tab" onclick="cancelJob('${jobId}')">⏹️ 작업 취소</button></div>`;
+                                        }
+                                        return '';
+                                    })()}
                                 </div>
                             `;
                         }
@@ -1079,11 +1136,37 @@
             }
         }
 
+        // Helpers: help panel toggles and range outputs
+        function initHelpToggles() {
+            document.querySelectorAll('[data-help-target]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-help-target');
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const showing = el.style.display !== 'none';
+                    el.style.display = showing ? 'none' : 'block';
+                    btn.setAttribute('aria-expanded', String(!showing));
+                });
+            });
+        }
+        function bindRange(id, outId) {
+            const r = document.getElementById(id);
+            const o = document.getElementById(outId);
+            if (!r || !o) return;
+            const fmt = v => String(parseInt(v, 10));
+            o.textContent = fmt(r.value);
+            r.addEventListener('input', () => o.textContent = fmt(r.value));
+        }
+
         // Initial boot
         (async () => {
             try { await fetchAuthConfig(); } catch {}
             try { await initConfigAndToggles(); } catch {}
             try { await refreshAuthUI(); } catch {}
+            try { initHelpToggles(); } catch {}
+            bindRange('jokbo_min_rel','jokbo_min_rel_out');
+            bindRange('lesson_min_rel','lesson_min_rel_out');
+            bindRange('partial_min_rel','partial_min_rel_out');
         })();
     </script>
 </body>
