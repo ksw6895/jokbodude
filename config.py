@@ -1,7 +1,7 @@
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 
 load_dotenv()
 
@@ -35,6 +35,7 @@ GENERATION_CONFIG = {
     "response_mime_type": "application/json",
 }
 
+# Base desired safety configuration (may be filtered if SDK lacks support)
 SAFETY_SETTINGS = [
     {
         "category": "HARM_CATEGORY_HARASSMENT",
@@ -58,6 +59,37 @@ SAFETY_SETTINGS = [
         "threshold": "BLOCK_NONE"
     }
 ]
+
+def get_safety_settings() -> List[Dict[str, Any]]:
+    """Return a safety_settings list compatible with the installed SDK.
+
+    Some SDK versions (e.g., google-generativeai<=0.8.x) may not support
+    certain categories like CIVIC_INTEGRITY. We attempt to normalize the
+    configured list and gracefully drop unsupported categories.
+    """
+    try:
+        # Validate against SDK converter (no network) to detect unsupported keys
+        from google.generativeai.types import safety_types as _st  # type: ignore
+        _st.to_easy_safety_dict(SAFETY_SETTINGS)
+        return SAFETY_SETTINGS
+    except Exception:
+        # Filter out CIVIC_INTEGRITY if present; keep the standard four
+        filtered = [
+            s for s in SAFETY_SETTINGS
+            if str(s.get("category", "")).upper() != "HARM_CATEGORY_CIVIC_INTEGRITY"
+        ]
+        try:
+            from google.generativeai.types import safety_types as _st  # type: ignore
+            _st.to_easy_safety_dict(filtered)
+            return filtered
+        except Exception:
+            # Last-resort minimal set
+            return [
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+            ]
 
 # Model name mapping
 MODEL_NAMES = {
@@ -94,7 +126,7 @@ def create_model(model_type: str = "flash", thinking_budget: Optional[int] = Non
     return genai.GenerativeModel(
         model_name=model_name,
         generation_config=config,
-        safety_settings=SAFETY_SETTINGS,
+        safety_settings=get_safety_settings(),
     )
 
 # Default model (for backward compatibility)
