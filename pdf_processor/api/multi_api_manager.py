@@ -39,16 +39,41 @@ class APIKeyStatus:
         self.last_used = datetime.now()
         self.last_error = None
         
-    def record_failure(self, error: str):
-        """Record a failed API call."""
+    def record_failure(self, error: str, *, category: Optional[str] = None,
+                       rate_limit_cooldown_secs: int = 30) -> None:
+        """Record a failed API call with classification.
+
+        Categories:
+        - 'prompt_block': PromptFeedback block (SAFETY/BLOCKLIST/OTHER/PROHIBITED_CONTENT)
+        - 'rate_limit': Quota/rate limiting (HTTP 429, resource exhausted)
+        - 'auth': Authentication/permission issues (401/403)
+        - 'server': Server-side/transient errors (5xx/unavailable)
+        - 'network': Client-side connectivity timeouts
+        - 'unknown': Everything else
+        """
         self.total_requests += 1
         self.total_failures += 1
-        self.consecutive_failures += 1
         self.last_used = datetime.now()
         self.last_error = error
-        
-        # Apply cooldown after consecutive failures
-        if self.consecutive_failures >= 3:
+
+        # Only count towards consecutive failures for issues likely tied to this key
+        if category in {"rate_limit", "auth", "server", "unknown"}:
+            self.consecutive_failures += 1
+        else:
+            # For prompt blocks, do not penalize the key with consecutive strikes
+            # as the prompt itself likely needs adjustment.
+            pass
+
+        # Short, transient cooldown for rate limiting to encourage rotation
+        if category == "rate_limit" and rate_limit_cooldown_secs > 0:
+            self.cooldown_until = datetime.now() + timedelta(seconds=rate_limit_cooldown_secs)
+            self.is_available = False
+            logger.warning(
+                f"API key {self.index} short cooldown {rate_limit_cooldown_secs}s due to rate limit"
+            )
+
+        # Apply longer cooldown only after repeated key-specific failures
+        if self.consecutive_failures >= 3 and category in {"rate_limit", "auth", "server", "unknown"}:
             self.cooldown_until = datetime.now() + timedelta(minutes=10)
             self.is_available = False
             logger.warning(f"API key {self.index} entering cooldown until {self.cooldown_until}")
@@ -98,6 +123,11 @@ class MultiAPIManager:
         # Track per-key in-flight counts
         self._in_use_counts: dict[int, int] = {}
         self._cv = threading.Condition(self._lock)
+        # Short cooldown applied to a key when rate limited, to encourage rotation
+        try:
+            self.rate_limit_cooldown_secs = max(0, int(os.getenv("GEMINI_RATE_LIMIT_COOLDOWN_SECS", "30")))
+        except Exception:
+            self.rate_limit_cooldown_secs = 30
         
         # Create API clients for each key
         self.api_clients = []
@@ -117,6 +147,22 @@ class MultiAPIManager:
             
         safe_ids = [f"k{i}:***{(k or '')[-4:] if k else '????'}" for i, k in enumerate(api_keys)]
         logger.info(f"Initialized MultiAPIManager with {len(api_keys)} API keys: {', '.join(safe_ids)}")
+
+    @staticmethod
+    def _categorize_error(error_msg: str) -> str:
+        """Best-effort classification for error handling policy."""
+        em = (error_msg or "").lower()
+        if "prompt blocked" in em or "block_reason" in em:
+            return "prompt_block"
+        if "429" in em or "rate limit" in em or "too many requests" in em or "quota" in em or "resource has been exhausted" in em:
+            return "rate_limit"
+        if "403" in em or "forbidden" in em or "permission" in em or "401" in em or "unauthorized" in em:
+            return "auth"
+        if "5xx" in em or "internal" in em or "unavailable" in em or "deadline" in em or "server" in em:
+            return "server"
+        if "timeout" in em or "timed out" in em or "connection" in em:
+            return "network"
+        return "unknown"
     
     def _acquire_api_index(self, wait: bool = True, timeout: Optional[float] = None) -> Optional[int]:
         """
@@ -211,7 +257,11 @@ class MultiAPIManager:
             api_index = self._acquire_api_index(wait=True, timeout=60.0)
             if api_index is None:
                 logger.warning("No available APIs after waiting; retrying...")
-                total_attempts += 1
+                # If the prompt itself is blocked, trying other keys won't help.
+                if category == "prompt_block":
+                    total_attempts = max_retries
+                else:
+                    total_attempts += 1
                 continue
             
             api_client = self.api_clients[api_index]
@@ -233,18 +283,25 @@ class MultiAPIManager:
                 
             except Exception as e:
                 error_msg = str(e)
+                category = self._categorize_error(error_msg)
                 logger.error(f"API key {api_index} (***{key_suffix}) failed: {error_msg}")
-                
-                # Record failure
-                status.record_failure(error_msg)
+
+                # Record failure with category-aware policy
+                status.record_failure(
+                    error_msg,
+                    category=category,
+                    rate_limit_cooldown_secs=self.rate_limit_cooldown_secs,
+                )
                 errors.append(f"API {api_index}: {error_msg}")
-                
-                # Check for specific errors that should trigger immediate failover
-                if "429" in error_msg or "quota" in error_msg.lower():
-                    logger.warning(f"API key {api_index} (***{key_suffix}) hit quota limit")
-                elif "403" in error_msg:
-                    logger.warning(f"API key {api_index} (***{key_suffix}) has permission issues")
-                
+
+                # Hints in logs
+                if category == "rate_limit":
+                    logger.warning(f"API key {api_index} (***{key_suffix}) rate limited; rotating to next key")
+                elif category == "auth":
+                    logger.warning(f"API key {api_index} (***{key_suffix}) permission/auth issue")
+                elif category == "prompt_block":
+                    logger.info(f"Prompt blocked; not penalizing key {api_index} and not retrying same prompt")
+
                 total_attempts += 1
             finally:
                 # Release the API key for other tasks

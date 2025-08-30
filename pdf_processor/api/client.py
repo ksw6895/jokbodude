@@ -208,13 +208,29 @@ class GeminiAPIClient:
                 except Exception:
                     pf, block_reason = None, None
                 if block_reason:
-                    msg = f"Prompt blocked: block_reason={block_reason}"
+                    # Do NOT retry for prompt blocks; rephrasing is required and this
+                    # is not a transient/key-specific issue. Also include a human-readable
+                    # reason name when possible to aid classification upstream.
+                    reason_map = {
+                        0: "UNSPECIFIED",
+                        1: "SAFETY",
+                        2: "OTHER",
+                        3: "BLOCKLIST",
+                        4: "PROHIBITED_CONTENT",
+                        5: "IMAGE_SAFETY",
+                    }
+                    try:
+                        reason_val = int(block_reason)
+                    except Exception:
+                        # Fallback if enum object doesn't cast nicely
+                        try:
+                            reason_val = int(str(block_reason))
+                        except Exception:
+                            reason_val = None
+                    reason_name = reason_map.get(reason_val, str(block_reason))
+                    msg = f"Prompt blocked: block_reason={block_reason} ({reason_name})"
                     logger.warning(f"{msg} [key={self._key_tag()}]")
-                    if attempt < max_retries - 1:
-                        wait_time = backoff_factor ** attempt
-                        logger.info(f"Retrying in {wait_time} seconds... [key={self._key_tag()}]")
-                        time.sleep(wait_time)
-                        continue
+                    # Immediately fail so the multi-API manager can decide next steps.
                     raise ContentGenerationError(msg)
 
                 # Guard against empty candidates before accessing response.text
@@ -268,22 +284,29 @@ class GeminiAPIClient:
                     if 'MAX_TOKENS' in finish_reason or finish_reason == '2':
                         logger.warning(f"Response truncated due to token limit (length: {len(response.text)}) [key={self._key_tag()}]")
                     elif 'SAFETY' in finish_reason or finish_reason == '3':
+                        # Retry immediately for safety finishes, up to max_retries.
                         logger.warning(f"Response blocked due to safety concerns [key={self._key_tag()}]")
                         if attempt < max_retries - 1:
-                            wait_time = backoff_factor ** attempt
-                            time.sleep(wait_time)
+                            logger.info(f"Retrying immediately due to safety finish (attempt {attempt + 1}/{max_retries}) [key={self._key_tag()}]")
                             continue
+                        raise ContentGenerationError("Response blocked due to safety")
                 
                 return response
                 
             except Exception as e:
-                logger.error(f"Content generation failed (attempt {attempt + 1}/{max_retries}) [key={self._key_tag()}]: {str(e)}")
+                err = str(e)
+                logger.error(f"Content generation failed (attempt {attempt + 1}/{max_retries}) [key={self._key_tag()}]: {err}")
+                # For rate limit/quota errors, fail fast so the multi-key layer can rotate.
+                low = err.lower()
+                if ("429" in low or "rate limit" in low or "too many requests" in low or
+                        "quota" in low or "resource has been exhausted" in low):
+                    raise ContentGenerationError(err)
                 if attempt < max_retries - 1:
                     wait_time = backoff_factor ** attempt
                     logger.info(f"Retrying in {wait_time} seconds... [key={self._key_tag()}]")
                     time.sleep(wait_time)
                 else:
-                    raise ContentGenerationError(f"Failed to generate content after {max_retries} attempts: {str(e)}")
+                    raise ContentGenerationError(f"Failed to generate content after {max_retries} attempts: {err}")
         
         raise ContentGenerationError("Maximum retries exceeded")
     

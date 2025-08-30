@@ -4,228 +4,273 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JokboDude · Guide</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css?v=4">
   <style>
-    :root {
-      --bg: #0b0c0e;
-      --bg-elev: #111318;
-      --text: #e8e9ed;
-      --muted: #a3a6ad;
-      --border: #20242a;
-      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.25);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      color: var(--text);
-      background: var(--bg);
-      min-height: 100vh;
-    }
-    .navbar { position: sticky; top: 0; z-index: 50; background: var(--bg-elev); border-bottom: 1px solid var(--border); }
-    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; }
-    .logo { display:flex; align-items:center; gap:.75rem; color: var(--text); font-weight: 800; font-size: 1.25rem; }
-    .logo-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; color: var(--text); background: #16181c; border: 1px solid var(--border); }
-    .nav-links { display:flex; align-items:center; gap:1rem; }
-    .nav-link { color: var(--muted); text-decoration:none; font-weight:700; padding:.4rem .7rem; border-radius:8px; }
-    .nav-link:hover { color: var(--text); background: #161a20; }
-    .lang-toggle { border:1px solid var(--border); background: #0f1115; color: var(--text); padding:.4rem .7rem; border-radius:8px; cursor:pointer; font-weight:700; }
-    .container { max-width: 1100px; margin: 2rem auto; padding: 1.25rem; }
-    .hero { text-align:center; margin: 1rem auto 2rem auto; }
-    .hero h1 { font-size: 2rem; font-weight:800; letter-spacing:.01em; }
-    .hero p { color: var(--muted); margin-top:.5rem; }
-    .card { background: var(--bg-elev); border:1px solid var(--border); border-radius:14px; box-shadow: var(--shadow-xl); overflow: hidden; margin-bottom: 1rem; }
-    .card h2 { padding: 1rem 1.25rem; border-bottom:1px solid var(--border); font-size: 1.1rem; }
-    .card .content { padding: 1rem 1.25rem; color: var(--muted); }
-    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+    /* Guide-specific layout on top of global styles */
+    .guide-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .guide-layout { display: grid; grid-template-columns: 260px 1fr; gap: 1.25rem; align-items: start; }
+    .side-nav { position: sticky; top: 96px; align-self: start; background: rgba(17,19,24,0.76); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: .75rem; }
+    .side-nav h3 { font-size: .9rem; color: var(--subtle); padding: .25rem .5rem .5rem; text-transform: uppercase; letter-spacing: .06em; }
+    .side-nav a { display: block; color: var(--muted); text-decoration: none; padding: .5rem .6rem; border-radius: 8px; font-weight: 700; }
+    .side-nav a:hover { color: var(--text); background: #14171c; }
+    .doc-section { scroll-margin-top: 100px; }
+    .doc-section .card-header { display: flex; align-items: center; justify-content: space-between; }
+    .badge { display:inline-block; background: #0f1115; color:#e8e9ed; border:1px solid var(--border); border-radius:9999px; padding:.2rem .6rem; font-weight:800; font-size:.8rem; margin-right:.4rem; }
     .list { margin-left: 1.25rem; }
     .list li { margin: .4rem 0; }
-    .badge { display:inline-block; background: #0f1115; color:#e8e9ed; border:1px solid var(--border); border-radius:9999px; padding:.2rem .6rem; font-weight:800; font-size:.8rem; margin-right:.4rem; }
-    .footer { text-align:center; color: var(--muted); font-size:.9rem; margin: 2rem 0 1rem; }
-    @media (max-width: 640px) { .hero h1 { font-size: 1.6rem; } }
+    .muted { color: var(--muted); }
+    .hero-note { color: var(--muted); margin-top: .4rem; }
+    @media (max-width: 980px) { .guide-layout { grid-template-columns: 1fr; } .side-nav { position: static; } }
   </style>
+  <script>
+    function toHTML(items) {
+      return items.map(x => `<li>${x}</li>`).join('');
+    }
+    function setHTML(id, html) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    }
+    const I18N = {
+      en: {
+        langBtn: '🇺🇸 EN',
+        heroTitle: 'User Guide',
+        heroSubtitle: 'Master JokboDude in minutes — features, modes, and tips',
+        overview_h: 'Overview',
+        overview: `JokboDude analyzes your exam PDFs (jokbo) and lecture slides using Google Gemini to connect questions with the most relevant teaching context. The output is a polished PDF that helps you study faster with explanations and relevance cues.`,
+        modes_h: 'Modes',
+        modes: [
+          '<span class="badge">Exam-Centric</span> Upload one or more exam PDFs and lecture slides. For each question, the most related slide(s) and a brief explanation are attached.',
+          '<span class="badge">Lecture-Centric</span> Upload slides and exam PDFs. Each slide receives the single most relevant question with a short explanation.',
+          '<span class="badge">Partial Jokbo</span> Extract only question regions (and next page if needed) with concise explanations into a compact review PDF.'
+        ],
+        quick_h: 'Quick Start',
+        quick: [
+          'Go to Home and select a mode.',
+          'Upload PDFs (50MB max per file).',
+          'Enable Multi-API if multiple Gemini keys are configured for speed.',
+          'Optionally adjust Minimum Relevance (0–110).',
+          'Click Start and monitor progress; download results when finished.'
+        ],
+        perf_h: 'Multi-API & Performance',
+        perf: [
+          'With multiple API keys, the system parallelizes requests across keys for throughput and resilience.',
+          'Large PDFs are split into chunks automatically; progress shows completed/total chunks.',
+          'Network hiccups and rate limits are retried; prompt blocks are surfaced immediately with reasons.'
+        ],
+        outputs_h: 'Outputs',
+        outputs: `Results are saved as downloadable PDFs. Exam-Centric groups questions with matched slides and explanations. Lecture-Centric keeps every slide (in order) with the top related question inserted. Partial Jokbo compiles cropped question pages with short explanations for rapid review.`,
+        troubleshoot_h: 'Troubleshooting',
+        troubleshoot: [
+          '<b>Upload too large (413)</b>: Ensure each file is under 50MB.',
+          '<b>Stuck at processing</b>: Large files may chunk; give it time or try Multi-API.',
+          '<b>Prompt blocked</b>: Safety filters may block certain content; revise files or wording.',
+          '<b>Few matches</b>: Lower Minimum Relevance to include more candidates.'
+        ],
+        privacy_h: 'Privacy & Storage',
+        privacy: `Uploaded PDFs are used only to analyze and produce outputs. Temporary analysis artifacts are pruned; generated results are kept for a limited time (configurable via RESULT_RETENTION_HOURS, default ~30 days).`,
+        faq_h: 'FAQ',
+        faq: [
+          '<b>Which model?</b> Gemini 2.5 Flash.',
+          '<b>What file types?</b> PDF only (.pdf).',
+          '<b>Where are my results?</b> After processing, use the download link presented on the Home page.'
+        ],
+        footer: 'Built for students. No grades, just growth.'
+      },
+      ko: {
+        langBtn: '🇰🇷 KO',
+        heroTitle: '사용 가이드',
+        heroSubtitle: '기능·모드·팁을 빠르게 익히세요',
+        overview_h: '개요',
+        overview: `JokboDude는 Google Gemini를 활용해 족보(기출) PDF와 강의 슬라이드를 분석하고, 각 문제에 가장 관련 있는 학습 컨텍스트를 연결합니다. 해설과 관련성 정보가 포함된 PDF 결과물로 빠르고 정확하게 복습할 수 있습니다.`,
+        modes_h: '모드',
+        modes: [
+          '<span class="badge">Exam-Centric</span> 여러 족보와 강의자료를 올리면, 문제별로 관련 슬라이드와 간단한 해설을 붙여줍니다.',
+          '<span class="badge">Lecture-Centric</span> 슬라이드 중심으로 각 슬라이드에 가장 관련 있는 문제 1개와 해설을 추가합니다.',
+          '<span class="badge">Partial Jokbo</span> 문제 영역(필요 시 다음 페이지 포함)만 추출해 간결한 해설과 함께 빠른 복습용 PDF로 만듭니다.'
+        ],
+        quick_h: '빠른 시작',
+        quick: [
+          '홈에서 원하는 모드를 선택합니다.',
+          'PDF를 업로드합니다(파일당 50MB 이하).',
+          '여러 Gemini 키가 있다면 Multi-API를 켜 속도를 높입니다.',
+          '필요 시 최소 관련성(0–110)을 조정합니다.',
+          '시작을 눌러 진행률을 확인하고, 완료되면 결과를 다운로드합니다.'
+        ],
+        perf_h: 'Multi-API & 성능',
+        perf: [
+          '여러 API 키가 있으면 키별로 병렬 처리하여 처리량과 안정성을 높입니다.',
+          '대용량 PDF는 자동으로 청크 처리되며, 진행률은 완료/총 청크 수로 표시됩니다.',
+          '네트워크/할당량 이슈는 재시도하며, 프롬프트 차단은 사유와 함께 즉시 알려줍니다.'
+        ],
+        outputs_h: '결과물',
+        outputs: `Exam-Centric은 문제+관련 슬라이드+해설을 묶어, Lecture-Centric은 모든 슬라이드 순서를 유지한 채 가장 관련 있는 문제를 삽입합니다. Partial Jokbo는 문제 페이지만 잘라 해설과 함께 간결하게 제공합니다.`,
+        troubleshoot_h: '문제 해결',
+        troubleshoot: [
+          '<b>업로드 용량 초과(413)</b>: 파일당 50MB 이하인지 확인하세요.',
+          '<b>처리가 멈춘 것 같아요</b>: 큰 파일은 청크 처리됩니다. 잠시 기다리거나 Multi-API를 켜보세요.',
+          '<b>프롬프트 차단</b>: 안전 필터에 의해 차단될 수 있습니다. 파일/표현을 조정해 보세요.',
+          '<b>매칭이 적어요</b>: 최소 관련성 점수를 낮춰 후보를 늘려보세요.'
+        ],
+        privacy_h: '개인정보/보관',
+        privacy: `업로드한 PDF는 분석과 결과 생성에만 사용됩니다. 임시 산출물은 주기적으로 정리되며, 생성된 결과물은 제한 기간 동안 보관됩니다(환경변수 RESULT_RETENTION_HOURS, 기본 약 30일).`,
+        faq_h: 'FAQ',
+        faq: [
+          '<b>사용 모델?</b> Gemini 2.5 Flash.',
+          '<b>지원 형식?</b> PDF만 지원합니다(.pdf).',
+          '<b>결과는 어디서 보나요?</b> 처리 완료 후 홈 화면에 다운로드 링크가 나타납니다.'
+        ],
+        footer: '학생을 위한 도구. 성적보다 성장을.'
+      }
+    };
+    function render(lang) {
+      const t = I18N[lang] || I18N.en;
+      document.getElementById('langBtn').textContent = t.langBtn;
+      setHTML('heroTitle', t.heroTitle);
+      setHTML('heroSubtitle', t.heroSubtitle);
+      setHTML('overview_h', t.overview_h);
+      setHTML('overview_c', t.overview);
+      setHTML('modes_h', t.modes_h);
+      setHTML('modes_c', `<ul class="list">${toHTML(t.modes)}</ul>`);
+      setHTML('quick_h', t.quick_h);
+      setHTML('quick_c', `<ol class="list">${toHTML(t.quick)}</ol>`);
+      setHTML('perf_h', t.perf_h);
+      setHTML('perf_c', `<ul class="list">${toHTML(t.perf)}</ul>`);
+      setHTML('outputs_h', t.outputs_h);
+      setHTML('outputs_c', t.outputs);
+      setHTML('troubleshoot_h', t.troubleshoot_h);
+      setHTML('troubleshoot_c', `<ul class="list">${toHTML(t.troubleshoot)}</ul>`);
+      setHTML('privacy_h', t.privacy_h);
+      setHTML('privacy_c', t.privacy);
+      setHTML('faq_h', t.faq_h);
+      setHTML('faq_c', `<ul class="list">${toHTML(t.faq)}</ul>`);
+      setHTML('footer', t.footer);
+      localStorage.setItem('jd_guide_lang', lang);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('jd_guide_lang') || 'ko';
+      render(saved);
+      document.getElementById('langBtn').addEventListener('click', () => {
+        const cur = localStorage.getItem('jd_guide_lang') || 'en';
+        render(cur === 'en' ? 'ko' : 'en');
+      });
+    });
+  </script>
+  <script>
+    // Smooth-scroll for anchor links
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      const id = a.getAttribute('href').slice(1);
+      const target = document.getElementById(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  </script>
 </head>
 <body>
-  <div class="navbar">
-    <div class="nav-inner">
-      <a href="/" class="logo">
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="/" class="logo" style="display:flex;align-items:center;gap:.75rem;text-decoration:none;color:var(--text);font-weight:800;">
         <div class="logo-icon">🎓</div>
         <span>JokboDude</span>
       </a>
       <div class="nav-links">
         <a class="nav-link" href="/">Home</a>
         <a class="nav-link" href="/guide">Guide</a>
-        <button id="langBtn" class="lang-toggle" aria-label="Toggle Language">🇺🇸 EN</button>
+        <button id="langBtn" class="tab" style="padding:.4rem .7rem;">🇺🇸 EN</button>
       </div>
     </div>
-  </div>
+  </nav>
 
-  <main class="container">
-    <section class="hero">
-      <h1 id="t_title">Welcome to JokboDude</h1>
-      <p id="t_subtitle">AI-powered study companion for everyday students</p>
+  <main class="guide-container">
+    <section class="hero-section">
+      <h1 class="hero-title" id="heroTitle">User Guide</h1>
+      <p class="hero-subtitle" id="heroSubtitle">Master JokboDude in minutes — features, modes, and tips</p>
+      <div class="hero-note">This guide mirrors the premium dark UI used on the home page.</div>
     </section>
 
-    <section class="grid">
-      <article class="card">
-        <h2 id="t_intent_h">What Is JokboDude?</h2>
-        <div class="content" id="t_intent">
-          <!-- filled by JS -->
-        </div>
-      </article>
+    <div class="guide-layout">
+      <aside class="side-nav">
+        <h3>On this page</h3>
+        <a href="#overview">Overview</a>
+        <a href="#modes">Modes</a>
+        <a href="#quick">Quick Start</a>
+        <a href="#performance">Multi-API & Performance</a>
+        <a href="#outputs">Outputs</a>
+        <a href="#troubleshooting">Troubleshooting</a>
+        <a href="#privacy">Privacy & Storage</a>
+        <a href="#faq">FAQ</a>
+      </aside>
 
-      <article class="card">
-        <h2 id="t_modes_h">Modes: When to Use Which?</h2>
-        <div class="content">
-          <ul class="list" id="t_modes">
-          </ul>
-        </div>
-      </article>
+      <div class="doc">
+        <section id="overview" class="doc-section app-card">
+          <div class="card-header">
+            <h2 class="card-title" id="overview_h">Overview</h2>
+          </div>
+          <div class="card-body">
+            <div class="muted" id="overview_c"></div>
+          </div>
+        </section>
 
-      <article class="card">
-        <h2 id="t_steps_h">Quick Start</h2>
-        <div class="content">
-          <ol class="list" id="t_steps"></ol>
-        </div>
-      </article>
+        <section id="modes" class="doc-section app-card" style="margin-top:1rem;">
+          <div class="card-header">
+            <h2 class="card-title" id="modes_h">Modes</h2>
+          </div>
+          <div class="card-body" id="modes_c"></div>
+        </section>
 
-      <article class="card">
-        <h2 id="t_outputs_h">Outputs</h2>
-        <div class="content" id="t_outputs"></div>
-      </article>
+        <section id="quick" class="doc-section app-card" style="margin-top:1rem;">
+          <div class="card-header">
+            <h2 class="card-title" id="quick_h">Quick Start</h2>
+          </div>
+          <div class="card-body" id="quick_c"></div>
+        </section>
 
-      <article class="card">
-        <h2 id="t_tips_h">Practical Tips</h2>
-        <div class="content">
-          <ul class="list" id="t_tips"></ul>
-        </div>
-      </article>
+        <section id="performance" class="doc-section app-card" style="margin-top:1rem;">
+          <div class="card-header">
+            <h2 class="card-title" id="perf_h">Multi-API & Performance</h2>
+          </div>
+          <div class="card-body" id="perf_c"></div>
+        </section>
 
-      <article class="card">
-        <h2 id="t_faq_h">FAQ</h2>
-        <div class="content">
-          <ul class="list" id="t_faq"></ul>
-        </div>
-      </article>
-    </section>
+        <section id="outputs" class="doc-section app-card" style="margin-top:1rem;">
+          <div class="card-header">
+            <h2 class="card-title" id="outputs_h">Outputs</h2>
+          </div>
+          <div class="card-body">
+            <div class="muted" id="outputs_c"></div>
+          </div>
+        </section>
 
-    <p class="footer" id="t_footer">Built for students. No grades, just growth.</p>
+        <section id="troubleshooting" class="doc-section app-card" style="margin-top:1rem;">
+          <div class="card-header">
+            <h2 class="card-title" id="troubleshoot_h">Troubleshooting</h2>
+          </div>
+          <div class="card-body" id="troubleshoot_c"></div>
+        </section>
+
+        <section id="privacy" class="doc-section app-card" style="margin-top:1rem;">
+          <div class="card-header">
+            <h2 class="card-title" id="privacy_h">Privacy & Storage</h2>
+          </div>
+          <div class="card-body">
+            <div class="muted" id="privacy_c"></div>
+          </div>
+        </section>
+
+        <section id="faq" class="doc-section app-card" style="margin-top:1rem;">
+          <div class="card-header">
+            <h2 class="card-title" id="faq_h">FAQ</h2>
+          </div>
+          <div class="card-body" id="faq_c"></div>
+        </section>
+
+        <div class="muted" style="text-align:center;margin:1.25rem 0;" id="footer">Built for students. No grades, just growth.</div>
+      </div>
+    </div>
   </main>
-
-  <script>
-    const i18n = {
-      en: {
-        langBtn: '🇺🇸 EN',
-        title: 'Welcome to JokboDude',
-        subtitle: 'AI-powered study companion for everyday students',
-        intent_h: 'What Is JokboDude?',
-        intent: `JokboDude analyzes your exam PDFs (jokbo) and lecture slides to help you study smarter, not longer.
-                 It finds which slides are most relevant to each question, summarizes key ideas, and explains answers.
-                 The goal is to connect questions with the right learning context so you can focus on understanding.`,
-        modes_h: 'Modes: When to Use Which?',
-        modes: [
-          '<span class="badge">Exam-Centric</span> Upload one or more exam PDFs and your lecture slides. The app lists questions and attaches the most related slides with explanations.',
-          '<span class="badge">Lecture-Centric</span> Upload lecture slides and exam PDFs. The app goes slide-by-slide and adds the single most relevant question for each slide.',
-          '<span class="badge">Partial Jokbo</span> Extracts just the question regions from jokbo PDFs (and the next page if needed) and compiles them with concise explanations into a compact PDF.'
-        ],
-        steps_h: 'Quick Start',
-        steps: [
-          'Open Home and choose Exam-Centric or Lecture-Centric.',
-          'Upload your PDFs (max 50MB each).',
-          'Optionally enable Multi-API if multiple Gemini keys are configured (faster).',
-          'Set the minimum relevance threshold if you want stricter filtering.',
-          'Click Start and watch the progress bar. Results appear under Results and can be downloaded as PDFs.'
-        ],
-        outputs_h: 'Outputs',
-        outputs: `You receive one or more PDFs in Results. Each file contains extracted content:
-                  for Exam-Centric, questions with matched slides and a brief explanation; for Lecture-Centric, every slide
-                  remains in order with the top related question inserted. Partial Jokbo produces cropped question pages + explanations only for fast review.`,
-        tips_h: 'Practical Tips',
-        tips: [
-          'Use clear, final versions of slides and exams; scan quality matters.',
-          'If nothing matches, try lowering the relevance threshold.',
-          'Large files are chunked automatically; multiple API keys help speed.',
-          'Privacy: PDFs are processed temporarily for analysis and output only.'
-        ],
-        faq_h: 'FAQ',
-        faq: [
-          '<b>Which model is used?</b> Gemini 2.5 Flash only.',
-          '<b>What is Multi-API?</b> If you provide multiple API keys, requests are distributed for throughput and resilience.',
-          '<b>What file types?</b> PDF only (.pdf).',
-          '<b>Where is my result?</b> After processing, check Results or download directly from the link shown.'
-        ],
-        footer: 'Built for students. No grades, just growth.'
-      },
-      ko: {
-        langBtn: '🇰🇷 KO',
-        title: 'JokboDude 사용 가이드',
-        subtitle: '일반 학생을 위한 AI 학습 도우미',
-        intent_h: 'JokboDude란?',
-        intent: `JokboDude는 족보(기출) PDF와 강의 슬라이드를 분석해 학습을 더 똑똑하게 도와줍니다.
-                 각 문제와 가장 관련 있는 슬라이드를 연결하고 핵심 개념과 간단한 해설을 제공합니다.
-                 목표는 ‘정답’이 아니라, 문제를 이해하는 데 필요한 컨텍스트를 빠르게 찾도록 돕는 것입니다.`,
-        modes_h: '모드: 언제 무엇을 쓰나요?',
-        modes: [
-          '<span class="badge">Exam-Centric</span> 여러 족보 PDF와 강의자료를 올리면, 문제별로 관련 슬라이드와 해설을 묶어줍니다.',
-          '<span class="badge">Lecture-Centric</span> 강의 슬라이드 중심으로 각 슬라이드에 가장 관련 있는 문제를 1개씩 연결합니다.',
-          '<span class="badge">Partial Jokbo</span> 족보에서 문제 영역만 잘라 간단한 해설과 함께 한 파일로 묶어 빠르게 복습하는 용도입니다. 필요한 경우 다음 페이지까지 자동 포함합니다.'
-        ],
-        steps_h: '빠른 시작',
-        steps: [
-          '홈에서 Exam-Centric 또는 Lecture-Centric을 선택합니다.',
-          'PDF를 업로드합니다(파일당 최대 50MB).',
-          '여러 Gemini 키가 있으면 Multi-API를 켭니다(속도 향상).',
-          '필요하면 최소 관련성 점수를 조정해 더 엄격하게 필터링합니다.',
-          '시작을 누르고 진행률을 확인합니다. 완료되면 Results에서 PDF를 다운로드하세요.'
-        ],
-        outputs_h: '결과물',
-        outputs: `결과 PDF가 Results에 생성됩니다. Exam-Centric은 문제와 매칭된 슬라이드/해설을, Lecture-Centric은 슬라이드 순서를 유지하면서 각 슬라이드에 가장 관련 있는 문제를 삽입합니다. Partial Jokbo는 문제 페이지만 잘라 해설과 함께 간결한 묶음으로 제공합니다.`,
-        tips_h: '실전 팁',
-        tips: [
-          '가능한 선명한 최종 버전의 슬라이드/족보를 사용하세요(스캔 품질 중요).',
-          '매칭이 적다면 관련성 임계값을 낮춰보세요.',
-          '큰 PDF는 자동 청크 처리됩니다. API 키가 많을수록 더 빠릅니다.',
-          '개인정보: 업로드된 PDF는 분석과 출력에만 사용되며 일시적으로 보관됩니다.'
-        ],
-        faq_h: '자주 묻는 질문',
-        faq: [
-          '<b>어떤 모델을 쓰나요?</b> Gemini 2.5 Flash만 사용합니다.',
-          '<b>Multi-API란?</b> 여러 API 키가 있으면 요청을 분산해 더 빠르고 안정적으로 처리합니다.',
-          '<b>파일 형식?</b> PDF(.pdf)만 지원합니다.',
-          '<b>결과는 어디서 보나요?</b> 처리 완료 후 Results에서 파일 목록을 확인하고 다운로드할 수 있습니다.'
-        ],
-        footer: '학생을 위한 도구 — 성적보다 성장.'
-      }
-    };
-
-    const el = id => document.getElementById(id);
-    function render(lang) {
-      const t = i18n[lang];
-      el('langBtn').textContent = t.langBtn;
-      el('t_title').textContent = t.title;
-      el('t_subtitle').textContent = t.subtitle;
-      el('t_intent_h').textContent = t.intent_h;
-      el('t_intent').innerHTML = t.intent;
-      el('t_modes_h').textContent = t.modes_h;
-      el('t_modes').innerHTML = t.modes.map(m => `<li>${m}</li>`).join('');
-      el('t_steps_h').textContent = t.steps_h;
-      el('t_steps').innerHTML = t.steps.map(s => `<li>${s}</li>`).join('');
-      el('t_outputs_h').textContent = t.outputs_h;
-      el('t_outputs').innerHTML = t.outputs;
-      el('t_tips_h').textContent = t.tips_h;
-      el('t_tips').innerHTML = t.tips.map(s => `<li>${s}</li>`).join('');
-      el('t_faq_h').textContent = t.faq_h;
-      el('t_faq').innerHTML = t.faq.map(s => `<li>${s}</li>`).join('');
-      el('t_footer').textContent = t.footer;
-      localStorage.setItem('jd_lang', lang);
-    }
-
-    const saved = localStorage.getItem('jd_lang') || 'en';
-    let current = saved === 'ko' ? 'ko' : 'en';
-    render(current);
-    el('langBtn').addEventListener('click', () => {
-      current = current === 'en' ? 'ko' : 'en';
-      render(current);
-    });
-  </script>
 </body>
 </html>

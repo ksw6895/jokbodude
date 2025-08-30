@@ -275,10 +275,16 @@ class BaseAnalyzer(ABC):
                 return text
             except Exception as e:
                 last_error = e
-                logger.error(f"Generation failed on attempt {attempt}/{attempts}: {e}")
+                msg = str(e)
+                logger.error(f"Generation failed on attempt {attempt}/{attempts}: {msg}")
+                # Do not retry locally for prompt-block cases; give control back to
+                # the multi-API layer to potentially try a different key only when
+                # appropriate (e.g., true rate limits signaled via HTTP 429).
+                if "Prompt blocked:" in msg:
+                    raise ContentGenerationError(msg)
                 if attempt < attempts:
                     continue
-                raise ContentGenerationError(str(e))
+                raise ContentGenerationError(msg)
         # Should not reach here
         if last_error:
             raise last_error
