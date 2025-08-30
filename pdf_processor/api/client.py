@@ -184,22 +184,26 @@ class GeminiAPIClient:
         for attempt in range(max_retries):
             try:
                 # Ensure correct API key context for this client before generation
-                # Guard the configure + call with a global lock to avoid cross-key races
+                # Guard BOTH the configure and the generate_content call with a global lock
+                # to avoid cross-key races. The google-generativeai SDK uses process-global
+                # configuration; another thread reconfiguring between configure() and the
+                # actual call can lead to 403s when trying to access files uploaded under
+                # a different key.
                 with self.CONFIG_LOCK:
                     self._configure_api(self.api_key)
 
-                # Enforce JSON mode and allow optional schema/limits per-call
-                gen_config: Dict[str, Any] = {}
-                # Enforce JSON MIME type only; avoid response_schema to prevent 400s
-                if response_mime_type:
-                    gen_config["response_mime_type"] = response_mime_type
-                if isinstance(max_output_tokens, int) and max_output_tokens > 0:
-                    gen_config["max_output_tokens"] = max_output_tokens
+                    # Enforce JSON mode and allow optional schema/limits per-call
+                    gen_config: Dict[str, Any] = {}
+                    # Enforce JSON MIME type only; avoid response_schema to prevent 400s
+                    if response_mime_type:
+                        gen_config["response_mime_type"] = response_mime_type
+                    if isinstance(max_output_tokens, int) and max_output_tokens > 0:
+                        gen_config["max_output_tokens"] = max_output_tokens
 
-                response = self.model.generate_content(
-                    content,
-                    generation_config=gen_config or None,
-                )
+                    response = self.model.generate_content(
+                        content,
+                        generation_config=gen_config or None,
+                    )
                 
                 # Blocked prompt handling (avoid touching response.text/parts when blocked)
                 try:
