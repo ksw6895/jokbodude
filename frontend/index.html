@@ -268,6 +268,30 @@
                 <div id="jobs_list" class="status-content" style="display:block;align-items:stretch;justify-content:flex-start;"></div>
             </div>
         </div>
+
+        <div class="app-card" style="margin-top:1rem;">
+            <div class="card-header">
+                <h2 class="card-title">Admin Tools</h2>
+                <p class="card-description">Manage temp files and artifacts (requires admin password)</p>
+            </div>
+            <div class="card-body">
+                <div class="form-section" style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
+                    <div class="form-group" style="min-width:260px;">
+                        <label for="admin_password">Admin Password</label>
+                        <input type="password" id="admin_password" placeholder="Enter admin password" style="width:100%;padding:0.5rem 1rem;border:1px solid var(--gray-300);border-radius:8px;" />
+                        <div class="form-hint" style="color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem;">Configured via environment variable ADMIN_PASSWORD</div>
+                    </div>
+                    <button id="save_admin_pw_btn" class="tab" style="height:40px;">Save</button>
+                </div>
+                <div class="form-section" style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;margin-top:0.75rem;">
+                    <label for="older_hours">Delete only files older than (hours)</label>
+                    <input id="older_hours" type="number" min="1" placeholder="e.g. 168" style="width:140px;padding:0.5rem 0.75rem;border:1px solid var(--gray-300);border-radius:8px;" />
+                    <button id="run_cleanup_btn" class="tab">Run Cleanup</button>
+                    <button id="show_stats_btn" class="tab">Show Storage Stats</button>
+                </div>
+                <pre id="admin_output" style="margin-top:1rem;background:rgba(0,0,0,0.25);padding:0.75rem;border-radius:8px;max-height:240px;overflow:auto;color:#ccc;"></pre>
+            </div>
+        </div>
     </div>
     
     <script>
@@ -804,9 +828,18 @@
         });
 
         // Admin cleanup: POST /admin/cleanup with optional older-than filter
+        function getAdminPassword() {
+            const saved = localStorage.getItem('jd_admin_password') || '';
+            const input = document.getElementById('admin_password');
+            if (input && input.value) return input.value;
+            return saved;
+        }
         async function adminCleanup(olderHours = null) {
             try {
                 const params = new URLSearchParams();
+                const pw = getAdminPassword();
+                if (!pw) { alert('Enter Admin Password in the Admin Tools section first.'); return; }
+                params.set('password', pw);
                 params.set('clear_cache', 'true');
                 params.set('clear_debug', 'true');
                 params.set('clear_temp_sessions', 'true');
@@ -814,9 +847,13 @@
                 const res = await fetch(`/admin/cleanup?${params.toString()}`, { method: 'POST' });
                 if (!res.ok) throw new Error('Cleanup request failed');
                 const data = await res.json();
-                alert('Cleanup done. Details: ' + JSON.stringify(data));
+                const out = document.getElementById('admin_output');
+                if (out) out.textContent = JSON.stringify(data, null, 2);
+                else alert('Cleanup done.');
             } catch (e) {
-                alert('Cleanup error: ' + e.message);
+                const out = document.getElementById('admin_output');
+                if (out) out.textContent = 'Cleanup error: ' + e.message;
+                else alert('Cleanup error: ' + e.message);
             }
         }
         document.getElementById('clear_cache_btn').addEventListener('click', (e) => {
@@ -824,6 +861,37 @@
             const older = prompt('Delete only files older than N hours? (Leave empty for all)', '');
             const n = older ? parseInt(older, 10) : null;
             adminCleanup(isNaN(n) ? null : n);
+        });
+
+        // Admin tools wiring
+        const adminPwSaved = localStorage.getItem('jd_admin_password') || '';
+        if (adminPwSaved) {
+            const input = document.getElementById('admin_password');
+            if (input) input.value = adminPwSaved;
+        }
+        document.getElementById('save_admin_pw_btn').addEventListener('click', () => {
+            const v = (document.getElementById('admin_password').value || '').trim();
+            if (!v) { alert('Enter a password to save.'); return; }
+            localStorage.setItem('jd_admin_password', v);
+            alert('Saved admin password locally for this browser.');
+        });
+        document.getElementById('run_cleanup_btn').addEventListener('click', () => {
+            const older = document.getElementById('older_hours').value;
+            const n = older ? parseInt(older, 10) : null;
+            adminCleanup(isNaN(n) ? null : n);
+        });
+        document.getElementById('show_stats_btn').addEventListener('click', async () => {
+            const out = document.getElementById('admin_output');
+            try {
+                const pw = getAdminPassword();
+                if (!pw) { alert('Enter Admin Password first.'); return; }
+                const res = await fetch(`/admin/storage-stats?password=${encodeURIComponent(pw)}`);
+                if (!res.ok) throw new Error('Stats request failed');
+                const data = await res.json();
+                out.textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                out.textContent = 'Stats error: ' + e.message;
+            }
         });
 
         // User ID handling

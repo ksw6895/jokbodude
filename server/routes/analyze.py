@@ -128,20 +128,27 @@ async def analyze_lesson_centric(
                 )
 
         jokbo_keys: list[str] = []
-        for file in jokbo_files:
-            saved_path = save_uploaded_file(file, Path("/tmp") / job_id / "jokbo")
-            key = storage_manager.store_file(saved_path, job_id, "jokbo")
-            jokbo_keys.append(key)
-            if not storage_manager.verify_file_available(key):
-                raise HTTPException(status_code=503, detail=f"Storage unavailable for {file.filename}; please retry later")
-
         lesson_keys: list[str] = []
-        for file in lesson_files:
-            saved_path = save_uploaded_file(file, Path("/tmp") / job_id / "lesson")
-            key = storage_manager.store_file(saved_path, job_id, "lesson")
-            lesson_keys.append(key)
-            if not storage_manager.verify_file_available(key):
-                raise HTTPException(status_code=503, detail=f"Storage unavailable for {file.filename}; please retry later")
+        # Mirror the temp-directory usage of the jokbo-centric endpoint to avoid /tmp leaks
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            for f in jokbo_files:
+                file_path = temp_path / f.filename
+                content = await f.read()
+                file_path.write_bytes(content)
+                key = storage_manager.store_file(file_path, job_id, "jokbo")
+                jokbo_keys.append(key)
+                if not storage_manager.verify_file_available(key):
+                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+
+            for f in lesson_files:
+                file_path = temp_path / f.filename
+                content = await f.read()
+                file_path.write_bytes(content)
+                key = storage_manager.store_file(file_path, job_id, "lesson")
+                lesson_keys.append(key)
+                if not storage_manager.verify_file_available(key):
+                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
 
         try:
             storage_manager.refresh_ttls(jokbo_keys + lesson_keys)

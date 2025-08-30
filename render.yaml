@@ -47,7 +47,7 @@ services:
           name: jokbodude-redis
           property: connectionString
       - key: RENDER_STORAGE_PATH
-        value: /tmp/storage
+        value: /data/storage
       - key: GEMINI_API_KEY
         sync: false # Set this in the Render dashboard (single key mode)
       - key: GEMINI_API_KEYS

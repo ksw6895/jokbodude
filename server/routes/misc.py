@@ -1,8 +1,10 @@
+import os
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import FileResponse, JSONResponse
 
 from pdf_processor.pdf.cache import clear_global_cache
@@ -11,6 +13,16 @@ from ..core import PRO_MODEL_PASSWORD, celery_app
 from ..utils import delete_path_contents
 
 router = APIRouter()
+
+
+def _require_admin(password: Optional[str]) -> None:
+    """Verify admin password from environment variable ADMIN_PASSWORD."""
+    admin_pw = os.getenv("ADMIN_PASSWORD", "")
+    if not admin_pw:
+        # If not set, disallow destructive admin ops by default
+        raise HTTPException(status_code=403, detail="Admin password not configured")
+    if (password or "") != admin_pw:
+        raise HTTPException(status_code=403, detail="Invalid admin password")
 
 
 @router.get("/")
@@ -72,12 +84,14 @@ async def health_check(request: Request):
 
 @router.post("/admin/cleanup")
 def admin_cleanup(
+    password: Optional[str] = Query(None),
     clear_cache: bool = Query(True),
     clear_debug: bool = Query(True),
     clear_temp_sessions: bool = Query(True),
     older_than_hours: int | None = Query(None, ge=1, description="Only delete files older than this many hours"),
 ):
     """Administrative cleanup: clear cache and prune debug/temp files."""
+    _require_admin(password)
     summary: dict[str, dict | bool] = {}
     if clear_cache:
         try:
@@ -96,3 +110,34 @@ def admin_cleanup(
         except Exception as e:
             summary["temp_sessions_deleted"] = {"error": str(e)}
     return summary
+
+
+@router.get("/admin/storage-stats")
+def storage_stats(password: Optional[str] = Query(None)):
+    """Return sizes and counts for results, debug, and sessions directories (admin-only)."""
+    _require_admin(password)
+    def dir_stats(base: Path) -> dict:
+        total = 0
+        files = 0
+        if base.exists():
+            for p in base.rglob("*"):
+                try:
+                    if p.is_file():
+                        files += 1
+                        total += p.stat().st_size
+                except Exception:
+                    continue
+        return {"path": str(base), "files": files, "bytes": total}
+
+    base_storage = Path(os.getenv("RENDER_STORAGE_PATH", "output"))
+    results_dir = (base_storage / "results").resolve()
+    debug_dir = Path("output/debug").resolve()
+    sessions_dir = Path("output/temp/sessions").resolve()
+    tmpdir = Path(os.getenv("TMPDIR", "")).resolve() if os.getenv("TMPDIR") else None
+    return {
+        "results": dir_stats(results_dir),
+        "debug": dir_stats(debug_dir),
+        "sessions": dir_stats(sessions_dir),
+        "tmp": dir_stats(tmpdir) if tmpdir else None,
+        "timestamp": datetime.now().isoformat(),
+    }

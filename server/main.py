@@ -20,6 +20,7 @@ async def lifespan(app: FastAPI):
     get_global_cache()
     try:
         _ret_hours = int(os.getenv("DEBUG_RETENTION_HOURS", "168"))
+        _results_ret_hours = int(os.getenv("RESULT_RETENTION_HOURS", "720"))  # default 30 days
         _prune_dirs = [Path("output/debug"), Path("output/temp/sessions")]
         now = time.time()
         for d in _prune_dirs:
@@ -38,6 +39,32 @@ async def lifespan(app: FastAPI):
                             p.rmdir()
                 except Exception:
                     continue
+        # Prune old generated results on disk
+        try:
+            sm = app.state.storage_manager
+            results_root = getattr(sm, "results_dir", Path(os.getenv("RENDER_STORAGE_PATH", "output") ) / "results")
+            if results_root.exists():
+                for p in results_root.rglob("*"):
+                    try:
+                        if not p.is_file():
+                            continue
+                        age_hours = (now - p.stat().st_mtime) / 3600.0
+                        if age_hours >= _results_ret_hours:
+                            p.unlink(missing_ok=True)
+                    except Exception:
+                        continue
+                # Remove empty subdirs
+                for d in sorted(results_root.rglob("*"), key=lambda x: len(str(x)), reverse=True):
+                    try:
+                        if d.is_dir():
+                            next(d.iterdir())
+                    except StopIteration:
+                        try:
+                            d.rmdir()
+                        except Exception:
+                            pass
+        except Exception:
+            pass
     except Exception:
         pass
     yield
@@ -64,3 +91,13 @@ def create_app() -> FastAPI:
     app.include_router(analyze.router)
     app.include_router(jobs.router)
     return app
+"""Bootstrap a safe TMPDIR so temp files avoid /tmp exhaustion.
+We set TMPDIR early (before any tempfile usage) to a path under the
+configured persistent storage if available, or under project output/.
+"""
+try:
+    _TMP_BASE = Path(os.getenv("RENDER_STORAGE_PATH", str(Path("output") / "temp" / "tmp")))
+    os.environ.setdefault("TMPDIR", str(_TMP_BASE))
+    _TMP_BASE.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
