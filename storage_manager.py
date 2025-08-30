@@ -782,6 +782,156 @@ class StorageManager:
         except Exception:
             return False
 
+    # --- Tester allowlist management ---
+    def _testers_key(self) -> str:
+        return "testers:allowed"
+
+    def add_tester(self, email: str) -> bool:
+        """Add an email to the allowed testers set (lowercased)."""
+        if self.use_local_only or not self.redis_client:
+            return False
+        try:
+            e = (email or "").strip().lower()
+            if not e:
+                return False
+            self._with_retry(self.redis_client.sadd, self._testers_key(), e)
+            # Keep allowlist around for 30 days; auto-refresh on changes
+            self._with_retry(self.redis_client.expire, self._testers_key(), 2592000)
+            return True
+        except Exception:
+            return False
+
+    def remove_tester(self, email: str) -> bool:
+        """Remove an email from the allowed testers set."""
+        if self.use_local_only or not self.redis_client:
+            return False
+        try:
+            e = (email or "").strip().lower()
+            if not e:
+                return False
+            self._with_retry(self.redis_client.srem, self._testers_key(), e)
+            return True
+        except Exception:
+            return False
+
+    def list_testers(self) -> list[str]:
+        """Return the dynamic tester allowlist from Redis (lowercased emails)."""
+        if self.use_local_only or not self.redis_client:
+            return []
+        try:
+            vals = self._with_retry(self.redis_client.smembers, self._testers_key()) or set()
+            out: list[str] = []
+            for v in vals:
+                if isinstance(v, (bytes, bytearray)):
+                    out.append(v.decode())
+                else:
+                    out.append(str(v))
+            return sorted({s.strip().lower() for s in out if s and s.strip()})
+        except Exception:
+            return []
+
+    def is_tester(self, email: str) -> bool:
+        """Check if email is in dynamic tester allowlist (best-effort)."""
+        if self.use_local_only or not self.redis_client:
+            return False
+        try:
+            e = (email or "").strip().lower()
+            if not e:
+                return False
+            return bool(self._with_retry(self.redis_client.sismember, self._testers_key(), e))
+        except Exception:
+            return False
+
+    # --- User profile registry ---
+    def _user_profile_key(self, user_id: str) -> str:
+        return f"user:{user_id}:profile"
+
+    def _users_index_key(self) -> str:
+        return "users:all"
+
+    def _email_index_key(self, email: str) -> str:
+        return f"email:{email.lower()}:users"
+
+    def save_user_profile(self, user_id: str, email: str, name: str) -> bool:
+        """Persist a minimal user profile and index it for lookup."""
+        if self.use_local_only or not self.redis_client:
+            return False
+        try:
+            from datetime import datetime
+            profile = {
+                "user_id": user_id,
+                "email": (email or "").strip(),
+                "name": (name or "").strip() or (email or "").strip(),
+                "updated_at": datetime.now().isoformat(),
+            }
+            # Preserve created_at if present
+            existing = self._with_retry(self.redis_client.get, self._user_profile_key(user_id))
+            if existing:
+                try:
+                    ex = json.loads(existing.decode() if isinstance(existing, (bytes, bytearray)) else existing)
+                    if isinstance(ex, dict) and ex.get("created_at"):
+                        profile["created_at"] = ex.get("created_at")
+                except Exception:
+                    pass
+            else:
+                profile["created_at"] = profile["updated_at"]
+            self._with_retry(self.redis_client.setex, self._user_profile_key(user_id), 2592000, json.dumps(profile))
+            # Index user id and email mapping
+            self._with_retry(self.redis_client.sadd, self._users_index_key(), user_id)
+            self._with_retry(self.redis_client.sadd, self._email_index_key(email), user_id)
+            # Expire indices lazily
+            self._with_retry(self.redis_client.expire, self._users_index_key(), 2592000)
+            self._with_retry(self.redis_client.expire, self._email_index_key(email), 2592000)
+            return True
+        except Exception:
+            return False
+
+    def get_user_profile(self, user_id: str) -> Optional[dict]:
+        if self.use_local_only or not self.redis_client:
+            return None
+        try:
+            v = self._with_retry(self.redis_client.get, self._user_profile_key(user_id))
+            if not v:
+                return None
+            try:
+                s = v.decode() if isinstance(v, (bytes, bytearray)) else v
+                return json.loads(s)
+            except Exception:
+                return None
+        except Exception:
+            return None
+
+    def list_users(self, limit: int = 200) -> list[dict]:
+        """List up to `limit` user profiles with token balances (best-effort)."""
+        if self.use_local_only or not self.redis_client:
+            return []
+        try:
+            ids = list(self._with_retry(self.redis_client.smembers, self._users_index_key()) or [])
+            out: list[dict] = []
+            for raw in ids[: max(0, int(limit))]:
+                uid = raw.decode() if isinstance(raw, (bytes, bytearray)) else str(raw)
+                prof = self.get_user_profile(uid) or {"user_id": uid}
+                prof["tokens"] = self.get_user_tokens(uid)
+                out.append(prof)
+            # Sort by updated_at desc if present
+            def _key(p):
+                return p.get("updated_at") or p.get("created_at") or ""
+            return sorted(out, key=_key, reverse=True)
+        except Exception:
+            return []
+
+    def find_user_ids_by_email(self, email: str) -> list[str]:
+        if self.use_local_only or not self.redis_client:
+            return []
+        try:
+            key = self._email_index_key(email)
+            vals = self._with_retry(self.redis_client.smembers, key) or set()
+            ids: list[str] = []
+            for v in vals:
+                ids.append(v.decode() if isinstance(v, (bytes, bytearray)) else str(v))
+            return sorted(set(ids))
+        except Exception:
+            return []
     # --- User → jobs mapping helpers ---
     def add_user_job(self, user_id: str, job_id: str) -> None:
         """Associate a job with a user id."""

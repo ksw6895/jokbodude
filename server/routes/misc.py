@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, HTTPException, Query, Request, Depends
 from fastapi.responses import FileResponse, JSONResponse
 
 from pdf_processor.pdf.cache import clear_global_cache
@@ -14,13 +14,24 @@ from ..utils import delete_path_contents
 
 router = APIRouter()
 
+def _admin_emails() -> set[str]:
+    raw = os.getenv("ADMIN_EMAILS", "").strip()
+    if not raw:
+        return set()
+    return {e.strip().lower() for e in raw.split(",") if e.strip()}
 
-def _require_admin(password: Optional[str]) -> None:
-    """Verify admin password from environment variable ADMIN_PASSWORD."""
+
+def _is_admin_email(email: Optional[str]) -> bool:
+    return (email or "").strip().lower() in _admin_emails()
+
+
+def _require_admin(password: Optional[str], user: Optional[dict]) -> None:
+    """Allow admin if user email is in ADMIN_EMAILS; otherwise require ADMIN_PASSWORD."""
+    if user and _is_admin_email(user.get("email")):
+        return
     admin_pw = os.getenv("ADMIN_PASSWORD", "")
     if not admin_pw:
-        # If not set, disallow destructive admin ops by default
-        raise HTTPException(status_code=403, detail="Admin password not configured")
+        raise HTTPException(status_code=403, detail="Admin not authorized")
     if (password or "") != admin_pw:
         raise HTTPException(status_code=403, detail="Invalid admin password")
 
@@ -84,6 +95,9 @@ async def health_check(request: Request):
     return JSONResponse(content={"status": "healthy" if all_healthy else "degraded", "checks": checks, "timestamp": datetime.now().isoformat()}, status_code=status_code)
 
 
+from .auth import get_current_user as _get_current_user  # lazy import to avoid cycles
+
+
 @router.post("/admin/cleanup")
 def admin_cleanup(
     password: Optional[str] = Query(None),
@@ -91,9 +105,10 @@ def admin_cleanup(
     clear_debug: bool = Query(True),
     clear_temp_sessions: bool = Query(True),
     older_than_hours: int | None = Query(None, ge=1, description="Only delete files older than this many hours"),
+    user=Depends(_get_current_user),
 ):
     """Administrative cleanup: clear cache and prune debug/temp files."""
-    _require_admin(password)
+    _require_admin(password, user)
     summary: dict[str, dict | bool] = {}
     if clear_cache:
         try:
@@ -115,9 +130,9 @@ def admin_cleanup(
 
 
 @router.get("/admin/storage-stats")
-def storage_stats(password: Optional[str] = Query(None)):
+def storage_stats(password: Optional[str] = Query(None), user=Depends(_get_current_user)):
     """Return sizes and counts for results, debug, and sessions directories (admin-only)."""
-    _require_admin(password)
+    _require_admin(password, user)
     def dir_stats(base: Path) -> dict:
         total = 0
         files = 0

@@ -79,7 +79,7 @@ bash scripts/smoke_batch.sh
 ## CBT(클로즈드 베타 테스트)
 CBT 기간에는 Google 로그인(OAuth)과 토큰 기반 사용량 측정을 제공합니다.
 
-- 환경 설정: `.env`에 `GOOGLE_OAUTH_CLIENT_ID`, `AUTH_SECRET_KEY`(필수), 선택 `ALLOWED_TESTERS`(허용 이메일 목록) 설정
+- 환경 설정: `.env`에 `GOOGLE_OAUTH_CLIENT_ID`, `AUTH_SECRET_KEY`(필수), 선택 `ALLOWED_TESTERS`(허용 이메일 목록), `ADMIN_EMAILS`(관리자 구글 이메일, 쉼표 구분) 설정
 - 최초 로그인 시 토큰이 지급됩니다(`CBT_TOKENS_INITIAL`, 기본 200)
 - 처리 청크당 토큰 차감: Flash=1, Pro=4(환경 변수로 조정 가능)
 - 잔액 부족 시 작업이 중단되며 진행 메시지로 안내됩니다
@@ -87,7 +87,7 @@ CBT 기간에는 Google 로그인(OAuth)과 토큰 기반 사용량 측정을 �
 
 ## 인증/토큰 개요
 - 로그인: Google Identity Services(GIS)로 로그인 후, 서버가 세션 쿠키(`session`, HttpOnly)를 발급합니다.
-- 화이트리스트: `ALLOWED_TESTERS`에 포함된 이메일만 로그인 허용(비어있으면 제한 없음).
+- 화이트리스트: `ALLOWED_TESTERS`(환경변수)와 동적 화이트리스트(관리자 UI에서 추가/삭제)의 합집합이 로그인 허용 목록입니다. `ADMIN_EMAILS`에 포함된 계정은 항상 로그인 가능하며 관리자 권한이 부여됩니다.
 - 토큰: 최초 로그인 시 `CBT_TOKENS_INITIAL`만큼 지급, 처리 청크당 차감(Flash=1, Pro=4 기본값).
 - 주요 엔드포인트:
   - `GET /auth/config` 로그인/토큰 UI 설정

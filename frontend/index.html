@@ -18,13 +18,13 @@
             </div>
             <div class="nav-links">
                 <div style="display:flex;align-items:center;gap:0.5rem;">
-                    <div id="auth_area" style="display:flex;align-items:center;gap:0.5rem;">
+                    <div id="auth_area" style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
                         <span id="user_badge" style="display:none; padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);"></span>
                         <span id="token_badge" style="display:none; padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);">Tokens: -</span>
                         <button id="login_btn" class="tab" style="padding:0.4rem 0.8rem;">Sign in</button>
                         <button id="logout_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;">Logout</button>
                     </div>
-                    <button id="clear_cache_btn" class="tab" style="padding:0.4rem 0.8rem;" title="Clear cache and debug files">Clear Cache</button>
+                    <button id="clear_cache_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;" title="Clear cache and debug files">Clear Cache</button>
                 </div>
                 <a class="nav-link" id="my_jobs_link" href="/profile" style="display:none;">My Jobs</a>
                 <a class="nav-link" href="/guide">Guide</a>
@@ -335,14 +335,34 @@
         <div class="app-card" style="margin-top:1rem;">
             <div class="card-header">
                 <h2 class="card-title">Admin Tools</h2>
-                <p class="card-description">Manage temp files and artifacts (requires admin password)</p>
+                <p class="card-description">Admin via Google account (ADMIN_EMAILS) or password fallback</p>
             </div>
             <div class="card-body">
+                <div id="admin_sections" style="display:none;">
+                    <div class="form-section" style="border-bottom:1px solid var(--border);padding-bottom:1rem;margin-bottom:1rem;">
+                        <h3 class="form-section-title">Tester Allowlist</h3>
+                        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+                            <input type="email" id="tester_email" placeholder="Add tester email" style="min-width:260px;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;"/>
+                            <button id="add_tester_btn" class="tab">Add Tester</button>
+                            <button id="reload_testers_btn" class="tab" title="Refresh list">Reload</button>
+                        </div>
+                        <div id="testers_list" class="status-content" style="display:block;align-items:stretch;justify-content:flex-start;margin-top:.75rem;padding:.75rem;min-height:auto;"></div>
+                    </div>
+                    <div class="form-section">
+                        <h3 class="form-section-title">User Tokens</h3>
+                        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+                            <input type="email" id="user_search_email" placeholder="Search by email (exact)" style="min-width:260px;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;"/>
+                            <button id="search_users_btn" class="tab">Search</button>
+                            <button id="list_users_btn" class="tab">List Recent</button>
+                        </div>
+                        <div id="users_list" class="status-content" style="display:block;align-items:stretch;justify-content:flex-start;margin-top:.75rem;padding:.75rem;min-height:auto;"></div>
+                    </div>
+                </div>
                 <div class="form-section" style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
                     <div class="form-group" style="min-width:260px;">
                         <label for="admin_password">Admin Password</label>
                         <input type="password" id="admin_password" placeholder="Enter admin password" style="width:100%;padding:0.5rem 1rem;border:1px solid var(--gray-300);border-radius:8px;" />
-                        <div class="form-hint" style="color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem;">Configured via environment variable ADMIN_PASSWORD</div>
+                        <div class="form-hint" style="color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem;">Optional if signed in as admin (ADMIN_EMAILS)</div>
                     </div>
                     <button id="save_admin_pw_btn" class="tab" style="height:40px;">Save</button>
                 </div>
@@ -912,9 +932,11 @@
         async function adminCleanup(olderHours = null) {
             try {
                 const params = new URLSearchParams();
-                const pw = getAdminPassword();
-                if (!pw) { alert('Enter Admin Password in the Admin Tools section first.'); return; }
-                params.set('password', pw);
+                if (!CURRENT_USER || !CURRENT_USER.admin) {
+                    const pw = getAdminPassword();
+                    if (!pw) { alert('Enter Admin Password in the Admin Tools section first.'); return; }
+                    params.set('password', pw);
+                }
                 params.set('clear_cache', 'true');
                 params.set('clear_debug', 'true');
                 params.set('clear_temp_sessions', 'true');
@@ -958,9 +980,13 @@
         document.getElementById('show_stats_btn').addEventListener('click', async () => {
             const out = document.getElementById('admin_output');
             try {
-                const pw = getAdminPassword();
-                if (!pw) { alert('Enter Admin Password first.'); return; }
-                const res = await fetch(`/admin/storage-stats?password=${encodeURIComponent(pw)}`);
+                let url = '/admin/storage-stats';
+                if (!CURRENT_USER || !CURRENT_USER.admin) {
+                    const pw = getAdminPassword();
+                    if (!pw) { alert('Enter Admin Password first.'); return; }
+                    url += `?password=${encodeURIComponent(pw)}`;
+                }
+                const res = await fetch(url);
                 if (!res.ok) throw new Error('Stats request failed');
                 const data = await res.json();
                 out.textContent = JSON.stringify(data, null, 2);
@@ -1004,6 +1030,8 @@
             const loginBtn = document.getElementById('login_btn');
             const logoutBtn = document.getElementById('logout_btn');
             const myJobsLink = document.getElementById('my_jobs_link');
+            const clearBtn = document.getElementById('clear_cache_btn');
+            const adminSections = document.getElementById('admin_sections');
             if (CURRENT_USER) {
                 userBadge.textContent = CURRENT_USER.email || CURRENT_USER.name || 'Signed in';
                 userBadge.style.display = 'inline-block';
@@ -1012,12 +1040,23 @@
                 loginBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-block';
                 if (myJobsLink) myJobsLink.style.display = 'inline-block';
+                if (CURRENT_USER.admin) {
+                    clearBtn.style.display = 'inline-block';
+                    adminSections.style.display = 'block';
+                    try { loadTesters(); } catch {}
+                    try { fetchUsers(null); } catch {}
+                } else {
+                    clearBtn.style.display = 'none';
+                    adminSections.style.display = 'none';
+                }
             } else {
                 userBadge.style.display = 'none';
                 tokenBadge.style.display = 'none';
                 loginBtn.style.display = 'inline-block';
                 logoutBtn.style.display = 'none';
                 if (myJobsLink) myJobsLink.style.display = 'none';
+                clearBtn.style.display = 'none';
+                adminSections.style.display = 'none';
             }
         }
         document.getElementById('login_btn').addEventListener('click', async () => {
@@ -1057,6 +1096,129 @@
             try { await fetch('/auth/logout', { method: 'POST' }); } catch {}
             await refreshAuthUI();
         });
+
+        // --- Admin: testers management ---
+        async function loadTesters() {
+            const box = document.getElementById('testers_list');
+            if (!box) return;
+            box.textContent = 'Loading...';
+            try {
+                const res = await fetch('/admin/testers');
+                if (!res.ok) throw new Error('Forbidden or failed');
+                const data = await res.json();
+                const list = data.dynamic || [];
+                if (!list.length) { box.innerHTML = '<div class="status-message">No testers yet. Add emails above.</div>'; return; }
+                let html = '';
+                for (const e of list) {
+                    const esc = encodeURIComponent(e);
+                    html += `<div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding:.4rem 0;">`+
+                            `<span>${e}</span>`+
+                            `<button class="tab" style="padding:.3rem .6rem;" onclick="removeTester('${esc}')">Remove</button>`+
+                            `</div>`;
+                }
+                box.innerHTML = html;
+            } catch (e) {
+                box.textContent = 'Failed to load testers: ' + e.message;
+            }
+        }
+        async function addTester(email) {
+            const box = document.getElementById('testers_list');
+            try {
+                const res = await fetch('/admin/testers', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams({ email }) });
+                if (!res.ok) throw new Error('Add failed');
+                await loadTesters();
+            } catch (e) { box.textContent = 'Add tester error: ' + e.message; }
+        }
+        async function removeTester(email) {
+            const box = document.getElementById('testers_list');
+            try {
+                const res = await fetch('/admin/testers/' + email, { method:'DELETE' });
+                if (!res.ok) throw new Error('Delete failed');
+                await loadTesters();
+            } catch (e) { box.textContent = 'Remove tester error: ' + e.message; }
+        }
+        window.removeTester = removeTester; // expose for onclick
+        const addTesterBtn = document.getElementById('add_tester_btn');
+        if (addTesterBtn) {
+            addTesterBtn.addEventListener('click', () => {
+                const v = (document.getElementById('tester_email').value || '').trim();
+                if (!v) { alert('Enter email'); return; }
+                addTester(v);
+            });
+        }
+        const reloadTestersBtn = document.getElementById('reload_testers_btn');
+        if (reloadTestersBtn) reloadTestersBtn.addEventListener('click', loadTesters);
+
+        // --- Admin: users list + tokens ---
+        async function renderUsers(list) {
+            const el = document.getElementById('users_list');
+            if (!el) return;
+            if (!list || !list.length) { el.innerHTML = '<div class="status-message">No users.</div>'; return; }
+            let html = '';
+            for (const u of list) {
+                const uid = u.user_id || '';
+                const email = u.email || '';
+                const name = u.name || '';
+                const tokens = (u.tokens ?? '-')
+                const escUid = encodeURIComponent(uid);
+                html += `<div style="padding:.5rem 0;border-bottom:1px solid var(--border);">`+
+                        `<div style=\"display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;\">`+
+                        `<b>${email}</b> <span style=\"color:var(--muted)\">(${uid})</span> · <span>Tokens: ${tokens}</span>`+
+                        `</div>`+
+                        `<div style=\"display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.4rem;\">`+
+                        `<input type=\"number\" id=\"set_${escUid}\" placeholder=\"Set amount\" style=\"width:140px;padding:.4rem .6rem;border:1px solid var(--border);border-radius:8px;\"/>`+
+                        `<button class=\"tab\" onclick=\"setTokens('${escUid}')\">Set</button>`+
+                        `<input type=\"number\" id=\"add_${escUid}\" placeholder=\"Add delta\" style=\"width:140px;padding:.4rem .6rem;border:1px solid var(--border);border-radius:8px;\"/>`+
+                        `<button class=\"tab\" onclick=\"addTokens('${escUid}')\">Add</button>`+
+                        `</div>`+
+                        `</div>`;
+            }
+            el.innerHTML = html;
+        }
+        async function fetchUsers(queryEmail = null) {
+            const el = document.getElementById('users_list');
+            if (!el) return;
+            el.textContent = 'Loading...';
+            try {
+                let url = '/admin/users';
+                if (queryEmail) url += `?q=${encodeURIComponent(queryEmail)}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Forbidden or failed');
+                const data = await res.json();
+                await renderUsers(data.users || []);
+            } catch (e) { el.textContent = 'Load users error: ' + e.message; }
+        }
+        async function setTokens(userId) {
+            const input = document.getElementById('set_' + userId);
+            const val = parseInt((input && input.value) || '', 10);
+            if (isNaN(val)) { alert('Enter a number'); return; }
+            try {
+                const res = await fetch(`/admin/users/${userId}/tokens?amount=${val}`, { method:'POST' });
+                if (!res.ok) throw new Error('Set failed');
+                const email = document.getElementById('user_search_email').value || '';
+                await fetchUsers(email || null);
+            } catch (e) { alert('Set tokens error: ' + e.message); }
+        }
+        async function addTokens(userId) {
+            const input = document.getElementById('add_' + userId);
+            const val = parseInt((input && input.value) || '', 10);
+            if (isNaN(val)) { alert('Enter a number'); return; }
+            try {
+                const res = await fetch(`/admin/users/${userId}/tokens/add?delta=${val}`, { method:'POST' });
+                if (!res.ok) throw new Error('Add failed');
+                const email = document.getElementById('user_search_email').value || '';
+                await fetchUsers(email || null);
+            } catch (e) { alert('Add tokens error: ' + e.message); }
+        }
+        window.setTokens = setTokens; window.addTokens = addTokens;
+        const searchUsersBtn = document.getElementById('search_users_btn');
+        if (searchUsersBtn) searchUsersBtn.addEventListener('click', () => {
+            const v = (document.getElementById('user_search_email').value || '').trim();
+            if (!v) { alert('Enter email'); return; }
+            fetchUsers(v);
+        });
+        const listUsersBtn = document.getElementById('list_users_btn');
+        if (listUsersBtn) listUsersBtn.addEventListener('click', () => fetchUsers(null));
 
         // Load My Jobs
         document.getElementById('load_jobs_btn').addEventListener('click', async () => {
