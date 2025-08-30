@@ -36,6 +36,7 @@
       <div>
         <button id="login_btn" class="tab" style="display:none;">Sign in</button>
         <button id="logout_btn" class="tab" style="display:none;">Logout</button>
+        <div id="gsi_btn" style="display:none;"></div>
       </div>
     </div>
 
@@ -59,7 +60,47 @@
       try {
         const r = await fetch('/auth/config');
         if (r.ok) AUTH_CONFIG = await r.json();
+        try { setupGoogleSignIn(); } catch {}
       } catch {}
+    }
+
+    // Google Sign-In helpers
+    async function onCredential(resp) {
+      try {
+        const r = await fetch('/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ id_token: resp.credential })
+        });
+        if (!r.ok) {
+          let msg = 'Sign-in failed';
+          try { const j = await r.json(); if (j && j.detail) msg = j.detail; } catch {}
+          throw new Error(msg);
+        }
+        location.reload();
+      } catch (e) {
+        alert('Login error: ' + (e && e.message ? e.message : e));
+      }
+    }
+    function setupGoogleSignIn() {
+      if (!AUTH_CONFIG.client_id) return;
+      try {
+        /* global google */
+        google.accounts.id.initialize({
+          client_id: AUTH_CONFIG.client_id,
+          callback: onCredential,
+          itp_support: true,
+          ux_mode: 'popup',
+          auto_select: false
+        });
+        const btn = document.getElementById('gsi_btn');
+        if (btn && btn.childElementCount === 0) {
+          google.accounts.id.renderButton(btn, {
+            type: 'standard', size: 'large', theme: 'outline',
+            text: 'signin_with', shape: 'pill', logo_alignment: 'left'
+          });
+        }
+      } catch (e) { /* ignore */ }
     }
 
     async function ensureAuth() {
@@ -146,18 +187,21 @@
     document.getElementById('logout_btn').addEventListener('click', async () => { try { await fetch('/auth/logout', { method: 'POST' }); } catch {} location.href='/' });
     document.getElementById('login_btn').addEventListener('click', async () => {
       try {
-        const cfg = AUTH_CONFIG || {}; /* global google */
-        if (cfg.client_id) {
-          google.accounts.id.initialize({
-            client_id: cfg.client_id,
-            callback: async (resp) => { try { await fetch('/auth/google', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams({ id_token: resp.credential }) }); location.reload(); } catch (e) { alert('Login error: ' + e.message); } },
-            auto_select: false
-          });
-          google.accounts.id.prompt();
-        } else {
-          alert('Sign-in not configured.');
-        }
-      } catch (e) { alert('Login error: ' + e.message); }
+        if (!AUTH_CONFIG.client_id) { alert('Sign-in not configured.'); return; }
+        setupGoogleSignIn();
+        /* global google */
+        google.accounts.id.prompt((notification) => {
+          const notShown = (typeof notification.isNotDisplayed === 'function' && notification.isNotDisplayed()) ||
+                           (typeof notification.isSkippedMoment === 'function' && notification.isSkippedMoment());
+          if (notShown) {
+            const btn = document.getElementById('gsi_btn');
+            if (btn) btn.style.display = 'inline-block';
+          }
+        });
+      } catch (e) {
+        const btn = document.getElementById('gsi_btn');
+        if (btn) btn.style.display = 'inline-block';
+      }
     });
 
     document.getElementById('refresh_jobs_btn').addEventListener('click', async () => { await boot(); });
@@ -172,4 +216,3 @@
   </script>
 </body>
 </html>
-

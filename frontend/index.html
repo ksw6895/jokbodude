@@ -23,6 +23,7 @@
                         <span id="token_badge" style="display:none; padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);">Tokens: -</span>
                         <button id="login_btn" class="tab" style="padding:0.4rem 0.8rem;">Sign in</button>
                         <button id="logout_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;">Logout</button>
+                        <div id="gsi_btn" style="display:none;"></div>
                     </div>
                     <button id="clear_cache_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;" title="Clear cache and debug files">Clear Cache</button>
                 </div>
@@ -1017,7 +1018,48 @@
                         t.style.display = 'block';
                     }
                 } catch {}
+                try { setupGoogleSignIn(); } catch {}
             } catch {}
+        }
+        // Google Sign-In helpers
+        async function onCredential(resp) {
+            try {
+                const r = await fetch('/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ id_token: resp.credential })
+                });
+                if (!r.ok) {
+                    let msg = 'Sign-in failed';
+                    try { const j = await r.json(); if (j && j.detail) msg = j.detail; } catch {}
+                    throw new Error(msg);
+                }
+                await refreshAuthUI();
+            } catch (e) {
+                alert('Login error: ' + (e && e.message ? e.message : e));
+            }
+        }
+        function setupGoogleSignIn() {
+            if (!AUTH_CONFIG.client_id) return;
+            try {
+                /* global google */
+                google.accounts.id.initialize({
+                    client_id: AUTH_CONFIG.client_id,
+                    callback: onCredential,
+                    itp_support: true,
+                    ux_mode: 'popup',
+                    auto_select: false
+                });
+                const btn = document.getElementById('gsi_btn');
+                if (btn && btn.childElementCount === 0) {
+                    google.accounts.id.renderButton(btn, {
+                        type: 'standard', size: 'large', theme: 'outline',
+                        text: 'signin_with', shape: 'pill', logo_alignment: 'left'
+                    });
+                }
+            } catch (e) {
+                // Ignore if script not ready
+            }
         }
         async function refreshAuthUI() {
             try {
@@ -1062,21 +1104,19 @@
         document.getElementById('login_btn').addEventListener('click', async () => {
             if (AUTH_CONFIG.client_id) {
                 try {
+                    setupGoogleSignIn();
                     /* global google */
-                    google.accounts.id.initialize({
-                        client_id: AUTH_CONFIG.client_id,
-                        callback: async (resp) => {
-                            try {
-                                const r = await fetch('/auth/google', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ id_token: resp.credential }) });
-                                if (!r.ok) throw new Error('Sign-in failed');
-                                await refreshAuthUI();
-                            } catch (e) { alert('Login error: ' + e.message); }
-                        },
-                        auto_select: false
+                    google.accounts.id.prompt((notification) => {
+                        const notShown = (typeof notification.isNotDisplayed === 'function' && notification.isNotDisplayed()) ||
+                                         (typeof notification.isSkippedMoment === 'function' && notification.isSkippedMoment());
+                        if (notShown) {
+                            const btn = document.getElementById('gsi_btn');
+                            if (btn) btn.style.display = 'inline-block';
+                        }
                     });
-                    google.accounts.id.prompt();
                 } catch (e) {
-                    alert('Google Sign-In unavailable. Please retry or use dev login.');
+                    const btn = document.getElementById('gsi_btn');
+                    if (btn) btn.style.display = 'inline-block';
                 }
             } else if (AUTH_CONFIG.allow_dev_login) {
                 const email = prompt('Dev login email:');
