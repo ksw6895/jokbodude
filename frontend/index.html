@@ -216,6 +216,23 @@
                                 • 대용량 PDF는 내부적으로 쪼개 처리될 수 있으며, 일부 항목이 실패해도 나머지를 먼저 결과에 포함합니다.
                                 처리 중 일부 실패가 발생하면 완료 시 요약 경고로 알려드립니다.
                             </div>
+                            <h3 class="form-section-title">Configuration</h3>
+                            <div class="form-group">
+                                <label for="partial_model">AI Model Selection</label>
+                                <div class="select-wrapper">
+                                    <select id="partial_model" name="model">
+                                        <option value="flash" selected>Gemini 2.5 Flash - Balanced</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Processing Mode</label>
+                                <div class="toggle-group" id="partial_multi_api_group" aria-label="Processing mode">
+                                    <button type="button" class="toggle-option" data-value="single">Single API</button>
+                                    <button type="button" class="toggle-option" data-value="multi">Multi-API</button>
+                                    <span class="toggle-note" id="partial_multi_api_note"></span>
+                                </div>
+                            </div>
                             <h3 class="form-section-title">File Upload</h3>
                             <div class="form-group">
                                 <label>Exam PDF Files</label>
@@ -332,6 +349,13 @@
                 JD_CONFIG.multi_api_available,
                 JD_CONFIG.api_keys_count
             );
+            initProcessingToggle(
+                'partial_multi_api_group',
+                'partial_multi_api_note',
+                'jd_multi_api_partial',
+                JD_CONFIG.multi_api_available,
+                JD_CONFIG.api_keys_count
+            );
         }
 
         function initProcessingToggle(groupId, noteId, storageKey, available, keysCount) {
@@ -376,7 +400,9 @@
         }
 
         function getMultiApiState(mode) {
-            const groupId = mode === 'jokbo-centric' ? 'jokbo_multi_api_group' : 'lesson_multi_api_group';
+            let groupId = 'jokbo_multi_api_group';
+            if (mode === 'lesson-centric') groupId = 'lesson_multi_api_group';
+            if (mode === 'partial-jokbo') groupId = 'partial_multi_api_group';
             const group = document.getElementById(groupId);
             const [singleBtn, multiBtn] = group.querySelectorAll('.toggle-option');
             return multiBtn.classList.contains('active') && !multiBtn.classList.contains('disabled');
@@ -388,7 +414,11 @@
             try {
                 const res = await fetch(`/config?password=${encodeURIComponent(pw)}`);
                 const data = await res.json();
-                const selects = [document.getElementById('jokbo_model'), document.getElementById('lesson_model')];
+                const selects = [
+                    document.getElementById('jokbo_model'),
+                    document.getElementById('lesson_model'),
+                    document.getElementById('partial_model')
+                ].filter(Boolean);
                 const hasPro = data.models && data.models.includes('pro');
                 for (const sel of selects) {
                     let opt = sel.querySelector('option[value="pro"]');
@@ -636,7 +666,7 @@
             }
 
             try {
-                const multiApi = mode === 'partial-jokbo' ? false : getMultiApiState(mode);
+                const multiApi = getMultiApiState(mode);
                 const minRel = mode === 'partial-jokbo'
                     ? 0
                     : (() => {
@@ -652,7 +682,7 @@
                     formData.append('multi_api', multiApi ? 'true' : 'false');
                     formData.append('min_relevance', String(minRel));
                 }
-                const pwdParam = (modelPassword && mode !== 'partial-jokbo') ? `&password=${encodeURIComponent(modelPassword)}` : '';
+                const pwdParam = modelPassword ? `&password=${encodeURIComponent(modelPassword)}` : '';
                 const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}&min_relevance=${minRel}${userParam}${pwdParam}`, {
                     method: 'POST',
                     body: formData
@@ -825,7 +855,8 @@
 
         document.getElementById('partialForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            await submitAnalysis('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', 'flash');
+            const model = document.getElementById('partial_model').value;
+            await submitAnalysis('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', model);
         });
 
         // Admin cleanup: POST /admin/cleanup with optional older-than filter

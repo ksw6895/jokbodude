@@ -575,8 +575,14 @@ def batch_analyze_single(
 
 
 @celery_app.task(name="tasks.generate_partial_jokbo")
-def generate_partial_jokbo(job_id: str) -> dict:
-    """Generate a partial jokbo PDF with cropped question regions + explanations."""
+def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_api: Optional[bool] = None) -> dict:
+    """Generate a partial jokbo PDF with cropped question regions + explanations.
+
+    Parameters may be provided via job metadata or directly as kwargs
+    (for consistency with other modes):
+    - model_type: "flash" or "pro"
+    - multi_api: prefer multi-API when True and multiple keys configured
+    """
 
     sm = StorageManager()
     try:
@@ -618,15 +624,32 @@ def generate_partial_jokbo(job_id: str) -> dict:
             except Exception:
                 pass
 
-            # Configure API + model
+            # Configure API + model, honoring overrides from metadata/kwargs
             configure_api()
-            model = create_model(MODEL_TYPE)
+            try:
+                meta_model = None
+                meta_multi = None
+                if isinstance(metadata, dict):
+                    meta_model = metadata.get("model")
+                    meta_multi = metadata.get("multi_api")
+            except Exception:
+                meta_model = None
+                meta_multi = None
+
+            selected_model = model_type or meta_model or MODEL_TYPE
+            model = create_model(selected_model)
             processor = PDFProcessor(model, session_id=job_id)
 
-            # Ask Gemini for question spans (prefer multi-API when multiple keys are configured)
+            # Determine multi-API strategy
             try:
                 from config import API_KEYS as _API_KEYS  # type: ignore
-                if isinstance(_API_KEYS, list) and len(_API_KEYS) > 1:
+            except Exception:
+                _API_KEYS = []
+            prefer_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else (len(_API_KEYS) > 1))
+
+            # Ask Gemini for question spans (use multi when requested and keys available)
+            try:
+                if prefer_multi and isinstance(_API_KEYS, list) and len(_API_KEYS) > 1:
                     analysis = processor.analyze_partial_jokbo_multi_api(jokbo_paths, lesson_paths, api_keys=_API_KEYS)
                 else:
                     analysis = processor.analyze_partial_jokbo(jokbo_paths, lesson_paths)

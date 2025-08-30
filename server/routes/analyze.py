@@ -310,6 +310,12 @@ async def analyze_partial_jokbo(
     request: Request,
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
+    # Align parameters with other modes for consistent UX
+    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    password: Optional[str] = Query(None),
+    multi_api: bool = Query(False),
+    # also allow form fallbacks if clients send as multipart fields
+    multi_api_form: Optional[bool] = Form(None),
     user_id: Optional[str] = Query(None),
 ):
     """Endpoint to generate a partial jokbo PDF."""
@@ -318,6 +324,10 @@ async def analyze_partial_jokbo(
     storage_manager = request.app.state.storage_manager
 
     try:
+        # Gate pro model behind password for parity with other endpoints
+        if model == "pro" and password != PRO_MODEL_PASSWORD:
+            raise HTTPException(status_code=403, detail="Invalid model password")
+
         for f in jokbo_files + lesson_files:
             if f.size and f.size > MAX_FILE_SIZE:
                 raise HTTPException(
@@ -342,12 +352,25 @@ async def analyze_partial_jokbo(
                 k = storage_manager.store_file(p, job_id, "lesson")
                 lesson_keys.append(k)
 
-        metadata = {"jokbo_keys": jokbo_keys, "lesson_keys": lesson_keys, "user_id": user_id}
+        # Resolve effective multi-API toggle (form overrides query if provided)
+        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+
+        metadata = {
+            "jokbo_keys": jokbo_keys,
+            "lesson_keys": lesson_keys,
+            "model": model,
+            "multi_api": effective_multi,
+            "user_id": user_id,
+        }
         storage_manager.store_job_metadata(job_id, metadata)
         if user_id:
             storage_manager.add_user_job(user_id, job_id)
 
-        task = celery_app.send_task("tasks.generate_partial_jokbo", args=[job_id])
+        task = celery_app.send_task(
+            "tasks.generate_partial_jokbo",
+            args=[job_id],
+            kwargs={"model_type": model, "multi_api": effective_multi},
+        )
         try:
             storage_manager.set_job_task(job_id, task.id)
         except Exception:
