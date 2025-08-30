@@ -6,37 +6,42 @@
   <title>My Jobs · JokboDude</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <link rel="stylesheet" href="/styles.css?v=3">
+  <link rel="stylesheet" href="/styles.css?v=5">
   <style>
-    .container { max-width: 980px; margin: 2rem auto; padding: 0 1rem; }
     .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
-    .muted { color: var(--gray-500); }
+    .muted { color: var(--muted); }
   </style>
   </head>
 <body>
   <nav class="navbar">
     <div class="navbar-content">
-      <div class="logo">
+      <a href="/" class="logo" style="display:flex;align-items:center;gap:.75rem;text-decoration:none;color:var(--text);font-weight:800;">
         <div class="logo-icon">🎓</div>
         <span>JokboDude</span>
-      </div>
+      </a>
       <div class="nav-links">
-        <a class="nav-link" href="/">Home</a>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div id="auth_area" style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+            <span id="user_badge" style="display:none; padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);"></span>
+            <span id="token_badge" style="display:none; padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);">Tokens: -</span>
+            <button id="login_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;">Sign in</button>
+            <button id="logout_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;">Logout</button>
+            <div id="gsi_btn" style="display:none;"></div>
+          </div>
+          <button id="clear_cache_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;" title="Clear cache and debug files">Clear Cache</button>
+        </div>
+        <a class="nav-link" id="my_jobs_link" href="/profile" style="display:none;">My Jobs</a>
         <a class="nav-link" href="/guide">Guide</a>
+        <a class="nav-link" id="feedback_link" href="#" style="display:none;">Feedback</a>
       </div>
     </div>
   </nav>
 
-  <div class="container">
+  <div class="main-container">
     <div class="header">
       <div>
         <h1 style="margin:0;">My Jobs</h1>
         <div class="muted" id="token_info" style="margin-top:.25rem;">&nbsp;</div>
-      </div>
-      <div>
-        <button id="login_btn" class="tab" style="display:none;">Sign in</button>
-        <button id="logout_btn" class="tab" style="display:none;">Logout</button>
-        <div id="gsi_btn" style="display:none;"></div>
       </div>
     </div>
 
