@@ -378,7 +378,7 @@
                     <div class="form-group" style="min-width:260px;">
                         <label for="admin_password">Admin Password</label>
                         <input type="password" id="admin_password" placeholder="Enter admin password" style="width:100%;padding:0.5rem 1rem;border:1px solid var(--gray-300);border-radius:8px;" />
-                        <div class="form-hint" style="color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem;">Optional if signed in as admin (ADMIN_EMAILS)</div>
+                        <div class="form-hint text-gray-500" style="font-size: 0.85rem; margin-top: 0.25rem;">Optional if signed in as admin (ADMIN_EMAILS)</div>
                     </div>
                     <button id="save_admin_pw_btn" class="tab" style="height:40px;">Save</button>
                 </div>
@@ -754,7 +754,7 @@
                         <div class="loader"></div>
                         <div class="status-message" style="margin-top: 1rem">
                             ${modeText} · ${model.toUpperCase()}<br>
-                            <small style="color: var(--gray-500)">Job ID: ${data.job_id}</small>
+                            <small class="text-gray-500">Job ID: ${data.job_id}</small>
                         </div>
                         <div class="progress-wrapper">
                             <div class="progress-bar">
@@ -877,7 +877,7 @@
                             <div>
                                 <div class="status-message">
                                     ✅ Analysis completed successfully!<br>
-                                    <small style="color: var(--gray-500)">Job ID: ${jobId}</small>
+                            <small class="text-gray-500">Job ID: ${jobId}</small>
                                 </div>
                                 ${warningsHtml}
                                 ${downloadLinks}

@@ -172,6 +172,33 @@ class BaseAnalyzer(ABC):
         """
         # Parse response
         result = ResponseParser.parse_response(response_text, self.get_mode())
+        # Log a compact summary including the API key tag used for this call
+        try:
+            key_tag = getattr(self.api_client, '_key_tag', lambda: 'k?:***????')()
+            mode = self.get_mode()
+            if mode == 'jokbo-centric':
+                pages = result.get('jokbo_pages') or []
+                total_q = 0
+                for p in pages:
+                    try:
+                        total_q += len((p or {}).get('questions', []) or [])
+                    except Exception:
+                        pass
+                logger.info(f"Result summary [{key_tag}]: {len(pages)} pages, {total_q} questions")
+            elif mode == 'lesson-centric':
+                slides = result.get('related_slides') or []
+                total_q = 0
+                for s in slides:
+                    try:
+                        total_q += len((s or {}).get('related_jokbo_questions', []) or [])
+                    except Exception:
+                        pass
+                logger.info(f"Result summary [{key_tag}]: {len(slides)} slides, {total_q} related questions")
+            elif mode == 'partial-jokbo':
+                qs = result.get('questions') or []
+                logger.info(f"Result summary [{key_tag}]: {len(qs)} partial questions")
+        except Exception:
+            pass
         
         # Validate structure
         if not ResponseParser.validate_response_structure(result, self.get_mode()):
@@ -243,7 +270,8 @@ class BaseAnalyzer(ABC):
         attempts = max(1, retries + 1)
         for attempt in range(1, attempts + 1):
             try:
-                response = self.api_client.generate_content(content)
+                # Prefer fast-fail per key; multi-API manager will rotate keys when needed
+                response = self.api_client.generate_content(content, max_retries=1, backoff_factor=1)
                 text = response.text
                 try:
                     parsed = ResponseParser.parse_response(text, mode)
