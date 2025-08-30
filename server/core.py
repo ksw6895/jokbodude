@@ -5,7 +5,6 @@ from celery import Celery
 # Core configuration
 STORAGE_PATH = Path(os.getenv("RENDER_STORAGE_PATH", "persistent_storage"))
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-PRO_MODEL_PASSWORD = os.getenv("PRO_MODEL_PASSWORD", "")
 
 # Celery application shared across routes
 celery_app = Celery("tasks")

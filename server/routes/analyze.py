@@ -4,10 +4,11 @@ from pathlib import Path
 from typing import Optional
 
 from celery import chord, group
-from fastapi import APIRouter, File, Form, HTTPException, Query, Request, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Query, Request, UploadFile, Depends
 
-from ..core import MAX_FILE_SIZE, PRO_MODEL_PASSWORD, celery_app
+from ..core import MAX_FILE_SIZE, celery_app
 from ..utils import save_uploaded_file
+from .auth import require_user
 
 router = APIRouter()
 
@@ -18,19 +19,16 @@ async def analyze_jokbo_centric(
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
-    password: Optional[str] = Query(None),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     multi_api_form: Optional[bool] = Form(None),
     min_relevance_form: Optional[int] = Form(None),
-    user_id: Optional[str] = Query(None),
+    user: dict = Depends(require_user),
 ):
     job_id = str(uuid.uuid4())
     storage_manager = request.app.state.storage_manager
 
     try:
-        if model == "pro" and password != PRO_MODEL_PASSWORD:
-            raise HTTPException(status_code=403, detail="Invalid model password")
 
         for f in jokbo_files + lesson_files:
             if f.size and f.size > MAX_FILE_SIZE:
@@ -80,9 +78,10 @@ async def analyze_jokbo_centric(
             "model": model,
             "multi_api": effective_multi,
             "min_relevance": effective_min_rel,
-            "user_id": user_id,
+            "user_id": user.get("sub"),
         }
         storage_manager.store_job_metadata(job_id, metadata)
+        user_id = user.get("sub")
         if user_id:
             storage_manager.add_user_job(user_id, job_id)
             # Optional preflight: require positive token balance
@@ -115,19 +114,16 @@ async def analyze_lesson_centric(
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
-    password: Optional[str] = Query(None),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     multi_api_form: Optional[bool] = Form(None),
     min_relevance_form: Optional[int] = Form(None),
-    user_id: Optional[str] = Query(None),
+    user: dict = Depends(require_user),
 ):
     job_id = str(uuid.uuid4())
     storage_manager = request.app.state.storage_manager
 
     try:
-        if model == "pro" and password != PRO_MODEL_PASSWORD:
-            raise HTTPException(status_code=403, detail="Invalid model password")
 
         for f in jokbo_files + lesson_files:
             if f.size and f.size > MAX_FILE_SIZE:
@@ -179,9 +175,10 @@ async def analyze_lesson_centric(
             "model": model,
             "multi_api": effective_multi,
             "min_relevance": effective_min_rel,
-            "user_id": user_id,
+            "user_id": user.get("sub"),
         }
         storage_manager.store_job_metadata(job_id, metadata)
+        user_id = user.get("sub")
         if user_id:
             storage_manager.add_user_job(user_id, job_id)
             try:
@@ -214,19 +211,16 @@ async def analyze_batch(
     lesson_files: list[UploadFile] = File(...),
     mode: str = Query("jokbo-centric", regex="^(jokbo-centric|lesson-centric)$"),
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
-    password: Optional[str] = Query(None),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     multi_api_form: Optional[bool] = Form(None),
     min_relevance_form: Optional[int] = Form(None),
-    user_id: Optional[str] = Query(None),
+    user: dict = Depends(require_user),
 ):
     """Submit a batch job that fans out into isolated subtasks."""
     job_id = str(uuid.uuid4())
     storage_manager = request.app.state.storage_manager
     try:
-        if model == "pro" and password != PRO_MODEL_PASSWORD:
-            raise HTTPException(status_code=403, detail="Invalid model password")
 
         for f in jokbo_files + lesson_files:
             if f.size and f.size > MAX_FILE_SIZE:
@@ -274,10 +268,11 @@ async def analyze_batch(
             "model": model,
             "multi_api": effective_multi,
             "min_relevance": effective_min_rel,
-            "user_id": user_id,
+            "user_id": user.get("sub"),
             "batch": True,
         }
         storage_manager.store_job_metadata(job_id, metadata)
+        user_id = user.get("sub")
         if user_id:
             storage_manager.add_user_job(user_id, job_id)
 
@@ -329,11 +324,10 @@ async def analyze_partial_jokbo(
     lesson_files: list[UploadFile] = File(...),
     # Align parameters with other modes for consistent UX
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
-    password: Optional[str] = Query(None),
     multi_api: bool = Query(False),
     # also allow form fallbacks if clients send as multipart fields
     multi_api_form: Optional[bool] = Form(None),
-    user_id: Optional[str] = Query(None),
+    user: dict = Depends(require_user),
 ):
     """Endpoint to generate a partial jokbo PDF."""
 
@@ -341,9 +335,6 @@ async def analyze_partial_jokbo(
     storage_manager = request.app.state.storage_manager
 
     try:
-        # Gate pro model behind password for parity with other endpoints
-        if model == "pro" and password != PRO_MODEL_PASSWORD:
-            raise HTTPException(status_code=403, detail="Invalid model password")
 
         for f in jokbo_files + lesson_files:
             if f.size and f.size > MAX_FILE_SIZE:
@@ -377,9 +368,10 @@ async def analyze_partial_jokbo(
             "lesson_keys": lesson_keys,
             "model": model,
             "multi_api": effective_multi,
-            "user_id": user_id,
+            "user_id": user.get("sub"),
         }
         storage_manager.store_job_metadata(job_id, metadata)
+        user_id = user.get("sub")
         if user_id:
             storage_manager.add_user_job(user_id, job_id)
             try:

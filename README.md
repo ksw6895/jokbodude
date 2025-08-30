@@ -44,16 +44,14 @@ uvicorn web_server:app --reload             # API (기본 8000)
 celery -A tasks:celery_app worker -Q analysis,default --loglevel=info
 ```
 
-3) 간단 테스트(curl)
+3) 간단 테스트(브라우저 권장)
+- 모든 기능은 Google 로그인(또는 dev 로그인)이 필요합니다. 브라우저 UI(`/`)에서 로그인 후 업로드/다운로드를 사용하세요.
+- curl 사용 시에도 인증 쿠키가 필요합니다(로그인 없이 호출 불가).
 ```
+# 예시: 로그인 후 동일 브라우저 세션에서 동작. Pro는 비밀번호 필요
+# curl 예시는 인증 쿠키 없이는 실패합니다.
 curl -F "jokbo_files=@jokbo/sample.pdf" -F "lesson_files=@lesson/sample.pdf" \
      "http://localhost:8000/analyze/jokbo-centric?model=flash"
-# Gemini 2.5 Pro requires ?model=pro&password=<your_secret>
-
-# 진행/결과 조회
-curl http://localhost:8000/progress/<job_id>
-curl http://localhost:8000/results/<job_id>
-curl -OJ http://localhost:8000/result/<job_id>/<filename>
 ```
 
 ### 배치 처리(한 번의 API로 여러 하위 요청)
@@ -61,11 +59,10 @@ curl -OJ http://localhost:8000/result/<job_id>/<filename>
 ```
 curl -F "jokbo_files=@jokbo/sample.pdf" -F "lesson_files=@lesson/sample.pdf" \
      "http://localhost:8000/analyze/batch?mode=jokbo-centric&model=flash"
-# Gemini 2.5 Pro: add ?model=pro&password=<your_secret>
 ```
 - mode=jokbo-centric: 각 족보 파일 × 모든 강의자료로 N개의 하위 작업 실행
 - mode=lesson-centric: 각 강의자료 × 모든 족보로 N개의 하위 작업 실행
-- 진행/결과는 동일 엔드포인트(`/progress/{job_id}`, `/results/{job_id}`) 사용
+- 진행/결과는 동일 엔드포인트(`/progress/{job_id}`, `/results/{job_id}`) 사용(로그인 및 소유자만 접근 가능)
 
 배치 스모크 테스트:
 ```
@@ -73,6 +70,8 @@ bash scripts/smoke_batch.sh
 ```
 
 프런트엔드는 `/`에서 정적 파일로 제공됩니다.
+
+중요: 임시 Job ID 기반의 비로그인 조회 기능은 제거되었습니다. 이제 결과 조회/다운로드는 로그인된 본인 작업에 한해 가능합니다.
 
 ### 환경 변수 세팅
 자세한 환경 변수 설명과 권장값은 `docs/ENV.md`를 참고하세요. CBT(로그인/토큰 과금) 설정도 포함되어 있습니다.
@@ -91,8 +90,7 @@ CBT 기간에는 Google 로그인(OAuth)과 토큰 기반 사용량 측정을 �
 2) 환경변수:
 ```
 GEMINI_API_KEY=...        # 또는 GEMINI_API_KEYS=key1,key2,...
-GEMINI_MODEL=flash        # 기본 flash (pro는 비밀번호 필요)
-PRO_MODEL_PASSWORD=...    # 선택: Pro 모델을 위한 비밀번호
+GEMINI_MODEL=flash        # 기본 flash (pro도 토큰으로 제어)
 REDIS_URL=redis://...
 RENDER_STORAGE_PATH=/data/storage  # 디스크 마운트 경로와 동일하게 설정
 ```

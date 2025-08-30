@@ -21,8 +21,6 @@ cp .env.example .env
 - `RENDER_STORAGE_PATH`
   - /tmp 대신 사용할 영속 스토리지 경로. Render/서버 환경에서 디스크 마운트 경로로 지정.
   - 예) `/data/storage`
-- `PRO_MODEL_PASSWORD`
-  - Pro 모델(`model=pro`) 사용을 비밀번호로 제한하여 비용 보호.
 - `FILE_TTL_SECONDS`
   - 업로드 파일 Redis TTL(초). 기본 86,400(24h). 길게 유지 권장.
 - `MAX_PAGES_PER_CHUNK`
@@ -66,10 +64,9 @@ cp .env.example .env
 1) 최소 `GEMINI_API_KEY`(또는 `GEMINI_API_KEYS`), `REDIS_URL` 설정
 2) CBT 진행 시 `GOOGLE_OAUTH_CLIENT_ID`, `AUTH_SECRET_KEY` 설정
 3) Render 등 배포 환경에서는 `RENDER_STORAGE_PATH`가 쓰기 가능해야 함
-4) 옵션: `PRO_MODEL_PASSWORD`로 pro 모델 접근 제어
+4) 토큰 기반 과금으로 pro 모델 접근 제어(비밀번호 제거)
 5) 서버/워커 시작:
 ```
 uvicorn web_server:app --reload
 celery -A tasks:celery_app worker -Q analysis,default --loglevel=info
 ```
-

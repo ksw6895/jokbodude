@@ -37,7 +37,7 @@ except Exception:
 
 # Check if multi-API mode is available
 USE_MULTI_API = len(API_KEYS) > 1 if 'API_KEYS' in globals() else False
-MODEL_TYPE = os.getenv("GEMINI_MODEL", "flash")  # Defaults to 'flash'; 'pro' requires password
+MODEL_TYPE = os.getenv("GEMINI_MODEL", "flash")  # Defaults to 'flash'; 'pro' uses more tokens
 
 # --- Celery Initialization with Configuration ---
 celery_app = Celery("tasks")

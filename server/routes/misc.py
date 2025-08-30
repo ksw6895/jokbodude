@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from pdf_processor.pdf.cache import clear_global_cache
 
-from ..core import PRO_MODEL_PASSWORD, celery_app
+from ..core import celery_app
 from ..utils import delete_path_contents
 
 router = APIRouter()
@@ -34,6 +34,10 @@ def read_root():
 def read_guide():
     return FileResponse("frontend/guide.html")
 
+@router.get("/profile")
+def read_profile():
+    return FileResponse("frontend/profile.html")
+
 
 @router.get("/styles.css")
 def read_stylesheet():
@@ -45,16 +49,14 @@ def read_stylesheet():
 
 
 @router.get("/config")
-def get_config(password: Optional[str] = None):
+def get_config():
     """Expose server capabilities for the frontend UI."""
     try:
         from config import API_KEYS as _API_KEYS  # type: ignore
         keys_count = len(_API_KEYS) if isinstance(_API_KEYS, list) else (1 if _API_KEYS else 0)
     except Exception:
         keys_count = 0
-    models = ["flash"]
-    if password and PRO_MODEL_PASSWORD and password == PRO_MODEL_PASSWORD:
-        models.append("pro")
+    models = ["flash", "pro"]
     return {"multi_api_available": keys_count > 1, "api_keys_count": keys_count, "models": models}
 
 

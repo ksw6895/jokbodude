@@ -1,14 +1,26 @@
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, HTTPException, Request, Response, Depends
 from fastapi.responses import FileResponse
 
 from ..core import celery_app
 from ..utils import build_content_disposition
+from .auth import require_user
 
 router = APIRouter()
 
 
+def _ensure_owner(request: Request, job_id: str, user: dict) -> None:
+    """Ensure the current session user owns the given job_id."""
+    try:
+        storage_manager = request.app.state.storage_manager
+        owner = storage_manager.get_job_owner(job_id)
+    except Exception:
+        owner = None
+    if not owner or owner != user.get("sub"):
+        raise HTTPException(status_code=403, detail="Not authorized for this job")
+
+
 @router.get("/status/{task_id}")
-def get_task_status(task_id: str):
+def get_task_status(task_id: str, user: dict = Depends(require_user)):
     task_result = celery_app.AsyncResult(task_id)
     response = {"task_id": task_id, "status": task_result.status}
     if task_result.successful():
@@ -19,7 +31,8 @@ def get_task_status(task_id: str):
 
 
 @router.get("/result/{job_id}")
-def get_result_file(request: Request, job_id: str):
+def get_result_file(request: Request, job_id: str, user: dict = Depends(require_user)):
+    _ensure_owner(request, job_id, user)
     storage_manager = request.app.state.storage_manager
     files = storage_manager.list_result_files(job_id)
     if not files:
@@ -37,7 +50,8 @@ def get_result_file(request: Request, job_id: str):
 
 
 @router.get("/results/{job_id}")
-def list_result_files(request: Request, job_id: str):
+def list_result_files(request: Request, job_id: str, user: dict = Depends(require_user)):
+    _ensure_owner(request, job_id, user)
     storage_manager = request.app.state.storage_manager
     files = storage_manager.list_result_files(job_id)
     if not files:
@@ -46,7 +60,8 @@ def list_result_files(request: Request, job_id: str):
 
 
 @router.get("/result/{job_id}/{filename}")
-def get_specific_result_file(request: Request, job_id: str, filename: str):
+def get_specific_result_file(request: Request, job_id: str, filename: str, user: dict = Depends(require_user)):
+    _ensure_owner(request, job_id, user)
     storage_manager = request.app.state.storage_manager
     path = storage_manager.get_result_path(job_id, filename)
     if path and path.exists():
@@ -61,7 +76,8 @@ def get_specific_result_file(request: Request, job_id: str, filename: str):
 
 
 @router.delete("/result/{job_id}/{filename}")
-def delete_specific_result_file(request: Request, job_id: str, filename: str):
+def delete_specific_result_file(request: Request, job_id: str, filename: str, user: dict = Depends(require_user)):
+    _ensure_owner(request, job_id, user)
     storage_manager = request.app.state.storage_manager
     removed = storage_manager.delete_result(job_id, filename)
     if not removed:
@@ -70,14 +86,16 @@ def delete_specific_result_file(request: Request, job_id: str, filename: str):
 
 
 @router.delete("/results/{job_id}")
-def delete_all_result_files(request: Request, job_id: str):
+def delete_all_result_files(request: Request, job_id: str, user: dict = Depends(require_user)):
+    _ensure_owner(request, job_id, user)
     storage_manager = request.app.state.storage_manager
     count = storage_manager.delete_all_results(job_id)
     return {"status": "deleted", "job_id": job_id, "deleted_count": int(count)}
 
 
 @router.get("/progress/{job_id}")
-def get_job_progress(request: Request, job_id: str):
+def get_job_progress(request: Request, job_id: str, user: dict = Depends(require_user)):
+    _ensure_owner(request, job_id, user)
     storage_manager = request.app.state.storage_manager
     progress_data = storage_manager.get_progress(job_id)
     if not progress_data:
@@ -86,7 +104,9 @@ def get_job_progress(request: Request, job_id: str):
 
 
 @router.get("/user/{user_id}/jobs")
-def get_user_jobs(request: Request, user_id: str, limit: int = 50):
+def get_user_jobs(request: Request, user_id: str, limit: int = 50, user: dict = Depends(require_user)):
+    if user_id != user.get("sub"):
+        raise HTTPException(status_code=403, detail="Not authorized for this user")
     storage_manager = request.app.state.storage_manager
     job_ids = storage_manager.get_user_jobs(user_id, limit=limit) or []
     results = []
@@ -114,7 +134,8 @@ def get_user_jobs(request: Request, user_id: str, limit: int = 50):
 
 
 @router.post("/jobs/{job_id}/cancel")
-def cancel_job(request: Request, job_id: str):
+def cancel_job(request: Request, job_id: str, user: dict = Depends(require_user)):
+    _ensure_owner(request, job_id, user)
     storage_manager = request.app.state.storage_manager
     task_id = storage_manager.get_job_task(job_id)
     try:
@@ -132,7 +153,8 @@ def cancel_job(request: Request, job_id: str):
 
 
 @router.delete("/jobs/{job_id}")
-def delete_job(request: Request, job_id: str, cancel_if_running: bool = True):
+def delete_job(request: Request, job_id: str, cancel_if_running: bool = True, user: dict = Depends(require_user)):
+    _ensure_owner(request, job_id, user)
     storage_manager = request.app.state.storage_manager
     if cancel_if_running:
         try:

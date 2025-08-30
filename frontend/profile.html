@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Jobs · JokboDude</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="stylesheet" href="/styles.css?v=3">
+  <style>
+    .container { max-width: 980px; margin: 2rem auto; padding: 0 1rem; }
+    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+    .muted { color: var(--gray-500); }
+  </style>
+  </head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <div class="logo">
+        <div class="logo-icon">🎓</div>
+        <span>JokboDude</span>
+      </div>
+      <div class="nav-links">
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link" href="/guide">Guide</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1 style="margin:0;">My Jobs</h1>
+        <div class="muted" id="token_info" style="margin-top:.25rem;">&nbsp;</div>
+      </div>
+      <div>
+        <button id="login_btn" class="tab" style="display:none;">Sign in</button>
+        <button id="logout_btn" class="tab" style="display:none;">Logout</button>
+      </div>
+    </div>
+
+    <div class="app-card">
+      <div class="card-header">
+        <h2 class="card-title" id="user_title">Loading…</h2>
+        <p class="card-description" id="user_desc">&nbsp;</p>
+      </div>
+      <div class="card-body">
+        <div style="display:flex; gap:.5rem; align-items:center; margin-bottom: .5rem;">
+          <button id="refresh_jobs_btn" class="tab">Refresh</button>
+        </div>
+        <div id="jobs_list" class="status-content" style="display:block;align-items:stretch;justify-content:flex-start;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let AUTH_CONFIG = { tokens_enabled: true, token_costs: { flash: 1, pro: 4 } };
+    async function fetchAuthConfig() {
+      try {
+        const r = await fetch('/auth/config');
+        if (r.ok) AUTH_CONFIG = await r.json();
+      } catch {}
+    }
+
+    async function ensureAuth() {
+      try {
+        const r = await fetch('/me');
+        const me = r.ok ? await r.json() : { authenticated: false };
+        const loginBtn = document.getElementById('login_btn');
+        const logoutBtn = document.getElementById('logout_btn');
+        if (!me.authenticated) {
+          document.getElementById('user_title').textContent = 'Sign in required';
+          document.getElementById('user_desc').textContent = 'Please sign in with Google to view your jobs.';
+          loginBtn.style.display = 'inline-block';
+          logoutBtn.style.display = 'none';
+          return null;
+        }
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-block';
+        document.getElementById('user_title').textContent = me.email || me.name || 'My Jobs';
+        const costs = (AUTH_CONFIG && AUTH_CONFIG.token_costs) || { flash: 1, pro: 4 };
+        const tokenInfo = `Balance: ${me.tokens ?? '-'} · Costs — Flash: ${costs.flash}/chunk, Pro: ${costs.pro}/chunk`;
+        document.getElementById('token_info').textContent = tokenInfo;
+        return me;
+      } catch {
+        return null;
+      }
+    }
+
+    async function loadJobs(userId) {
+      const list = document.getElementById('jobs_list');
+      list.innerHTML = '<div class="status-message">Loading...</div>';
+      try {
+        const res = await fetch(`/user/${encodeURIComponent(userId)}/jobs`);
+        const data = await res.json();
+        if (!data.jobs || data.jobs.length === 0) {
+          list.innerHTML = '<div class="status-message">No jobs found.</div>';
+          return;
+        }
+        let html = '';
+        for (const j of data.jobs) {
+          const prog = j.progress || {};
+          const pct = prog.progress || 0;
+          const chunks = (prog.total_chunks ? `${prog.completed_chunks||0}/${prog.total_chunks} chunks` : '');
+          let files = '';
+          for (const f of (j.files||[])) {
+            const ef = encodeURIComponent(f);
+            files += `<div style="display:flex;gap:0.4rem;align-items:center;">`
+                   + `<a class="download-btn" style="margin-top:0.5rem;" href="/result/${j.job_id}/${ef}" target="_blank">📥 ${f}</a>`
+                   + `<button style="margin-top:0.5rem;padding:0.4rem 0.6rem;border:1px solid var(--border);background:rgba(255,255,255,0.06);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="deleteResult('${j.job_id}','${ef}')">🗑️ Delete</button>`
+                   + `</div>`;
+          }
+          const canCancel = (j.status === 'PENDING' || j.status === 'STARTED' || j.status === 'RETRY');
+          html += `
+            <div style="padding:1rem;border-bottom:1px solid var(--border);">
+              <div class="status-message" style="text-align:left;">
+                <div><b>Job:</b> ${j.job_id} · <b>Status:</b> ${j.status}</div>
+                <div class="progress-bar" style="margin:0.4rem 0;"><div class="progress-fill" style="width:${pct}%"></div></div>
+                <div style="font-size:0.875rem;color:#666;">${pct}% ${chunks}</div>
+                <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;">${files}</div>
+                <div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+                  ${canCancel ? `<button style="padding:0.5rem 0.8rem;border:1px solid var(--border);background:rgba(255,255,255,0.06);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="cancelJob('${j.job_id}')">⏹️ Cancel</button>` : ''}
+                  <button style="padding:0.5rem 0.8rem;border:1px solid var(--border);background:rgba(255,255,255,0.06);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="deleteJob('${j.job_id}')">🧹 Delete Job</button>
+                </div>
+              </div>
+            </div>`;
+        }
+        list.innerHTML = html;
+      } catch (e) {
+        list.innerHTML = `<div class="status-message">Failed to load jobs: ${e.message}</div>`;
+      }
+    }
+
+    async function cancelJob(jobId) {
+      try { await fetch(`/jobs/${jobId}/cancel`, { method: 'POST' }); await boot(); } catch (e) { alert('Failed to cancel: ' + e.message); }
+    }
+    async function deleteJob(jobId) {
+      if (!confirm('Delete this job and its results?')) return;
+      try { await fetch(`/jobs/${jobId}`, { method: 'DELETE' }); await boot(); } catch (e) { alert('Failed to delete: ' + e.message); }
+    }
+    async function deleteResult(jobId, filename) {
+      if (!confirm('Delete this result file?')) return;
+      try { await fetch(`/result/${jobId}/${filename}`, { method: 'DELETE' }); await boot(); } catch (e) { alert('Failed to delete file: ' + e.message); }
+    }
+
+    document.getElementById('logout_btn').addEventListener('click', async () => { try { await fetch('/auth/logout', { method: 'POST' }); } catch {} location.href='/' });
+    document.getElementById('login_btn').addEventListener('click', async () => {
+      try {
+        const cfg = AUTH_CONFIG || {}; /* global google */
+        if (cfg.client_id) {
+          google.accounts.id.initialize({
+            client_id: cfg.client_id,
+            callback: async (resp) => { try { await fetch('/auth/google', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams({ id_token: resp.credential }) }); location.reload(); } catch (e) { alert('Login error: ' + e.message); } },
+            auto_select: false
+          });
+          google.accounts.id.prompt();
+        } else {
+          alert('Sign-in not configured.');
+        }
+      } catch (e) { alert('Login error: ' + e.message); }
+    });
+
+    document.getElementById('refresh_jobs_btn').addEventListener('click', async () => { await boot(); });
+
+    async function boot() {
+      await fetchAuthConfig();
+      const me = await ensureAuth();
+      if (me && me.user_id) await loadJobs(me.user_id);
+    }
+
+    boot();
+  </script>
+</body>
+</html>
+

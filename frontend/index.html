@@ -26,6 +26,7 @@
                     </div>
                     <button id="clear_cache_btn" class="tab" style="padding:0.4rem 0.8rem;" title="Clear cache and debug files">Clear Cache</button>
                 </div>
+                <a class="nav-link" id="my_jobs_link" href="/profile" style="display:none;">My Jobs</a>
                 <a class="nav-link" href="/guide">Guide</a>
                 <a class="nav-link" id="feedback_link" href="#" style="display:none;">Feedback</a>
             </div>
@@ -67,13 +68,11 @@
             <div class="card-header">
                 <h2 class="card-title">Start Your Analysis</h2>
                 <p class="card-description">Upload your PDF files and let our AI do the work</p>
+                <div id="token_info_line" style="margin-top:.25rem;color:var(--gray-500);font-size:.9rem;display:none;"></div>
             </div>
             
             <div class="card-body">
-                <div class="form-group" style="max-width:300px;margin-bottom:1rem;">
-                    <label for="model_password">Model Password</label>
-                    <input type="password" id="model_password" placeholder="Enter password to unlock Pro" style="width:100%;padding:0.5rem 1rem;border:1px solid var(--gray-300);border-radius:8px;" />
-                </div>
+                <!-- Model password removed; Pro access is token-based -->
                 <div class="tabs">
                     <button class="tab active" onclick="switchTab('jokbo')">
                         Exam-Centric Analysis
@@ -96,6 +95,7 @@
                                 <div class="select-wrapper">
                                     <select id="jokbo_model" name="model">
                                         <option value="flash" selected>Gemini 2.5 Flash - Balanced</option>
+                                        <option value="pro">Gemini 2.5 Pro - Quality</option>
                                     </select>
                                 </div>
                         </div>
@@ -158,6 +158,7 @@
                                 <div class="select-wrapper">
                                     <select id="lesson_model" name="model">
                                         <option value="flash" selected>Gemini 2.5 Flash - Balanced</option>
+                                        <option value="pro">Gemini 2.5 Pro - Quality</option>
                                     </select>
                                 </div>
                             </div>
@@ -228,6 +229,7 @@
                                 <div class="select-wrapper">
                                     <select id="partial_model" name="model">
                                         <option value="flash" selected>Gemini 2.5 Flash - Balanced</option>
+                                        <option value="pro">Gemini 2.5 Pro - Quality</option>
                                     </select>
                                 </div>
                             </div>
@@ -285,7 +287,7 @@
         <div class="app-card" style="margin-top:1rem;">
             <div class="card-header">
                 <h2 class="card-title">My Jobs</h2>
-                <p class="card-description">View your recent jobs by User ID</p>
+                <p class="card-description">View your recent jobs</p>
             </div>
             <div class="card-body">
                 <button id="load_jobs_btn" class="tab" style="margin-bottom:1rem;">Load My Jobs</button>
@@ -321,7 +323,7 @@
     <script>
         const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
         let JD_CONFIG = { multi_api_available: false, api_keys_count: 0 };
-        let modelPassword = localStorage.getItem('jd_model_password') || '';
+        // Pro model no longer requires a password; token-based
         // Staged file buckets to allow incremental adds and removals per input
         const stagedFiles = {
             'jokbo_files': [],
@@ -414,40 +416,7 @@
             return multiBtn.classList.contains('active') && !multiBtn.classList.contains('disabled');
         }
 
-        async function checkModelPassword() {
-            const pwdInput = document.getElementById('model_password');
-            const pw = (pwdInput.value || '').trim();
-            try {
-                const res = await fetch(`/config?password=${encodeURIComponent(pw)}`);
-                const data = await res.json();
-                const selects = [
-                    document.getElementById('jokbo_model'),
-                    document.getElementById('lesson_model'),
-                    document.getElementById('partial_model')
-                ].filter(Boolean);
-                const hasPro = data.models && data.models.includes('pro');
-                for (const sel of selects) {
-                    let opt = sel.querySelector('option[value="pro"]');
-                    if (hasPro) {
-                        if (!opt) {
-                            sel.insertAdjacentHTML('beforeend', '<option value="pro">Gemini 2.5 Pro - Quality</option>');
-                        }
-                    } else if (opt) {
-                        opt.remove();
-                        if (sel.value === 'pro') sel.value = 'flash';
-                    }
-                }
-                if (hasPro) {
-                    modelPassword = pw;
-                    localStorage.setItem('jd_model_password', pw);
-                } else {
-                    modelPassword = '';
-                    localStorage.removeItem('jd_model_password');
-                }
-            } catch (e) {
-                console.error('Password check failed', e);
-            }
-        }
+        // Pro model is always available; /config determines only multi-api availability
         
         // Tab switching
         function switchTab(tabName) {
@@ -513,11 +482,6 @@
         
         // Kick off config fetch and toggle init
         initConfigAndToggles();
-        document.getElementById('model_password').addEventListener('input', checkModelPassword);
-        if (modelPassword) {
-            document.getElementById('model_password').value = modelPassword;
-            checkModelPassword();
-        }
 
         // Staged file selection helpers (allow multi-step add/remove)
         function addFilesToBucket(inputId, files, errorId) {
@@ -647,6 +611,13 @@
                     return;
                 }
             }
+            // Require sign-in before uploading
+            if (!CURRENT_USER) {
+                statusBadge.className = 'status-badge error';
+                statusBadge.textContent = 'AUTH REQUIRED';
+                statusContent.innerHTML = '<div class="status-message">Please sign in with Google to use the service.</div>';
+                return;
+            }
             
             // Update status
             statusBadge.className = 'status-badge processing';
@@ -681,16 +652,12 @@
                         if (isNaN(n)) return 70;
                         return Math.max(0, Math.min(n, 110));
                     })();
-                let userId = (localStorage.getItem('jd_user_id') || '').trim();
-                try { if (CURRENT_USER && CURRENT_USER.user_id) userId = CURRENT_USER.user_id; } catch {}
-                const userParam = userId ? `&user_id=${encodeURIComponent(userId)}` : '';
                 // Send multi_api and min_relevance only for existing modes
                 if (mode !== 'partial-jokbo') {
                     formData.append('multi_api', multiApi ? 'true' : 'false');
                     formData.append('min_relevance', String(minRel));
                 }
-                const pwdParam = modelPassword ? `&password=${encodeURIComponent(modelPassword)}` : '';
-                const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}&min_relevance=${minRel}${userParam}${pwdParam}`, {
+                const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}&min_relevance=${minRel}`, {
                     method: 'POST',
                     body: formData
                 });
@@ -828,9 +795,21 @@
                         clearInterval(interval);
                         statusBadge.className = 'status-badge error';
                         statusBadge.textContent = 'FAILED';
+                        let extra = '';
+                        try {
+                          const pr = await fetch(`/progress/${jobId}`);
+                          if (pr.ok) {
+                            const pj = await pr.json();
+                            const msg = (pj && pj.message) || '';
+                            if (msg.includes('토큰 잔액 부족')) {
+                              extra = `<div style="margin-top:.5rem;color:#b44;">Insufficient tokens. Please contact admin for a top-up.</div>`;
+                            }
+                          }
+                        } catch {}
                         statusContent.innerHTML = `
                             <div class="status-message">
                                 ❌ Analysis failed: ${data.error || 'Unknown error'}
+                                ${extra}
                             </div>
                         `;
                     }
@@ -945,6 +924,16 @@
                     f.href = AUTH_CONFIG.feedback_form_url;
                     f.style.display = 'inline-block';
                 }
+                // Show token info line if enabled
+                try {
+                    const t = document.getElementById('token_info_line');
+                    if (t && AUTH_CONFIG.tokens_enabled) {
+                        const flash = (AUTH_CONFIG.token_costs && AUTH_CONFIG.token_costs.flash) || 1;
+                        const pro = (AUTH_CONFIG.token_costs && AUTH_CONFIG.token_costs.pro) || 4;
+                        t.textContent = `Token costs · Flash: ${flash}/chunk · Pro: ${pro}/chunk`;
+                        t.style.display = 'block';
+                    }
+                } catch {}
             } catch {}
         }
         async function refreshAuthUI() {
@@ -957,6 +946,7 @@
             const tokenBadge = document.getElementById('token_badge');
             const loginBtn = document.getElementById('login_btn');
             const logoutBtn = document.getElementById('logout_btn');
+            const myJobsLink = document.getElementById('my_jobs_link');
             if (CURRENT_USER) {
                 userBadge.textContent = CURRENT_USER.email || CURRENT_USER.name || 'Signed in';
                 userBadge.style.display = 'inline-block';
@@ -964,14 +954,13 @@
                 tokenBadge.style.display = 'inline-block';
                 loginBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-block';
-                if (CURRENT_USER.user_id) {
-                    try { localStorage.setItem('jd_user_id', CURRENT_USER.user_id); } catch {}
-                }
+                if (myJobsLink) myJobsLink.style.display = 'inline-block';
             } else {
                 userBadge.style.display = 'none';
                 tokenBadge.style.display = 'none';
                 loginBtn.style.display = 'inline-block';
                 logoutBtn.style.display = 'none';
+                if (myJobsLink) myJobsLink.style.display = 'none';
             }
         }
         document.getElementById('login_btn').addEventListener('click', async () => {
@@ -1014,16 +1003,14 @@
 
         // Load My Jobs
         document.getElementById('load_jobs_btn').addEventListener('click', async () => {
-            let userId = (localStorage.getItem('jd_user_id') || '').trim();
-            if (CURRENT_USER && CURRENT_USER.user_id) userId = CURRENT_USER.user_id;
             const list = document.getElementById('jobs_list');
-            if (!userId) {
-                list.innerHTML = '<div class="status-message">Please set your User ID first.</div>';
+            if (!CURRENT_USER || !CURRENT_USER.user_id) {
+                list.innerHTML = '<div class="status-message">Please sign in to view your jobs.</div>';
                 return;
             }
             list.innerHTML = '<div class="status-message">Loading...</div>';
             try {
-                const res = await fetch(`/user/${encodeURIComponent(userId)}/jobs`);
+                const res = await fetch(`/user/${encodeURIComponent(CURRENT_USER.user_id)}/jobs`);
                 const data = await res.json();
                 if (!data.jobs || data.jobs.length === 0) {
                     list.innerHTML = '<div class="status-message">No jobs found.</div>';
