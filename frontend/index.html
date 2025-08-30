@@ -4,341 +4,356 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JokboDude - Professional PDF Analysis Platform</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- Load final overrides; dark premium theme -->
+    <style>
+      :root { --bg: #0D1117; --bg-elevated: #161B22; --border-color: #30363D; --text-primary: #C9D1D9; --text-secondary: #8B949E; }
+      body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-primary); }
+      .aurora-background { position: fixed; inset: 0; pointer-events: none; z-index: -1; background: radial-gradient(circle at 10% 20%, rgba(58,122,255,.10), transparent 40%), radial-gradient(circle at 90% 80%, rgba(110,86,255,.10), transparent 40%), radial-gradient(circle at 50% 50%, rgba(30,190,255,.08), transparent 50%); filter: blur(80px); }
+      .glass-card { background: rgba(22,27,34,.70); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%); border: 1px solid var(--border-color); border-radius: 16px; }
+      .hero-title-gradient { background: linear-gradient(90deg, #E1E8EF, #A6C5E3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+      .tab.active { background-color: #58A6FF; color: #0D1117; font-weight: 600; }
+      .file-upload-area { transition: all .3s ease; }
+      .file-upload-area.dragover { border-color: #58A6FF; transform: scale(1.02); box-shadow: 0 0 20px rgba(88,166,255,.2); }
+      .tab-content { display: none; }
+      .tab-content.active { display: block; animation: fadeIn .3s ease-in-out; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform: translateY(0); } }
+      .help-panel { max-height: 0; overflow: hidden; transition: max-height .4s ease-out, padding .4s ease-out, margin .4s ease-out; padding-top:0; padding-bottom:0; margin-top:0; }
+      .help-panel.show { max-height: 220px; margin-top: .5rem; padding-top: .75rem; padding-bottom: .75rem; }
+      /* JS-targeted elements */
+      .status-badge { border: 1px solid #30363D; background: rgba(0,0,0,0.3); color: #9aa4af; padding: .25rem .6rem; border-radius: 9999px; font-weight: 800; font-size: .8rem; }
+      .status-badge.idle { color: #9aa4af; }
+      .status-badge.processing { color: #e3b341; border-color: #3a3320; }
+      .status-badge.success { color: #42c386; border-color: #204732; }
+      .status-badge.error { color: #ef6363; border-color: #4a2222; }
+      .progress-bar { border: 1px solid #30363D; background: #0b0f14; border-radius: 9999px; overflow: hidden; }
+      .progress-fill { background: linear-gradient(90deg, #dcdcdc, #8d8d8d); height: 8px; width: 0%; transition: width .3s ease; }
+      .loader { display:inline-block; width: 20px; height: 20px; border: 3px solid #1c1f24; border-top-color: #bbb; border-radius: 50%; animation: spin 1s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .file-item { display:flex; align-items:center; justify-content:space-between; gap:.75rem; flex-wrap:wrap; padding:.5rem .6rem; border:1px solid #30363D; border-radius:8px; background:#12151a; }
+      .file-remove { padding:.25rem .5rem; border:1px solid #30363D; background: rgba(255,255,255,0.06); border-radius:6px; cursor:pointer; color:#ef6363; }
+    </style>
+    <!-- legacy stylesheet left temporarily during migration; will be removed -->
     <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-content">
-            <div class="logo">
-                <div class="logo-icon">🎓</div>
-                <span>JokboDude</span>
+    <nav class="sticky top-0 z-50 bg-black/30 backdrop-blur-lg border-b border-gray-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+          <a href="/" class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center text-xl">🎓</div>
+            <span class="text-white text-2xl font-bold">JokboDude</span>
+          </a>
+          <div class="flex items-center gap-2 md:gap-4">
+            <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" id="my_jobs_link" href="/profile" style="display:none;">My Jobs</a>
+            <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" href="/guide">Guide</a>
+            <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" id="feedback_link" href="#" style="display:none;">Feedback</a>
+            <div id="auth_area" class="flex items-center gap-2">
+              <span id="user_badge" style="display:none;" class="px-3 py-1.5 border border-gray-700 rounded-full bg-gray-800/50 text-xs text-gray-300"></span>
+              <span id="token_badge" style="display:none;" class="px-3 py-1.5 border border-gray-700 rounded-full bg-gray-800/50 text-xs text-gray-300">Tokens: -</span>
+              <button id="login_btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">Sign in</button>
+              <div id="gsi_btn" style="display:none;"></div>
+              <button id="logout_btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-colors" style="display:none;">Logout</button>
+              <button id="clear_cache_btn" class="bg-gray-800 hover:bg-gray-700 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-colors" style="display:none;" title="Clear cache and debug files">Clear Cache</button>
             </div>
-            <div class="nav-links">
-                <div style="display:flex;align-items:center;gap:0.5rem;">
-                    <div id="auth_area" style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-                        <span id="user_badge" style="display:none; padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);"></span>
-                        <span id="token_badge" style="display:none; padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);">Tokens: -</span>
-                        <button id="login_btn" class="tab" style="padding:0.4rem 0.8rem;">Sign in</button>
-                        <button id="logout_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;">Logout</button>
-                        <div id="gsi_btn" style="display:none;"></div>
-                    </div>
-                    <button id="clear_cache_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;" title="Clear cache and debug files">Clear Cache</button>
-                </div>
-                <a class="nav-link" id="my_jobs_link" href="/profile" style="display:none;">My Jobs</a>
-                <a class="nav-link" href="/guide">Guide</a>
-                <a class="nav-link" id="feedback_link" href="#" style="display:none;">Feedback</a>
-            </div>
+          </div>
         </div>
+      </div>
     </nav>
-    
-    
-    <div class="main-container">
-        <div class="hero-section">
-            <h1 class="hero-title">AI-Powered PDF Analysis</h1>
-            <p class="hero-subtitle">Transform your study materials with intelligent document analysis using Google Gemini AI</p>
-            <a href="#start" class="hero-cta">Start Analysis →</a>
+    <div class="aurora-background"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center py-12 md:py-20">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight hero-title-gradient">AI-Powered PDF Analysis</h1>
+            <p class="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-gray-400">Transform your study materials with intelligent document analysis using Google Gemini AI</p>
+            <a href="#start" class="mt-8 inline-block bg-blue-600 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg shadow-blue-500/20 hover:bg-blue-500 transform hover:-translate-y-1 transition-all duration-300">Start Analysis →</a>
         </div>
-        
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🚀</div>
-                <div class="feature-title">Fast Processing</div>
-                <div class="feature-description">Analyze multiple PDFs simultaneously with our optimized processing engine</div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-16">
+            <div class="glass-card p-6 flex flex-col items-start hover:border-blue-500/50 transition-colors duration-300">
+                <div class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-2xl mb-4">🚀</div>
+                <h3 class="text-lg font-bold text-white mb-2">Fast Processing</h3>
+                <p class="text-sm text-gray-400">Analyze multiple PDFs simultaneously with our optimized processing engine</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎯</div>
-                <div class="feature-title">Smart Matching</div>
-                <div class="feature-description">AI automatically matches exam questions with relevant lecture content</div>
+            <div class="glass-card p-6 flex flex-col items-start hover:border-blue-500/50 transition-colors duration-300">
+                <div class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-2xl mb-4">🎯</div>
+                <h3 class="text-lg font-bold text-white mb-2">Smart Matching</h3>
+                <p class="text-sm text-gray-400">AI automatically matches exam questions with relevant lecture content</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">💎</div>
-                <div class="feature-title">Gemini Model</div>
-                <div class="feature-description">Uses Gemini 2.5 Flash for balanced speed and quality</div>
+            <div class="glass-card p-6 flex flex-col items-start hover:border-blue-500/50 transition-colors duration-300">
+                <div class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-2xl mb-4">💎</div>
+                <h3 class="text-lg font-bold text-white mb-2">Gemini Model</h3>
+                <p class="text-sm text-gray-400">Uses Gemini 2.5 Flash for balanced speed and quality</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <div class="feature-title">Detailed Analysis</div>
-                <div class="feature-description">Get comprehensive explanations and relevance scores for each match</div>
+            <div class="glass-card p-6 flex flex-col items-start hover:border-blue-500/50 transition-colors duration-300">
+                <div class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-2xl mb-4">📊</div>
+                <h3 class="text-lg font-bold text-white mb-2">Detailed Analysis</h3>
+                <p class="text-sm text-gray-400">Get comprehensive explanations and relevance scores for each match</p>
             </div>
         </div>
-        
-        <div class="app-card" id="start">
-            <div class="card-header">
-                <h2 class="card-title">Start Your Analysis</h2>
-                <p class="card-description">Upload your PDF files and let our AI do the work</p>
-                <div id="token_info_line" style="margin-top:.25rem;color:var(--gray-500);font-size:.9rem;display:none;"></div>
+
+        <div class="glass-card" id="start">
+            <div class="p-6 border-b border-gray-800">
+                <h2 class="text-2xl font-bold text-white">Start Your Analysis</h2>
+                <p class="mt-1 text-gray-400">Upload your PDF files and let our AI do the work</p>
+                <div id="token_info_line" class="mt-2 text-xs text-gray-500" style="display:none;"></div>
             </div>
             
-            <div class="card-body">
+            <div class="p-6">
                 <!-- Model password removed; Pro access is token-based -->
-                <div class="tabs">
-                    <button class="tab active" onclick="switchTab('jokbo')">
-                        Exam-Centric Analysis
-                    </button>
-                    <button class="tab" onclick="switchTab('lesson')">
-                        Lecture-Centric Analysis
-                    </button>
-                    <button class="tab" onclick="switchTab('partial')">
-                        Partial Jokbo
-                    </button>
+                <div class="flex p-1 bg-gray-900/70 border border-gray-700 rounded-xl mb-6">
+                    <button class="tab w-1/3 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800 active" onclick="switchTab('jokbo')">Exam-Centric Analysis</button>
+                    <button class="tab w-1/3 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('lesson')">Lecture-Centric Analysis</button>
+                    <button class="tab w-1/3 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('partial')">Partial Jokbo</button>
                 </div>
                 
-                <!-- Jokbo-Centric Tab -->
+                <!-- Jokbo-Centric Tab (Tailwind) -->
                 <div id="jokbo-tab" class="tab-content active">
-                    <form id="jokboForm">
-                        <div class="form-section">
-                            <div class="form-section-title" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;">
-                                <h3 class="form-section-title" style="margin:0;">Configuration</h3>
-                                <button type="button" class="tab" aria-expanded="false" data-help-target="jokbo_help" style="padding:.35rem .6rem;">모드 설명</button>
+                    <form id="jokboForm" class="space-y-6">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Configuration</h3>
+                                <button type="button" class="tab px-2 py-1 rounded-md text-sm" aria-expanded="false" data-help-target="jokbo_help">모드 설명</button>
                             </div>
-                            <div id="jokbo_help" class="help-panel" style="display:none;">
-                                <div class="help-title">Exam-Centric Analysis</div>
-                                <div class="help-body">
-                                    하나의 족보를 중심으로 여러 강의자료를 매칭하여, 각 문제에 가장 관련성 높은 슬라이드 근거를 첨부합니다.
-                                    관련성 점수 커트라인 이상만 포함되며, 멀티 API를 사용하면 병렬 처리로 더 빠르게 진행됩니다.
-                                </div>
+                            <div id="jokbo_help" class="help-panel">
+                                <div class="text-white font-semibold">Exam-Centric Analysis</div>
+                                <div class="text-gray-400">하나의 족보를 중심으로 여러 강의자료를 매칭하여, 각 문제에 가장 관련성 높은 슬라이드 근거를 첨부합니다. 멀티 API를 사용하면 병렬 처리로 더 빠르게 진행됩니다.</div>
                             </div>
-                            <div class="form-group">
-                                <label for="jokbo_model">AI Model Selection</label>
-                                <div class="select-wrapper">
-                                    <select id="jokbo_model" name="model">
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="jokbo_model" class="block text-sm font-medium text-gray-300 mb-1">AI Model</label>
+                                    <select id="jokbo_model" name="model" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                                         <option value="flash" selected>Gemini 2.5 Flash - Balanced</option>
                                         <option value="pro">Gemini 2.5 Pro - Quality</option>
                                     </select>
                                 </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="jokbo_min_rel">Minimum Relevance Score (0–110)</label>
-                            <div class="range-row">
-                                <input id="jokbo_min_rel" type="range" min="0" max="110" value="70" step="5"/>
-                                <output id="jokbo_min_rel_out" for="jokbo_min_rel" class="range-out">70</output>
-                            </div>
-                            <div class="form-hint" style="color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem;">Connections below this score will be excluded.</div>
-                        </div>
-                        <div class="form-group">
-                            <label>Processing Mode</label>
-                                <div class="toggle-group" id="jokbo_multi_api_group" aria-label="Processing mode">
-                                    <button type="button" class="toggle-option" data-value="single">Single API</button>
-                                    <button type="button" class="toggle-option" data-value="multi">Multi-API</button>
-                                    <span class="toggle-note" id="jokbo_multi_api_note"></span>
+                                <div>
+                                    <label for="jokbo_min_rel" class="block text-sm font-medium text-gray-300 mb-1">Min Relevance Score</label>
+                                    <div class="flex items-center gap-4">
+                                        <input id="jokbo_min_rel" type="range" min="0" max="110" value="70" step="5" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                        <output id="jokbo_min_rel_out" for="jokbo_min_rel" class="font-semibold text-blue-400 w-8 text-right">70</output>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Processing Mode</label>
+                                    <div class="flex items-center gap-2">
+                                        <div id="jokbo_multi_api_group" class="inline-flex rounded-md shadow-sm bg-gray-900 border border-gray-700">
+                                            <button type="button" data-value="single" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-l-md text-xs font-medium text-gray-400 hover:bg-gray-800">Single API</button>
+                                            <button type="button" data-value="multi" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-r-md text-xs font-medium text-gray-400 hover:bg-gray-800">Multi-API</button>
+                                        </div>
+                                        <span id="jokbo_multi_api_note" class="text-xs text-gray-500"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="form-section">
-                            <h3 class="form-section-title">File Upload</h3>
-                            <div class="form-group">
-                                <label>Exam PDF Files</label>
-                                <input type="file" id="jokbo_files" multiple accept=".pdf">
-                                <div class="file-upload-area" onclick="document.getElementById('jokbo_files').click()">
-                                    <div class="file-upload-icon">📄</div>
-                                    <div class="file-upload-text">Click to select exam PDFs</div>
-                                    <div class="file-upload-hint">Maximum 50MB per file • Multiple files supported</div>
-                                    <div class="file-list" id="jokbo_file_list"></div>
+
+                        <div>
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">File Upload</h3>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Exam PDFs</label>
+                                    <input type="file" id="jokbo_files" multiple accept=".pdf" class="hidden">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('jokbo_files').click()">
+                                        <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
+                                        <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
+                                        <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
+                                    </div>
+                                    <div class="text-red-400 text-xs mt-2" id="jokbo_error"></div>
+                                    <div class="mt-4 space-y-2" id="jokbo_file_list"></div>
                                 </div>
-                                <div class="error-message" id="jokbo_error"></div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Lecture PDF Files</label>
-                                <input type="file" id="jokbo_lesson_files" multiple accept=".pdf">
-                                <div class="file-upload-area" onclick="document.getElementById('jokbo_lesson_files').click()">
-                                    <div class="file-upload-icon">📚</div>
-                                    <div class="file-upload-text">Click to select lecture PDFs</div>
-                                    <div class="file-upload-hint">Maximum 50MB per file • Multiple files supported</div>
-                                    <div class="file-list" id="jokbo_lesson_file_list"></div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Lecture PDFs</label>
+                                    <input type="file" id="jokbo_lesson_files" multiple accept=".pdf" class="hidden">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('jokbo_lesson_files').click()">
+                                        <div class="mx-auto h-12 w-12 text-gray-500">📚</div>
+                                        <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
+                                        <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
+                                    </div>
+                                    <div class="text-red-400 text-xs mt-2" id="jokbo_lesson_error"></div>
+                                    <div class="mt-4 space-y-2" id="jokbo_lesson_file_list"></div>
                                 </div>
-                                <div class="error-message" id="jokbo_lesson_error"></div>
                             </div>
                         </div>
-                        
-                        <button type="submit" class="submit-btn">
-                            <span>Start Exam-Centric Analysis</span>
-                            <span>→</span>
-                        </button>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-500 transform hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2">Start Exam-Centric Analysis →</button>
+                        </div>
                     </form>
                 </div>
 
-                <!-- Lesson-Centric Tab -->
+                <!-- Lesson-Centric Tab (Tailwind) -->
                 <div id="lesson-tab" class="tab-content">
-                    <form id="lessonForm">
-                        <div class="form-section">
-                            <div class="form-section-title" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;">
-                                <h3 class="form-section-title" style="margin:0;">Configuration</h3>
-                                <button type="button" class="tab" aria-expanded="false" data-help-target="lesson_help" style="padding:.35rem .6rem;">모드 설명</button>
+                    <form id="lessonForm" class="space-y-6">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Configuration</h3>
+                                <button type="button" class="tab px-2 py-1 rounded-md text-sm" aria-expanded="false" data-help-target="lesson_help">모드 설명</button>
                             </div>
-                            <div id="lesson_help" class="help-panel" style="display:none;">
-                                <div class="help-title">Lecture-Centric Analysis</div>
-                                <div class="help-body">
-                                    하나의 강의자료를 기준으로 여러 족보 문제를 매칭합니다. 각 슬라이드에 가장 적합한 문제를 1개씩 첨부하며,
-                                    관련성 점수 커트라인으로 불필요한 매칭을 걸러냅니다. 멀티 API 사용 시 여러 파일을 병렬 처리합니다.
-                                </div>
+                            <div id="lesson_help" class="help-panel">
+                                <div class="text-white font-semibold">Lecture-Centric Analysis</div>
+                                <div class="text-gray-400">강의 슬라이드 각각에 대해 가장 연관 있는 문제를 매칭해 해설과 함께 구성합니다. 슬라이드 순서를 유지합니다.</div>
                             </div>
-                            <div class="form-group">
-                                <label for="lesson_model">AI Model Selection</label>
-                                <div class="select-wrapper">
-                                    <select id="lesson_model" name="model">
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="lesson_model" class="block text-sm font-medium text-gray-300 mb-1">AI Model</label>
+                                    <select id="lesson_model" name="model" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                                         <option value="flash" selected>Gemini 2.5 Flash - Balanced</option>
                                         <option value="pro">Gemini 2.5 Pro - Quality</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="lesson_min_rel">Minimum Relevance Score (0–110)</label>
-                                <div class="range-row">
-                                    <input id="lesson_min_rel" type="range" min="0" max="110" value="70" step="5"/>
-                                    <output id="lesson_min_rel_out" for="lesson_min_rel" class="range-out">70</output>
+                                <div>
+                                    <label for="lesson_min_rel" class="block text-sm font-medium text-gray-300 mb-1">Min Relevance Score</label>
+                                    <div class="flex items-center gap-4">
+                                        <input id="lesson_min_rel" type="range" min="0" max="110" value="70" step="5" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                        <output id="lesson_min_rel_out" for="lesson_min_rel" class="font-semibold text-blue-400 w-8 text-right">70</output>
+                                    </div>
                                 </div>
-                                <div class="form-hint" style="color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem;">Connections below this score will be excluded.</div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Processing Mode</label>
+                                    <div class="flex items-center gap-2">
+                                        <div id="lesson_multi_api_group" class="inline-flex rounded-md shadow-sm bg-gray-900 border border-gray-700">
+                                            <button type="button" data-value="single" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-l-md text-xs font-medium text-gray-400 hover:bg-gray-800">Single API</button>
+                                            <button type="button" data-value="multi" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-r-md text-xs font-medium text-gray-400 hover:bg-gray-800">Multi-API</button>
+                                        </div>
+                                        <span id="lesson_multi_api_note" class="text-xs text-gray-500"></span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>Processing Mode</label>
-                                <div class="toggle-group" id="lesson_multi_api_group" aria-label="Processing mode">
-                                    <button type="button" class="toggle-option" data-value="single">Single API</button>
-                                    <button type="button" class="toggle-option" data-value="multi">Multi-API</button>
-                                    <span class="toggle-note" id="lesson_multi_api_note"></span>
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">File Upload</h3>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Lecture PDFs</label>
+                                    <input type="file" id="lesson_lesson_files" multiple accept=".pdf" class="hidden">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('lesson_lesson_files').click()">
+                                        <div class="mx-auto h-12 w-12 text-gray-500">📚</div>
+                                        <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
+                                    </div>
+                                    <div class="text-red-400 text-xs mt-2" id="lesson_lesson_error"></div>
+                                    <div class="mt-4 space-y-2" id="lesson_lesson_file_list"></div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Exam PDFs</label>
+                                    <input type="file" id="lesson_jokbo_files" multiple accept=".pdf" class="hidden">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('lesson_jokbo_files').click()">
+                                        <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
+                                        <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
+                                        <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
+                                    </div>
+                                    <div class="text-red-400 text-xs mt-2" id="lesson_jokbo_error"></div>
+                                    <div class="mt-4 space-y-2" id="lesson_jokbo_file_list"></div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="form-section">
-                            <h3 class="form-section-title">File Upload</h3>
-                            <div class="form-group">
-                                <label>Lecture PDF Files</label>
-                                <input type="file" id="lesson_lesson_files" multiple accept=".pdf">
-                                <div class="file-upload-area" onclick="document.getElementById('lesson_lesson_files').click()">
-                                    <div class="file-upload-icon">📚</div>
-                                    <div class="file-upload-text">Click to select lecture PDFs</div>
-                                    <div class="file-upload-hint">Maximum 50MB per file • Multiple files supported</div>
-                                    <div class="file-list" id="lesson_lesson_file_list"></div>
-                                </div>
-                                <div class="error-message" id="lesson_lesson_error"></div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Exam PDF Files</label>
-                                <input type="file" id="lesson_jokbo_files" multiple accept=".pdf">
-                                <div class="file-upload-area" onclick="document.getElementById('lesson_jokbo_files').click()">
-                                    <div class="file-upload-icon">📄</div>
-                                    <div class="file-upload-text">Click to select exam PDFs</div>
-                                    <div class="file-upload-hint">Maximum 50MB per file • Multiple files supported</div>
-                                    <div class="file-list" id="lesson_jokbo_file_list"></div>
-                                </div>
-                                <div class="error-message" id="lesson_jokbo_error"></div>
-                            </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-500 transform hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2">Start Lecture-Centric Analysis →</button>
                         </div>
-                        
-                        <button type="submit" class="submit-btn">
-                            <span>Start Lecture-Centric Analysis</span>
-                            <span>→</span>
-                        </button>
                     </form>
                 </div>
 
-                <!-- Partial Jokbo Tab -->
+                <!-- Partial Jokbo Tab (Tailwind) -->
                 <div id="partial-tab" class="tab-content">
-                    <form id="partialForm">
-                        <div class="form-section">
-                            <div class="form-section-title" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;">
-                                <h3 class="form-section-title" style="margin:0;">Configuration</h3>
-                                <button type="button" class="tab" aria-expanded="false" data-help-target="partial_help" style="padding:.35rem .6rem;">모드 설명</button>
+                    <form id="partialForm" class="space-y-6">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Configuration</h3>
+                                <button type="button" class="tab px-2 py-1 rounded-md text-sm" aria-expanded="false" data-help-target="partial_help">모드 설명</button>
                             </div>
-                            <div id="partial_help" class="help-panel" style="display:none;">
-                                <div class="help-title">Partial Jokbo</div>
-                                <div class="help-body">
-                                    족보에서 문제 영역만 잘라 간단한 해설과 함께 묶습니다. 여러 족보/강의자료를 올리면 문제 시작 페이지를 자동 감지해
-                                    해당 페이지(+필요 시 다음 페이지)만 추출합니다. 일부 항목 실패 시에도 가능한 결과를 우선 생성하고, 완료 시 경고로 요약합니다.
-                                </div>
+                            <div id="partial_help" class="help-panel">
+                                <div class="text-white font-semibold">Partial Jokbo</div>
+                                <div class="text-gray-400">문제 영역만 추출해 간단한 해설과 함께 빠른 복습용 PDF로 만듭니다.</div>
                             </div>
-                            <h3 class="form-section-title" style="display:none;">Configuration</h3>
-                            <div class="form-group">
-                                <label for="partial_model">AI Model Selection</label>
-                                <div class="select-wrapper">
-                                    <select id="partial_model" name="model">
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="partial_model" class="block text-sm font-medium text-gray-300 mb-1">AI Model</label>
+                                    <select id="partial_model" name="model" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                                         <option value="flash" selected>Gemini 2.5 Flash - Balanced</option>
                                         <option value="pro">Gemini 2.5 Pro - Quality</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="partial_min_rel">Minimum Relevance Score (0–110)</label>
-                                <div class="range-row">
-                                    <input id="partial_min_rel" type="range" min="0" max="110" value="50" step="5"/>
-                                    <output id="partial_min_rel_out" for="partial_min_rel" class="range-out">50</output>
+                                <div>
+                                    <label for="partial_min_rel" class="block text-sm font-medium text-gray-300 mb-1">Min Relevance Score</label>
+                                    <div class="flex items-center gap-4">
+                                        <input id="partial_min_rel" type="range" min="0" max="110" value="50" step="5" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                        <output id="partial_min_rel_out" for="partial_min_rel" class="font-semibold text-blue-400 w-8 text-right">50</output>
+                                    </div>
                                 </div>
-                                <div class="form-hint" style="color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem;">현재 파셜 모드에서는 향후 적용을 위한 기준 값으로 저장됩니다.</div>
-                            </div>
-                            <div class="form-group">
-                                <label>Processing Mode</label>
-                                <div class="toggle-group" id="partial_multi_api_group" aria-label="Processing mode">
-                                    <button type="button" class="toggle-option" data-value="single">Single API</button>
-                                    <button type="button" class="toggle-option" data-value="multi">Multi-API</button>
-                                    <span class="toggle-note" id="partial_multi_api_note"></span>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Processing Mode</label>
+                                    <div class="flex items-center gap-2">
+                                        <div id="partial_multi_api_group" class="inline-flex rounded-md shadow-sm bg-gray-900 border border-gray-700">
+                                            <button type="button" data-value="single" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-l-md text-xs font-medium text-gray-400 hover:bg-gray-800">Single API</button>
+                                            <button type="button" data-value="multi" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-r-md text-xs font-medium text-gray-400 hover:bg-gray-800">Multi-API</button>
+                                        </div>
+                                        <span id="partial_multi_api_note" class="text-xs text-gray-500"></span>
+                                    </div>
                                 </div>
-                            </div>
-                            <h3 class="form-section-title">File Upload</h3>
-                            <div class="form-group">
-                                <label>Exam PDF Files</label>
-                                <input type="file" id="partial_jokbo_files" multiple accept=".pdf">
-                                <div class="file-upload-area" onclick="document.getElementById('partial_jokbo_files').click()">
-                                    <div class="file-upload-icon">📄</div>
-                                    <div class="file-upload-text">Click to select exam PDFs</div>
-                                    <div class="file-list" id="partial_jokbo_file_list"></div>
-                                </div>
-                                <div class="error-message" id="partial_jokbo_error"></div>
-                            </div>
-                            <div class="form-group">
-                                <label>Lecture PDF Files</label>
-                                <input type="file" id="partial_lesson_files" multiple accept=".pdf">
-                                <div class="file-upload-area" onclick="document.getElementById('partial_lesson_files').click()">
-                                    <div class="file-upload-icon">📚</div>
-                                    <div class="file-upload-text">Click to select lecture PDFs</div>
-                                    <div class="file-list" id="partial_lesson_file_list"></div>
-                                </div>
-                                <div class="error-message" id="partial_lesson_error"></div>
                             </div>
                         </div>
-                        <button type="submit" class="submit-btn">
-                            <span>Create Partial Jokbo</span>
-                            <span>→</span>
-                        </button>
+                        <div>
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">File Upload</h3>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Exam PDFs</label>
+                                    <input type="file" id="partial_jokbo_files" multiple accept=".pdf" class="hidden">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('partial_jokbo_files').click()">
+                                        <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
+                                        <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
+                                    </div>
+                                    <div class="text-red-400 text-xs mt-2" id="partial_jokbo_error"></div>
+                                    <div class="mt-4 space-y-2" id="partial_jokbo_file_list"></div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Lecture PDFs</label>
+                                    <input type="file" id="partial_lesson_files" multiple accept=".pdf" class="hidden">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('partial_lesson_files').click()">
+                                        <div class="mx-auto h-12 w-12 text-gray-500">📚</div>
+                                        <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
+                                    </div>
+                                    <div class="text-red-400 text-xs mt-2" id="partial_lesson_error"></div>
+                                    <div class="mt-4 space-y-2" id="partial_lesson_file_list"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-500 transform hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2">Create Partial Jokbo →</button>
+                        </div>
                     </form>
                 </div>
 
-                <div class="status-section">
-                    <div class="status-header">
-                        <h3 class="status-title">Processing Status</h3>
-                        <span class="status-badge idle" id="status-badge">IDLE</span>
+                <div class="mt-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-white">Processing Status</h3>
+                        <span id="status-badge" class="status-badge idle">IDLE</span>
                     </div>
-                    <div class="status-content" id="status-content">
-                        <div class="status-message" id="status-message">
-                            Ready to process your files
-                        </div>
+                    <div id="status-content" class="bg-gray-900/70 border border-gray-800 rounded-lg p-6 min-h-[120px] flex items-center justify-center text-center">
+                        <p id="status-message" class="text-gray-400">Ready to process your files.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="app-card" style="margin-top:1rem;">
-            <div class="card-header">
-                <h2 class="card-title">My Jobs</h2>
-                <p class="card-description">View your recent jobs</p>
+        <div class="glass-card mt-4">
+            <div class="p-6 border-b border-gray-800">
+                <h2 class="text-xl font-bold text-white">My Jobs</h2>
+                <p class="text-gray-400">View your recent jobs</p>
             </div>
-            <div class="card-body">
-                <button id="load_jobs_btn" class="tab" style="margin-bottom:1rem;">Load My Jobs</button>
-                <div id="jobs_list" class="status-content" style="display:block;align-items:stretch;justify-content:flex-start;"></div>
+            <div class="p-6">
+                <button id="load_jobs_btn" class="bg-gray-800 hover:bg-gray-700 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-colors mb-4">Load My Jobs</button>
+                <div id="jobs_list" class="bg-gray-900/70 border border-gray-800 rounded-lg p-4 min-h-[80px]" style="display:block;align-items:stretch;justify-content:flex-start;"></div>
             </div>
         </div>
 
-        <div class="app-card" style="margin-top:1rem;">
-            <div class="card-header">
-                <h2 class="card-title">Admin Tools</h2>
-                <p class="card-description">Admin via Google account (ADMIN_EMAILS) or password fallback</p>
+        <div class="glass-card mt-4">
+            <div class="p-6 border-b border-gray-800">
+                <h2 class="text-xl font-bold text-white">Admin Tools</h2>
+                <p class="text-gray-400">Admin via Google account (ADMIN_EMAILS) or password fallback</p>
             </div>
-            <div class="card-body">
+            <div class="p-6">
                 <div id="admin_sections" style="display:none;">
                     <div class="form-section" style="border-bottom:1px solid var(--border);padding-bottom:1rem;margin-bottom:1rem;">
                         <h3 class="form-section-title">Tester Allowlist</h3>

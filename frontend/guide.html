@@ -4,9 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JokboDude · Guide</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Keep legacy stylesheet during migration; can remove later -->
   <link rel="stylesheet" href="/styles.css?v=5">
   <style>
+    .aurora-background { position: fixed; inset: 0; pointer-events: none; z-index: -1; background: radial-gradient(circle at 10% 20%, rgba(58,122,255,.10), transparent 40%), radial-gradient(circle at 90% 80%, rgba(110,86,255,.10), transparent 40%), radial-gradient(circle at 50% 50%, rgba(30,190,255,.08), transparent 50%); filter: blur(80px); }
     /* Guide-specific layout on top of global styles */
     .guide-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
     .guide-layout { display: grid; grid-template-columns: 260px 1fr; gap: 1.25rem; align-items: start; }
@@ -171,23 +176,26 @@
   </script>
 </head>
 <body>
-  <nav class="navbar">
-    <div class="navbar-content">
-      <a href="/" class="logo" style="display:flex;align-items:center;gap:.75rem;text-decoration:none;color:var(--text);font-weight:800;">
-        <div class="logo-icon">🎓</div>
-        <span>JokboDude</span>
-      </a>
-      <div class="nav-links">
-        <a class="nav-link" href="/guide">Guide</a>
-        <a class="nav-link" id="my_jobs_link" href="/profile" style="display:none;">My Jobs</a>
-        <a class="nav-link" id="feedback_link" href="#" style="display:none;">Feedback</a>
-        <button id="langBtn" class="tab" style="padding:.4rem .7rem;">🇺🇸 EN</button>
+  <div class="aurora-background"></div>
+  <nav class="sticky top-0 z-50 bg-black/30 backdrop-blur-lg border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        <a href="/" class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center text-xl">🎓</div>
+          <span class="text-white text-2xl font-bold">JokboDude</span>
+        </a>
+        <div class="flex items-center gap-2 md:gap-4">
+          <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" href="/guide">Guide</a>
+          <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" id="my_jobs_link" href="/profile" style="display:none;">My Jobs</a>
+          <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" id="feedback_link" href="#" style="display:none;">Feedback</a>
+          <button id="langBtn" class="bg-gray-800 hover:bg-gray-700 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-colors">🇺🇸 EN</button>
+        </div>
       </div>
     </div>
   </nav>
 
-  <main class="guide-container">
-    <section class="hero-section">
+  <main class="guide-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <section class="text-center py-6">
       <h1 class="hero-title" id="heroTitle">User Guide</h1>
       <p class="hero-subtitle" id="heroSubtitle">Master JokboDude in minutes — features, modes, and tips</p>
       <div class="hero-note">This guide mirrors the premium dark UI used on the home page.</div>

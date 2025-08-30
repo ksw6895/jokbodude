@@ -4,40 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Jobs · JokboDude</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link rel="stylesheet" href="/styles.css?v=5">
   <style>
+    .aurora-background { position: fixed; inset: 0; pointer-events: none; z-index: -1; background: radial-gradient(circle at 10% 20%, rgba(58,122,255,.10), transparent 40%), radial-gradient(circle at 90% 80%, rgba(110,86,255,.10), transparent 40%), radial-gradient(circle at 50% 50%, rgba(30,190,255,.08), transparent 50%); filter: blur(80px); }
     .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
     .muted { color: var(--muted); }
   </style>
   </head>
 <body>
-  <nav class="navbar">
-    <div class="navbar-content">
-      <a href="/" class="logo" style="display:flex;align-items:center;gap:.75rem;text-decoration:none;color:var(--text);font-weight:800;">
-        <div class="logo-icon">🎓</div>
-        <span>JokboDude</span>
-      </a>
-      <div class="nav-links">
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-          <div id="auth_area" style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-            <span id="user_badge" style="display:none; padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);"></span>
-            <span id="token_badge" style="display:none; padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);">Tokens: -</span>
-            <button id="login_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;">Sign in</button>
-            <button id="logout_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;">Logout</button>
+  <div class="aurora-background"></div>
+  <nav class="sticky top-0 z-50 bg-black/30 backdrop-blur-lg border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        <a href="/" class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center text-xl">🎓</div>
+          <span class="text-white text-2xl font-bold">JokboDude</span>
+        </a>
+        <div class="flex items-center gap-2 md:gap-4">
+          <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" id="my_jobs_link" href="/profile" style="display:none;">My Jobs</a>
+          <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" href="/guide">Guide</a>
+          <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" id="feedback_link" href="#" style="display:none;">Feedback</a>
+          <div id="auth_area" class="flex items-center gap-2">
+            <span id="user_badge" style="display:none;" class="px-3 py-1.5 border border-gray-700 rounded-full bg-gray-800/50 text-xs text-gray-300"></span>
+            <span id="token_badge" style="display:none;" class="px-3 py-1.5 border border-gray-700 rounded-full bg-gray-800/50 text-xs text-gray-300">Tokens: -</span>
+            <button id="login_btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg" style="display:none;">Sign in</button>
             <div id="gsi_btn" style="display:none;"></div>
+            <button id="logout_btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-colors" style="display:none;">Logout</button>
+            <button id="clear_cache_btn" class="bg-gray-800 hover:bg-gray-700 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-colors" style="display:none;" title="Clear cache and debug files">Clear Cache</button>
           </div>
-          <button id="clear_cache_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;" title="Clear cache and debug files">Clear Cache</button>
         </div>
-        <a class="nav-link" id="my_jobs_link" href="/profile" style="display:none;">My Jobs</a>
-        <a class="nav-link" href="/guide">Guide</a>
-        <a class="nav-link" id="feedback_link" href="#" style="display:none;">Feedback</a>
       </div>
     </div>
   </nav>
 
-  <div class="main-container">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
     <div class="header">
       <div>
         <h1 style="margin:0;">My Jobs</h1>
@@ -45,16 +50,16 @@
       </div>
     </div>
 
-    <div class="app-card">
-      <div class="card-header">
-        <h2 class="card-title" id="user_title">Loading…</h2>
-        <p class="card-description" id="user_desc">&nbsp;</p>
+    <div class="glass-card">
+      <div class="p-6 border-b border-gray-800">
+        <h2 class="text-xl font-bold text-white" id="user_title">Loading…</h2>
+        <p class="text-gray-400" id="user_desc">&nbsp;</p>
       </div>
-      <div class="card-body">
+      <div class="p-6">
         <div style="display:flex; gap:.5rem; align-items:center; margin-bottom: .5rem;">
           <button id="refresh_jobs_btn" class="tab">Refresh</button>
         </div>
-        <div id="jobs_list" class="status-content" style="display:block;align-items:stretch;justify-content:flex-start;"></div>
+        <div id="jobs_list" class="bg-gray-900/70 border border-gray-800 rounded-lg p-4 min-h-[80px]" style="display:block;align-items:stretch;justify-content:flex-start;"></div>
       </div>
     </div>
   </div>
