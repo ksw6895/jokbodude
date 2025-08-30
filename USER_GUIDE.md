@@ -28,7 +28,7 @@
          (파일 업로드)  (저장)  (처리)   (결과)   (다운로드)
 ```
 
-## 🆕 최신 개선사항 (2025-08-11)
+## 🆕 최신 개선사항 (2025-08-30)
 
 ### 즉시 해결된 문제들
 1. ✅ **Lesson-Centric 모드 Redis 지원**: 완전히 구현됨
@@ -44,10 +44,13 @@
 6. ✅ **헬스체크 엔드포인트**: `/health`로 시스템 상태 모니터링
 
 ### 새로운 기능들
+- **Google 로그인 + 세션 쿠키**: GIS 로그인 후 서버가 HttpOnly 세션 쿠키 발급
+- **CBT 토큰 과금**: 최초 지급(`CBT_TOKENS_INITIAL`), 청크 처리당 차감(Flash=1/Pro=4 기본)
+- **My Jobs**: 최근 작업 목록/진행률/결과 파일 일괄 조회 및 삭제
+- **진행률/결과 API 갱신**: `/progress/{job_id}`, `/results/{job_id}`, `/result/{job_id}/{filename}` (인증 필요)
 - **자동 압축**: 1MB 이상 파일 자동 압축 (최대 90% 공간 절약)
-- **진행률 API**: `/progress/{job_id}` 엔드포인트
-- **향상된 UI**: 실시간 진행률 바 표시
-- **더 나은 에러 메시지**: 사용자 친화적 오류 안내
+- **향상된 UI**: 실시간 진행률 바 표시 + 토큰 배지
+- **개선된 오류 메시지**: 사용자 친화적 에러 안내
 
 ## Render 배포 단계별 가이드
 
@@ -142,28 +145,47 @@ GEMINI_MODEL=flash
 
 ### 웹 인터페이스 접속
 1. 브라우저에서 `https://jokbodude-api.onrender.com` 접속
-2. 모델 선택 (Pro/Flash/Flash-lite)
-3. PDF 파일 업로드:
+2. 상단에서 Google 계정으로 로그인 (화이트리스트 미설정 시 모두 허용)
+3. 모델 선택 (Flash/Pro, Pro는 토큰 기반 제어)
+4. PDF 파일 업로드:
    - 족보 PDF (여러 개 가능)
    - 강의자료 PDF (여러 개 가능)
-4. "Start Analysis" 클릭
-5. 처리 완료 후 결과 다운로드
+5. "Start Analysis" 클릭
+6. 처리 완료 후 My Jobs 또는 결과 버튼으로 다운로드
 
-### API 직접 사용
+### API 직접 사용 (인증 필요)
 ```bash
-# 파일 업로드 및 분석 시작
-curl -X POST "https://jokbodude-api.onrender.com/analyze/jokbo-centric?model=flash" \
-  -F "jokbo_files=@족보.pdf" \
-  -F "lesson_files=@강의자료.pdf"
+# 1) 로그인 (브라우저 UI에서 Google 로그인 권장)
+# 또는 dev-login이 활성화된 경우(로컬 전용):
+curl -X POST "http://localhost:8000/auth/dev-login" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "email=user@example.com&password=ADMIN_PASSWORD" -i
+# 위 응답의 Set-Cookie 헤더에서 session 쿠키를 추출하여 아래 요청에 사용
 
-# 상태 확인
-curl "https://jokbodude-api.onrender.com/status/{task_id}"
+# 2) 분석 시작 (세션 쿠키 필요)
+curl -X POST "http://localhost:8000/analyze/jokbo-centric?model=flash" \
+  -H "Cookie: session=YOUR_SESSION_JWT" \
+  -F "jokbo_files=@jokbo/sample.pdf" \
+  -F "lesson_files=@lesson/sample.pdf"
 
-# 결과 다운로드
-curl -O "https://jokbodude-api.onrender.com/result/{job_id}"
+# 3) 진행률 확인(세션 쿠키 필요)
+curl -H "Cookie: session=YOUR_SESSION_JWT" \
+  "http://localhost:8000/progress/{job_id}"
+
+# 4) 결과 파일 목록
+curl -H "Cookie: session=YOUR_SESSION_JWT" \
+  "http://localhost:8000/results/{job_id}"
+
+# 5) 특정 결과 파일 다운로드
+curl -H "Cookie: session=YOUR_SESSION_JWT" -OJ \
+  "http://localhost:8000/result/{job_id}/{filename}"
 ```
 
 ## 트러블슈팅
+
+### 문제 0: 로그인 422 (Unprocessable Content)
+**원인:** 서버가 폼 파라미터를 기대하는데 다른 포맷으로 보낸 경우
+**해결:** `/auth/google`와 `/auth/dev-login`은 `application/x-www-form-urlencoded`로 전송하세요
 
 ### 문제 1: "FileNotFoundError"
 **해결:** 이미 수정됨. Redis 기반 스토리지로 해결
@@ -190,6 +212,13 @@ curl -O "https://jokbodude-api.onrender.com/result/{job_id}"
 **확인:**
 1. Redis 서비스가 Running 상태인지
 2. render.yaml의 서비스 이름이 일치하는지
+
+### 문제 6: 로그인 실패 (401/403)
+**확인:**
+1. `GOOGLE_OAUTH_CLIENT_ID`가 올바른지 (GIS와 일치)
+2. `AUTH_SECRET_KEY`가 설정되어 있는지
+3. `ALLOWED_TESTERS`에 이메일이 포함되어 있는지(비어있으면 전체 허용)
+4. (로컬) `ALLOW_UNVERIFIED_GOOGLE_TOKENS=true`로 claims-only 검증 허용 여부
 
 ## 비용 관리
 

@@ -49,6 +49,8 @@ cp .env.example .env
 - 개발 편의(선택):
   - `ALLOW_DEV_LOGIN=true` + `ADMIN_PASSWORD` → `/auth/dev-login` 활성화(로컬 전용)
   - `ALLOW_UNVERIFIED_GOOGLE_TOKENS=true` → 서명 검증 없이 claim만 검증(운영 비권장)
+  - `COOKIE_SECURE` → `true`로 설정 시 HTTPS에서만 세션 쿠키 전송(기본 false)
+  - `COOKIE_SAMESITE` → 기본 `Lax` (필요 시 `None`/`Strict`로 조정)
 
 ## 병렬 처리 관련(선택)
 

@@ -48,7 +48,7 @@ celery -A tasks:celery_app worker -Q analysis,default --loglevel=info
 - 모든 기능은 Google 로그인(또는 dev 로그인)이 필요합니다. 브라우저 UI(`/`)에서 로그인 후 업로드/다운로드를 사용하세요.
 - curl 사용 시에도 인증 쿠키가 필요합니다(로그인 없이 호출 불가).
 ```
-# 예시: 로그인 후 동일 브라우저 세션에서 동작. Pro는 비밀번호 필요
+# 예시: 로그인 후 동일 브라우저 세션에서 동작합니다.
 # curl 예시는 인증 쿠키 없이는 실패합니다.
 curl -F "jokbo_files=@jokbo/sample.pdf" -F "lesson_files=@lesson/sample.pdf" \
      "http://localhost:8000/analyze/jokbo-centric?model=flash"
@@ -84,6 +84,18 @@ CBT 기간에는 Google 로그인(OAuth)과 토큰 기반 사용량 측정을 �
 - 처리 청크당 토큰 차감: Flash=1, Pro=4(환경 변수로 조정 가능)
 - 잔액 부족 시 작업이 중단되며 진행 메시지로 안내됩니다
 - 관리자 토큰 관리: `docs/CBT.md` 참조
+
+## 인증/토큰 개요
+- 로그인: Google Identity Services(GIS)로 로그인 후, 서버가 세션 쿠키(`session`, HttpOnly)를 발급합니다.
+- 화이트리스트: `ALLOWED_TESTERS`에 포함된 이메일만 로그인 허용(비어있으면 제한 없음).
+- 토큰: 최초 로그인 시 `CBT_TOKENS_INITIAL`만큼 지급, 처리 청크당 차감(Flash=1, Pro=4 기본값).
+- 주요 엔드포인트:
+  - `GET /auth/config` 로그인/토큰 UI 설정
+  - `POST /auth/google` 폼 `id_token`(x-www-form-urlencoded)
+  - `POST /auth/dev-login` 폼 `email`, `password`(옵션, 로컬/개발용)
+  - `POST /auth/logout` 로그아웃
+  - `GET /me` 현재 세션/잔액 확인
+  - 진행/결과/잡: `GET /progress/{job_id}`, `GET /results/{job_id}`, `GET /result/{job_id}/{filename}`
 
 ## Render 배포(요약)
 1) GitHub 연결 → Blueprint(Render)로 `render.yaml` 사용

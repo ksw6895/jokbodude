@@ -9,13 +9,14 @@ CBT (Closed Beta Test) setup
 
 Endpoints
 
-- POST `/auth/google` with `id_token` from Google Identity Services.
-- POST `/auth/dev-login` with `email` + `password` (admin) if enabled.
+- POST `/auth/google` with form `id_token` (Content-Type: application/x-www-form-urlencoded) from Google Identity Services.
+- POST `/auth/dev-login` with form `email` + `password` (admin) if enabled.
 - POST `/auth/logout` clears the session.
 - GET `/me` returns `authenticated`, `user_id`, `email`, and `tokens`.
+- GET `/auth/config` returns UI config for sign-in and token costs.
 - Admin tokens:
-  - POST `/admin/users/{user_id}/tokens?password=...` body: `amount` to set balance.
-  - POST `/admin/users/{user_id}/tokens/add?password=...` body: `delta` to add/subtract.
+  - POST `/admin/users/{user_id}/tokens` with query `password` and `amount` to set balance.
+  - POST `/admin/users/{user_id}/tokens/add` with query `password` and `delta` to add/subtract.
 
 Token consumption
 
@@ -29,3 +30,4 @@ Frontend
 
 - Navbar shows Google Sign-In, current email, and token balance.
 - If Google is not configured, dev login is available when enabled.
+- Result access requires authentication; My Jobs view lists recent jobs and files.
