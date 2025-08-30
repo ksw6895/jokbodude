@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, Form
 
 from ..utils import delete_path_contents
 from ..core import celery_app
@@ -83,7 +83,7 @@ def auth_config():
 
 
 @router.post("/auth/google")
-def auth_google(request: Request, response: Response, id_token: str):
+def auth_google(request: Request, response: Response, id_token: str = Form(...)):
     payload = validate_google_id_token(id_token)
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid Google token")
@@ -108,7 +108,12 @@ def auth_google(request: Request, response: Response, id_token: str):
 
 
 @router.post("/auth/dev-login")
-def dev_login(request: Request, response: Response, email: str, password: Optional[str] = None):
+def dev_login(
+    request: Request,
+    response: Response,
+    email: str = Form(...),
+    password: Optional[str] = Form(None),
+):
     if os.getenv("ALLOW_DEV_LOGIN", "false").lower() not in ("1", "true", "yes"):
         raise HTTPException(status_code=403, detail="Dev login disabled")
     admin_pw = os.getenv("ADMIN_PASSWORD", "")
