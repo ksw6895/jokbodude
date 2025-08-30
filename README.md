@@ -82,7 +82,7 @@ GEMINI_API_KEY=...        # 또는 GEMINI_API_KEYS=key1,key2,...
 GEMINI_MODEL=flash        # 기본 flash (pro는 비밀번호 필요)
 PRO_MODEL_PASSWORD=...    # 선택: Pro 모델을 위한 비밀번호
 REDIS_URL=redis://...
-RENDER_STORAGE_PATH=/var/data  # 쓰기 가능 경로
+RENDER_STORAGE_PATH=/data/storage  # 디스크 마운트 경로와 동일하게 설정
 ```
 
 ## 동작/품질 메모
@@ -94,6 +94,8 @@ RENDER_STORAGE_PATH=/var/data  # 쓰기 가능 경로
 - 개인 PDF/비밀키 커밋 금지. `.env`로 관리
 - 멀티 키 사용 시 처리량/안정성 향상(`GEMINI_API_KEYS`)
 - Render에서는 `REDIS_URL`과 쓰기 가능한 `RENDER_STORAGE_PATH`를 설정하세요
+  - Blueprint(render.yaml) 기본값: 디스크를 `/data/storage`에 마운트하고, env도 동일 경로로 설정
+  - 디스크를 `/var/data`에 마운트하고 싶다면 mountPath와 env 둘 다 `/var/data`로 맞추세요
 - 병렬 처리 관련 환경 변수:
   - `CELERY_CONCURRENCY`: 워커 프로세스 동시성(예: 2~4)
   - `GEMINI_PER_KEY_CONCURRENCY`: 같은 API 키에서 동시 처리 허용 수(기본 1)

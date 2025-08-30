@@ -15,16 +15,25 @@ from celery import group, chord
 # --- Configuration ---
 # Ensure temporary files use a persistent or project path instead of /tmp
 # Prefer RENDER_STORAGE_PATH when provided (e.g., on Render disks), else project output
-_TMP_BASE = Path(os.getenv("RENDER_STORAGE_PATH", str(Path("output") / "temp" / "tmp")))
-os.environ.setdefault("TMPDIR", str(_TMP_BASE))
+try:
+    _TMP_BASE = Path(os.getenv("RENDER_STORAGE_PATH", str(Path("output") / "temp" / "tmp")))
+    os.environ.setdefault("TMPDIR", str(_TMP_BASE))
 
-# Use a storage path colocated with TMPDIR for any ad-hoc persistence needs
-STORAGE_PATH = Path(os.getenv("RENDER_STORAGE_PATH", str(Path("output") / "storage")))
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    # Use a storage path colocated with TMPDIR for any ad-hoc persistence needs
+    STORAGE_PATH = Path(os.getenv("RENDER_STORAGE_PATH", str(Path("output") / "storage")))
+    REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
-# Ensure storage path exists
-STORAGE_PATH.mkdir(parents=True, exist_ok=True)
-_TMP_BASE.mkdir(parents=True, exist_ok=True)
+    # Ensure storage paths exist
+    STORAGE_PATH.mkdir(parents=True, exist_ok=True)
+    _TMP_BASE.mkdir(parents=True, exist_ok=True)
+except Exception:
+    # Fallback to project-local directories if absolute paths are not writable
+    _TMP_BASE = Path("output") / "temp" / "tmp"
+    os.environ["TMPDIR"] = str(_TMP_BASE)
+    STORAGE_PATH = Path("output") / "storage"
+    REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    STORAGE_PATH.mkdir(parents=True, exist_ok=True)
+    _TMP_BASE.mkdir(parents=True, exist_ok=True)
 
 # Check if multi-API mode is available
 USE_MULTI_API = len(API_KEYS) > 1 if 'API_KEYS' in globals() else False

@@ -24,12 +24,30 @@ class StorageManager:
         self.redis_url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379/0")
         self.use_local_only = False
         # Local storage for intermediate files (backups/fallbacks)
-        self.local_storage = Path(os.getenv("RENDER_STORAGE_PATH", "/tmp/storage"))
-        self.local_storage.mkdir(parents=True, exist_ok=True)
+        try:
+            self.local_storage = Path(os.getenv("RENDER_STORAGE_PATH", "/tmp/storage"))
+            self.local_storage.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            # If an absolute path is not writable (e.g., /var/data without a mounted disk), fallback safely
+            self.local_storage = Path("output") / "storage"
+            try:
+                self.local_storage.mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
         # Dedicated results directory (persistent when RENDER_STORAGE_PATH is set, or ./output by default)
-        results_root = Path(os.getenv("RENDER_STORAGE_PATH", "output"))
-        self.results_dir = results_root / "results"
-        self.results_dir.mkdir(parents=True, exist_ok=True)
+        _results_env = os.getenv("RENDER_STORAGE_PATH")
+        if _results_env:
+            try:
+                results_root = Path(_results_env)
+                (results_root / "results").mkdir(parents=True, exist_ok=True)
+                self.results_dir = results_root / "results"
+            except Exception:
+                # Fallback to project output if creation fails
+                self.results_dir = Path("output") / "results"
+                self.results_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            self.results_dir = Path("output") / "results"
+            self.results_dir.mkdir(parents=True, exist_ok=True)
         # Configurable TTL for file keys (seconds). Default 24h.
         try:
             self.file_ttl_seconds = max(60, int(os.getenv("FILE_TTL_SECONDS", "86400")))
