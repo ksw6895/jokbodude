@@ -85,6 +85,15 @@ async def analyze_jokbo_centric(
         storage_manager.store_job_metadata(job_id, metadata)
         if user_id:
             storage_manager.add_user_job(user_id, job_id)
+            # Optional preflight: require positive token balance
+            try:
+                bal = storage_manager.get_user_tokens(user_id)
+                if bal is not None and bal <= 0:
+                    raise HTTPException(status_code=402, detail="Insufficient tokens for analysis. Contact admin.")
+            except HTTPException:
+                raise
+            except Exception:
+                pass
 
         task = celery_app.send_task(
             "tasks.run_jokbo_analysis",
@@ -175,6 +184,14 @@ async def analyze_lesson_centric(
         storage_manager.store_job_metadata(job_id, metadata)
         if user_id:
             storage_manager.add_user_job(user_id, job_id)
+            try:
+                bal = storage_manager.get_user_tokens(user_id)
+                if bal is not None and bal <= 0:
+                    raise HTTPException(status_code=402, detail="Insufficient tokens for analysis. Contact admin.")
+            except HTTPException:
+                raise
+            except Exception:
+                pass
 
         task = celery_app.send_task(
             "tasks.run_lesson_analysis",
@@ -365,6 +382,14 @@ async def analyze_partial_jokbo(
         storage_manager.store_job_metadata(job_id, metadata)
         if user_id:
             storage_manager.add_user_job(user_id, job_id)
+            try:
+                bal = storage_manager.get_user_tokens(user_id)
+                if bal is not None and bal <= 0:
+                    raise HTTPException(status_code=402, detail="Insufficient tokens for analysis. Contact admin.")
+            except HTTPException:
+                raise
+            except Exception:
+                pass
 
         task = celery_app.send_task(
             "tasks.generate_partial_jokbo",

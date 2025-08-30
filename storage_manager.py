@@ -601,6 +601,12 @@ class StorageManager:
         if self.use_local_only or not self.redis_client:
             return
         try:
+            # Optional CBT token consumption per chunk (best-effort)
+            try:
+                self._consume_tokens_for_job(job_id, inc)
+            except Exception:
+                # Token logic should never break progress updates
+                pass
             key = f"progress:{job_id}"
             pipe = self.redis_client.pipeline()
             # Atomically increment and fetch needed fields
@@ -650,6 +656,131 @@ class StorageManager:
             self._with_retry(self.redis_client.expire, key, 172800)
         except Exception as e:
             logger.error(f"Failed to increment chunk progress: {e}")
+
+    # --- CBT token accounting ---
+    def _consume_tokens_for_job(self, job_id: str, inc: int) -> None:
+        """Consume tokens for a job owner based on model and chunk increments.
+
+        - Looks up job metadata for `user_id` and `model`.
+        - Consumes FLASH_TOKENS_PER_CHUNK or PRO_TOKENS_PER_CHUNK * inc from the owner's balance.
+        - If insufficient balance, marks the job as requested to cancel and updates progress message.
+        """
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            meta = self.get_job_metadata(job_id) or {}
+            user_id = (meta or {}).get("user_id")
+            model = (meta or {}).get("model") or "flash"
+            if not user_id:
+                return
+            # Read costs and defaults from environment
+            try:
+                flash_cost = max(0, int(os.getenv("FLASH_TOKENS_PER_CHUNK", "1")))
+            except Exception:
+                flash_cost = 1
+            try:
+                pro_cost = max(0, int(os.getenv("PRO_TOKENS_PER_CHUNK", "4")))
+            except Exception:
+                pro_cost = 4
+            per_chunk = pro_cost if str(model).lower() == "pro" else flash_cost
+            to_consume = max(0, int(per_chunk) * max(1, int(inc)))
+            if to_consume <= 0:
+                return
+            ok = self.consume_user_tokens(user_id, to_consume)
+            if not ok:
+                # Request cooperative cancel and update message
+                try:
+                    self.request_cancel(job_id)
+                    # best-effort message update
+                    self.update_progress(job_id, (self.get_progress(job_id) or {}).get("progress", 0) or 0,
+                                         "토큰 잔액 부족으로 작업이 중지되었습니다")
+                except Exception:
+                    pass
+        except Exception:
+            # Do not disrupt normal flow
+            return
+
+    # --- Public token helpers ---
+    def _token_key(self, user_id: str) -> str:
+        return f"user:{user_id}:tokens"
+
+    def get_user_tokens(self, user_id: str) -> Optional[int]:
+        if self.use_local_only or not self.redis_client:
+            return None
+        try:
+            v = self._with_retry(self.redis_client.get, self._token_key(user_id))
+            if v is None:
+                return None
+            try:
+                return int(v if isinstance(v, (bytes, bytearray)) else v)
+            except Exception:
+                try:
+                    return int(v.decode() if isinstance(v, (bytes, bytearray)) else v)
+                except Exception:
+                    return None
+        except Exception:
+            return None
+
+    def set_user_tokens(self, user_id: str, amount: int) -> bool:
+        if self.use_local_only or not self.redis_client:
+            return False
+        try:
+            amt = max(0, int(amount))
+            # long TTL (30d) auto-refresh on write
+            self._with_retry(self.redis_client.setex, self._token_key(user_id), 2592000, str(amt))
+            return True
+        except Exception:
+            return False
+
+    def add_user_tokens(self, user_id: str, delta: int) -> Optional[int]:
+        if self.use_local_only or not self.redis_client:
+            return None
+        try:
+            # Ensure key exists
+            pipe = self.redis_client.pipeline()
+            pipe.incrby(self._token_key(user_id), int(delta))
+            pipe.expire(self._token_key(user_id), 2592000)
+            new_val, _ = self._with_retry(pipe.execute)
+            try:
+                return int(new_val)
+            except Exception:
+                return None
+        except Exception:
+            return None
+
+    def consume_user_tokens(self, user_id: str, amount: int) -> bool:
+        """Atomically consume tokens if available. Returns True when successful."""
+        if self.use_local_only or not self.redis_client:
+            return False
+        try:
+            amt = max(0, int(amount))
+            if amt == 0:
+                return True
+            key = self._token_key(user_id)
+            # Lua script to check-and-decrement without going negative
+            script = (
+                "local k=KEYS[1]; local a=tonumber(ARGV[1]); "
+                "local v=redis.call('GET', k); "
+                "if not v then return 0 end; "
+                "local n=tonumber(v); if not n or n < a then return -1 end; "
+                "n=n-a; redis.call('SET', k, tostring(n)); return n;"
+            )
+            lua = self.redis_client.register_script(script)
+            res = self._with_retry(lua, keys=[key], args=[str(amt)])
+            try:
+                ival = int(res)
+            except Exception:
+                return False
+            if ival >= 0:
+                # extend TTL
+                try:
+                    self._with_retry(self.redis_client.expire, key, 2592000)
+                except Exception:
+                    pass
+                return True
+            return False
+        except Exception:
+            return False
 
     # --- User → jobs mapping helpers ---
     def add_user_job(self, user_id: str, job_id: str) -> None:

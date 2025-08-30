@@ -74,6 +74,15 @@ bash scripts/smoke_batch.sh
 
 프런트엔드는 `/`에서 정적 파일로 제공됩니다.
 
+## CBT(클로즈드 베타 테스트)
+CBT 기간에는 Google 로그인(OAuth)과 토큰 기반 사용량 측정을 제공합니다.
+
+- 환경 설정: `.env`에 `GOOGLE_OAUTH_CLIENT_ID`, `AUTH_SECRET_KEY`(필수), 선택 `ALLOWED_TESTERS`(허용 이메일 목록) 설정
+- 최초 로그인 시 토큰이 지급됩니다(`CBT_TOKENS_INITIAL`, 기본 200)
+- 처리 청크당 토큰 차감: Flash=1, Pro=4(환경 변수로 조정 가능)
+- 잔액 부족 시 작업이 중단되며 진행 메시지로 안내됩니다
+- 관리자 토큰 관리: `docs/CBT.md` 참조
+
 ## Render 배포(요약)
 1) GitHub 연결 → Blueprint(Render)로 `render.yaml` 사용
 2) 환경변수:

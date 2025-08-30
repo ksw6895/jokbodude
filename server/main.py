@@ -10,7 +10,7 @@ from pdf_processor.pdf.cache import clear_global_cache, get_global_cache
 from storage_manager import StorageManager
 
 from .core import REDIS_URL
-from .routes import analyze, jobs, misc
+from .routes import analyze, jobs, misc, auth
 
 
 @asynccontextmanager
@@ -88,6 +88,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.include_router(misc.router)
+    app.include_router(auth.router)
     app.include_router(analyze.router)
     app.include_router(jobs.router)
     return app

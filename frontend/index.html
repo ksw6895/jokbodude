@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JokboDude - Professional PDF Analysis Platform</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- Load final overrides; dark premium theme -->
     <link rel="stylesheet" href="styles.css?v=3">
 </head>
@@ -17,11 +18,16 @@
             </div>
             <div class="nav-links">
                 <div style="display:flex;align-items:center;gap:0.5rem;">
-                    <input id="user_id_input" placeholder="User ID" style="padding:0.4rem 0.6rem;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.08);color:var(--text);min-width:140px;" />
-                    <button id="save_user_id_btn" class="tab" style="padding:0.4rem 0.8rem;">Save</button>
+                    <div id="auth_area" style="display:flex;align-items:center;gap:0.5rem;">
+                        <span id="user_badge" style="display:none; padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);"></span>
+                        <span id="token_badge" style="display:none; padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.06);color:var(--muted);">Tokens: -</span>
+                        <button id="login_btn" class="tab" style="padding:0.4rem 0.8rem;">Sign in</button>
+                        <button id="logout_btn" class="tab" style="padding:0.4rem 0.8rem; display:none;">Logout</button>
+                    </div>
                     <button id="clear_cache_btn" class="tab" style="padding:0.4rem 0.8rem;" title="Clear cache and debug files">Clear Cache</button>
                 </div>
                 <a class="nav-link" href="/guide">Guide</a>
+                <a class="nav-link" id="feedback_link" href="#" style="display:none;">Feedback</a>
             </div>
         </div>
     </nav>
@@ -675,7 +681,8 @@
                         if (isNaN(n)) return 70;
                         return Math.max(0, Math.min(n, 110));
                     })();
-                const userId = (localStorage.getItem('jd_user_id') || '').trim();
+                let userId = (localStorage.getItem('jd_user_id') || '').trim();
+                try { if (CURRENT_USER && CURRENT_USER.user_id) userId = CURRENT_USER.user_id; } catch {}
                 const userParam = userId ? `&user_id=${encodeURIComponent(userId)}` : '';
                 // Send multi_api and min_relevance only for existing modes
                 if (mode !== 'partial-jokbo') {
@@ -926,19 +933,89 @@
             }
         });
 
-        // User ID handling
-        const userInput = document.getElementById('user_id_input');
-        const saveBtn = document.getElementById('save_user_id_btn');
-        const saved = localStorage.getItem('jd_user_id') || '';
-        if (saved) userInput.value = saved;
-        saveBtn.addEventListener('click', () => {
-            const val = userInput.value.trim();
-            if (val) localStorage.setItem('jd_user_id', val);
+        // Auth + config init
+        let AUTH_CONFIG = { enabled: false, client_id: '', allow_dev_login: false, feedback_form_url: '' };
+        let CURRENT_USER = null;
+        async function fetchAuthConfig() {
+            try {
+                const r = await fetch('/auth/config');
+                if (r.ok) AUTH_CONFIG = await r.json();
+                const f = document.getElementById('feedback_link');
+                if (AUTH_CONFIG.feedback_form_url) {
+                    f.href = AUTH_CONFIG.feedback_form_url;
+                    f.style.display = 'inline-block';
+                }
+            } catch {}
+        }
+        async function refreshAuthUI() {
+            try {
+                const res = await fetch('/me');
+                const info = res.ok ? await res.json() : { authenticated: false };
+                CURRENT_USER = info && info.authenticated ? info : null;
+            } catch { CURRENT_USER = null; }
+            const userBadge = document.getElementById('user_badge');
+            const tokenBadge = document.getElementById('token_badge');
+            const loginBtn = document.getElementById('login_btn');
+            const logoutBtn = document.getElementById('logout_btn');
+            if (CURRENT_USER) {
+                userBadge.textContent = CURRENT_USER.email || CURRENT_USER.name || 'Signed in';
+                userBadge.style.display = 'inline-block';
+                tokenBadge.textContent = `Tokens: ${CURRENT_USER.tokens ?? '-'}`;
+                tokenBadge.style.display = 'inline-block';
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+                if (CURRENT_USER.user_id) {
+                    try { localStorage.setItem('jd_user_id', CURRENT_USER.user_id); } catch {}
+                }
+            } else {
+                userBadge.style.display = 'none';
+                tokenBadge.style.display = 'none';
+                loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+            }
+        }
+        document.getElementById('login_btn').addEventListener('click', async () => {
+            if (AUTH_CONFIG.client_id) {
+                try {
+                    /* global google */
+                    google.accounts.id.initialize({
+                        client_id: AUTH_CONFIG.client_id,
+                        callback: async (resp) => {
+                            try {
+                                const r = await fetch('/auth/google', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ id_token: resp.credential }) });
+                                if (!r.ok) throw new Error('Sign-in failed');
+                                await refreshAuthUI();
+                            } catch (e) { alert('Login error: ' + e.message); }
+                        },
+                        auto_select: false
+                    });
+                    google.accounts.id.prompt();
+                } catch (e) {
+                    alert('Google Sign-In unavailable. Please retry or use dev login.');
+                }
+            } else if (AUTH_CONFIG.allow_dev_login) {
+                const email = prompt('Dev login email:');
+                if (!email) return;
+                const pw = prompt('Admin password for dev login:');
+                if (!pw) return;
+                try {
+                    const r = await fetch('/auth/dev-login', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ email, password: pw }) });
+                    if (!r.ok) throw new Error('Dev login failed');
+                    await refreshAuthUI();
+                } catch (e) { alert('Dev login error: ' + e.message); }
+            } else {
+                alert('Sign-in not configured. Please set GOOGLE_OAUTH_CLIENT_ID or enable dev login.');
+            }
+        });
+        document.getElementById('logout_btn').addEventListener('click', async () => {
+            try { await fetch('/auth/logout', { method: 'POST' }); } catch {}
+            await refreshAuthUI();
         });
 
         // Load My Jobs
         document.getElementById('load_jobs_btn').addEventListener('click', async () => {
-            const userId = (localStorage.getItem('jd_user_id') || '').trim();
+            let userId = (localStorage.getItem('jd_user_id') || '').trim();
+            if (CURRENT_USER && CURRENT_USER.user_id) userId = CURRENT_USER.user_id;
             const list = document.getElementById('jobs_list');
             if (!userId) {
                 list.innerHTML = '<div class="status-message">Please set your User ID first.</div>';
@@ -1014,6 +1091,12 @@
                 alert('Failed to delete file: ' + e.message);
             }
         }
+
+        // Initial boot
+        (async () => {
+            try { await initConfigAndToggles(); } catch {}
+            try { await refreshAuthUI(); } catch {}
+        })();
     </script>
 </body>
 </html>
