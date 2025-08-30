@@ -1081,6 +1081,7 @@
 
         // Initial boot
         (async () => {
+            try { await fetchAuthConfig(); } catch {}
             try { await initConfigAndToggles(); } catch {}
             try { await refreshAuthUI(); } catch {}
         })();
