@@ -6,6 +6,7 @@ from celery import Celery, current_task
 from celery.exceptions import Ignore
 from typing import Optional
 from config import create_model, configure_api, API_KEYS
+import logging
 from pdf_processor.core.processor import PDFProcessor
 from pdf_creator import PDFCreator
 from storage_manager import StorageManager
@@ -38,6 +39,7 @@ except Exception:
 # Check if multi-API mode is available
 USE_MULTI_API = len(API_KEYS) > 1 if 'API_KEYS' in globals() else False
 MODEL_TYPE = os.getenv("GEMINI_MODEL", "flash")  # Defaults to 'flash'; 'pro' uses more tokens
+logger = logging.getLogger(__name__)
 
 # --- Celery Initialization with Configuration ---
 celery_app = Celery("tasks")
@@ -82,6 +84,12 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
         if isinstance(metadata, dict):
             meta_multi = metadata.get("multi_api")
         use_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else USE_MULTI_API)
+        try:
+            logger.info(f"run_jokbo_analysis: use_multi={use_multi}, API_KEYS_count={len(API_KEYS) if isinstance(API_KEYS, list) else 0}")
+            if use_multi and (not isinstance(API_KEYS, list) or len(API_KEYS) < 2):
+                logger.warning("run_jokbo_analysis: requested multi_api but only 1 key available; falling back to single-key")
+        except Exception:
+            pass
 
         # Refresh TTLs upfront to avoid expiry during queue delays
         try:
@@ -288,6 +296,12 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
         if isinstance(metadata, dict):
             meta_multi = metadata.get("multi_api")
         use_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else USE_MULTI_API)
+        try:
+            logger.info(f"run_lesson_analysis: use_multi={use_multi}, API_KEYS_count={len(API_KEYS) if isinstance(API_KEYS, list) else 0}")
+            if use_multi and (not isinstance(API_KEYS, list) or len(API_KEYS) < 2):
+                logger.warning("run_lesson_analysis: requested multi_api but only 1 key available; falling back to single-key")
+        except Exception:
+            pass
 
         # Create temporary directory for processing
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -646,6 +660,12 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
             except Exception:
                 _API_KEYS = []
             prefer_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else (len(_API_KEYS) > 1))
+            try:
+                logger.info(f"generate_partial_jokbo: prefer_multi={prefer_multi}, API_KEYS_count={len(_API_KEYS) if isinstance(_API_KEYS, list) else 0}")
+                if prefer_multi and (not isinstance(_API_KEYS, list) or len(_API_KEYS) < 2):
+                    logger.warning("generate_partial_jokbo: requested multi_api but only 1 key available; falling back to single-key")
+            except Exception:
+                pass
 
             # Ask Gemini for question spans (use multi when requested and keys available)
             try:

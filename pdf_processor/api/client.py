@@ -38,7 +38,15 @@ class GeminiAPIClient:
             api_key: Optional API key (if not provided, uses environment variable)
         """
         self.model = model
-        self.api_key = api_key
+        # Bind API key if provided; in single-key mode default to configured key
+        if api_key is None:
+            try:
+                from config import API_KEY as _DEFAULT_KEY  # local import to avoid cycles
+            except Exception:
+                _DEFAULT_KEY = None
+            self.api_key = _DEFAULT_KEY
+        else:
+            self.api_key = api_key
         self.key_index = key_index
         self._configure_api(api_key)
         
@@ -53,8 +61,10 @@ class GeminiAPIClient:
         """
         try:
             suffix = (self.api_key or "")[-4:] if self.api_key else "????"
-            idx = self.key_index if self.key_index is not None else "?"
-            return f"k{idx}:***{suffix}"
+            idx = self.key_index if self.key_index is not None else 0
+            # Present indices as 1-based for readability: k1, k2, ...
+            tag_idx = (idx + 1) if isinstance(idx, int) else idx
+            return f"k{tag_idx}:***{suffix}"
         except Exception:
             return "k?:***????"
 

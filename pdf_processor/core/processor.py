@@ -12,6 +12,7 @@ import json
 import shutil
 
 from ..api.client import GeminiAPIClient
+from config import API_KEY as _DEFAULT_API_KEY
 from ..api.file_manager import FileManager
 from ..api.multi_api_manager import MultiAPIManager
 from ..analyzers.lesson_centric import LessonCentricAnalyzer
@@ -37,7 +38,12 @@ class PDFProcessor:
             session_id: Optional session ID for tracking
         """
         self.model = model
-        self.api_client = GeminiAPIClient(model)
+        # Bind a concrete API key for single-key mode so logs include key tag
+        try:
+            self.api_client = GeminiAPIClient(model, api_key=_DEFAULT_API_KEY, key_index=0)
+        except Exception:
+            # Fallback to no explicit key if config import fails; SDK global config should be set upstream
+            self.api_client = GeminiAPIClient(model)
         # Bind file manager to this API client (single-key context)
         self.file_manager = FileManager(self.api_client)
         
