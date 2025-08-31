@@ -375,11 +375,28 @@ class MultiAPIAnalyzer:
                 ordered_results[i] = {"error": "No result"}
         
         # Adaptive retry: split failed chunks once and try again cycling through all keys.
-        # This helps with token limits or safety blocks on larger spans.
+        # This helps with token limits on larger spans. However, if failures are due to
+        # prompt blocking, splitting will not help. In that case, skip adaptive retry.
         try:
             from ..pdf.operations import PDFOperations as _PDFOps
             from ..parsers.result_merger import ResultMerger as _RM
             failed_indices = [i for i, r in enumerate(ordered_results) if isinstance(r, dict) and r.get("error")]
+            # If all failed errors indicate prompt blocking, skip adaptive retry entirely
+            try:
+                _all_blocked = False
+                if failed_indices:
+                    _all_blocked = all(
+                        isinstance(ordered_results[i], dict)
+                        and isinstance(ordered_results[i].get("error"), str)
+                        and ("prompt blocked" in ordered_results[i]["error"].lower())
+                        for i in failed_indices
+                    )
+                if _all_blocked:
+                    logger.info("All failed chunks were prompt-blocked; skipping adaptive split retries")
+                    raise StopIteration  # short-circuit adaptive retry block
+            except Exception:
+                # If detection fails, proceed with best-effort adaptive retry below
+                pass
             for i in failed_indices:
                 try:
                     chunk_path, start_page, end_page = chunks[i]
@@ -412,6 +429,9 @@ class MultiAPIAnalyzer:
                         Path(right_path).unlink(missing_ok=True)
                     except Exception:
                         pass
+        except StopIteration:
+            # Intentional early exit from adaptive retry when all failures are prompt-blocked
+            pass
         except Exception:
             # Best-effort; ignore adaptive retry failures
             pass

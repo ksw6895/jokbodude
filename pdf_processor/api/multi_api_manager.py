@@ -194,6 +194,40 @@ class MultiAPIManager:
                     self._cv.wait(timeout=remaining)
                 else:
                     self._cv.wait(0.5)
+
+    def _acquire_api_index_excluding(
+        self,
+        exclude: set[int],
+        wait: bool = True,
+        timeout: Optional[float] = None,
+    ) -> Optional[int]:
+        """
+        Acquire an available API index that is not in the exclude set.
+        Mirrors _acquire_api_index but skips indices already tried in this operation.
+        """
+        with self._cv:
+            end_time = None if timeout is None else (time.time() + timeout)
+            while True:
+                n = len(self.api_keys)
+                for _ in range(n):
+                    idx = self.current_index
+                    self.current_index = (self.current_index + 1) % n
+                    if idx in exclude:
+                        continue
+                    status = self.api_statuses[idx]
+                    in_use = self._in_use_counts.get(idx, 0)
+                    if status.check_availability() and in_use < self.per_key_limit:
+                        self._in_use_counts[idx] = in_use + 1
+                        return idx
+                if not wait:
+                    return None
+                if timeout is not None:
+                    remaining = end_time - time.time()
+                    if remaining <= 0:
+                        return None
+                    self._cv.wait(timeout=remaining)
+                else:
+                    self._cv.wait(0.5)
     
     def _release_api_index(self, idx: int) -> None:
         with self._cv:
@@ -243,26 +277,25 @@ class MultiAPIManager:
         Raises:
             APIError: If all APIs fail
         """
-        errors = []
-        # Default: try each API key once
+        errors: list[str] = []
+        # Default: try each API key once per operation
         if max_retries is None:
             try:
                 max_retries = max(1, len(self.api_keys))
             except Exception:
                 max_retries = 3
-        total_attempts = 0
-        
-        while total_attempts < max_retries:
-            # Acquire an available, idle API key index (block briefly if needed)
-            api_index = self._acquire_api_index(wait=True, timeout=60.0)
+
+        # Enforce at-most-once per key, regardless of max_retries value
+        max_unique_tries = min(max_retries, len(self.api_keys))
+        tried_indices: set[int] = set()
+        prompt_block_seen = False
+
+        while len(tried_indices) < max_unique_tries:
+            # Acquire an available, idle API key index that we haven't tried yet
+            api_index = self._acquire_api_index_excluding(tried_indices, wait=True, timeout=60.0)
             if api_index is None:
-                logger.warning("No available APIs after waiting; retrying...")
-                # If the prompt itself is blocked, trying other keys won't help.
-                if category == "prompt_block":
-                    total_attempts = max_retries
-                else:
-                    total_attempts += 1
-                continue
+                logger.warning("No available APIs after waiting; aborting further retries for this operation")
+                break
             
             api_client = self.api_clients[api_index]
             model = self.models[api_index]
@@ -300,15 +333,26 @@ class MultiAPIManager:
                 elif category == "auth":
                     logger.warning(f"API key {api_index} (***{key_suffix}) permission/auth issue")
                 elif category == "prompt_block":
-                    logger.info(f"Prompt blocked; not penalizing key {api_index} and not retrying same prompt")
-
-                total_attempts += 1
+                    logger.info(
+                        f"Prompt blocked; not penalizing key {api_index} and not retrying same key for this prompt"
+                    )
+                    prompt_block_seen = True
             finally:
                 # Release the API key for other tasks
                 self._release_api_index(api_index)
-        
-        # All attempts failed
-        raise APIError(f"All API attempts failed after {total_attempts} tries. Errors: {'; '.join(errors)}")
+
+            # Mark this key as tried regardless of error class
+            tried_indices.add(api_index)
+
+            # If we've seen a prompt block, continue trying remaining, untried keys once
+            # but do NOT start a second pass.
+            if prompt_block_seen and len(tried_indices) >= max_unique_tries:
+                break
+
+        # All attempts failed or aborted
+        raise APIError(
+            f"All API attempts failed after {len(tried_indices)} unique tries. Errors: {'; '.join(errors)}"
+        )
     
     def get_status_report(self) -> Dict[str, Any]:
         """Get a status report of all API keys."""
