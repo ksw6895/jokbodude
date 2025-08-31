@@ -8,7 +8,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Image
 from reportlab.lib.units import inch
 import io
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, Tuple
 from pathlib import Path
 import tempfile
 import os
@@ -17,6 +17,7 @@ import threading
 from validators import PDFValidator
 import unicodedata
 import re
+from pdf_processor.pdf.operations import PDFOperations
 
 class PDFCreator:
     def __init__(self):
@@ -342,8 +343,16 @@ class PDFCreator:
                 self.jokbo_pdfs[jokbo_path] = fitz.open(jokbo_path)
             return self.jokbo_pdfs[jokbo_path]
     
-    def extract_jokbo_question(self, jokbo_filename: str, jokbo_page: int, question_number, question_text: str, jokbo_dir: str = "jokbo", jokbo_end_page: int = None, is_last_question_on_page: bool = False, question_numbers_on_page = None):
-        """Extract full page containing the question from jokbo PDF"""
+    def extract_jokbo_question(self, jokbo_filename: str, jokbo_page: int, question_number, question_text: str, jokbo_dir: str = "jokbo", jokbo_end_page: int = None, is_last_question_on_page: bool = False, question_numbers_on_page = None, computed_next_start_page: Optional[int] = None, computed_next_question_number: Optional[object] = None):
+        """Extract the problem region from jokbo PDF.
+
+        - Crops the start page from the detected question-number marker to page bottom.
+        - If the question spans multiple pages (jokbo_end_page provided), inserts
+          full middle pages and crops the end page from top to the next marker.
+        - If it's the last question on the page, includes a cropped slice from
+          the next page (top to next marker) when available.
+        - Falls back to inserting full pages when markers cannot be found.
+        """
         self.log_debug(f"extract_jokbo_question: Q={question_number}, start_page={jokbo_page}, initial_end={jokbo_end_page}")
         self.log_debug(f"  is_last_question_on_page={is_last_question_on_page}")
         self.log_debug(f"  question_numbers_on_page(raw)={question_numbers_on_page}")
@@ -416,20 +425,219 @@ class PDFCreator:
             self.log_debug(f"  VALIDATION: clamped end_page from {jokbo_end_page} to {jokbo_page}")
             jokbo_end_page = jokbo_page
         
-        # Extract the full page(s) containing the question
+        # Start constructing a cropped document
         self.log_debug(
-            f"  Final extraction: start={jokbo_page}, end={jokbo_end_page}, 0-based={jokbo_page-1}..{jokbo_end_page-1},"
-            f" explicit_end_param={explicit_end}, decision={decision_reason}"
+            f"  Final extraction (cropped): start={jokbo_page}, end={jokbo_end_page}, explicit_end={explicit_end}, reason={decision_reason}, next_start={computed_next_start_page}, next_q={computed_next_question_number}"
         )
         question_doc = fitz.open()
-        
-        # Extract pages
-        jokbo_pdf = self.get_jokbo_pdf(str(jokbo_path))  # get_jokbo_pdf already handles locking
-        question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_end_page-1)
-        
-        self.log_debug(f"  Extracted document pages={len(question_doc)}")
-        
+
+        qnum_int = self._safe_int(question_number, 0)
+        # 1) Crop start page from marker to bottom. Prefer computed next when same-page,
+        #    otherwise just crop from current marker to page bottom.
+        same_page_next = (
+            isinstance(computed_next_start_page, int)
+            and computed_next_start_page > 0
+            and int(computed_next_start_page) == int(jokbo_page)
+        )
+        try:
+            if same_page_next:
+                cropped_start = PDFOperations.extract_question_region(
+                    str(jokbo_path), int(jokbo_page), next_question_start=int(jokbo_page), question_number=qnum_int,
+                    next_question_number_for_same_page=self._safe_int(computed_next_question_number, 0)
+                )
+            else:
+                cropped_start = PDFOperations.extract_question_region(
+                    str(jokbo_path), int(jokbo_page), next_question_start=None, question_number=qnum_int
+                )
+        except Exception as e:
+            self.log_debug(f"  WARN: extract_question_region failed on start page {jokbo_page}: {e}")
+            cropped_start = None
+
+        jokbo_pdf = self.get_jokbo_pdf(str(jokbo_path))
+        if cropped_start and Path(cropped_start).exists():
+            try:
+                with fitz.open(cropped_start) as tmp:
+                    question_doc.insert_pdf(tmp)
+                self.temp_files.append(cropped_start)
+            except Exception as e:
+                self.log_debug(f"  WARN: failed to insert cropped start page, falling back to full: {e}")
+                question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_page-1)
+        else:
+            # Fallback to inserting the full start page
+            question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page-1, to_page=jokbo_page-1)
+
+        # 2) Handle multi-page questions with explicit end page
+        if isinstance(jokbo_end_page, int) and jokbo_end_page and jokbo_end_page > jokbo_page:
+            # Insert any full middle pages
+            if jokbo_end_page - jokbo_page > 1:
+                try:
+                    question_doc.insert_pdf(
+                        jokbo_pdf, from_page=jokbo_page, to_page=jokbo_end_page-2
+                    )
+                except Exception as e:
+                    self.log_debug(f"  WARN: failed inserting middle pages {jokbo_page+1}..{jokbo_end_page-1}: {e}")
+            # Crop the end page from top to next marker (qnum+1)
+            end_crop_path = None
+            try:
+                target_next = self._safe_int(computed_next_question_number, 0) if computed_next_question_number is not None else (qnum_int + 1)
+                end_crop_path = PDFOperations.extract_top_until_marker(
+                    str(jokbo_path), int(jokbo_end_page), target_next
+                )
+            except Exception as e:
+                self.log_debug(f"  WARN: extract_top_until_marker failed on end page {jokbo_end_page}: {e}")
+                end_crop_path = None
+            if end_crop_path and Path(end_crop_path).exists():
+                try:
+                    with fitz.open(end_crop_path) as tmp:
+                        question_doc.insert_pdf(tmp)
+                    self.temp_files.append(end_crop_path)
+                except Exception as e:
+                    self.log_debug(f"  WARN: failed to insert end-cropped page, using full: {e}")
+                    question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_end_page-1, to_page=jokbo_end_page-1)
+            else:
+                question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_end_page-1, to_page=jokbo_end_page-1)
+        # 3) Otherwise, prefer computed next-start; fallback to last-on-page heuristic
+        elif isinstance(computed_next_start_page, int) and computed_next_start_page and computed_next_start_page > jokbo_page:
+            # Insert any full middle pages up to next_start-1
+            next_p = int(computed_next_start_page)
+            if next_p - jokbo_page > 1:
+                try:
+                    question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page, to_page=next_p-2)
+                except Exception as e:
+                    self.log_debug(f"  WARN: failed inserting middle pages {jokbo_page+1}..{next_p-1}: {e}")
+            # Then crop the next-start page from top until its marker
+            next_crop_path = None
+            try:
+                target_next = self._safe_int(computed_next_question_number, 0)
+                next_crop_path = PDFOperations.extract_top_until_marker(
+                    str(jokbo_path), next_p, target_next if target_next > 0 else (qnum_int + 1)
+                )
+            except Exception as e:
+                self.log_debug(f"  WARN: extract_top_until_marker failed on page {next_p}: {e}")
+                next_crop_path = None
+            if next_crop_path and Path(next_crop_path).exists():
+                try:
+                    with fitz.open(next_crop_path) as tmp:
+                        question_doc.insert_pdf(tmp)
+                    self.temp_files.append(next_crop_path)
+                except Exception as e:
+                    self.log_debug(f"  WARN: failed to insert next-start cropped page, using full next: {e}")
+                    question_doc.insert_pdf(jokbo_pdf, from_page=next_p-1, to_page=next_p-1)
+            else:
+                question_doc.insert_pdf(jokbo_pdf, from_page=next_p-1, to_page=next_p-1)
+        elif is_last_question_on_page and jokbo_page < pdf_page_count:
+            next_crop_path = None
+            try:
+                next_crop_path = PDFOperations.extract_top_until_marker(
+                    str(jokbo_path), int(jokbo_page) + 1, qnum_int + 1
+                )
+            except Exception as e:
+                self.log_debug(f"  WARN: extract_top_until_marker failed on page {jokbo_page+1}: {e}")
+                next_crop_path = None
+            if next_crop_path and Path(next_crop_path).exists():
+                try:
+                    with fitz.open(next_crop_path) as tmp:
+                        question_doc.insert_pdf(tmp)
+                    self.temp_files.append(next_crop_path)
+                except Exception as e:
+                    self.log_debug(f"  WARN: failed to insert next-cropped page, using full next: {e}")
+                    question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page, to_page=jokbo_page)
+            else:
+                # Conservative fallback: include full next page to avoid losing content
+                question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page, to_page=jokbo_page)
+
+        self.log_debug(f"  Cropped extraction pages={len(question_doc)}")
         return question_doc
+
+    # -------------------------------
+    # Next-boundary calculation utils
+    # -------------------------------
+    def _safe_qnum(self, v: object) -> int:
+        try:
+            return self._safe_int(v, 0)
+        except Exception:
+            return 0
+
+    def _build_next_map_for_lesson(self, analysis_result: Dict[str, Any]) -> Dict[tuple, Tuple[Optional[int], Optional[object]]]:
+        """Build mapping: (file, start_page, qnum) -> (next_start_page, next_qnum).
+
+        Uses all questions across related_slides, grouped by jokbo file, ordered by
+        (page asc, within-page order via question_numbers_on_page if available, else qnum asc).
+        """
+        items_by_file: Dict[str, list] = {}
+        page_orders: Dict[tuple, list[int]] = {}
+        for slide in analysis_result.get("related_slides", []) or []:
+            for q in slide.get("related_jokbo_questions", []) or []:
+                fn = str(q.get("jokbo_filename") or "")
+                sp = self._safe_int(q.get("jokbo_page"), 0)
+                qn = self._safe_qnum(q.get("question_number"))
+                if not fn or sp <= 0 or qn <= 0:
+                    continue
+                items_by_file.setdefault(fn, []).append((sp, qn))
+                # record a per-page order list once available
+                qlist = q.get("question_numbers_on_page") or []
+                if isinstance(qlist, list) and qlist:
+                    key = (fn, sp)
+                    if key not in page_orders:
+                        try:
+                            page_orders[key] = [self._safe_qnum(x) for x in qlist if self._safe_qnum(x) > 0]
+                        except Exception:
+                            pass
+        result: Dict[tuple, Tuple[Optional[int], Optional[object]]] = {}
+        for fn, arr in items_by_file.items():
+            # dedupe
+            uniq = sorted(set(arr))
+            # sort with within-page order preference
+            def sort_key(t):
+                sp, qn = t
+                order = page_orders.get((fn, sp))
+                if order and qn in order:
+                    return (sp, order.index(qn))
+                return (sp, qn)
+            ordered = sorted(uniq, key=sort_key)
+            for i, (sp, qn) in enumerate(ordered):
+                ns, nq = (None, None)
+                if i + 1 < len(ordered):
+                    ns, nq = ordered[i + 1]
+                result[(fn, sp, qn)] = (ns, nq)
+        return result
+
+    def _build_next_map_for_jokbo(self, analysis_result: Dict[str, Any]) -> Dict[tuple, Tuple[Optional[int], Optional[object]]]:
+        """Build mapping: (file, start_page, qnum) -> (next_start_page, next_qnum) for jokbo-centric."""
+        items_by_file: Dict[str, list] = {}
+        page_orders: Dict[tuple, list[int]] = {}
+        for p in analysis_result.get("jokbo_pages", []) or []:
+            sp = self._safe_int(p.get("jokbo_page"), 0)
+            for q in p.get("questions", []) or []:
+                fn = str(q.get("jokbo_filename") or "__single__")
+                qn = self._safe_qnum(q.get("question_number"))
+                if not fn or sp <= 0 or qn <= 0:
+                    continue
+                items_by_file.setdefault(fn, []).append((sp, qn))
+                qlist = q.get("question_numbers_on_page") or []
+                if isinstance(qlist, list) and qlist:
+                    key = (fn, sp)
+                    if key not in page_orders:
+                        try:
+                            page_orders[key] = [self._safe_qnum(x) for x in qlist if self._safe_qnum(x) > 0]
+                        except Exception:
+                            pass
+        result: Dict[tuple, Tuple[Optional[int], Optional[object]]] = {}
+        for fn, arr in items_by_file.items():
+            uniq = sorted(set(arr))
+            def sort_key(t):
+                sp, qn = t
+                order = page_orders.get((fn, sp))
+                if order and qn in order:
+                    return (sp, order.index(qn))
+                return (sp, qn)
+            ordered = sorted(uniq, key=sort_key)
+            for i, (sp, qn) in enumerate(ordered):
+                ns, nq = (None, None)
+                if i + 1 < len(ordered):
+                    ns, nq = ordered[i + 1]
+                result[(fn, sp, qn)] = (ns, nq)
+        return result
     
     def create_filtered_pdf(self, lesson_path: str, analysis_result: Dict[str, Any], output_path: str, jokbo_dir: str = "jokbo"):
         """Create new PDF for lesson-centric mode.
@@ -458,6 +666,12 @@ class PDFCreator:
             for q in slide_info.get("related_jokbo_questions", []) or []:
                 related_by_page[page_num].append(q)
 
+        # Build next-boundary map across all questions from analysis
+        try:
+            next_map = self._build_next_map_for_lesson(analysis_result)
+        except Exception:
+            next_map = {}
+
         total_pages = len(lesson_pdf)
         # Iterate through every slide to ensure none are skipped
         for page_num in range(1, total_pages + 1):
@@ -479,15 +693,21 @@ class PDFCreator:
                     pass
 
                 # Extract and insert the question from jokbo (handles next-page inclusion)
+                fn = str(question.get("jokbo_filename") or "")
+                sp = int(question.get("jokbo_page", 0))
+                qn_norm = self._safe_int(question.get("question_number"), 0)
+                ns, nq = next_map.get((fn, sp, qn_norm), (None, None))
                 question_doc = self.extract_jokbo_question(
-                    question.get("jokbo_filename"), 
-                    int(question.get("jokbo_page", 0)),
+                    fn,
+                    sp,
                     question.get("question_number"),
                     question.get("question_text", ""),
                     jokbo_dir,
                     question.get("jokbo_end_page"),
                     is_last_question,
-                    question_numbers
+                    question_numbers,
+                    computed_next_start_page=ns,
+                    computed_next_question_number=nq,
                 )
                 if question_doc:
                     doc.insert_pdf(question_doc)
@@ -631,6 +851,12 @@ class PDFCreator:
                         # Add page number to question for later use
                         question["_jokbo_page_num"] = jokbo_page_num
                         all_questions.append(question)
+
+        # Build next-boundary map across this jokbo
+        try:
+            next_map = self._build_next_map_for_jokbo(analysis_result)
+        except Exception:
+            next_map = {}
         
         # Sort questions by question number
         def get_question_number_for_sort(question):
@@ -686,6 +912,9 @@ class PDFCreator:
                 
                 # Extract the question pages (handles multi-page questions)
                 before_pages = len(doc)
+                key1 = (jokbo_filename, int(jokbo_page_num), self._safe_int(question_num, 0))
+                key2 = ("__single__", int(jokbo_page_num), self._safe_int(question_num, 0))
+                ns, nq = next_map.get(key1, next_map.get(key2, (None, None)))
                 question_doc = self.extract_jokbo_question(
                     jokbo_filename,
                     jokbo_page_num,
@@ -695,7 +924,9 @@ class PDFCreator:
                     # Respect jokbo_end_page if present (multi-page questions)
                     question.get("jokbo_end_page"),
                     is_last_question,
-                    question_numbers
+                    question_numbers,
+                    computed_next_start_page=ns,
+                    computed_next_question_number=nq,
                 )
                 if question_doc:
                     try:

@@ -16,6 +16,82 @@ logger = get_logger(__name__)
 
 class PDFOperations:
     """Handles all PDF manipulation operations."""
+
+    # -----------------------------
+    # Low-level marker search utils
+    # -----------------------------
+    @staticmethod
+    def find_question_marker_y(page: fitz.Page, target_num: int) -> Optional[float]:
+        """Find the Y-coordinate of the question-number marker on a page.
+
+        - Prefers text extraction via PyMuPDF words with left-margin heuristic
+        - Falls back to OCR with pytesseract when text is not extractable
+        - Returns the top Y (in PDF units) of the detected marker, or None if not found
+        """
+        try:
+            words = page.get_text("words") or []
+        except Exception:
+            words = []
+        w = page.rect.width
+        candidates: list[tuple[float, float]] = []  # (y0, x0)
+        if words:
+            import re as _re
+            pats = [
+                rf"^\(?{target_num}\)?[\.)]$",
+                rf"^\(?{target_num}\)?$",
+                rf"^{target_num}번$",
+                rf"^Q\s*{target_num}$",
+            ]
+            compiled = [_re.compile(p) for p in pats]
+            for x0, y0, x1, y1, text, *_ in words:
+                t = str(text or "").strip()
+                if not t:
+                    continue
+                # left margin constraint to reduce false positives
+                if x0 > (w * 0.35):
+                    continue
+                for cp in compiled:
+                    if cp.match(t):
+                        candidates.append((y0, x0))
+                        break
+        # OCR fallback if no words or no match
+        if not candidates:
+            try:
+                from PIL import Image
+                import io as _io
+                import pytesseract
+                pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                img = Image.open(_io.BytesIO(pix.tobytes("png")))
+                data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
+                ih = img.height
+                # map pixels to PDF units
+                scale_y = page.rect.height / float(ih or 1)
+                import re as _re
+                pats = [
+                    rf"^\(?{target_num}\)?[\.)]$",
+                    rf"^\(?{target_num}\)?$",
+                    rf"^{target_num}번$",
+                    rf"^Q\s*{target_num}$",
+                ]
+                compiled = [_re.compile(p) for p in pats]
+                n = len(data.get("text", []))
+                for i in range(n):
+                    t = (data["text"][i] or "").strip()
+                    if not t:
+                        continue
+                    for cp in compiled:
+                        if cp.match(t):
+                            y0 = float(data["top"][i]) * scale_y
+                            x0 = float(data["left"][i]) * (page.rect.width / float(img.width or 1))
+                            if x0 <= (page.rect.width * 0.4):
+                                candidates.append((y0, x0))
+                            break
+            except Exception:
+                pass
+        if not candidates:
+            return None
+        candidates.sort(key=lambda t: (t[0], t[1]))
+        return candidates[0][0]
     
     @staticmethod
     def get_page_count(pdf_path: str) -> int:
@@ -128,6 +204,7 @@ class PDFOperations:
         page_start: int,
         next_question_start: Optional[int] = None,
         question_number: Optional[object] = None,
+        next_question_number_for_same_page: Optional[object] = None,
         output_path: Optional[str] = None,
     ) -> str:
         """Extract just the question region across one or more pages.
@@ -174,74 +251,7 @@ class PDFOperations:
 
                 out_doc = fitz.open()
                 qnum_int = _to_int(question_number, 0) if question_number is not None else 0
-
-                def _find_marker_y(page: fitz.Page, target_num: int) -> Optional[float]:
-                    # Try text-based search first
-                    try:
-                        words = page.get_text("words") or []
-                    except Exception:
-                        words = []
-                    w = page.rect.width
-                    candidates: list[tuple[float, float]] = []  # (y0, x0)
-                    if words:
-                        import re
-                        # build pattern variants: 3, 3., 3), (3), 3번, Q3
-                        pats = [
-                            rf"^\(?{target_num}\)?[\.)]$",
-                            rf"^\(?{target_num}\)?$",
-                            rf"^{target_num}번$",
-                            rf"^Q\s*{target_num}$",
-                        ]
-                        compiled = [re.compile(p) for p in pats]
-                        for x0,y0,x1,y1,text, *_ in words:
-                            t = str(text or "").strip()
-                            if not t:
-                                continue
-                            # left margin constraint to reduce false positives
-                            if x0 > (w * 0.35):
-                                continue
-                            for cp in compiled:
-                                if cp.match(t):
-                                    candidates.append((y0, x0))
-                                    break
-                    # OCR fallback if no words or no match
-                    if not candidates:
-                        try:
-                            from PIL import Image
-                            import io
-                            import pytesseract
-                            pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
-                            img = Image.open(io.BytesIO(pix.tobytes("png")))
-                            data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
-                            ih = img.height
-                            # map pixels to PDF units
-                            scale_y = page.rect.height / float(ih or 1)
-                            import re
-                            pats = [
-                                rf"^\(?{target_num}\)?[\.)]$",
-                                rf"^\(?{target_num}\)?$",
-                                rf"^{target_num}번$",
-                                rf"^Q\s*{target_num}$",
-                            ]
-                            compiled = [re.compile(p) for p in pats]
-                            n = len(data.get("text", []))
-                            for i in range(n):
-                                t = (data["text"][i] or "").strip()
-                                if not t:
-                                    continue
-                                for cp in compiled:
-                                    if cp.match(t):
-                                        y0 = float(data["top"][i]) * scale_y
-                                        x0 = float(data["left"][i]) * (page.rect.width / float(img.width or 1))
-                                        if x0 <= (page.rect.width * 0.4):
-                                            candidates.append((y0, x0))
-                                        break
-                        except Exception:
-                            pass
-                    if not candidates:
-                        return None
-                    candidates.sort(key=lambda t: (t[0], t[1]))
-                    return candidates[0][0]
+                next_same_int = _to_int(next_question_number_for_same_page, 0) if next_question_number_for_same_page is not None else 0
 
                 for pno in range(page_start, page_end + 1):
                     page = src[pno - 1]
@@ -250,12 +260,13 @@ class PDFOperations:
                     y1 = rect.height
                     if pno == page_start:
                         if qnum_int > 0:
-                            y_found = _find_marker_y(page, qnum_int)
+                            y_found = PDFOperations.find_question_marker_y(page, qnum_int)
                             if y_found is not None:
                                 y0 = max(0.0, y_found - 4)  # small margin
                         # If next question is also on this same page, crop to its marker
-                        if same_page_next and qnum_int > 0:
-                            yn = _find_marker_y(page, qnum_int + 1)
+                        if same_page_next and (qnum_int > 0 or next_same_int > 0):
+                            target_next = next_same_int if next_same_int > 0 else (qnum_int + 1 if qnum_int > 0 else 0)
+                            yn = PDFOperations.find_question_marker_y(page, target_next) if target_next > 0 else None
                             if yn is not None and yn > y0:
                                 y1 = yn - 4
                     elif pno == page_end and same_page_next is False:
@@ -286,6 +297,61 @@ class PDFOperations:
                 else PDFOperations.get_page_count(pdf_path)
             )
             return PDFOperations.extract_pages(pdf_path, page_start, end_page, output_path)
+
+    @staticmethod
+    def extract_top_until_marker(
+        pdf_path: str,
+        page_num: int,
+        target_number: Optional[object],
+        output_path: Optional[str] = None,
+    ) -> Optional[str]:
+        """Extract the top region of a page until a question-number marker.
+
+        - Useful for capturing the continuation of a multi-page question that spills
+          onto the next page: returns from top to the next question marker.
+        - If the marker is not found, returns the full page as a conservative fallback.
+        - Returns the path to a single-page PDF, or None on failure.
+        """
+        def _to_int(val: object, default: int = 0) -> int:
+            try:
+                if isinstance(val, bool):
+                    return default
+                if isinstance(val, (int, float)):
+                    return int(val)
+                import re
+                m = re.search(r"(\d+)", str(val) or "")
+                return int(m.group(1)) if m else default
+            except Exception:
+                return default
+
+        try:
+            with fitz.open(str(pdf_path)) as src:
+                if page_num < 1 or page_num > len(src):
+                    return None
+                page = src[page_num - 1]
+                rect = page.rect
+                y1 = rect.height
+                tnum = _to_int(target_number, 0)
+                if tnum > 0:
+                    yn = PDFOperations.find_question_marker_y(page, tnum)
+                    if yn is not None and yn > 0:
+                        # crop to just above the marker
+                        y1 = max(10.0, min(rect.height, yn - 4))
+                out_doc = fitz.open()
+                out_page = out_doc.new_page(width=rect.width, height=y1)
+                out_page.show_pdf_page(
+                    fitz.Rect(0, 0, rect.width, y1), src, page_num - 1, clip=fitz.Rect(0, 0, rect.width, y1)
+                )
+                if output_path is None:
+                    temp_file = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+                    output_path = temp_file.name
+                out_doc.save(output_path)
+                out_doc.close()
+                return output_path
+        except Exception as e:
+            logger.warning(f"Top-until-marker crop failed on page {page_num}: {e}
+")
+            return None
     
     @staticmethod
     def get_page_text(pdf_path: str, page_num: int) -> str:
