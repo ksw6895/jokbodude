@@ -378,9 +378,20 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                             "connections": []
                         }
                     
-                    # Add related slides
+                    # Add related slides, carrying the source QA fields so that
+                    # we can keep explanation/answer consistent with the slides
+                    # we end up selecting for this question.
                     for slide in question.get("related_lesson_slides", []):
-                        all_connections[question_id]["connections"].append(slide)
+                        try:
+                            s = dict(slide)
+                        except Exception:
+                            s = slide
+                        if isinstance(s, dict):
+                            s.setdefault("_source_explanation", question.get("explanation"))
+                            s.setdefault("_source_answer", question.get("answer"))
+                            s.setdefault("_source_question_text", question.get("question_text"))
+                            s.setdefault("_source_wrong_answers", question.get("wrong_answer_explanations", {}))
+                        all_connections[question_id]["connections"].append(s)
 
         # Build final result with filtered connections
         final_pages = {}
@@ -411,6 +422,27 @@ class JokboCentricAnalyzer(BaseAnalyzer):
             except Exception:
                 pass
             
+            # Keep explanation/answer consistent with the selected slides:
+            # choose the best slide's originating explanation/answer if present.
+            if filtered_connections:
+                top = filtered_connections[0]
+                if isinstance(top, dict):
+                    try:
+                        src_expl = top.get("_source_explanation")
+                        if src_expl:
+                            question_data["explanation"] = src_expl
+                        src_ans = top.get("_source_answer")
+                        if src_ans:
+                            question_data["answer"] = src_ans
+                        src_qt = top.get("_source_question_text")
+                        if src_qt:
+                            question_data["question_text"] = src_qt
+                        src_wa = top.get("_source_wrong_answers")
+                        if isinstance(src_wa, dict):
+                            question_data["wrong_answer_explanations"] = src_wa
+                    except Exception:
+                        pass
+
             # Add question with filtered connections
             question_data["related_lesson_slides"] = filtered_connections
             final_pages[jokbo_page]["questions"].append(question_data)
