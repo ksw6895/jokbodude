@@ -52,9 +52,9 @@ async def preflight_jokbo_centric(
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
-    # Allow overrides when sent as multipart fields
-    multi_api_form: Optional[bool] = Form(None),
-    min_relevance_form: Optional[int] = Form(None),
+    # Allow overrides when sent as multipart fields (frontend sends 'multi_api' and 'min_relevance')
+    multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
+    min_relevance_form: Optional[int] = Form(None, alias="min_relevance"),
     user: dict = Depends(require_user),
 ):
     """Upload files, compute page + chunk counts, store metadata, but do not start the job.
@@ -175,8 +175,8 @@ async def preflight_lesson_centric(
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
-    multi_api_form: Optional[bool] = Form(None),
-    min_relevance_form: Optional[int] = Form(None),
+    multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
+    min_relevance_form: Optional[int] = Form(None, alias="min_relevance"),
     user: dict = Depends(require_user),
 ):
     """Preflight for lesson-centric mode. Stores files, returns counts, does not start job."""
@@ -305,7 +305,12 @@ def start_preflight_job(request: Request, job_id: str, user: dict = Depends(requ
         raise HTTPException(status_code=404, detail="Job metadata not found")
     mode = (meta or {}).get("mode")
     model = (meta or {}).get("model") or "flash"
-    use_multi = bool((meta or {}).get("multi_api"))
+    # Robustly interpret the stored multi_api flag
+    _mval = (meta or {}).get("multi_api")
+    if isinstance(_mval, str):
+        use_multi = _mval.strip().lower() in {"1", "true", "yes", "on"}
+    else:
+        use_multi = bool(_mval)
 
     # Clear preflight flag; job is starting
     try:

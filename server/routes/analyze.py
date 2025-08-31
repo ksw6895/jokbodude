@@ -21,8 +21,9 @@ async def analyze_jokbo_centric(
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
-    multi_api_form: Optional[bool] = Form(None),
-    min_relevance_form: Optional[int] = Form(None),
+    # Frontend sends as form fields named 'multi_api' and 'min_relevance'
+    multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
+    min_relevance_form: Optional[int] = Form(None, alias="min_relevance"),
     user: dict = Depends(require_user),
 ):
     job_id = str(uuid.uuid4())
@@ -117,8 +118,8 @@ async def analyze_lesson_centric(
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
-    multi_api_form: Optional[bool] = Form(None),
-    min_relevance_form: Optional[int] = Form(None),
+    multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
+    min_relevance_form: Optional[int] = Form(None, alias="min_relevance"),
     user: dict = Depends(require_user),
 ):
     job_id = str(uuid.uuid4())
@@ -215,8 +216,8 @@ async def analyze_batch(
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
-    multi_api_form: Optional[bool] = Form(None),
-    min_relevance_form: Optional[int] = Form(None),
+    multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
+    min_relevance_form: Optional[int] = Form(None, alias="min_relevance"),
     user: dict = Depends(require_user),
 ):
     """Submit a batch job that fans out into isolated subtasks."""
@@ -330,8 +331,8 @@ async def analyze_partial_jokbo(
     # Optional relevance cutoff for consistency (currently informational)
     min_relevance: Optional[int] = Query(None, ge=0, le=110),
     # also allow form fallbacks if clients send as multipart fields
-    multi_api_form: Optional[bool] = Form(None),
-    min_relevance_form: Optional[int] = Form(None),
+    multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
+    min_relevance_form: Optional[int] = Form(None, alias="min_relevance"),
     user: dict = Depends(require_user),
 ):
     """Endpoint to generate a partial jokbo PDF.
