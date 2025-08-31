@@ -349,8 +349,7 @@ class PDFOperations:
                 out_doc.close()
                 return output_path
         except Exception as e:
-            logger.warning(f"Top-until-marker crop failed on page {page_num}: {e}
-")
+            logger.warning(f"Top-until-marker crop failed on page {page_num}: {e}")
             return None
     
     @staticmethod
