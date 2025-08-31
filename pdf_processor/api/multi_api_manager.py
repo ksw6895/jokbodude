@@ -212,6 +212,12 @@ class MultiAPIManager:
         Mirrors _acquire_api_index but skips indices already tried in this operation.
         """
         with self._cv:
+            # If all keys are excluded, waiting won't help; return immediately
+            try:
+                if len(exclude) >= len(self.api_keys):
+                    return None
+            except Exception:
+                pass
             end_time = None if timeout is None else (time.time() + timeout)
             while True:
                 n = len(self.api_keys)
@@ -301,9 +307,19 @@ class MultiAPIManager:
         with self._lock:
             global_excluded = set(self._global_tried_indices) if self._block_mode_active else set()
 
+        # Fast-fail if block mode is active and all keys are globally excluded
+        if self._block_mode_active and len(global_excluded) >= len(self.api_keys):
+            raise APIError(
+                "Prompt blocked and all API keys already tried for this prompt; aborting without wait"
+            )
+
         while len(tried_indices) < max_unique_tries:
             # Acquire an available, idle API key index that we haven't tried yet
             excluded_now = tried_indices | global_excluded
+            # If nothing remains to try, abort immediately (avoid 60s wait loops)
+            if len(excluded_now) >= len(self.api_keys):
+                logger.warning("All API keys already tried for this prompt; aborting immediately")
+                break
             api_index = self._acquire_api_index_excluding(excluded_now, wait=True, timeout=60.0)
             if api_index is None:
                 logger.warning("No available APIs after waiting; aborting further retries for this operation")
