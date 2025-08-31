@@ -242,8 +242,11 @@ class PDFOperations:
                 same_page_next = (
                     next_question_start is not None and _to_int(next_question_start) == _to_int(page_start)
                 )
+                # Safer default: if the model didn't provide next_question_start,
+                # do NOT append the rest of the document. Default to a single page
+                # and try a best-effort lookahead crop on the next page (below).
                 if next_question_start is None:
-                    page_end = total_pages
+                    page_end = page_start
                 elif same_page_next:
                     page_end = page_start
                 else:
@@ -281,6 +284,27 @@ class PDFOperations:
                         fitz.Rect(0, 0, rect.width, new_h), src, pno - 1, clip=clip
                     )
 
+                # If we don't know the next_question_start and the question may
+                # spill onto the next page, attempt a best-effort crop of the top
+                # of the next page until the next question marker (qnum+1).
+                # This avoids producing excessively long outputs while capturing
+                # common two-page questions.
+                try:
+                    if (next_question_start is None) and (qnum_int > 0) and (page_start < total_pages):
+                        next_page = src[page_start]  # 0-based index -> next page
+                        rect = next_page.rect
+                        target_next = qnum_int + 1
+                        yn = PDFOperations.find_question_marker_y(next_page, target_next)
+                        if yn is not None and yn > 10.0:
+                            clip = fitz.Rect(0, 0, rect.width, max(10.0, yn - 4))
+                            out_page = out_doc.new_page(width=rect.width, height=clip.height)
+                            out_page.show_pdf_page(
+                                fitz.Rect(0, 0, rect.width, clip.height), src, page_start, clip=clip
+                            )
+                except Exception:
+                    # Best-effort only; ignore on failure
+                    pass
+
                 # Persist output
                 if output_path is None:
                     temp_file = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
@@ -289,14 +313,17 @@ class PDFOperations:
                 out_doc.close()
                 return output_path
         except Exception as e:
-            logger.warning(f"Cropping failed; falling back to full pages: {e}")
-            # Fallback to page-span extraction
-            end_page = (
-                next_question_start - 1
-                if next_question_start and (int(next_question_start) > int(page_start))
-                else PDFOperations.get_page_count(pdf_path)
-            )
-            return PDFOperations.extract_pages(pdf_path, page_start, end_page, output_path)
+            logger.warning(f"Cropping failed; falling back to conservative page-span: {e}")
+            # Fallback to page-span extraction; do not include the entire document when
+            # next_question_start is missing. Default to a single page.
+            try:
+                if next_question_start and (int(next_question_start) > int(page_start)):
+                    end_page = int(next_question_start) - 1
+                else:
+                    end_page = int(page_start)
+            except Exception:
+                end_page = int(page_start)
+            return PDFOperations.extract_pages(pdf_path, int(page_start), int(end_page), output_path)
 
     @staticmethod
     def extract_top_until_marker(
