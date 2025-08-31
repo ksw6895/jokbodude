@@ -68,7 +68,7 @@
     let AUTH_CONFIG = { tokens_enabled: true, token_costs: { flash: 1, pro: 4 } };
     async function fetchAuthConfig() {
       try {
-        const r = await fetch('/auth/config');
+        const r = await fetch('/auth/config', { credentials: 'include' });
         if (r.ok) AUTH_CONFIG = await r.json();
         try { setupGoogleSignIn(); } catch {}
       } catch {}
@@ -79,6 +79,7 @@
       try {
         const r = await fetch('/auth/google', {
           method: 'POST',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({ id_token: resp.credential })
         });
@@ -115,7 +116,7 @@
 
     async function ensureAuth() {
       try {
-        const r = await fetch('/me');
+        const r = await fetch('/me', { credentials: 'include' });
         const me = r.ok ? await r.json() : { authenticated: false };
         const loginBtn = document.getElementById('login_btn');
         const logoutBtn = document.getElementById('logout_btn');
@@ -142,7 +143,7 @@
       const list = document.getElementById('jobs_list');
       list.innerHTML = '<div class="status-message">Loading...</div>';
       try {
-        const res = await fetch(`/user/${encodeURIComponent(userId)}/jobs`);
+        const res = await fetch(`/user/${encodeURIComponent(userId)}/jobs`, { credentials: 'include' });
         const data = await res.json();
         if (!data.jobs || data.jobs.length === 0) {
           list.innerHTML = '<div class="status-message">No jobs found.</div>';
@@ -183,18 +184,18 @@
     }
 
     async function cancelJob(jobId) {
-      try { await fetch(`/jobs/${jobId}/cancel`, { method: 'POST' }); await boot(); } catch (e) { alert('Failed to cancel: ' + e.message); }
+      try { await fetch(`/jobs/${jobId}/cancel`, { method: 'POST', credentials: 'include' }); await boot(); } catch (e) { alert('Failed to cancel: ' + e.message); }
     }
     async function deleteJob(jobId) {
       if (!confirm('Delete this job and its results?')) return;
-      try { await fetch(`/jobs/${jobId}`, { method: 'DELETE' }); await boot(); } catch (e) { alert('Failed to delete: ' + e.message); }
+      try { await fetch(`/jobs/${jobId}`, { method: 'DELETE', credentials: 'include' }); await boot(); } catch (e) { alert('Failed to delete: ' + e.message); }
     }
     async function deleteResult(jobId, filename) {
       if (!confirm('Delete this result file?')) return;
-      try { await fetch(`/result/${jobId}/${filename}`, { method: 'DELETE' }); await boot(); } catch (e) { alert('Failed to delete file: ' + e.message); }
+      try { await fetch(`/result/${jobId}/${filename}`, { method: 'DELETE', credentials: 'include' }); await boot(); } catch (e) { alert('Failed to delete file: ' + e.message); }
     }
 
-    document.getElementById('logout_btn').addEventListener('click', async () => { try { await fetch('/auth/logout', { method: 'POST' }); } catch {} location.href='/' });
+    document.getElementById('logout_btn').addEventListener('click', async () => { try { await fetch('/auth/logout', { method: 'POST', credentials: 'include' }); } catch {} location.href='/' });
     document.getElementById('login_btn').addEventListener('click', async () => {
       try {
         if (!AUTH_CONFIG.client_id) { alert('Sign-in not configured.'); return; }

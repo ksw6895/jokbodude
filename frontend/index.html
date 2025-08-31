@@ -104,9 +104,9 @@
             <div class="p-6">
                 <!-- Model password removed; Pro access is token-based -->
                 <div class="flex p-1 bg-gray-900/70 border border-gray-700 rounded-xl mb-6">
-                    <button class="tab w-1/3 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800 active" onclick="switchTab('jokbo')">Exam-Centric Analysis</button>
-                    <button class="tab w-1/3 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('lesson')">Lecture-Centric Analysis</button>
-                    <button class="tab w-1/3 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('partial')">Partial Jokbo</button>
+                    <button class="tab w-1/3 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800 active" onclick="switchTab('jokbo', event)">Exam-Centric Analysis</button>
+                    <button class="tab w-1/3 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('lesson', event)">Lecture-Centric Analysis</button>
+                    <button class="tab w-1/3 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('partial', event)">Partial Jokbo</button>
                 </div>
                 
                 <!-- Jokbo-Centric Tab (Tailwind) -->
@@ -410,7 +410,7 @@
         // Initialize processing mode toggles with server capabilities
         async function initConfigAndToggles() {
             try {
-                const res = await fetch('/config');
+                const res = await fetch('/config', { credentials: 'include' });
                 if (res.ok) {
                     JD_CONFIG = await res.json();
                 }
@@ -492,11 +492,12 @@
         // Pro model is always available; /config determines only multi-api availability
         
         // Tab switching
-        function switchTab(tabName) {
+        function switchTab(tabName, evt) {
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            event.target.classList.add('active');
+            const e = evt || window.event;
+            if (e && e.target) e.target.classList.add('active');
             
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
@@ -735,8 +736,10 @@
                 // Always include consistent params for parity
                 formData.append('multi_api', multiApi ? 'true' : 'false');
                 formData.append('min_relevance', String(minRel));
-                const response = await fetch(`/analyze/${mode}?model=${model}&multi_api=${multiApi}&min_relevance=${minRel}`, {
+                const response = await fetch(`/analyze/${mode}?model=${encodeURIComponent(model)}&multi_api=${multiApi ? 'true' : 'false'}&min_relevance=${encodeURIComponent(String(minRel))}`,
+                {
                     method: 'POST',
+                    credentials: 'include',
                     body: formData
                 });
                 
@@ -788,7 +791,7 @@
                 try {
                     // Check progress first
                     try {
-                        const progressRes = await fetch(`/progress/${jobId}`);
+                        const progressRes = await fetch(`/progress/${jobId}`, { credentials: 'include' });
                         if (progressRes.ok) {
                             const progressData = await progressRes.json();
                             const chunks = progressData.total_chunks ? ` · ${progressData.completed_chunks||0}/${progressData.total_chunks} chunks` : '';
@@ -823,7 +826,7 @@
                         // Progress endpoint might not be available yet
                     }
                     
-                    const res = await fetch(`/status/${taskId}`);
+                    const res = await fetch(`/status/${taskId}`, { credentials: 'include' });
                     const data = await res.json();
                     
                     if (data.status === 'SUCCESS') {
@@ -832,7 +835,7 @@
                         statusBadge.textContent = 'COMPLETED';
                         
                         // Get list of files
-                        const filesRes = await fetch(`/results/${jobId}`);
+                        const filesRes = await fetch(`/results/${jobId}`, { credentials: 'include' });
                         let downloadLinks = '';
                         
                         if (filesRes.ok) {
@@ -890,7 +893,7 @@
                         statusBadge.textContent = 'FAILED';
                         let extra = '';
                         try {
-                          const pr = await fetch(`/progress/${jobId}`);
+                          const pr = await fetch(`/progress/${jobId}`, { credentials: 'include' });
                           if (pr.ok) {
                             const pj = await pr.json();
                             const msg = (pj && pj.message) || '';
@@ -957,7 +960,7 @@
                 params.set('clear_debug', 'true');
                 params.set('clear_temp_sessions', 'true');
                 if (olderHours && olderHours > 0) params.set('older_than_hours', String(olderHours));
-                const res = await fetch(`/admin/cleanup?${params.toString()}`, { method: 'POST' });
+                const res = await fetch(`/admin/cleanup?${params.toString()}`, { method: 'POST', credentials: 'include' });
                 if (!res.ok) throw new Error('Cleanup request failed');
                 const data = await res.json();
                 const out = document.getElementById('admin_output');
@@ -1002,7 +1005,7 @@
                     if (!pw) { alert('Enter Admin Password first.'); return; }
                     url += `?password=${encodeURIComponent(pw)}`;
                 }
-                const res = await fetch(url);
+                const res = await fetch(url, { credentials: 'include' });
                 if (!res.ok) throw new Error('Stats request failed');
                 const data = await res.json();
                 out.textContent = JSON.stringify(data, null, 2);
@@ -1016,7 +1019,7 @@
         let CURRENT_USER = null;
         async function fetchAuthConfig() {
             try {
-                const r = await fetch('/auth/config');
+                const r = await fetch('/auth/config', { credentials: 'include' });
                 if (r.ok) AUTH_CONFIG = await r.json();
                 const f = document.getElementById('feedback_link');
                 if (AUTH_CONFIG.feedback_form_url) {
@@ -1041,6 +1044,7 @@
             try {
                 const r = await fetch('/auth/google', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({ id_token: resp.credential })
                 });
@@ -1078,7 +1082,7 @@
         }
         async function refreshAuthUI() {
             try {
-                const res = await fetch('/me');
+                const res = await fetch('/me', { credentials: 'include' });
                 const info = res.ok ? await res.json() : { authenticated: false };
                 CURRENT_USER = info && info.authenticated ? info : null;
             } catch { CURRENT_USER = null; }
@@ -1139,7 +1143,7 @@
                 const pw = prompt('Admin password for dev login:');
                 if (!pw) return;
                 try {
-                    const r = await fetch('/auth/dev-login', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ email, password: pw }) });
+                    const r = await fetch('/auth/dev-login', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ email, password: pw }) });
                     if (!r.ok) throw new Error('Dev login failed');
                     await refreshAuthUI();
                 } catch (e) { alert('Dev login error: ' + e.message); }
@@ -1148,7 +1152,7 @@
             }
         });
         document.getElementById('logout_btn').addEventListener('click', async () => {
-            try { await fetch('/auth/logout', { method: 'POST' }); } catch {}
+            try { await fetch('/auth/logout', { method: 'POST', credentials: 'include' }); } catch {}
             await refreshAuthUI();
         });
 
@@ -1158,7 +1162,7 @@
             if (!box) return;
             box.textContent = 'Loading...';
             try {
-                const res = await fetch('/admin/testers');
+                const res = await fetch('/admin/testers', { credentials: 'include' });
                 if (!res.ok) throw new Error('Forbidden or failed');
                 const data = await res.json();
                 const list = data.dynamic || [];
@@ -1179,7 +1183,7 @@
         async function addTester(email) {
             const box = document.getElementById('testers_list');
             try {
-                const res = await fetch('/admin/testers', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams({ email }) });
+                const res = await fetch('/admin/testers', { method:'POST', credentials: 'include', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams({ email }) });
                 if (!res.ok) throw new Error('Add failed');
                 await loadTesters();
             } catch (e) { box.textContent = 'Add tester error: ' + e.message; }
@@ -1187,7 +1191,7 @@
         async function removeTester(email) {
             const box = document.getElementById('testers_list');
             try {
-                const res = await fetch('/admin/testers/' + email, { method:'DELETE' });
+                const res = await fetch('/admin/testers/' + email, { method:'DELETE', credentials: 'include' });
                 if (!res.ok) throw new Error('Delete failed');
                 await loadTesters();
             } catch (e) { box.textContent = 'Remove tester error: ' + e.message; }
@@ -1237,7 +1241,7 @@
             try {
                 let url = '/admin/users';
                 if (queryEmail) url += `?q=${encodeURIComponent(queryEmail)}`;
-                const res = await fetch(url);
+                const res = await fetch(url, { credentials: 'include' });
                 if (!res.ok) throw new Error('Forbidden or failed');
                 const data = await res.json();
                 await renderUsers(data.users || []);
@@ -1248,7 +1252,7 @@
             const val = parseInt((input && input.value) || '', 10);
             if (isNaN(val)) { alert('Enter a number'); return; }
             try {
-                const res = await fetch(`/admin/users/${userId}/tokens?amount=${val}`, { method:'POST' });
+                const res = await fetch(`/admin/users/${userId}/tokens?amount=${val}`, { method:'POST', credentials: 'include' });
                 if (!res.ok) throw new Error('Set failed');
                 const email = document.getElementById('user_search_email').value || '';
                 await fetchUsers(email || null);
@@ -1259,7 +1263,7 @@
             const val = parseInt((input && input.value) || '', 10);
             if (isNaN(val)) { alert('Enter a number'); return; }
             try {
-                const res = await fetch(`/admin/users/${userId}/tokens/add?delta=${val}`, { method:'POST' });
+                const res = await fetch(`/admin/users/${userId}/tokens/add?delta=${val}`, { method:'POST', credentials: 'include' });
                 if (!res.ok) throw new Error('Add failed');
                 const email = document.getElementById('user_search_email').value || '';
                 await fetchUsers(email || null);
@@ -1284,7 +1288,7 @@
             }
             list.innerHTML = '<div class="status-message">Loading...</div>';
             try {
-                const res = await fetch(`/user/${encodeURIComponent(CURRENT_USER.user_id)}/jobs`);
+                const res = await fetch(`/user/${encodeURIComponent(CURRENT_USER.user_id)}/jobs`, { credentials: 'include' });
                 const data = await res.json();
                 if (!data.jobs || data.jobs.length === 0) {
                     list.innerHTML = '<div class="status-message">No jobs found.</div>';
@@ -1328,7 +1332,7 @@
         });
         async function cancelJob(jobId) {
             try {
-                await fetch(`/jobs/${jobId}/cancel`, { method: 'POST' });
+                await fetch(`/jobs/${jobId}/cancel`, { method: 'POST', credentials: 'include' });
                 document.getElementById('load_jobs_btn').click();
             } catch (e) {
                 alert('Failed to cancel: ' + e.message);
@@ -1337,7 +1341,7 @@
         async function deleteJob(jobId) {
             if (!confirm('Delete this job and its results?')) return;
             try {
-                await fetch(`/jobs/${jobId}`, { method: 'DELETE' });
+                await fetch(`/jobs/${jobId}`, { method: 'DELETE', credentials: 'include' });
                 document.getElementById('load_jobs_btn').click();
             } catch (e) {
                 alert('Failed to delete: ' + e.message);
@@ -1346,7 +1350,7 @@
         async function deleteResult(jobId, filename) {
             if (!confirm('Delete this result file?')) return;
             try {
-                await fetch(`/result/${jobId}/${filename}`, { method: 'DELETE' });
+                await fetch(`/result/${jobId}/${filename}`, { method: 'DELETE', credentials: 'include' });
                 document.getElementById('load_jobs_btn').click();
             } catch (e) {
                 alert('Failed to delete file: ' + e.message);
