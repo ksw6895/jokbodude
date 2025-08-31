@@ -498,14 +498,17 @@ class PDFCreator:
                 question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_end_page-1, to_page=jokbo_end_page-1)
         # 3) Otherwise, prefer computed next-start; fallback to last-on-page heuristic
         elif isinstance(computed_next_start_page, int) and computed_next_start_page and computed_next_start_page > jokbo_page:
-            # Insert any full middle pages up to next_start-1
-            next_p = int(computed_next_start_page)
+            # Safety guard: next_start is only trusted up to the immediate next page.
+            # If the inferred next question starts far away, we treat this as a
+            # one-page (or next-page) question to prevent runaway insertion.
+            raw_next_p = int(computed_next_start_page)
+            next_p = min(jokbo_page + 1, raw_next_p)
             if next_p - jokbo_page > 1:
                 try:
                     question_doc.insert_pdf(jokbo_pdf, from_page=jokbo_page, to_page=next_p-2)
                 except Exception as e:
                     self.log_debug(f"  WARN: failed inserting middle pages {jokbo_page+1}..{next_p-1}: {e}")
-            # Then crop the next-start page from top until its marker
+            # Then crop the next-start page from top until its marker (qnum+1 by default)
             next_crop_path = None
             try:
                 target_next = self._safe_int(computed_next_question_number, 0)
