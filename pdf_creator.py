@@ -566,6 +566,7 @@ class PDFCreator:
         """
         items_by_file: Dict[str, list] = {}
         page_orders: Dict[tuple, list[int]] = {}
+        explicit_next: Dict[tuple, Tuple[int, Optional[int]]] = {}
         for slide in analysis_result.get("related_slides", []) or []:
             for q in slide.get("related_jokbo_questions", []) or []:
                 fn = str(q.get("jokbo_filename") or "")
@@ -583,7 +584,31 @@ class PDFCreator:
                             page_orders[key] = [self._safe_qnum(x) for x in qlist if self._safe_qnum(x) > 0]
                         except Exception:
                             pass
+                # Prefer explicit next_question_start when provided by the model
+                try:
+                    ns = q.get("next_question_start")
+                    if isinstance(ns, int) and ns > 0:
+                        explicit_next[(fn, sp, qn)] = (int(ns), None)
+                except Exception:
+                    pass
         result: Dict[tuple, Tuple[Optional[int], Optional[object]]] = {}
+        # Apply explicit next-page hints first and try to infer next question number
+        for (fn, sp, qn), (ns, _) in list(explicit_next.items()):
+            nq: Optional[int] = None
+            try:
+                if ns == sp:
+                    order = page_orders.get((fn, sp)) or []
+                    if qn in order:
+                        idx = order.index(qn)
+                        if idx + 1 < len(order):
+                            nq = order[idx + 1]
+                else:
+                    order_ns = page_orders.get((fn, ns)) or []
+                    if order_ns:
+                        nq = order_ns[0]
+            except Exception:
+                pass
+            result[(fn, sp, qn)] = (ns, nq)
         for fn, arr in items_by_file.items():
             # dedupe
             uniq = sorted(set(arr))
@@ -599,13 +624,16 @@ class PDFCreator:
                 ns, nq = (None, None)
                 if i + 1 < len(ordered):
                     ns, nq = ordered[i + 1]
-                result[(fn, sp, qn)] = (ns, nq)
+                # Do not overwrite explicit mapping
+                if (fn, sp, qn) not in result:
+                    result[(fn, sp, qn)] = (ns, nq)
         return result
 
     def _build_next_map_for_jokbo(self, analysis_result: Dict[str, Any]) -> Dict[tuple, Tuple[Optional[int], Optional[object]]]:
         """Build mapping: (file, start_page, qnum) -> (next_start_page, next_qnum) for jokbo-centric."""
         items_by_file: Dict[str, list] = {}
         page_orders: Dict[tuple, list[int]] = {}
+        explicit_next: Dict[tuple, Tuple[int, Optional[int]]] = {}
         for p in analysis_result.get("jokbo_pages", []) or []:
             sp = self._safe_int(p.get("jokbo_page"), 0)
             for q in p.get("questions", []) or []:
@@ -622,7 +650,31 @@ class PDFCreator:
                             page_orders[key] = [self._safe_qnum(x) for x in qlist if self._safe_qnum(x) > 0]
                         except Exception:
                             pass
+                # Prefer explicit next_question_start when provided by the model
+                try:
+                    ns = q.get("next_question_start")
+                    if isinstance(ns, int) and ns > 0:
+                        explicit_next[(fn, sp, qn)] = (int(ns), None)
+                except Exception:
+                    pass
         result: Dict[tuple, Tuple[Optional[int], Optional[object]]] = {}
+        # Apply explicit next-page hints first with best-effort next-q inference
+        for (fn, sp, qn), (ns, _) in list(explicit_next.items()):
+            nq: Optional[int] = None
+            try:
+                if ns == sp:
+                    order = page_orders.get((fn, sp)) or []
+                    if qn in order:
+                        idx = order.index(qn)
+                        if idx + 1 < len(order):
+                            nq = order[idx + 1]
+                else:
+                    order_ns = page_orders.get((fn, ns)) or []
+                    if order_ns:
+                        nq = order_ns[0]
+            except Exception:
+                pass
+            result[(fn, sp, qn)] = (ns, nq)
         for fn, arr in items_by_file.items():
             uniq = sorted(set(arr))
             def sort_key(t):
@@ -636,7 +688,8 @@ class PDFCreator:
                 ns, nq = (None, None)
                 if i + 1 < len(ordered):
                     ns, nq = ordered[i + 1]
-                result[(fn, sp, qn)] = (ns, nq)
+                if (fn, sp, qn) not in result:
+                    result[(fn, sp, qn)] = (ns, nq)
         return result
     
     def create_filtered_pdf(self, lesson_path: str, analysis_result: Dict[str, Any], output_path: str, jokbo_dir: str = "jokbo"):

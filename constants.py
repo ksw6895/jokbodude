@@ -130,6 +130,7 @@ LESSON_CENTRIC_TASK = """작업:
 3. 강의자료의 각 페이지별로 관련된 족보 문제들을 그룹화하세요
 4. 각 문제의 정답과 함께 모든 선택지가 왜 오답인지도 설명하세요
 5. 문제가 여러 페이지에 걸쳐있으면 jokbo_end_page에 끝 페이지 번호를 표시하세요
+6. 각 문제에 대해 다음 문제의 시작 페이지(next_question_start)도 보고하세요. 같은 페이지면 현재 페이지 번호를 넣으세요.
 
 제외 규칙:
 - '문제', '정답', '해설', '예제', '기출', '퀴즈', 'TBL', '보기', '선지', '정답:' 등의 키워드/패턴이 보이는 강의 슬라이드는 제외
@@ -146,6 +147,7 @@ LESSON_CENTRIC_OUTPUT_FORMAT = """출력 형식 (반드시 순수 JSON만 응답
           "jokbo_filename": "{jokbo_filename}",
           "jokbo_page": 3,
           "jokbo_end_page": 4,
+          "next_question_start": 5,
           "question_number": "15",
           "question_numbers_on_page": ["13", "14", "15"],
           "question_text": "문제 내용",
@@ -201,6 +203,9 @@ JOKBO_CENTRIC_TASK = """작업 (족보 중심 분석):
 - 슬라이드에 문제 캡처(스크린샷)가 포함되어 있고 별도 설명이 거의 없는 경우도 제외.
 - 문제와 내용이 섞여 있으면 문제 영역은 완전히 무시하고, 남는 '내용'만으로 직접적 근거가 충분한 경우에만 포함하세요. 그렇지 않으면 제외.
 
+추가 요구 사항(페이지 경계 보고):
+- 각 문제에 대해 다음 문제의 시작 페이지(next_question_start)를 함께 보고하세요. 같은 페이지면 현재 페이지 번호를 넣으세요.
+
 ⚠️ **중요**:
 - 관련성 점수가 70점 미만인 슬라이드만 있거나 관련 슬라이드가 전혀 없는 문제는 분석 결과에서 완전히 제외하세요
 - 해당 문제는 jokbo_pages의 questions 배열에 포함시키지 마세요
@@ -225,6 +230,8 @@ JOKBO_CENTRIC_OUTPUT_FORMAT = """출력 형식 (반드시 순수 JSON만 응답�
             "3번": "왜 3번이 오답인지 설명",
             "4번": "왜 4번이 오답인지 설명"
           },
+          "jokbo_end_page": 10,
+          "next_question_start": 10,
           "related_lesson_slides": [
             {
               "lesson_filename": "{lesson_filename}",

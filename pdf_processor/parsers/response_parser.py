@@ -538,7 +538,8 @@ class ResponseParser:
                         "question_numbers_on_page": qn_on_page,
                         **({"jokbo_filename": (q.get("jokbo_filename") or "").strip()} if q.get("jokbo_filename") else {}),
                         # preserve optional fields if present and valid
-                        **({"jokbo_end_page": ResponseParser._to_int_safe(q.get("jokbo_end_page"), 0)} if q.get("jokbo_end_page") else {})
+                        **({"jokbo_end_page": ResponseParser._to_int_safe(q.get("jokbo_end_page"), 0)} if q.get("jokbo_end_page") else {}),
+                        **({"next_question_start": ResponseParser._to_int_safe(q.get("next_question_start"), 0)} if q.get("next_question_start") is not None else {})
                     })
                 if cleaned_questions:
                     cleaned_pages.append({
@@ -633,6 +634,7 @@ class ResponseParser:
                     "jokbo_filename": (q.get("jokbo_filename") or "").strip(),
                     "jokbo_page": ResponseParser._to_int_safe(q.get("jokbo_page"), 0),
                     "jokbo_end_page": ResponseParser._to_int_safe(q.get("jokbo_end_page"), 0) if q.get("jokbo_end_page") else None,
+                    "next_question_start": ResponseParser._to_int_safe(q.get("next_question_start"), 0) if q.get("next_question_start") is not None else None,
                     "question_number": qnum,
                     "question_numbers_on_page": qn_on_page,
                     "question_text": qtext,
