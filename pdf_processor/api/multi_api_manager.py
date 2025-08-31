@@ -132,6 +132,12 @@ class MultiAPIManager:
         # Create API clients for each key
         self.api_clients = []
         self.models = []
+
+        # Global prompt-block guard within the lifetime of this manager (i.e., per job).
+        # Once we detect a prompt block, we will only allow each key to be tried once
+        # across all subsequent execute_with_failover() calls, then stop.
+        self._block_mode_active: bool = False
+        self._global_tried_indices: set[int] = set()
         
         for i, api_key in enumerate(api_keys):
             # Configure API for this key
@@ -290,9 +296,15 @@ class MultiAPIManager:
         tried_indices: set[int] = set()
         prompt_block_seen = False
 
+        # If we've previously seen a prompt block in this manager, exclude keys that were
+        # already tried during the block window from future attempts.
+        with self._lock:
+            global_excluded = set(self._global_tried_indices) if self._block_mode_active else set()
+
         while len(tried_indices) < max_unique_tries:
             # Acquire an available, idle API key index that we haven't tried yet
-            api_index = self._acquire_api_index_excluding(tried_indices, wait=True, timeout=60.0)
+            excluded_now = tried_indices | global_excluded
+            api_index = self._acquire_api_index_excluding(excluded_now, wait=True, timeout=60.0)
             if api_index is None:
                 logger.warning("No available APIs after waiting; aborting further retries for this operation")
                 break
@@ -311,7 +323,10 @@ class MultiAPIManager:
                 # Record success
                 status.record_success()
                 logger.info(f"Operation successful with API key {api_index} (***{key_suffix})")
-                
+                # On success, clear any prompt-block global state to allow future operations normally
+                with self._lock:
+                    self._block_mode_active = False
+                    self._global_tried_indices.clear()
                 return result
                 
             except Exception as e:
@@ -337,12 +352,20 @@ class MultiAPIManager:
                         f"Prompt blocked; not penalizing key {api_index} and not retrying same key for this prompt"
                     )
                     prompt_block_seen = True
+                    # Activate global block mode and remember that this key was tried.
+                    with self._lock:
+                        self._block_mode_active = True
+                        self._global_tried_indices.add(api_index)
             finally:
                 # Release the API key for other tasks
                 self._release_api_index(api_index)
 
             # Mark this key as tried regardless of error class
             tried_indices.add(api_index)
+            # If block mode is active (either from this or a prior attempt), record globally
+            with self._lock:
+                if self._block_mode_active:
+                    self._global_tried_indices.add(api_index)
 
             # If we've seen a prompt block, continue trying remaining, untried keys once
             # but do NOT start a second pass.
