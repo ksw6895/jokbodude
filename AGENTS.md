@@ -9,6 +9,15 @@
 - `frontend/`: Static UI served at `/`; `jokbo/`, `lesson/`: input PDFs; `output/`: generated results.
 - Config: `.env(.example)`, `config.py`, `celeryconfig.py`, `requirements.txt`.
 
+## API Surface (Current)
+- Analyze: `POST /analyze/jokbo-centric`, `POST /analyze/lesson-centric`, `POST /analyze/partial-jokbo`, `POST /analyze/batch`
+  - Multipart fields: `jokbo_files`, `lesson_files` (50MB per file)
+  - Query params: `model=flash|pro`, `multi_api=true|false`, `min_relevance=0..110`
+- Jobs: `GET /status/{task_id}`, `GET /progress/{job_id}`, `GET /results/{job_id}`, `GET /result/{job_id}/{filename}`, `DELETE /result/{job_id}/{filename}`, `POST /jobs/{job_id}/cancel`, `DELETE /jobs/{job_id}`
+- Users: `GET /user/{user_id}/jobs`
+- Auth: `GET /auth/config`, `POST /auth/google`, `POST /auth/dev-login` (optional), `POST /auth/logout`, `GET /me`, admin testers/users
+- Misc: `GET /`, `GET /guide`, `GET /profile`, `GET /styles.css`, `GET /config`, `GET /health`, `POST /admin/cleanup`, `GET /admin/storage-stats`
+
 ## Build, Test, and Development Commands
 - Setup (Python 3.8+):
   ```bash
@@ -24,6 +33,7 @@
        "http://localhost:8000/analyze/jokbo-centric?model=flash"
   # then poll /status/{task_id} and fetch /results/{job_id}
   ```
+ - Frontend login (local): set `ALLOW_DEV_LOGIN=true`, `ADMIN_PASSWORD`, and add your email to `ALLOWED_TESTERS` to use dev login.
 
 ## Coding Style & Naming Conventions
 - Follow PEP 8; 4-space indents; include type hints where practical.
@@ -36,6 +46,12 @@
 - Validate outputs exist in `output/` and that `/health`, `/status/{task_id}`, and `/results/{job_id}` respond as expected.
 - Smoke tools: `python scripts/generate_dummy_pdfs.py` then `bash scripts/smoke.sh` (requires API + Celery + Redis running). Polls and downloads a result to `output/`.
 
+## Frontend Guidelines
+- Tailwind UI in `frontend/index.html` and `frontend/profile.html`.
+- All `fetch` calls must include `credentials: 'include'` so session cookies are sent to protected endpoints.
+- Do not change multipart field names (`jokbo_files`, `lesson_files`) or route shapes without coordinating backend changes.
+- Keep request paths, query params, and polling intervals in sync with routes under `server/routes/`.
+
 ## Commit & Pull Request Guidelines
 - Commits follow Conventional Commits seen in history (e.g., `feat: add multi-API`, `fix: Redis storage fallback`).
 - PRs should include: clear description, rationale, before/after behavior, linked issues, and logs/screenshots for API flows.
@@ -44,3 +60,4 @@
 ## Security & Configuration Tips
 - Do not commit secrets or personal PDFs. Configure `GEMINI_API_KEY` or `GEMINI_API_KEYS`; set `REDIS_URL` for web/worker; on Render ensure `RENDER_STORAGE_PATH` is writable.
 - `GEMINI_MODEL` is fixed to `flash`; prefer multi-API for throughput.
+ - Auth/session: set `AUTH_SECRET_KEY`, `GOOGLE_OAUTH_CLIENT_ID`, `ADMIN_EMAILS`; adjust `COOKIE_SECURE`/`COOKIE_SAMESITE` for your environment.
