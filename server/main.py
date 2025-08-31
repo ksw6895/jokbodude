@@ -11,6 +11,7 @@ from storage_manager import StorageManager
 
 from .core import REDIS_URL
 from .routes import analyze, jobs, misc, auth
+from .routes import preflight
 
 
 @asynccontextmanager
@@ -89,6 +90,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(misc.router)
     app.include_router(auth.router)
+    app.include_router(preflight.router)
     app.include_router(analyze.router)
     app.include_router(jobs.router)
     return app

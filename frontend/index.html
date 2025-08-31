@@ -177,6 +177,8 @@
                             </div>
                         </div>
 
+                        <div id="jokbo_estimate" class="text-xs text-gray-400"></div>
+
                         <div class="flex justify-end">
                             <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-500 transform hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2">Start Exam-Centric Analysis →</button>
                         </div>
@@ -248,7 +250,9 @@
                                 </div>
                             </div>
                         </div>
-                        
+
+                        <div id="lesson_estimate" class="text-xs text-gray-400"></div>
+
                         <div class="flex justify-end">
                             <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-500 transform hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2">Start Lecture-Centric Analysis →</button>
                         </div>
@@ -659,6 +663,70 @@
             }
         });
         
+        // Preflight cache keyed by mode
+        const LATEST_PREFLIGHT = { 'jokbo-centric': null, 'lesson-centric': null };
+        function currentOptions(mode) {
+            const multiApi = getMultiApiState(mode);
+            let minRel = 70;
+            if (mode === 'jokbo-centric') {
+                const n = parseInt(String(document.getElementById('jokbo_min_rel').value), 10);
+                minRel = isNaN(n) ? 70 : Math.max(0, Math.min(n, 110));
+            } else if (mode === 'lesson-centric') {
+                const n = parseInt(String(document.getElementById('lesson_min_rel').value), 10);
+                minRel = isNaN(n) ? 70 : Math.max(0, Math.min(n, 110));
+            }
+            return { multiApi, minRel };
+        }
+        function buildFormDataFromStaged(jokboInputId, lessonInputId, opts) {
+            const fd = new FormData();
+            const jokboFiles = stagedFiles[jokboInputId] || [];
+            const lessonFiles = stagedFiles[lessonInputId] || [];
+            for (const f of jokboFiles) fd.append('jokbo_files', f);
+            for (const f of lessonFiles) fd.append('lesson_files', f);
+            fd.append('multi_api', opts.multiApi ? 'true' : 'false');
+            fd.append('min_relevance', String(opts.minRel));
+            return fd;
+        }
+        function filesFingerprint(jokboInputId, lessonInputId, model, opts) {
+            const jb = (stagedFiles[jokboInputId] || []).map(f => `${f.name}:${f.size}:${f.lastModified}`).join('|');
+            const ls = (stagedFiles[lessonInputId] || []).map(f => `${f.name}:${f.size}:${f.lastModified}`).join('|');
+            return `${model}|${opts.multiApi?'m':'s'}|${opts.minRel}|${jb}||${ls}`;
+        }
+        async function doPreflight(mode, jokboInputId, lessonInputId, model) {
+            const opts = currentOptions(mode);
+            const fd = buildFormDataFromStaged(jokboInputId, lessonInputId, opts);
+            const url = `/preflight/${mode}?model=${encodeURIComponent(model)}`;
+            const res = await fetch(url, { method: 'POST', credentials: 'include', body: fd });
+            if (!res.ok) {
+                let msg = 'Preflight failed';
+                try { const e = await res.json(); msg = e.detail || msg; } catch {}
+                throw new Error(msg);
+            }
+            const data = await res.json();
+            // Cache per mode with fingerprint
+            LATEST_PREFLIGHT[mode] = { data, fingerprint: filesFingerprint(jokboInputId, lessonInputId, model, opts) };
+            // Update estimate UI
+            try { updateEstimate(mode, data); } catch {}
+            return data;
+        }
+        function updateEstimate(mode, pf) {
+            const elId = (mode === 'jokbo-centric') ? 'jokbo_estimate' : (mode === 'lesson-centric' ? 'lesson_estimate' : null);
+            if (!elId) return;
+            const el = document.getElementById(elId);
+            if (!el) return;
+            const jbCnt = (pf && pf.files && pf.files.jokbo) ? pf.files.jokbo.length : 0;
+            const lsCnt = (pf && pf.files && pf.files.lesson) ? pf.files.lesson.length : 0;
+            const tc = pf.total_chunks || 0;
+            const tpc = pf.tokens_per_chunk || 0;
+            const et = pf.estimated_tokens || 0;
+            el.innerHTML = tc > 0 ? `
+              <div class="mt-2 p-2 bg-gray-900/60 border border-gray-800 rounded">
+                <div>Files: ${jbCnt} exam · ${lsCnt} lecture</div>
+                <div>Chunks: <strong>${tc}</strong> (approx.)</div>
+                <div>Tokens: ~ <strong>${et}</strong> (${tpc} / chunk)</div>
+              </div>` : '';
+        }
+
         // Form submission
         async function submitAnalysis(mode, jokboInputId, lessonInputId, model) {
             const statusBadge = document.getElementById('status-badge');
@@ -693,71 +761,45 @@
                 return;
             }
             
-            // Update status
-            statusBadge.className = 'status-badge processing';
-            statusBadge.textContent = 'UPLOADING';
-            statusContent.innerHTML = `
-                <div>
-                    <div class="loader"></div>
-                    <div class="status-message" style="margin-top: 1rem">Uploading files...</div>
-                    <div class="progress-wrapper">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 30%"></div>
+            try {
+                // Step 1: preflight (upload-only + estimate)
+                statusBadge.className = 'status-badge processing';
+                statusBadge.textContent = 'UPLOADING';
+                statusContent.innerHTML = `
+                    <div>
+                        <div class="loader"></div>
+                        <div class="status-message" style="margin-top: 1rem">Uploading for preflight...</div>
+                        <div class="progress-wrapper">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 30%"></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-            
-            const formData = new FormData();
-            for (const file of jokboFiles) {
-                formData.append('jokbo_files', file);
-            }
-            for (const file of lessonFiles) {
-                formData.append('lesson_files', file);
-            }
+                `;
 
-            try {
-                const multiApi = getMultiApiState(mode);
-                const minRel = (() => {
-                    if (mode === 'jokbo-centric') {
-                        const n = parseInt(String(document.getElementById('jokbo_min_rel').value), 10);
-                        return isNaN(n) ? 70 : Math.max(0, Math.min(n, 110));
-                    }
-                    if (mode === 'lesson-centric') {
-                        const n = parseInt(String(document.getElementById('lesson_min_rel').value), 10);
-                        return isNaN(n) ? 70 : Math.max(0, Math.min(n, 110));
-                    }
-                    if (mode === 'partial-jokbo') {
-                        const n = parseInt(String(document.getElementById('partial_min_rel').value), 10);
-                        return isNaN(n) ? 50 : Math.max(0, Math.min(n, 110));
-                    }
-                    return 70;
-                })();
-                // Always include consistent params for parity
-                formData.append('multi_api', multiApi ? 'true' : 'false');
-                formData.append('min_relevance', String(minRel));
-                const response = await fetch(`/analyze/${mode}?model=${encodeURIComponent(model)}&multi_api=${multiApi ? 'true' : 'false'}&min_relevance=${encodeURIComponent(String(minRel))}`,
-                {
-                    method: 'POST',
-                    credentials: 'include',
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Upload failed');
+                const pf = await doPreflight(mode, jokboInputId, lessonInputId, model);
+
+                // Step 2: confirm with user before starting Gemini work
+                const tpc = pf.tokens_per_chunk || 0;
+                const et = pf.estimated_tokens || 0;
+                const tc = pf.total_chunks || 0;
+                const proceed = window.confirm(`총 청크: ${tc}\n예상 토큰: ${et} (청크당 ${tpc})\n\n이대로 분석을 시작할까요?`);
+                if (!proceed) {
+                    statusBadge.className = 'status-badge idle';
+                    statusBadge.textContent = 'IDLE';
+                    statusContent.innerHTML = '<p id="status-message" class="text-gray-400">Ready to process your files.</p>';
+                    return;
                 }
-                
-                const data = await response.json();
-                
+
+                // Step 3: start job from preflight job_id
+                statusBadge.className = 'status-badge processing';
                 statusBadge.textContent = 'PROCESSING';
-                const modeText = multiApi ? 'Multi-API' : 'Single API';
                 statusContent.innerHTML = `
                     <div>
                         <div class="loader"></div>
                         <div class="status-message" style="margin-top: 1rem">
-                            ${modeText} · ${model.toUpperCase()}<br>
-                            <small class="text-gray-500">Job ID: ${data.job_id}</small>
+                            ${getMultiApiState(mode) ? 'Multi-API' : 'Single API'} · ${model.toUpperCase()}<br>
+                            <small class="text-gray-500">Job ID: ${pf.job_id}</small>
                         </div>
                         <div class="progress-wrapper">
                             <div class="progress-bar">
@@ -766,9 +808,15 @@
                         </div>
                     </div>
                 `;
-                
+                const startRes = await fetch(`/jobs/${pf.job_id}/start`, { method: 'POST', credentials: 'include' });
+                if (!startRes.ok) {
+                    let msg = 'Failed to start job';
+                    try { const e = await startRes.json(); msg = e.detail || msg; } catch {}
+                    throw new Error(msg);
+                }
+                const startData = await startRes.json();
                 // Start checking status
-                checkStatus(data.task_id, data.job_id);
+                checkStatus(startData.task_id, startData.job_id);
                 
             } catch (error) {
                 statusBadge.className = 'status-badge error';
@@ -933,6 +981,49 @@
             e.preventDefault();
             const model = document.getElementById('lesson_model').value;
             await submitAnalysis('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
+        });
+
+        // Trigger automatic preflight estimate when both buckets filled or options change
+        async function maybePreflight(mode, jokboId, lessonId, model) {
+            const jb = stagedFiles[jokboId] || [];
+            const ls = stagedFiles[lessonId] || [];
+            if (!CURRENT_USER) return; // require login to preflight (uses server)
+            if (jb.length === 0 || ls.length === 0) return;
+            const opts = currentOptions(mode);
+            const fp = filesFingerprint(jokboId, lessonId, model, opts);
+            const cached = LATEST_PREFLIGHT[mode];
+            if (cached && cached.fingerprint === fp) {
+                // Already up-to-date
+                try { updateEstimate(mode, cached.data); } catch {}
+                return;
+            }
+            try { await doPreflight(mode, jokboId, lessonId, model); } catch (e) { /* ignore */ }
+        }
+        // Wire preflight on file selection changes
+        document.getElementById('jokbo_files').addEventListener('change', () => {
+            const model = document.getElementById('jokbo_model').value;
+            maybePreflight('jokbo-centric', 'jokbo_files', 'jokbo_lesson_files', model);
+        });
+        document.getElementById('jokbo_lesson_files').addEventListener('change', () => {
+            const model = document.getElementById('jokbo_model').value;
+            maybePreflight('jokbo-centric', 'jokbo_files', 'jokbo_lesson_files', model);
+        });
+        document.getElementById('lesson_lesson_files').addEventListener('change', () => {
+            const model = document.getElementById('lesson_model').value;
+            maybePreflight('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
+        });
+        document.getElementById('lesson_jokbo_files').addEventListener('change', () => {
+            const model = document.getElementById('lesson_model').value;
+            maybePreflight('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
+        });
+        // Wire preflight when options change (model / min relevance / multi-api)
+        document.getElementById('jokbo_model').addEventListener('change', () => {
+            const model = document.getElementById('jokbo_model').value;
+            maybePreflight('jokbo-centric', 'jokbo_files', 'jokbo_lesson_files', model);
+        });
+        document.getElementById('lesson_model').addEventListener('change', () => {
+            const model = document.getElementById('lesson_model').value;
+            maybePreflight('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
         });
 
         document.getElementById('partialForm').addEventListener('submit', async (e) => {
