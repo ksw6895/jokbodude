@@ -13,6 +13,7 @@ import time
 from typing import Any, Optional, List, Dict
 from datetime import datetime
 from google import genai  # google-genai unified SDK
+from google.genai import types as genai_types
 from pathlib import Path
 
 from ..utils.exceptions import APIError, FileUploadError, ContentGenerationError
@@ -114,8 +115,8 @@ class GeminiAPIClient:
     # enforces object-only JSON without overconstraining nested properties.
     DEFAULT_RESPONSE_SCHEMA: Dict[str, Any] = {"type": "object"}
             
-    def upload_file(self, file_path: str, display_name: Optional[str] = None, 
-                   mime_type: str = "application/pdf") -> Any:
+    def upload_file(self, file_path: str, display_name: Optional[str] = None,
+                    mime_type: str = "application/pdf") -> Any:
         """
         Upload a file to Gemini API.
         
@@ -137,20 +138,30 @@ class GeminiAPIClient:
             logger.info(f"Uploading file: {display_name} [key={self._key_tag()}]")
             if self._client is None:
                 raise FileUploadError("Client not initialized")
-            uploaded_file = self._client.files.upload(
-                file=file_path,
+            # google-genai (new SDK) upload signature: files.upload(file=..., config=UploadFileConfig(...))
+            upload_cfg = genai_types.UploadFileConfig(
                 display_name=display_name,
                 mime_type=mime_type,
             )
+            uploaded_file = self._client.files.upload(
+                file=file_path,
+                config=upload_cfg,
+            )
             
-            # Wait for file to be processed
-            while uploaded_file.state.name == "PROCESSING":
-                logger.debug(f"Processing {display_name}... [key={self._key_tag()}]")
+            # Wait until file is ACTIVE per new SDK semantics
+            while True:
+                try:
+                    state = getattr(uploaded_file, "state", None)
+                    state_name = getattr(state, "name", None) if state is not None else None
+                except Exception:
+                    state_name = None
+                if state_name == "ACTIVE":
+                    break
+                if state_name == "FAILED":
+                    raise FileUploadError(f"File processing failed: {display_name}")
+                logger.debug(f"Processing {display_name} (state={state_name or 'UNKNOWN'})... [key={self._key_tag()}]")
                 time.sleep(2)
                 uploaded_file = self._client.files.get(uploaded_file.name)
-            
-            if uploaded_file.state.name == "FAILED":
-                raise FileUploadError(f"File processing failed: {display_name}")
                 
             logger.info(f"Successfully uploaded: {display_name} [key={self._key_tag()}]")
             return uploaded_file
