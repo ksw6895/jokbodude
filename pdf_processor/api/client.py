@@ -235,7 +235,10 @@ class GeminiAPIClient:
         Raises:
             ContentGenerationError: If content generation fails
         """
-        for attempt in range(max_retries):
+        # Allow up to 2 extra tries specifically for prompt blocks (user request)
+        block_bonus_attempts = 2
+        total_attempts = max(1, int(max_retries)) + block_bonus_attempts
+        for attempt in range(total_attempts):
             try:
                 # Enforce JSON mode and allow optional schema/limits per-call
                 gen_config: Dict[str, Any] = {}
@@ -300,9 +303,7 @@ class GeminiAPIClient:
                 except Exception:
                     pf, block_reason = None, None
                 if block_reason:
-                    # Do NOT retry for prompt blocks; rephrasing is required and this
-                    # is not a transient/key-specific issue. Also include a human-readable
-                    # reason name when possible to aid classification upstream.
+                    # Retry up to 2 more times on prompt blocks before surfacing error
                     reason_map = {
                         0: "UNSPECIFIED",
                         1: "SAFETY",
@@ -322,7 +323,15 @@ class GeminiAPIClient:
                     reason_name = reason_map.get(reason_val, str(block_reason))
                     msg = f"Prompt blocked: block_reason={block_reason} ({reason_name})"
                     logger.warning(f"{msg} [key={self._key_tag()}]")
-                    # Immediately fail so the multi-API manager can decide next steps.
+                    # If we still have bonus attempts left (specific to blocks), retry
+                    # Note: attempt is 0-based; treat last two iterations as bonus for block cases
+                    remaining_bonus = max(0, (total_attempts - max(1, int(max_retries))) - max(0, attempt - (max(1, int(max_retries)) - 1)))
+                    if attempt < (max(1, int(max_retries)) + block_bonus_attempts - 1):
+                        wait_time = 1  # short fixed wait for block retries
+                        logger.info(f"Retrying due to prompt block in {wait_time}s... [key={self._key_tag()}]")
+                        time.sleep(wait_time)
+                        continue
+                    # No more retries: surface as error so the manager can rotate keys/log
                     raise ContentGenerationError(msg)
 
                 # Guard against empty candidates before accessing response.text

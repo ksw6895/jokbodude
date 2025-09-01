@@ -487,7 +487,8 @@ class ResponseParser:
                     slides = q.get("related_lesson_slides") or []
                     if not isinstance(slides, list):
                         slides = []
-                    norm_slides: List[Dict[str, Any]] = []
+                    # Deduplicate by (lesson_filename, lesson_page) keeping highest score
+                    best_by_key: Dict[tuple, Dict[str, Any]] = {}
                     for s in slides:
                         if not isinstance(s, dict):
                             continue
@@ -504,12 +505,17 @@ class ResponseParser:
                         rs = (s.get("relevance_reason") or s.get("reason") or "").strip()
                         # Parser-level filtering: drop slides with score < 80
                         if sc >= 80:
-                            norm_slides.append({
+                            key = (lf.lower(), lp)
+                            cand = {
                                 "lesson_filename": lf,
                                 "lesson_page": lp,
                                 "relevance_score": sc,
                                 "relevance_reason": rs
-                            })
+                            }
+                            prev = best_by_key.get(key)
+                            if not prev or sc > int(prev.get("relevance_score", 0)):
+                                best_by_key[key] = cand
+                    norm_slides: List[Dict[str, Any]] = list(best_by_key.values())
                     # Keep at most 2 slides by score desc
                     norm_slides.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)
                     norm_slides = norm_slides[:2]

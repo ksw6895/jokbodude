@@ -280,8 +280,37 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                     slide["lesson_page"] = new_lp
                     filtered_slides.append(slide)
 
-                # Replace with validated slides only
-                question["related_lesson_slides"] = filtered_slides
+                # Replace with validated slides only, de-duplicated by (lesson_filename, lesson_page)
+                if filtered_slides:
+                    best_by_key = {}
+                    for s in filtered_slides:
+                        try:
+                            lf = (s.get("lesson_filename") or "").strip().lower()
+                        except Exception:
+                            lf = ""
+                        try:
+                            lp2 = int(s.get("lesson_page", 0))
+                        except Exception:
+                            lp2 = 0
+                        key = (lf, lp2)
+                        # Prefer higher relevance_score when duplicates exist
+                        try:
+                            sc_new = int(s.get("relevance_score", 0) or 0)
+                        except Exception:
+                            sc_new = 0
+                        prev = best_by_key.get(key)
+                        if not prev:
+                            best_by_key[key] = s
+                        else:
+                            try:
+                                sc_prev = int(prev.get("relevance_score", 0) or 0)
+                            except Exception:
+                                sc_prev = 0
+                            if sc_new > sc_prev:
+                                best_by_key[key] = s
+                    question["related_lesson_slides"] = list(best_by_key.values())
+                else:
+                    question["related_lesson_slides"] = []
 
         return result
     
@@ -436,6 +465,32 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                     "questions": []
                 }
             
+            # De-duplicate connections by (lesson_filename, lesson_page), keeping the highest score
+            try:
+                dedup: dict[tuple, dict] = {}
+                for c in connections:
+                    if not isinstance(c, dict):
+                        continue
+                    lf = str(c.get("lesson_filename") or "").strip().lower()
+                    try:
+                        lp = int(str(c.get("lesson_page", 0)) or 0)
+                    except Exception:
+                        lp = 0
+                    if not lf or lp <= 0:
+                        continue
+                    key = (lf, lp)
+                    try:
+                        sc = int(c.get("relevance_score", 0) or 0)
+                    except Exception:
+                        sc = 0
+                    prev = dedup.get(key)
+                    if (prev is None) or (sc > int(prev.get("relevance_score", 0) or 0)):
+                        dedup[key] = c
+                # Use deduplicated list for filtering
+                connections = list(dedup.values()) if dedup else connections
+            except Exception:
+                pass
+
             # Filter connections with user-configured threshold
             min_thr = getattr(self, 'min_relevance_score', 80)
             filtered_connections = self.filter_connections(connections, min_score=min_thr)
