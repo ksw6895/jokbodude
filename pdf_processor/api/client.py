@@ -97,7 +97,7 @@ class GeminiAPIClient:
             
         try:
             logger.info(f"Uploading file: {display_name} [key={self._key_tag()}]")
-            if not self._client:
+            if self._client is None:
                 raise FileUploadError("Client not initialized")
             uploaded_file = self._client.files.upload(
                 file=file_path,
@@ -134,7 +134,7 @@ class GeminiAPIClient:
         """
         for attempt in range(max_retries):
             try:
-                if not self._client:
+                if self._client is None:
                     raise FileUploadError("Client not initialized")
                 self._client.files.delete(file.name)
                 logger.info(f"Deleted file: {file.display_name} [key={self._key_tag()}]")
@@ -153,7 +153,7 @@ class GeminiAPIClient:
             List of uploaded files
         """
         try:
-            if not self._client:
+            if self._client is None:
                 raise FileUploadError("Client not initialized")
             files = list(self._client.files.list())
             return files
@@ -338,7 +338,7 @@ class GeminiAPIClient:
             File object if found, None otherwise
         """
         try:
-            if not self._client:
+            if self._client is None:
                 return None
             return self._client.files.get(file_name)
         except Exception as e:
