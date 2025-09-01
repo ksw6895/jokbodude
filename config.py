@@ -124,22 +124,14 @@ def create_model(model_type: str = "flash", thinking_budget: Optional[int] = Non
         # config["thinking_budget"] = thinking_budget
     
     # Bind a default client so the model is fully scoped without global config
-    client = genai.Client(api_key=API_KEY)
-    safety = get_safety_settings()
-    try:
-        return genai.GenerativeModel(
-            client=client,
-            model_name=model_name,
-            generation_config=config,
-            safety_settings=safety,
-        )
-    except Exception:
-        # Fallback without safety_settings if structure is not accepted
-        return genai.GenerativeModel(
-            client=client,
-            model_name=model_name,
-            generation_config=config,
-        )
+    # New SDK does not require a GenerativeModel instance; we return a config dict.
+    return {
+        "model_name": model_name,
+        "generation_config": config,
+        "safety_settings": get_safety_settings(),
+        # Informational only; clients will instantiate `genai.Client` per key
+        "_api_key_bound": API_KEY is not None,
+    }
 
 # Default model (for backward compatibility)
 # NOTE: Model creation is now done after explicit configuration

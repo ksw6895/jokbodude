@@ -35,10 +35,11 @@ api_keys = [
 ]
 
 # Create model
-model = genai.GenerativeModel(model_name="gemini-1.5-pro")
+client = genai.Client()
+model_cfg = {"model_name": "gemini-2.5-pro"}
 
 # Create processor
-processor = PDFProcessor(model)
+processor = PDFProcessor(model_cfg)
 
 # Jokbo-centric analysis with multi-API
 result = processor.analyze_jokbo_centric_multi_api(

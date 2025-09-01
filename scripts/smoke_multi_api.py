@@ -62,7 +62,8 @@ def main() -> None:
         jokbo_path, lesson_paths = pick_default_files()
 
     # Configure API and model
-    configure_api()  # uses default key
+    # New SDK uses scoped clients; our model is a config dict
+    configure_api()  # returns a client if needed, but not required here
     model = create_model(args.model)
     processor = PDFProcessor(model, session_id='smoke')
 

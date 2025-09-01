@@ -42,7 +42,7 @@ class PDFProcessor:
         try:
             self.api_client = GeminiAPIClient(model, api_key=_DEFAULT_API_KEY, key_index=0)
         except Exception:
-            # Fallback to no explicit key if config import fails; SDK global config should be set upstream
+            # Fallback to no explicit key if config import fails
             self.api_client = GeminiAPIClient(model)
         # Bind file manager to this API client (single-key context)
         self.file_manager = FileManager(self.api_client)
@@ -439,7 +439,14 @@ class PDFProcessor:
     def _get_model_config(self) -> Dict[str, Any]:
         """Get the model configuration from the current model."""
         # Extract config from current model
-        # This is a simplified version - in reality, you'd want to properly extract the config
+        # Accept dict-style config or object-style; return normalized dict
+        if isinstance(self.model, dict):
+            out = {
+                "model_name": self.model.get("model_name") or self.model.get("_model_name") or "gemini-2.5-flash",
+                "generation_config": self.model.get("generation_config") or self.model.get("_generation_config"),
+                "safety_settings": self.model.get("safety_settings") or self.model.get("_safety_settings"),
+            }
+            return out
         model_name = (
             getattr(self.model, "_model_name", None)
             or getattr(self.model, "model_name", None)

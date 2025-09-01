@@ -32,7 +32,45 @@ class GeminiAPIClient:
             model: The Gemini model instance to use
             api_key: Optional API key (if not provided, uses environment variable)
         """
-        self.model = model
+        # Extract model configuration (name, base generation config, safety)
+        self.model_name = None
+        self.base_generation_config: Dict[str, Any] | None = None
+        self.safety_settings: Any = None
+        try:
+            if isinstance(model, dict):
+                self.model_name = (
+                    model.get("model_name")
+                    or model.get("_model_name")
+                    or "gemini-2.5-flash"
+                )
+                self.base_generation_config = (
+                    model.get("generation_config")
+                    or model.get("_generation_config")
+                    or None
+                )
+                self.safety_settings = (
+                    model.get("safety_settings")
+                    or model.get("_safety_settings")
+                    or None
+                )
+            else:
+                self.model_name = (
+                    getattr(model, "model_name", None)
+                    or getattr(model, "_model_name", None)
+                    or "gemini-2.5-flash"
+                )
+                self.base_generation_config = (
+                    getattr(model, "generation_config", None)
+                    or getattr(model, "_generation_config", None)
+                )
+                self.safety_settings = (
+                    getattr(model, "safety_settings", None)
+                    or getattr(model, "_safety_settings", None)
+                )
+        except Exception:
+            self.model_name = self.model_name or "gemini-2.5-flash"
+            self.base_generation_config = self.base_generation_config or None
+            self.safety_settings = self.safety_settings or None
         # Bind API key if provided; in single-key mode default to configured key
         if api_key is None:
             try:
@@ -195,33 +233,25 @@ class GeminiAPIClient:
                 if isinstance(max_output_tokens, int) and max_output_tokens > 0:
                     gen_config["max_output_tokens"] = max_output_tokens
 
-                # Prefer per-key client for generation to avoid global config races
-                # Prefer the bound GenerativeModel (carries generation/safety config)
-                response = None
+                # Merge base generation config with per-call overrides
+                final_gen_cfg: Dict[str, Any] = {}
                 try:
-                    response = self.model.generate_content(
-                        content,
-                        generation_config=gen_config or None,
-                    )
-                except Exception as _e:
-                    logger.debug(f"Model-based generation failed; trying client call: {_e}")
-                    response = None
+                    if isinstance(self.base_generation_config, dict):
+                        final_gen_cfg.update(self.base_generation_config)
+                except Exception:
+                    pass
+                for k, v in (gen_config or {}).items():
+                    final_gen_cfg[k] = v
 
-                if response is None and self._client is not None:
-                    try:
-                        model_name = (
-                            getattr(self.model, "_model_name", None)
-                            or getattr(self.model, "model_name", None)
-                            or "gemini-2.5-flash"
-                        )
-                        response = self._client.models.generate_content(
-                            model=model_name,
-                            contents=content,
-                            generation_config=gen_config or None,
-                        )
-                    except Exception as _e:
-                        logger.debug(f"Client-based generation also failed: {_e}")
-                        raise
+                if self._client is None:
+                    raise ContentGenerationError("Client not initialized")
+                model_name = self.model_name or "gemini-2.5-flash"
+                response = self._client.models.generate_content(
+                    model=model_name,
+                    contents=content,
+                    generation_config=final_gen_cfg or None,
+                    safety_settings=self.safety_settings if self.safety_settings else None,
+                )
                 
                 # Blocked prompt handling (avoid touching response.text/parts when blocked)
                 try:

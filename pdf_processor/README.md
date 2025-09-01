@@ -68,10 +68,14 @@ from google import genai
 setup_file_logging()
 
 # Create model
-model = genai.GenerativeModel(model_name="gemini-1.5-pro")
+client = genai.Client()
+model_cfg = {
+  "model_name": "gemini-2.5-pro",
+  "generation_config": {"response_mime_type": "application/json"}
+}
 
-# Create processor
-processor = PDFProcessor(model)
+# Create processor (accepts model config dict)
+processor = PDFProcessor(model_cfg)
 
 # Lesson-centric analysis
 result = processor.analyze_lesson_centric(

@@ -131,7 +131,7 @@ class MultiAPIManager:
         
         # Create API clients for each key
         self.api_clients = []
-        self.models = []
+        self.models = []  # keep for interface; we store model config dicts
 
         # Global prompt-block guard within the lifetime of this manager (i.e., per job).
         # Once we detect a prompt block, we will only allow each key to be tried once
@@ -140,37 +140,11 @@ class MultiAPIManager:
         self._global_tried_indices: set[int] = set()
         
         for i, api_key in enumerate(api_keys):
-            # Create a per-key client (avoid global configure to prevent races)
-            try:
-                _client = genai.Client(api_key=api_key)
-            except Exception:
-                _client = None
-
-            # Create model bound to this client, with graceful fallback if safety_settings shape is unsupported
+            # Model config dict for this client; keep original config
             cfg = dict(model_config or {})
-            try:
-                if _client is not None:
-                    model = genai.GenerativeModel(client=_client, **cfg)
-                else:
-                    model = genai.GenerativeModel(**cfg)
-            except Exception:
-                # Retry without safety_settings
-                try:
-                    cfg.pop("safety_settings", None)
-                except Exception:
-                    pass
-                if _client is not None:
-                    try:
-                        model = genai.GenerativeModel(client=_client, **cfg)
-                    except Exception:
-                        model = genai.GenerativeModel(**cfg)
-                else:
-                    model = genai.GenerativeModel(**cfg)
-
-            self.models.append(model)
-            
+            self.models.append(cfg)
             # Create API client (maintains its own per-key genai.Client for file ops)
-            client = GeminiAPIClient(model, api_key, key_index=i)
+            client = GeminiAPIClient(cfg, api_key, key_index=i)
             self.api_clients.append(client)
             
         safe_ids = [f"k{i}:***{(k or '')[-4:] if k else '????'}" for i, k in enumerate(api_keys)]
