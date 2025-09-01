@@ -161,7 +161,7 @@ class GeminiAPIClient:
                     raise FileUploadError(f"File processing failed: {display_name}")
                 logger.debug(f"Processing {display_name} (state={state_name or 'UNKNOWN'})... [key={self._key_tag()}]")
                 time.sleep(2)
-                uploaded_file = self._client.files.get(uploaded_file.name)
+                uploaded_file = self._client.files.get(name=uploaded_file.name)
                 
             logger.info(f"Successfully uploaded: {display_name} [key={self._key_tag()}]")
             return uploaded_file
@@ -185,7 +185,7 @@ class GeminiAPIClient:
             try:
                 if self._client is None:
                     raise FileUploadError("Client not initialized")
-                self._client.files.delete(file.name)
+                self._client.files.delete(name=file.name)
                 logger.info(f"Deleted file: {file.display_name} [key={self._key_tag()}]")
                 return True
             except Exception as e:
@@ -257,12 +257,41 @@ class GeminiAPIClient:
                 if self._client is None:
                     raise ContentGenerationError("Client not initialized")
                 model_name = self.model_name or "gemini-2.5-flash"
-                response = self._client.models.generate_content(
-                    model=model_name,
-                    contents=content,
-                    generation_config=final_gen_cfg or None,
-                    safety_settings=self.safety_settings if self.safety_settings else None,
-                )
+                # New SDK prefers `config=`; add compatibility fallback to `generation_config=`
+                gen_kwargs: Dict[str, Any] = {
+                    "model": model_name,
+                    "contents": content,
+                }
+                if final_gen_cfg:
+                    gen_kwargs["config"] = final_gen_cfg
+                if self.safety_settings:
+                    gen_kwargs["safety_settings"] = self.safety_settings
+
+                try:
+                    response = self._client.models.generate_content(**gen_kwargs)
+                except TypeError as te:
+                    msg = str(te).lower()
+                    # If this SDK doesn't support `config`, try legacy `generation_config`
+                    if "unexpected keyword" in msg and "config" in msg:
+                        try:
+                            if final_gen_cfg:
+                                gen_kwargs.pop("config", None)
+                                gen_kwargs["generation_config"] = final_gen_cfg
+                            response = self._client.models.generate_content(**gen_kwargs)
+                        except TypeError as te2:
+                            # If `safety_settings` is also unsupported, drop it and retry once
+                            msg2 = str(te2).lower()
+                            if "unexpected keyword" in msg2 and "safety_settings" in msg2:
+                                gen_kwargs.pop("safety_settings", None)
+                                response = self._client.models.generate_content(**gen_kwargs)
+                            else:
+                                raise
+                    # If `safety_settings` alone is unsupported, drop it and retry
+                    elif "unexpected keyword" in msg and "safety_settings" in msg:
+                        gen_kwargs.pop("safety_settings", None)
+                        response = self._client.models.generate_content(**gen_kwargs)
+                    else:
+                        raise
                 
                 # Blocked prompt handling (avoid touching response.text/parts when blocked)
                 try:
@@ -386,7 +415,7 @@ class GeminiAPIClient:
         try:
             if self._client is None:
                 return None
-            return self._client.files.get(file_name)
+            return self._client.files.get(name=file_name)
         except Exception as e:
             logger.error(f"Failed to get file {file_name} [key={self._key_tag()}]: {str(e)}")
             return None

@@ -165,7 +165,7 @@ class FileManager:
                         return True
                 else:
                     _client = genai.Client()
-                    _client.files.delete(file.name)
+                    _client.files.delete(name=file.name)
                     logger.info(f"Deleted file: {file.display_name}")
                     self.untrack_file(file)
                     return True
