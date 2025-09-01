@@ -62,7 +62,7 @@ pdf_processor/
 
 ```python
 from pdf_processor import PDFProcessor, setup_file_logging
-import google.generativeai as genai
+from google import genai
 
 # Set up logging
 setup_file_logging()

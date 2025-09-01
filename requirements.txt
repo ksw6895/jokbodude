@@ -1,5 +1,6 @@
 # Existing dependencies
-google-generativeai==0.8.5
+# Migrate from legacy google-generativeai (EOL) to new google-genai
+google-genai>=1.30,<2
 PyPDF2==3.0.1
 reportlab==4.2.2
 Pillow==11.0.0

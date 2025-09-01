@@ -6,7 +6,7 @@ Provides centralized file operations with proper cleanup and tracking.
 import time
 from typing import List, Optional, Set, Any
 from datetime import datetime
-import google.generativeai as genai
+from google import genai  # google-genai unified SDK
 
 from ..utils.logging import get_logger
 
@@ -128,7 +128,9 @@ class FileManager:
             if self.api_client is not None:
                 files = self.api_client.list_files()
             else:
-                files = list(genai.list_files())
+                # Use a fresh client that picks up env GEMINI_API_KEY/GOOGLE_API_KEY
+                _client = genai.Client()
+                files = list(_client.files.list())
             if self.api_client is not None:
                 logger.info(f"Found {len(files)} uploaded files [key={self.api_client._key_tag()}]")
             else:
@@ -162,7 +164,8 @@ class FileManager:
                         self.untrack_file(file)
                         return True
                 else:
-                    genai.delete_file(file.name)
+                    _client = genai.Client()
+                    _client.files.delete(file.name)
                     logger.info(f"Deleted file: {file.display_name}")
                     self.untrack_file(file)
                     return True

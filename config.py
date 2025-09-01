@@ -1,5 +1,5 @@
 import os
-import google.generativeai as genai
+from google import genai  # google-genai unified SDK
 from dotenv import load_dotenv
 from typing import Optional, List, Dict, Any
 
@@ -22,9 +22,8 @@ elif API_KEY:
 else:
     raise ValueError("Please set either GEMINI_API_KEY or GEMINI_API_KEYS in .env file")
 
-# Configure with the default (first) API key
-# NOTE: Configure is now done explicitly when needed, not at import time
-# genai.configure(api_key=API_KEY)
+# Note: google-genai prefers per-instance clients over global configure.
+# We avoid global state and create genai.Client(...) where needed.
 
 # Base configuration
 GENERATION_CONFIG = {
@@ -36,60 +35,61 @@ GENERATION_CONFIG = {
 }
 
 # Base desired safety configuration (may be filtered if SDK lacks support)
-SAFETY_SETTINGS = [
-    {
-        "category": "HARM_CATEGORY_HARASSMENT",
-        "threshold": "BLOCK_NONE"
-    },
-    {
-        "category": "HARM_CATEGORY_HATE_SPEECH",
-        "threshold": "BLOCK_NONE"
-    },
-    {
-        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-        "threshold": "BLOCK_NONE"
-    },
-    {
-        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-        "threshold": "BLOCK_NONE"
-    },
-    # Ensure civic integrity prompts are not blocked by default
-    {
-        "category": "HARM_CATEGORY_CIVIC_INTEGRITY",
-        "threshold": "BLOCK_NONE"
-    }
-]
+def _truthy(val: Optional[str]) -> bool:
+    if val is None:
+        return False
+    return str(val).strip().lower() in ("1", "true", "t", "yes", "y", "on")
 
-def get_safety_settings() -> List[Dict[str, Any]]:
-    """Return a safety_settings list compatible with the installed SDK.
+# Default: disable safety filters unless explicitly overridden
+DISABLE_SAFETY_FILTERS = _truthy(os.getenv("DISABLE_SAFETY_FILTERS", "true"))
 
-    Some SDK versions (e.g., google-generativeai<=0.8.x) may not support
-    certain categories like CIVIC_INTEGRITY. We attempt to normalize the
-    configured list and gracefully drop unsupported categories.
+SAFETY_SETTINGS: Optional[List[Dict[str, Any]]] = None  # computed on demand
+
+def _build_block_none_safety_settings() -> List[Dict[str, Any]] | list:
+    """Best-effort: build safety settings that disable blocking.
+
+    Tries the new google-genai typed API first; falls back to dict form.
+    Returns a list suitable for passing as `safety_settings`.
     """
+    categories = [
+        "HARM_CATEGORY_HARASSMENT",
+        "HARM_CATEGORY_HATE_SPEECH",
+        "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        "HARM_CATEGORY_DANGEROUS_CONTENT",
+        "HARM_CATEGORY_CIVIC_INTEGRITY",
+    ]
+    # Try typed API
     try:
-        # Validate against SDK converter (no network) to detect unsupported keys
-        from google.generativeai.types import safety_types as _st  # type: ignore
-        _st.to_easy_safety_dict(SAFETY_SETTINGS)
-        return SAFETY_SETTINGS
+        from google.genai import types as _types  # type: ignore
+        HC = getattr(_types, "HarmCategory", None)
+        BT = getattr(_types, "BlockThreshold", None)
+        SS = getattr(_types, "SafetySetting", None)
+        if HC and BT and SS:
+            out = []
+            for name in categories:
+                cat = getattr(HC, name, None) or name
+                thr = getattr(BT, "BLOCK_NONE", None) or "BLOCK_NONE"
+                out.append(SS(category=cat, threshold=thr))
+            return out
     except Exception:
-        # Filter out CIVIC_INTEGRITY if present; keep the standard four
-        filtered = [
-            s for s in SAFETY_SETTINGS
-            if str(s.get("category", "")).upper() != "HARM_CATEGORY_CIVIC_INTEGRITY"
-        ]
+        pass
+    # Fallback: dicts
+    return [{"category": name, "threshold": "BLOCK_NONE"} for name in categories]
+
+
+def get_safety_settings() -> Optional[List[Dict[str, Any]]]:
+    """Return safety settings, honoring DISABLE_SAFETY_FILTERS.
+
+    - If DISABLE_SAFETY_FILTERS is true (default), returns a best-effort list
+      that disables blocking (BLOCK_NONE per category).
+    - If false, returns None to rely on server defaults.
+    """
+    if DISABLE_SAFETY_FILTERS:
         try:
-            from google.generativeai.types import safety_types as _st  # type: ignore
-            _st.to_easy_safety_dict(filtered)
-            return filtered
+            return _build_block_none_safety_settings()  # type: ignore[return-value]
         except Exception:
-            # Last-resort minimal set
-            return [
-                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-            ]
+            return None
+    return None
 
 # Model name mapping
 MODEL_NAMES = {
@@ -123,17 +123,33 @@ def create_model(model_type: str = "flash", thinking_budget: Optional[int] = Non
         # TODO: Add actual thinking budget configuration when API supports it
         # config["thinking_budget"] = thinking_budget
     
-    return genai.GenerativeModel(
-        model_name=model_name,
-        generation_config=config,
-        safety_settings=get_safety_settings(),
-    )
+    # Bind a default client so the model is fully scoped without global config
+    client = genai.Client(api_key=API_KEY)
+    safety = get_safety_settings()
+    try:
+        return genai.GenerativeModel(
+            client=client,
+            model_name=model_name,
+            generation_config=config,
+            safety_settings=safety,
+        )
+    except Exception:
+        # Fallback without safety_settings if structure is not accepted
+        return genai.GenerativeModel(
+            client=client,
+            model_name=model_name,
+            generation_config=config,
+        )
 
 # Default model (for backward compatibility)
 # NOTE: Model creation is now done after explicit configuration
 # model = create_model("flash")
 
 def configure_api(api_key: Optional[str] = None):
-    """Explicitly configure the API with the given key or default"""
+    """Create and return a scoped google-genai Client.
+
+    New SDK does not require global configuration. This helper returns a
+    `genai.Client` for convenience and backward compatibility with callers.
+    """
     key_to_use = api_key or API_KEY
-    genai.configure(api_key=key_to_use)
+    return genai.Client(api_key=key_to_use)

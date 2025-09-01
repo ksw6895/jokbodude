@@ -25,7 +25,7 @@ The refactored PDF processor now includes full multi-API support for improved re
 
 ```python
 from pdf_processor import PDFProcessor
-import google.generativeai as genai
+from google import genai
 
 # Your API keys
 api_keys = [

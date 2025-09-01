@@ -12,7 +12,7 @@ Concurrency note:
 import time
 from typing import Any, Optional, List, Dict
 from datetime import datetime
-import google.generativeai as genai
+from google import genai  # google-genai unified SDK
 from pathlib import Path
 
 from ..utils.exceptions import APIError, FileUploadError, ContentGenerationError
@@ -196,27 +196,32 @@ class GeminiAPIClient:
                     gen_config["max_output_tokens"] = max_output_tokens
 
                 # Prefer per-key client for generation to avoid global config races
+                # Prefer the bound GenerativeModel (carries generation/safety config)
                 response = None
-                if self._client is not None:
-                    try:
-                        model_name = getattr(self.model, "_model_name", None) or getattr(self.model, "model_name", None)
-                        if model_name:
-                            response = self._client.models.generate_content(
-                                model=model_name,
-                                contents=content,
-                                generation_config=gen_config or None,
-                            )
-                    except Exception as _e:
-                        # Fall back to the bound model instance if client call fails
-                        logger.debug(f"Client-based generation failed; falling back to model: {_e}")
-                        response = None
-
-                if response is None:
-                    # Use the per-key bound model instance (thread-safe when created with client)
+                try:
                     response = self.model.generate_content(
                         content,
                         generation_config=gen_config or None,
                     )
+                except Exception as _e:
+                    logger.debug(f"Model-based generation failed; trying client call: {_e}")
+                    response = None
+
+                if response is None and self._client is not None:
+                    try:
+                        model_name = (
+                            getattr(self.model, "_model_name", None)
+                            or getattr(self.model, "model_name", None)
+                            or "gemini-2.5-flash"
+                        )
+                        response = self._client.models.generate_content(
+                            model=model_name,
+                            contents=content,
+                            generation_config=gen_config or None,
+                        )
+                    except Exception as _e:
+                        logger.debug(f"Client-based generation also failed: {_e}")
+                        raise
                 
                 # Blocked prompt handling (avoid touching response.text/parts when blocked)
                 try:

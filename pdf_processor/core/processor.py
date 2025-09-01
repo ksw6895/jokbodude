@@ -440,10 +440,23 @@ class PDFProcessor:
         """Get the model configuration from the current model."""
         # Extract config from current model
         # This is a simplified version - in reality, you'd want to properly extract the config
+        model_name = (
+            getattr(self.model, "_model_name", None)
+            or getattr(self.model, "model_name", None)
+            or "gemini-2.5-flash"
+        )
+        gen_cfg = (
+            getattr(self.model, "_generation_config", None)
+            or getattr(self.model, "generation_config", None)
+        )
+        safety = (
+            getattr(self.model, "_safety_settings", None)
+            or getattr(self.model, "safety_settings", None)
+        )
         return {
-            "model_name": getattr(self.model, "_model_name", "gemini-2.5-flash"),
-            "generation_config": getattr(self.model, "_generation_config", None),
-            "safety_settings": getattr(self.model, "_safety_settings", None)
+            "model_name": model_name,
+            "generation_config": gen_cfg,
+            "safety_settings": safety,
         }
     
     # Utility methods

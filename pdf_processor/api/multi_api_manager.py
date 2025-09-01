@@ -9,7 +9,7 @@ import random
 from typing import List, Dict, Any, Optional, Callable
 from datetime import datetime, timedelta
 import threading
-import google.generativeai as genai
+from google import genai  # google-genai unified SDK
 
 from .client import GeminiAPIClient
 from ..utils.logging import get_logger
@@ -146,16 +146,26 @@ class MultiAPIManager:
             except Exception:
                 _client = None
 
-            # Create model bound to this client
+            # Create model bound to this client, with graceful fallback if safety_settings shape is unsupported
+            cfg = dict(model_config or {})
             try:
                 if _client is not None:
-                    model = genai.GenerativeModel(client=_client, **model_config)
+                    model = genai.GenerativeModel(client=_client, **cfg)
                 else:
-                    # Fallback: create model without explicit client (will use default/global)
-                    model = genai.GenerativeModel(**model_config)
+                    model = genai.GenerativeModel(**cfg)
             except Exception:
-                # As a last resort, attempt without client
-                model = genai.GenerativeModel(**model_config)
+                # Retry without safety_settings
+                try:
+                    cfg.pop("safety_settings", None)
+                except Exception:
+                    pass
+                if _client is not None:
+                    try:
+                        model = genai.GenerativeModel(client=_client, **cfg)
+                    except Exception:
+                        model = genai.GenerativeModel(**cfg)
+                else:
+                    model = genai.GenerativeModel(**cfg)
 
             self.models.append(model)
             

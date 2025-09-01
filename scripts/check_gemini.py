@@ -19,7 +19,7 @@ import argparse
 from typing import List
 
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai  # google-genai unified SDK
 
 
 def mask_key(key: str) -> str:
@@ -38,10 +38,10 @@ def get_keys_from_env() -> List[str]:
 
 def check_key(key: str, verbose: bool = False) -> tuple[bool, str]:
     try:
-        genai.configure(api_key=key)
-        models = list(genai.list_models())
+        client = genai.Client(api_key=key)
+        models = list(client.models.list())
         if verbose:
-            names = ", ".join(m.name for m in models[:5])
+            names = ", ".join(getattr(m, 'name', '<unknown>') for m in models[:5])
             if len(models) > 5:
                 names += ", ..."
             print(f"  models returned: {len(models)} [sample: {names}]")
@@ -79,4 +79,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
