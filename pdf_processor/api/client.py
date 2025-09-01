@@ -2,16 +2,14 @@
 Gemini API client for handling API interactions.
 Provides a clean interface for API operations with retry logic and error handling.
 
-Important:
-- The google-generativeai SDK uses a global configuration (`genai.configure`).
-- In multi-threaded, multi-key scenarios this can cause cross-key 403/400 issues
-  if different threads reconfigure the global key concurrently.
-- To ensure correctness, we guard each configure+API call with a process-wide lock.
-  This may reduce peak parallelism but avoids permission errors.
+Concurrency note:
+- We now avoid the process-global `genai.configure` and do NOT use a global lock.
+- Each instance creates its own `genai.Client(api_key=...)` and uses client-scoped
+  services (files/models) so calls can run truly concurrently, even for the same key
+  when `GEMINI_PER_KEY_CONCURRENCY` > 1.
 """
 
 import time
-import threading
 from typing import Any, Optional, List, Dict
 from datetime import datetime
 import google.generativeai as genai
@@ -26,9 +24,6 @@ logger = get_logger(__name__)
 class GeminiAPIClient:
     """Client for interacting with Google Gemini API."""
     
-    # Global lock to prevent cross-thread key reconfiguration during SDK calls
-    CONFIG_LOCK = threading.RLock()
-
     def __init__(self, model, api_key: Optional[str] = None, *, key_index: Optional[int] = None):
         """
         Initialize the Gemini API client.
@@ -48,12 +43,16 @@ class GeminiAPIClient:
         else:
             self.api_key = api_key
         self.key_index = key_index
-        self._configure_api(api_key)
+        # Create a per-instance client bound to this API key for thread-safe ops
+        try:
+            self._client = genai.Client(api_key=self.api_key)
+        except Exception:
+            # Fallback: still allow object creation; calls will raise on use
+            self._client = None
         
     def _configure_api(self, api_key: Optional[str] = None):
-        """Configure the API with the provided or environment API key."""
-        if api_key:
-            genai.configure(api_key=api_key)
+        """Deprecated: no-op (kept for backward compatibility)."""
+        return None
 
     def _key_tag(self) -> str:
         """Return a safe identifier for the bound API key for logs.
@@ -96,23 +95,20 @@ class GeminiAPIClient:
             display_name = Path(file_path).name
             
         try:
-            # Ensure correct API key context for this client
             logger.info(f"Uploading file: {display_name} [key={self._key_tag()}]")
-            with self.CONFIG_LOCK:
-                self._configure_api(self.api_key)
-                uploaded_file = genai.upload_file(
-                    path=file_path,
-                    display_name=display_name,
-                    mime_type=mime_type
-                )
+            if not self._client:
+                raise FileUploadError("Client not initialized")
+            uploaded_file = self._client.files.upload(
+                file=file_path,
+                display_name=display_name,
+                mime_type=mime_type,
+            )
             
             # Wait for file to be processed
             while uploaded_file.state.name == "PROCESSING":
                 logger.debug(f"Processing {display_name}... [key={self._key_tag()}]")
                 time.sleep(2)
-                with self.CONFIG_LOCK:
-                    self._configure_api(self.api_key)
-                    uploaded_file = genai.get_file(uploaded_file.name)
+                uploaded_file = self._client.files.get(uploaded_file.name)
             
             if uploaded_file.state.name == "FAILED":
                 raise FileUploadError(f"File processing failed: {display_name}")
@@ -137,10 +133,9 @@ class GeminiAPIClient:
         """
         for attempt in range(max_retries):
             try:
-                # Ensure correct API key context for this client
-                with self.CONFIG_LOCK:
-                    self._configure_api(self.api_key)
-                    genai.delete_file(file.name)
+                if not self._client:
+                    raise FileUploadError("Client not initialized")
+                self._client.files.delete(file.name)
                 logger.info(f"Deleted file: {file.display_name} [key={self._key_tag()}]")
                 return True
             except Exception as e:
@@ -157,10 +152,9 @@ class GeminiAPIClient:
             List of uploaded files
         """
         try:
-            # Ensure correct API key context for this client
-            with self.CONFIG_LOCK:
-                self._configure_api(self.api_key)
-                files = list(genai.list_files())
+            if not self._client:
+                raise FileUploadError("Client not initialized")
+            files = list(self._client.files.list())
             return files
         except Exception as e:
             logger.error(f"Failed to list files [key={self._key_tag()}]: {str(e)}")
@@ -193,27 +187,18 @@ class GeminiAPIClient:
         """
         for attempt in range(max_retries):
             try:
-                # Ensure correct API key context for this client before generation
-                # Guard BOTH the configure and the generate_content call with a global lock
-                # to avoid cross-key races. The google-generativeai SDK uses process-global
-                # configuration; another thread reconfiguring between configure() and the
-                # actual call can lead to 403s when trying to access files uploaded under
-                # a different key.
-                with self.CONFIG_LOCK:
-                    self._configure_api(self.api_key)
+                # Enforce JSON mode and allow optional schema/limits per-call
+                gen_config: Dict[str, Any] = {}
+                if response_mime_type:
+                    gen_config["response_mime_type"] = response_mime_type
+                if isinstance(max_output_tokens, int) and max_output_tokens > 0:
+                    gen_config["max_output_tokens"] = max_output_tokens
 
-                    # Enforce JSON mode and allow optional schema/limits per-call
-                    gen_config: Dict[str, Any] = {}
-                    # Enforce JSON MIME type only; avoid response_schema to prevent 400s
-                    if response_mime_type:
-                        gen_config["response_mime_type"] = response_mime_type
-                    if isinstance(max_output_tokens, int) and max_output_tokens > 0:
-                        gen_config["max_output_tokens"] = max_output_tokens
-
-                    response = self.model.generate_content(
-                        content,
-                        generation_config=gen_config or None,
-                    )
+                # Use the per-key bound model instance (thread-safe) for generation
+                response = self.model.generate_content(
+                    content,
+                    generation_config=gen_config or None,
+                )
                 
                 # Blocked prompt handling (avoid touching response.text/parts when blocked)
                 try:
@@ -335,10 +320,9 @@ class GeminiAPIClient:
             File object if found, None otherwise
         """
         try:
-            # Ensure correct API key context for this client
-            with self.CONFIG_LOCK:
-                self._configure_api(self.api_key)
-                return genai.get_file(file_name)
+            if not self._client:
+                return None
+            return self._client.files.get(file_name)
         except Exception as e:
             logger.error(f"Failed to get file {file_name} [key={self._key_tag()}]: {str(e)}")
             return None
