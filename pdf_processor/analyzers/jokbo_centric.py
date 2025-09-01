@@ -222,8 +222,17 @@ class JokboCentricAnalyzer(BaseAnalyzer):
         if not (chunk_info and isinstance(result, dict) and "jokbo_pages" in result):
             return result
 
-        start_page, _ = chunk_info
-        offset = max(0, int(start_page) - 1)
+        # Chunk info is 1-based inclusive (start_page .. end_page) from original PDF
+        start_page, end_page = chunk_info
+        try:
+            start_page = int(start_page)
+            end_page = int(end_page)
+        except Exception:
+            # If chunk info is malformed, skip adjustments entirely
+            return result
+
+        offset = max(0, start_page - 1)
+        chunk_total_pages = max(0, end_page - start_page + 1)
 
         # Lazy-load total pages for clamping if we have a known lesson path
         total_pages = None
@@ -239,21 +248,40 @@ class JokboCentricAnalyzer(BaseAnalyzer):
 
         for page_info in (result.get("jokbo_pages") or []):
             for question in (page_info.get("questions") or []):
-                for slide in (question.get("related_lesson_slides") or []):
+                slides = question.get("related_lesson_slides") or []
+                if not isinstance(slides, list):
+                    continue
+                filtered_slides = []
+                for slide in slides:
                     if not isinstance(slide, dict):
+                        # Keep non-dict entries unchanged
                         continue
+                    # Parse lesson page as reported by the model (1-based within chunk)
                     try:
                         lp = int(slide.get("lesson_page", 0))
                     except Exception:
                         lp = 0
-                    if lp <= 0:
+
+                    # Drop hallucinated/out-of-range page indices for this chunk
+                    if lp < 1 or (chunk_total_pages and lp > chunk_total_pages):
+                        try:
+                            logger.debug(
+                                f"Dropping out-of-range lesson_page={lp} (chunk 1..{chunk_total_pages})"
+                            )
+                        except Exception:
+                            pass
                         continue
+
+                    # Within chunk range: apply offset and optional clamping
                     new_lp = lp + offset
-                    # Clamp to document bounds if known
                     tp = _get_total_pages()
                     if tp > 0:
                         new_lp = max(1, min(new_lp, tp))
                     slide["lesson_page"] = new_lp
+                    filtered_slides.append(slide)
+
+                # Replace with validated slides only
+                question["related_lesson_slides"] = filtered_slides
 
         return result
     

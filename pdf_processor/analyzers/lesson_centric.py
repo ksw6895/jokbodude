@@ -237,20 +237,54 @@ class LessonCentricAnalyzer(BaseAnalyzer):
 
     def _post_process_results(self, result: Dict[str, Any],
                               chunk_info: Optional[Tuple[int, int]] = None) -> Dict[str, Any]:
-        """Adjust lesson page numbers when processing a chunk."""
+        """Adjust lesson page numbers when processing a chunk.
+
+        Only keep slides whose lesson_page is within the chunk's 1-based
+        page range; treat out-of-range pages as hallucinations and drop them.
+        For valid pages, apply the page offset back to the original PDF.
+        """
         if not chunk_info:
             return result
-        start_page, _ = chunk_info
+
+        start_page, end_page = chunk_info
+        try:
+            start_page = int(start_page)
+            end_page = int(end_page)
+        except Exception:
+            return result
+
         offset = start_page - 1
-        
-        # Adjust lesson_page inside related_slides
-        if "related_slides" in result and isinstance(result["related_slides"], list):
-            for slide in result["related_slides"]:
-                if isinstance(slide, dict) and "lesson_page" in slide:
+        chunk_total_pages = max(0, end_page - start_page + 1)
+
+        # Adjust lesson_page inside related_slides and filter invalid ones
+        slides = result.get("related_slides")
+        if isinstance(slides, list):
+            filtered_slides = []
+            for slide in slides:
+                if not isinstance(slide, dict):
+                    # Keep non-dict entries unchanged
+                    continue
+                try:
+                    lp = int(slide.get("lesson_page", 0))
+                except Exception:
+                    lp = 0
+
+                # Drop if lesson_page not within this chunk's valid range
+                if lp < 1 or (chunk_total_pages and lp > chunk_total_pages):
                     try:
-                        slide["lesson_page"] = slide.get("lesson_page", 0) + offset
+                        logger.debug(
+                            f"Dropping out-of-range lesson_page={lp} (chunk 1..{chunk_total_pages})"
+                        )
                     except Exception:
-                        continue
+                        pass
+                    continue
+
+                # Valid: apply offset back to original PDF
+                slide["lesson_page"] = lp + offset
+                filtered_slides.append(slide)
+
+            result["related_slides"] = filtered_slides
+
         return result
     
     def analyze_multiple_jokbos(self, jokbo_paths: List[str], lesson_path: str) -> List[Dict[str, Any]]:
