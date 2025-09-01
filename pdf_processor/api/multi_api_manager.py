@@ -140,14 +140,26 @@ class MultiAPIManager:
         self._global_tried_indices: set[int] = set()
         
         for i, api_key in enumerate(api_keys):
-            # Configure API for this key
-            genai.configure(api_key=api_key)
-            
-            # Create model
-            model = genai.GenerativeModel(**model_config)
+            # Create a per-key client (avoid global configure to prevent races)
+            try:
+                _client = genai.Client(api_key=api_key)
+            except Exception:
+                _client = None
+
+            # Create model bound to this client
+            try:
+                if _client is not None:
+                    model = genai.GenerativeModel(client=_client, **model_config)
+                else:
+                    # Fallback: create model without explicit client (will use default/global)
+                    model = genai.GenerativeModel(**model_config)
+            except Exception:
+                # As a last resort, attempt without client
+                model = genai.GenerativeModel(**model_config)
+
             self.models.append(model)
             
-            # Create API client
+            # Create API client (maintains its own per-key genai.Client for file ops)
             client = GeminiAPIClient(model, api_key, key_index=i)
             self.api_clients.append(client)
             

@@ -46,8 +46,9 @@ class GeminiAPIClient:
         # Create a per-instance client bound to this API key for thread-safe ops
         try:
             self._client = genai.Client(api_key=self.api_key)
-        except Exception:
-            # Fallback: still allow object creation; calls will raise on use
+        except Exception as e:
+            # Log precise failure reason for easier debugging and keep object usable
+            logger.error(f"Failed to initialize genai.Client for key {self._key_tag()}: {e}")
             self._client = None
         
     def _configure_api(self, api_key: Optional[str] = None):
@@ -194,11 +195,28 @@ class GeminiAPIClient:
                 if isinstance(max_output_tokens, int) and max_output_tokens > 0:
                     gen_config["max_output_tokens"] = max_output_tokens
 
-                # Use the per-key bound model instance (thread-safe) for generation
-                response = self.model.generate_content(
-                    content,
-                    generation_config=gen_config or None,
-                )
+                # Prefer per-key client for generation to avoid global config races
+                response = None
+                if self._client is not None:
+                    try:
+                        model_name = getattr(self.model, "_model_name", None) or getattr(self.model, "model_name", None)
+                        if model_name:
+                            response = self._client.models.generate_content(
+                                model=model_name,
+                                contents=content,
+                                generation_config=gen_config or None,
+                            )
+                    except Exception as _e:
+                        # Fall back to the bound model instance if client call fails
+                        logger.debug(f"Client-based generation failed; falling back to model: {_e}")
+                        response = None
+
+                if response is None:
+                    # Use the per-key bound model instance (thread-safe when created with client)
+                    response = self.model.generate_content(
+                        content,
+                        generation_config=gen_config or None,
+                    )
                 
                 # Blocked prompt handling (avoid touching response.text/parts when blocked)
                 try:
