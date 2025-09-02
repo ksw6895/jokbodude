@@ -1139,24 +1139,44 @@ class PDFCreator:
         """
 
         doc = fitz.open()
-        for q in questions or []:
-            q_pdf = q.get("question_pdf")
-            explanation = q.get("explanation", "")
 
-            if q_pdf and Path(q_pdf).exists():
-                with fitz.open(q_pdf) as src:
-                    doc.insert_pdf(src)
-
+        # If there are no questions, emit a single placeholder page to avoid zero-page save errors
+        if not questions:
             page = doc.new_page()
             fontname = self._register_font(page)
             text_rect = fitz.Rect(50, 50, page.rect.width - 50, page.rect.height - 50)
+            placeholder = (
+                "부분 족보 결과가 비어 있습니다.\n\n"
+                "- 분석 결과에 해당하는 문제가 없거나,\n"
+                "- 요청이 차단되어 결과를 생성하지 못했습니다.\n\n"
+                "입력 파일과 설정을 확인해 주세요."
+            )
             page.insert_textbox(
                 text_rect,
-                self._normalize_korean(explanation),
-                fontsize=11,
+                self._normalize_korean(placeholder),
+                fontsize=12,
                 fontname=fontname,
                 align=fitz.TEXT_ALIGN_LEFT,
             )
+        else:
+            for q in questions or []:
+                q_pdf = q.get("question_pdf")
+                explanation = q.get("explanation", "")
+
+                if q_pdf and Path(q_pdf).exists():
+                    with fitz.open(q_pdf) as src:
+                        doc.insert_pdf(src)
+
+                page = doc.new_page()
+                fontname = self._register_font(page)
+                text_rect = fitz.Rect(50, 50, page.rect.width - 50, page.rect.height - 50)
+                page.insert_textbox(
+                    text_rect,
+                    self._normalize_korean(explanation),
+                    fontsize=11,
+                    fontname=fontname,
+                    align=fitz.TEXT_ALIGN_LEFT,
+                )
 
         doc.save(output_path)
         doc.close()

@@ -632,11 +632,21 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
                 sm.save_file_locally(key, local_path)
                 lesson_paths.append(str(local_path))
 
-            # Initialize progress
+            # Initialize progress: total chunks = jokbo_count * sum(lesson_chunks)
             try:
-                sm.init_progress(job_id, max(1, len(jokbo_paths)), "부분 족보 분석 시작")
+                lesson_chunks = 0
+                for lp in lesson_paths:
+                    try:
+                        lesson_chunks += len(PDFOperations.split_pdf_for_chunks(lp))
+                    except Exception:
+                        lesson_chunks += 1
+                total_chunks = max(1, len(jokbo_paths) * max(1, lesson_chunks))
+                sm.init_progress(job_id, total_chunks, "부분 족보 분석 시작")
             except Exception:
-                pass
+                try:
+                    sm.init_progress(job_id, max(1, len(jokbo_paths)), "부분 족보 분석 시작")
+                except Exception:
+                    pass
 
             # Configure API + model, honoring overrides from metadata/kwargs
             configure_api()

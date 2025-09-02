@@ -211,6 +211,19 @@ class MultiAPIAnalyzer:
                                  parallel: bool = True, max_workers: Optional[int] = None) -> List[Dict[str, Any]]:
         """Distribute partial-jokbo across jokbo files using multiple API keys."""
         tasks = list(jokbo_paths or [])
+        # Determine how many chunk units each jokbo completion should represent
+        try:
+            from ..pdf.operations import PDFOperations as _PDFOps
+            lesson_chunks = 0
+            for lp in (lesson_paths or []):
+                try:
+                    lesson_chunks += len(_PDFOps.split_pdf_for_chunks(lp))
+                except Exception:
+                    lesson_chunks += 1
+            if lesson_chunks <= 0:
+                lesson_chunks = 1
+        except Exception:
+            lesson_chunks = 1
         def task_operation(jp, api_client, model):
             fm = FileManager(api_client)
             analyzer = PartialJokboAnalyzer(api_client, fm, self.session_id, self.debug_dir)
@@ -222,7 +235,23 @@ class MultiAPIAnalyzer:
                 max_workers = min(len(tasks), max(1, capacity))
             except Exception:
                 max_workers = min(len(tasks), 3) or 1
-        return self.api_manager.distribute_tasks(tasks, task_operation, parallel=parallel, max_workers=max_workers)
+        # Progress callback per completed jokbo
+        def _on_progress(jp):
+            try:
+                from storage_manager import StorageManager
+                from pathlib import Path as _P
+                name = None
+                try:
+                    name = _P(str(jp)).name
+                except Exception:
+                    name = None
+                StorageManager().increment_chunk(self.session_id, int(lesson_chunks),
+                    f"파일 완료: {name}" if name else None)
+            except Exception:
+                pass
+        return self.api_manager.distribute_tasks(
+            tasks, task_operation, parallel=parallel, max_workers=max_workers, on_progress=_on_progress
+        )
     
     def analyze_with_chunk_retry(self, mode: str, file_path: str, 
                                center_file_path: str, chunks: List[tuple]) -> Dict[str, Any]:

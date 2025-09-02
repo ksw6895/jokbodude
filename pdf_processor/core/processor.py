@@ -219,6 +219,19 @@ class PDFProcessor:
         Each jokbo is analyzed independently; results are concatenated.
         """
         all_questions: List[Dict[str, Any]] = []
+        # Compute effective lesson chunk count for progress increments (>=1)
+        try:
+            from ..pdf.operations import PDFOperations as _PDFOps
+            lesson_chunks = 0
+            for lp in (lesson_paths or []):
+                try:
+                    lesson_chunks += len(_PDFOps.split_pdf_for_chunks(lp))
+                except Exception:
+                    lesson_chunks += 1
+            if lesson_chunks <= 0:
+                lesson_chunks = 1
+        except Exception:
+            lesson_chunks = 1
         for jp in jokbo_paths or []:
             try:
                 result = self.partial_analyzer.analyze(jp, lesson_paths or [])
@@ -227,6 +240,13 @@ class PDFProcessor:
                     qq = dict(q)
                     qq["_jokbo_path"] = str(jp)
                     all_questions.append(qq)
+                # Progress: count this jokbo as 'lesson_chunks' units
+                try:
+                    from storage_manager import StorageManager
+                    StorageManager().increment_chunk(self.session_id, int(lesson_chunks),
+                        f"파일 완료: {Path(jp).name}")
+                except Exception:
+                    pass
             except Exception as e:
                 logger.warning(f"Partial-jokbo analysis failed for {Path(jp).name}: {e}")
                 continue

@@ -59,7 +59,8 @@ async def preflight_partial_jokbo(
 ):
     """Upload files, compute simple cost estimate for partial-jokbo, store metadata, and return a job_id.
 
-    Estimation model: one chunk per jokbo (partial analyzer runs once per jokbo without page chunking).
+    Estimation model: jokbo_count × sum(lesson_chunks).
+    This mirrors runtime progress for partial‑jokbo (each jokbo counts as lesson_chunks units).
     """
     storage_manager = request.app.state.storage_manager
     job_id = str(uuid.uuid4())
@@ -114,8 +115,14 @@ async def preflight_partial_jokbo(
         except Exception:
             effective_min_rel = None
 
-        # Estimate: one chunk per jokbo (no lesson chunk multiplication)
-        total_chunks = max(1, len(jokbo_info))
+        # Estimate: jokbo_count × sum(lesson_chunks)
+        try:
+            lesson_chunks_sum = sum(int(max(1, (li.get('chunks') or 1))) for li in (lesson_info or []))
+        except Exception:
+            lesson_chunks_sum = len(lesson_info) if lesson_info else 1
+        if lesson_chunks_sum <= 0:
+            lesson_chunks_sum = 1
+        total_chunks = max(1, len(jokbo_info) * lesson_chunks_sum)
         tokens_per_chunk = _per_chunk_tokens(model)
         est_tokens = tokens_per_chunk * total_chunks
         pct_per_chunk = 100 / total_chunks if total_chunks > 0 else 100
