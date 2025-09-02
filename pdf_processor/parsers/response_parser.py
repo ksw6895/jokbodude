@@ -721,6 +721,46 @@ class ResponseParser:
                 if with_slides == 0:
                     return True
                 return False
+            elif mode == "partial-jokbo":
+                qs = data.get("questions") or []
+                if not isinstance(qs, list) or len(qs) == 0:
+                    return True
+                total = len(qs)
+                valid_ps = 0
+                non_placeholder_expl = 0
+                pages = []
+                for q in qs:
+                    try:
+                        ps = int((q or {}).get("page_start") or 0)
+                    except Exception:
+                        ps = 0
+                    if ps > 0:
+                        valid_ps += 1
+                    expl = (q or {}).get("explanation")
+                    if isinstance(expl, str) and expl.strip() and not ResponseParser._is_placeholder_value(expl):
+                        non_placeholder_expl += 1
+                    try:
+                        pages.append(int((q or {}).get("page_start") or 0))
+                    except Exception:
+                        pages.append(0)
+                if valid_ps == 0:
+                    return True
+                # Heuristic: if fewer than half have valid page_start, suspicious
+                if valid_ps / max(1, total) < 0.5:
+                    return True
+                # If all page_start are identical (>=3 items) and no next_question_start provided, likely low-quality
+                try:
+                    unique_pages = {p for p in pages if p > 0}
+                    if total >= 3 and len(unique_pages) == 1:
+                        any_nqs = any((q or {}).get("next_question_start") for q in qs)
+                        if not any_nqs:
+                            return True
+                except Exception:
+                    pass
+                # Require at least one non-placeholder explanation across the set
+                if non_placeholder_expl == 0:
+                    return True
+                return False
             else:
                 slides = data.get("related_slides") or []
                 if not slides:

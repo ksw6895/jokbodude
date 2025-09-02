@@ -248,6 +248,20 @@ class BaseAnalyzer(ABC):
                 for p in pages:
                     total_q += len((p or {}).get("questions", []) or [])
                 return total_q == 0
+            elif mode == "partial-jokbo":
+                qs = data.get("questions") or []
+                if not isinstance(qs, list) or not qs:
+                    return True
+                # If present but all entries are malformed, treat as empty
+                try:
+                    valid = 0
+                    for q in qs:
+                        ps = int((q or {}).get("page_start") or 0)
+                        if ps > 0:
+                            valid += 1
+                    return valid == 0
+                except Exception:
+                    return False
             else:
                 slides = data.get("related_slides") or []
                 if not isinstance(slides, list) or not slides:

@@ -44,6 +44,121 @@ def _build_file_info(path: Path) -> dict:
     return {"filename": path.name, "pages": pages, "chunks": chunks}
 
 
+@router.post("/preflight/partial-jokbo")
+async def preflight_partial_jokbo(
+    request: Request,
+    jokbo_files: list[UploadFile] = File(...),
+    lesson_files: list[UploadFile] = File(...),
+    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    multi_api: bool = Query(False),
+    # Accept for parity (informational only for now)
+    min_relevance: Optional[int] = Query(None, ge=0, le=110),
+    multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
+    min_relevance_form: Optional[int] = Form(None, alias="min_relevance"),
+    user: dict = Depends(require_user),
+):
+    """Upload files, compute simple cost estimate for partial-jokbo, store metadata, and return a job_id.
+
+    Estimation model: one chunk per jokbo (partial analyzer runs once per jokbo without page chunking).
+    """
+    storage_manager = request.app.state.storage_manager
+    job_id = str(uuid.uuid4())
+
+    try:
+        for f in jokbo_files + lesson_files:
+            if f.size and f.size > MAX_FILE_SIZE:
+                raise HTTPException(status_code=413, detail=f"File {f.filename} exceeds maximum size of 50MB")
+
+        jokbo_keys: list[str] = []
+        lesson_keys: list[str] = []
+        jokbo_info: list[dict] = []
+        lesson_info: list[dict] = []
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tdir = Path(temp_dir)
+            # Save jokbo files
+            for f in jokbo_files:
+                p = tdir / f.filename
+                content = await f.read()
+                p.write_bytes(content)
+                info = _build_file_info(p)
+                jokbo_info.append(info)
+                k = storage_manager.store_file(p, job_id, "jokbo")
+                jokbo_keys.append(k)
+                if not storage_manager.verify_file_available(k):
+                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+            # Save lesson files
+            for f in lesson_files:
+                p = tdir / f.filename
+                content = await f.read()
+                p.write_bytes(content)
+                info = _build_file_info(p)
+                lesson_info.append(info)
+                k = storage_manager.store_file(p, job_id, "lesson")
+                lesson_keys.append(k)
+                if not storage_manager.verify_file_available(k):
+                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+
+        # Refresh TTLs for safety while waiting for confirmation
+        try:
+            storage_manager.refresh_ttls(jokbo_keys + lesson_keys)
+        except Exception:
+            pass
+
+        # Normalize options
+        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        effective_min_rel: Optional[int] = None
+        try:
+            mr = min_relevance_form if min_relevance_form is not None else min_relevance
+            if mr is not None:
+                effective_min_rel = max(0, min(int(mr), 110))
+        except Exception:
+            effective_min_rel = None
+
+        # Estimate: one chunk per jokbo (no lesson chunk multiplication)
+        total_chunks = max(1, len(jokbo_info))
+        tokens_per_chunk = _per_chunk_tokens(model)
+        est_tokens = tokens_per_chunk * total_chunks
+        pct_per_chunk = 100 / total_chunks if total_chunks > 0 else 100
+
+        metadata = {
+            "mode": "partial-jokbo",
+            "jokbo_keys": jokbo_keys,
+            "lesson_keys": lesson_keys,
+            "model": model,
+            "multi_api": effective_multi,
+            "min_relevance": effective_min_rel,
+            "user_id": user.get("sub"),
+            "preflight": True,
+            "preflight_stats": {
+                "jokbo": jokbo_info,
+                "lesson": lesson_info,
+                "total_chunks": total_chunks,
+                "tokens_per_chunk": tokens_per_chunk,
+                "estimated_tokens": est_tokens,
+            },
+        }
+        storage_manager.store_job_metadata(job_id, metadata)
+        user_id = user.get("sub")
+        if user_id:
+            storage_manager.add_user_job(user_id, job_id)
+
+        return {
+            "job_id": job_id,
+            "mode": "partial-jokbo",
+            "model": model,
+            "multi_api": effective_multi,
+            "min_relevance": effective_min_rel,
+            "files": {"jokbo": jokbo_info, "lesson": lesson_info},
+            "total_chunks": total_chunks,
+            "tokens_per_chunk": tokens_per_chunk,
+            "estimated_tokens": est_tokens,
+            "pct_per_chunk": pct_per_chunk,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Preflight failed: {str(e)}")
+
 @router.post("/preflight/jokbo-centric")
 async def preflight_jokbo_centric(
     request: Request,
@@ -329,6 +444,13 @@ def start_preflight_job(request: Request, job_id: str, user: dict = Depends(requ
     elif mode == "lesson-centric":
         task = celery_app.send_task(
             "tasks.run_lesson_analysis",
+            args=[job_id],
+            kwargs={"model_type": model, "multi_api": use_multi},
+            queue="analysis",
+        )
+    elif mode == "partial-jokbo":
+        task = celery_app.send_task(
+            "tasks.generate_partial_jokbo",
             args=[job_id],
             kwargs={"model_type": model, "multi_api": use_multi},
             queue="analysis",

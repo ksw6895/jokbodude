@@ -323,6 +323,8 @@
                                 </div>
                             </div>
                         </div>
+                        <div id="partial_estimate" class="text-xs text-gray-400"></div>
+
                         <div class="flex justify-end">
                             <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-500 transform hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2">Create Partial Jokbo →</button>
                         </div>
@@ -462,15 +464,34 @@
             const preferMulti = saved !== null ? (saved === 'true') : !!available;
             setToggleActive(singleBtn, multiBtn, preferMulti && available);
 
+            // Helper to trigger preflight estimate when toggles change
+            const triggerPreflight = () => {
+                try {
+                    if (!CURRENT_USER) return;
+                    if (groupId === 'jokbo_multi_api_group') {
+                        const model = document.getElementById('jokbo_model').value;
+                        maybePreflight('jokbo-centric', 'jokbo_files', 'jokbo_lesson_files', model);
+                    } else if (groupId === 'lesson_multi_api_group') {
+                        const model = document.getElementById('lesson_model').value;
+                        maybePreflight('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
+                    } else if (groupId === 'partial_multi_api_group') {
+                        const model = document.getElementById('partial_model').value;
+                        maybePreflight('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', model);
+                    }
+                } catch {}
+            };
+
             // Wire up clicks
             singleBtn.onclick = () => {
                 setToggleActive(singleBtn, multiBtn, false);
                 localStorage.setItem(storageKey, 'false');
+                triggerPreflight();
             };
             multiBtn.onclick = () => {
                 if (multiBtn.classList.contains('disabled')) return;
                 setToggleActive(singleBtn, multiBtn, true);
                 localStorage.setItem(storageKey, 'true');
+                triggerPreflight();
             };
         }
 
@@ -710,7 +731,11 @@
             return data;
         }
         function updateEstimate(mode, pf) {
-            const elId = (mode === 'jokbo-centric') ? 'jokbo_estimate' : (mode === 'lesson-centric' ? 'lesson_estimate' : null);
+            const elId = (mode === 'jokbo-centric')
+              ? 'jokbo_estimate'
+              : (mode === 'lesson-centric'
+                 ? 'lesson_estimate'
+                 : (mode === 'partial-jokbo' ? 'partial_estimate' : null));
             if (!elId) return;
             const el = document.getElementById(elId);
             if (!el) return;
@@ -762,7 +787,7 @@
             }
             
             try {
-                // Step 1: preflight (upload-only + estimate)
+                // Unified preflight + confirm + start flow for all modes
                 statusBadge.className = 'status-badge processing';
                 statusBadge.textContent = 'UPLOADING';
                 statusContent.innerHTML = `
@@ -779,7 +804,6 @@
 
                 const pf = await doPreflight(mode, jokboInputId, lessonInputId, model);
 
-                // Step 2: confirm with user before starting Gemini work
                 const tpc = pf.tokens_per_chunk || 0;
                 const et = pf.estimated_tokens || 0;
                 const tc = pf.total_chunks || 0;
@@ -791,7 +815,6 @@
                     return;
                 }
 
-                // Step 3: start job from preflight job_id
                 statusBadge.className = 'status-badge processing';
                 statusBadge.textContent = 'PROCESSING';
                 statusContent.innerHTML = `
@@ -815,9 +838,7 @@
                     throw new Error(msg);
                 }
                 const startData = await startRes.json();
-                // Start checking status
                 checkStatus(startData.task_id, startData.job_id);
-                
             } catch (error) {
                 statusBadge.className = 'status-badge error';
                 statusBadge.textContent = 'ERROR';
@@ -1016,6 +1037,14 @@
             const model = document.getElementById('lesson_model').value;
             maybePreflight('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
         });
+        document.getElementById('partial_jokbo_files').addEventListener('change', () => {
+            const model = document.getElementById('partial_model').value;
+            maybePreflight('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', model);
+        });
+        document.getElementById('partial_lesson_files').addEventListener('change', () => {
+            const model = document.getElementById('partial_model').value;
+            maybePreflight('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', model);
+        });
         // Wire preflight when options change (model / min relevance / multi-api)
         document.getElementById('jokbo_model').addEventListener('change', () => {
             const model = document.getElementById('jokbo_model').value;
@@ -1024,6 +1053,14 @@
         document.getElementById('lesson_model').addEventListener('change', () => {
             const model = document.getElementById('lesson_model').value;
             maybePreflight('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
+        });
+        document.getElementById('partial_model').addEventListener('change', () => {
+            const model = document.getElementById('partial_model').value;
+            maybePreflight('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', model);
+        });
+        document.getElementById('partial_min_rel').addEventListener('input', () => {
+            const model = document.getElementById('partial_model').value;
+            maybePreflight('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', model);
         });
 
         document.getElementById('partialForm').addEventListener('submit', async (e) => {
