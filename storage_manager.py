@@ -14,6 +14,7 @@ import zlib
 from pathlib import Path
 from typing import List, Dict, Optional
 import hashlib
+import socket
 
 logger = logging.getLogger(__name__)
 
@@ -59,13 +60,46 @@ class StorageManager:
     
     def _init_redis_connection(self, max_retries: int = 3):
         """Initialize Redis connection with retry logic"""
+        # Build socket keepalive options similar to celeryconfig
+        KEEPALIVE_OPTS = {}
+        if hasattr(socket, "TCP_KEEPIDLE"):
+            KEEPALIVE_OPTS[socket.TCP_KEEPIDLE] = 1
+        if hasattr(socket, "TCP_KEEPINTVL"):
+            KEEPALIVE_OPTS[socket.TCP_KEEPINTVL] = 3
+        if hasattr(socket, "TCP_KEEPCNT"):
+            KEEPALIVE_OPTS[socket.TCP_KEEPCNT] = 5
+        if not KEEPALIVE_OPTS and hasattr(socket, "TCP_KEEPALIVE"):
+            KEEPALIVE_OPTS[socket.TCP_KEEPALIVE] = 60
+
+        # Timeouts (seconds) with sane defaults to prevent indefinite hangs
+        try:
+            sock_timeout = float(os.getenv("REDIS_SOCKET_TIMEOUT", "30.0"))
+        except Exception:
+            sock_timeout = 30.0
+        try:
+            sock_conn_timeout = float(os.getenv("REDIS_SOCKET_CONNECT_TIMEOUT", "30.0"))
+        except Exception:
+            sock_conn_timeout = 30.0
+        try:
+            health_check_interval = int(os.getenv("REDIS_HEALTH_CHECK_INTERVAL", "30"))
+        except Exception:
+            health_check_interval = 30
+
         for attempt in range(max_retries):
             try:
-                self.redis_client = redis.from_url(self.redis_url)
+                self.redis_client = redis.from_url(
+                    self.redis_url,
+                    socket_timeout=sock_timeout,
+                    socket_connect_timeout=sock_conn_timeout,
+                    socket_keepalive=True,
+                    socket_keepalive_options=KEEPALIVE_OPTS,
+                    health_check_interval=health_check_interval,
+                    retry_on_timeout=True,
+                )
                 self.redis_client.ping()  # Test connection
                 logger.info("Redis connection established")
                 return
-            except redis.ConnectionError as e:
+            except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError) as e:
                 if attempt == max_retries - 1:
                     logger.error(f"Redis connection failed after {max_retries} attempts, using local storage only")
                     self.use_local_only = True
@@ -80,7 +114,7 @@ class StorageManager:
         for attempt in range(max_retries):
             try:
                 return func(*args, **kwargs)
-            except (redis.ConnectionError, redis.TimeoutError) as e:
+            except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError) as e:
                 if attempt == max_retries - 1:
                     logger.error(f"Operation failed after {max_retries} attempts: {e}")
                     raise
@@ -241,7 +275,10 @@ class StorageManager:
         """Store job metadata in Redis"""
         key = f"job:{job_id}:metadata"
         # Keep metadata longer to support long-running tasks
-        self.redis_client.setex(
+        if self.redis_client is None or self.use_local_only:
+            return
+        self._with_retry(
+            self.redis_client.setex,
             key,
             172800,  # 48 hours TTL
             json.dumps(metadata)
@@ -250,7 +287,9 @@ class StorageManager:
     def get_job_metadata(self, job_id: str) -> Optional[Dict]:
         """Retrieve job metadata from Redis"""
         key = f"job:{job_id}:metadata"
-        data = self.redis_client.get(key)
+        if self.redis_client is None or self.use_local_only:
+            return None
+        data = self._with_retry(self.redis_client.get, key)
         if data:
             return json.loads(data)
         return None
@@ -262,29 +301,35 @@ class StorageManager:
         
         result_key = f"result:{job_id}:{result_path.name}"
         # Store with longer TTL for results
-        self.redis_client.setex(
-            result_key,
-            172800,  # 48 hours TTL
-            content
-        )
+        if not self.use_local_only and self.redis_client:
+            self._with_retry(
+                self.redis_client.setex,
+                result_key,
+                172800,  # 48 hours TTL
+                content
+            )
         # Persist to disk as well to avoid overusing Redis memory
         try:
             dest = self.results_dir / job_id / result_path.name
             dest.parent.mkdir(parents=True, exist_ok=True)
             dest.write_bytes(content)
             # Index the on-disk path for lookup
-            self.redis_client.setex(
-                f"result_path:{job_id}:{result_path.name}",
-                172800,
-                str(dest)
-            )
+            if not self.use_local_only and self.redis_client:
+                self._with_retry(
+                    self.redis_client.setex,
+                    f"result_path:{job_id}:{result_path.name}",
+                    172800,
+                    str(dest)
+                )
         except Exception as e:
             logger.warning(f"Failed to persist result to disk: {e}")
         return result_key
     
     def get_result(self, result_key: str) -> Optional[bytes]:
         """Retrieve result from Redis"""
-        return self.redis_client.get(result_key)
+        if self.redis_client is None or self.use_local_only:
+            return None
+        return self._with_retry(self.redis_client.get, result_key)
 
     def get_result_path(self, job_id: str, filename: str) -> Optional[Path]:
         """Return on-disk path for a stored result if available."""
