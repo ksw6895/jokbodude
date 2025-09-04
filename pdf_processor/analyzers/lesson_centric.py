@@ -123,6 +123,16 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         
         for i, (path, start_page, end_page) in enumerate(chunks):
             logger.info(f"Processing chunk {i+1}/{len(chunks)}: pages {start_page}-{end_page}")
+            # Cooperative cancellation check between chunks
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
             
             # Extract chunk
             chunk_path = PDFOperations.extract_pages(path, start_page, end_page)
@@ -306,6 +316,16 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         is_chunked = len(chunks) > 1
         for jokbo_path in jokbo_paths:
             logger.info(f"Analyzing jokbo: {Path(jokbo_path).name}")
+            # Cooperative cancellation check between files
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
             
             try:
                 # Always upload both per-call for safety

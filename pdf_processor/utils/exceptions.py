@@ -56,3 +56,13 @@ class ChunkProcessingError(PDFProcessorError):
 class SessionError(PDFProcessorError):
     """Raised when session-related operations fail."""
     pass
+
+
+class CancelledError(PDFProcessorError):
+    """Raised when a job is cancelled by the user.
+
+    This exception is used to cooperatively abort long-running analysis loops
+    when a cancellation flag is detected in Redis. Celery tasks can catch this
+    exception and mark the task as REVOKED without treating it as a failure.
+    """
+    pass

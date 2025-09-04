@@ -114,6 +114,16 @@ class BaseAnalyzer(ABC):
         chunk_results = []
         
         for i, (path, start_page, end_page) in enumerate(chunks):
+            # Cooperative cancellation check between chunks
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
             logger.info(f"Processing chunk {i+1}/{len(chunks)}: pages {start_page}-{end_page}")
             
             # Extract chunk to temporary file

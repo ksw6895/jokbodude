@@ -104,7 +104,13 @@ def get_job_progress(request: Request, job_id: str, user: dict = Depends(require
 
 
 @router.get("/user/{user_id}/jobs")
-def get_user_jobs(request: Request, user_id: str, limit: int = 50, user: dict = Depends(require_user)):
+def get_user_jobs(
+    request: Request,
+    user_id: str,
+    limit: int = 50,
+    include_preflight: bool = False,
+    user: dict = Depends(require_user),
+):
     if user_id != user.get("sub"):
         raise HTTPException(status_code=403, detail="Not authorized for this user")
     storage_manager = request.app.state.storage_manager
@@ -112,15 +118,41 @@ def get_user_jobs(request: Request, user_id: str, limit: int = 50, user: dict = 
     results = []
     for job_id in job_ids:
         entry = {"job_id": job_id}
+        # Determine draft/preflight status
+        is_draft = False
+        try:
+            meta = storage_manager.get_job_metadata(job_id) or {}
+            is_draft = bool((meta or {}).get("preflight"))
+        except Exception:
+            is_draft = False
+        if is_draft and not include_preflight:
+            continue
         try:
             task_id = storage_manager.get_job_task(job_id)
             if task_id:
                 tr = celery_app.AsyncResult(task_id)
                 entry["status"] = tr.status
             else:
-                entry["status"] = "UNKNOWN"
+                # No task bound yet. Classify as DRAFT or derive from files if any
+                if is_draft:
+                    entry["status"] = "DRAFT"
+                else:
+                    # If results already exist, mark success
+                    try:
+                        if storage_manager.list_result_files(job_id):
+                            entry["status"] = "SUCCESS"
+                        else:
+                            entry["status"] = "UNKNOWN"
+                    except Exception:
+                        entry["status"] = "UNKNOWN"
         except Exception:
             entry["status"] = "UNKNOWN"
+        # If a cancel flag is present, surface as CANCELLED
+        try:
+            if storage_manager.is_cancelled(job_id):
+                entry["status"] = "CANCELLED"
+        except Exception:
+            pass
         try:
             entry["progress"] = storage_manager.get_progress(job_id) or {}
         except Exception:
@@ -129,6 +161,8 @@ def get_user_jobs(request: Request, user_id: str, limit: int = 50, user: dict = 
             entry["files"] = storage_manager.list_result_files(job_id)
         except Exception:
             entry["files"] = []
+        if is_draft:
+            entry["draft"] = True
         results.append(entry)
     return {"user_id": user_id, "jobs": results}
 
@@ -142,13 +176,28 @@ def cancel_job(request: Request, job_id: str, user: dict = Depends(require_user)
         storage_manager.request_cancel(job_id)
     except Exception:
         pass
-    revoked = False
-    if task_id:
+    # If there's no task, treat this as a draft/unstarted job: cleanup immediately
+    if not task_id:
         try:
-            celery_app.control.revoke(task_id, terminate=True, signal="SIGTERM")
-            revoked = True
+            storage_manager.delete_all_results(job_id)
         except Exception:
-            revoked = False
+            pass
+        try:
+            storage_manager.cleanup_job(job_id)
+        except Exception:
+            pass
+        return {"job_id": job_id, "task_id": None, "revoked": False, "draft_deleted": True}
+    revoked = False
+    try:
+        celery_app.control.revoke(task_id, terminate=True, signal="SIGTERM")
+        revoked = True
+    except Exception:
+        revoked = False
+    # Best-effort: mark progress as cancelled for UI
+    try:
+        storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "취소 요청됨")
+    except Exception:
+        pass
     return {"job_id": job_id, "task_id": task_id, "revoked": revoked}
 
 

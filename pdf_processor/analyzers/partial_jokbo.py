@@ -54,6 +54,16 @@ class PartialJokboAnalyzer(BaseAnalyzer):
 
         Returns a structure like {"questions": [...]}.
         """
+        # Cooperative cancellation pre-check
+        try:
+            from storage_manager import StorageManager
+            from ..utils.exceptions import CancelledError
+            if StorageManager().is_cancelled(self.session_id):
+                raise CancelledError("cancelled")
+        except CancelledError:
+            raise
+        except Exception:
+            pass
         jokbo_filename = Path(jokbo_path).name
         lesson_filenames = [Path(p).name for p in lesson_paths or []]
 
@@ -73,4 +83,3 @@ class PartialJokboAnalyzer(BaseAnalyzer):
             pass
 
         return self.parse_and_validate_response(response_text)
-

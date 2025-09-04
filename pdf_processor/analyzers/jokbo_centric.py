@@ -130,6 +130,16 @@ class JokboCentricAnalyzer(BaseAnalyzer):
         original_lesson_filename = Path(lesson_path).name
 
         for i, (path, start_page, end_page) in enumerate(chunks):
+            # Cooperative cancellation check between chunks
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
             logger.info(f"Processing chunk {i+1}/{len(chunks)}: pages {start_page}-{end_page}")
             
             # Extract chunk
@@ -346,6 +356,16 @@ class JokboCentricAnalyzer(BaseAnalyzer):
         
         for idx, lesson_path in enumerate(lesson_paths):
             logger.info(f"Analyzing lesson {idx+1}/{len(lesson_paths)}: {Path(lesson_path).name}")
+            # Cooperative cancellation check between lessons
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
             
             try:
                 # Perform analysis (may chunk internally). Always upload both per-call

@@ -3,7 +3,7 @@ import os
 import tempfile
 from pathlib import Path
 from celery import Celery, current_task
-from celery.exceptions import Ignore
+from celery.exceptions import Ignore, SoftTimeLimitExceeded
 from typing import Optional
 from config import create_model, configure_api, API_KEYS
 import logging
@@ -12,6 +12,7 @@ from pdf_creator import PDFCreator
 from storage_manager import StorageManager
 from pdf_processor.pdf.operations import PDFOperations
 from celery import group, chord
+from pdf_processor.utils.exceptions import CancelledError
 
 # --- Configuration ---
 # Ensure temporary files use a persistent or project path instead of /tmp
@@ -258,6 +259,22 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
                 pass
             return result_payload
             
+    except CancelledError:
+        try:
+            storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
+            storage_manager.finalize_progress(job_id, "취소됨")
+        except Exception:
+            pass
+        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+        raise Ignore()
+    except SoftTimeLimitExceeded:
+        try:
+            storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "시간 제한으로 취소됨")
+            storage_manager.finalize_progress(job_id, "취소됨")
+        except Exception:
+            pass
+        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "timeout"})
+        raise Ignore()
     except Exception as e:
         # Celery will catch this exception and store it in the task result backend
         raise e
@@ -458,6 +475,22 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
                 pass
             return result_payload
             
+    except CancelledError:
+        try:
+            storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
+            storage_manager.finalize_progress(job_id, "취소됨")
+        except Exception:
+            pass
+        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+        raise Ignore()
+    except SoftTimeLimitExceeded:
+        try:
+            storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "시간 제한으로 취소됨")
+            storage_manager.finalize_progress(job_id, "취소됨")
+        except Exception:
+            pass
+        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "timeout"})
+        raise Ignore()
     except Exception as e:
         # Celery will catch this exception and store it in the task result backend
         raise e
@@ -732,6 +765,22 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
             if isinstance(analysis, dict) and analysis.get("warnings"):
                 result["warnings"] = analysis["warnings"]
             return result
+    except CancelledError:
+        try:
+            sm.update_progress(job_id, int((sm.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
+            sm.finalize_progress(job_id, "취소됨")
+        except Exception:
+            pass
+        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+        raise Ignore()
+    except SoftTimeLimitExceeded:
+        try:
+            sm.update_progress(job_id, int((sm.get_progress(job_id) or {}).get('progress', 0) or 0), "시간 제한으로 취소됨")
+            sm.finalize_progress(job_id, "취소됨")
+        except Exception:
+            pass
+        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "timeout"})
+        raise Ignore()
     except Exception as exc:
         raise exc
 
