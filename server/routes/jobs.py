@@ -203,8 +203,24 @@ def cancel_job(request: Request, job_id: str, user: dict = Depends(require_user)
 
 @router.delete("/jobs/{job_id}")
 def delete_job(request: Request, job_id: str, cancel_if_running: bool = True, user: dict = Depends(require_user)):
-    _ensure_owner(request, job_id, user)
     storage_manager = request.app.state.storage_manager
+    # Authorization: allow delete if (a) owner matches OR (b) the job id exists in this user's job list
+    owner_ok = False
+    try:
+        owner = storage_manager.get_job_owner(job_id)
+        owner_ok = bool(owner and owner == user.get("sub"))
+    except Exception:
+        owner_ok = False
+    if not owner_ok:
+        try:
+            user_jobs = storage_manager.get_user_jobs(user.get("sub"), limit=1000) or []
+            if job_id not in user_jobs:
+                raise HTTPException(status_code=403, detail="Not authorized for this job")
+        except HTTPException:
+            raise
+        except Exception:
+            # As a safe fallback, require explicit ownership when we cannot verify membership
+            raise HTTPException(status_code=403, detail="Not authorized for this job")
     if cancel_if_running:
         try:
             task_id = storage_manager.get_job_task(job_id)
@@ -219,4 +235,9 @@ def delete_job(request: Request, job_id: str, cancel_if_running: bool = True, us
     except Exception:
         pass
     storage_manager.cleanup_job(job_id)
+    # Ensure removal from this user's visible list even if job->owner mapping is missing/expired
+    try:
+        storage_manager.remove_user_job(user.get("sub"), job_id)
+    except Exception:
+        pass
     return {"status": "deleted", "job_id": job_id}
