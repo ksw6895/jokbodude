@@ -186,7 +186,8 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
                     pass
                 
                 # Analyze jokbo against all lessons (use multi-API when enabled)
-                if use_multi and len(API_KEYS) > 1:
+                # Use multi-API orchestration when requested, even with a single key.
+                if use_multi:
                     analysis_result = processor.analyze_jokbo_centric_multi_api(
                         lesson_paths, jokbo_path_str, api_keys=API_KEYS
                     )
@@ -403,7 +404,8 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
                     pass
                 
                 # Analyze lesson against all jokbos (use multi-API when enabled)
-                if use_multi and len(API_KEYS) > 1:
+                # Use multi-API orchestration when requested, even with a single key.
+                if use_multi:
                     analysis_result = processor.analyze_lesson_centric_multi_api(
                         jokbo_paths, lesson_path_str, api_keys=API_KEYS
                     )
@@ -571,7 +573,7 @@ def batch_analyze_single(
             if mode == "jokbo-centric":
                 analysis_result = (
                     processor.analyze_jokbo_centric_multi_api(b_paths, str(a_path), api_keys=API_KEYS)
-                    if (multi_api and len(API_KEYS) > 1)
+                    if multi_api
                     else processor.analyze_jokbo_centric(b_paths, str(a_path))
                 )
                 if "error" in analysis_result:
@@ -584,7 +586,7 @@ def batch_analyze_single(
             else:
                 analysis_result = (
                     processor.analyze_lesson_centric_multi_api(b_paths, str(a_path), api_keys=API_KEYS)
-                    if (multi_api and len(API_KEYS) > 1)
+                    if multi_api
                     else processor.analyze_lesson_centric(b_paths, str(a_path))
                 )
                 if "error" in analysis_result:
@@ -702,7 +704,9 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
                 from config import API_KEYS as _API_KEYS  # type: ignore
             except Exception:
                 _API_KEYS = []
-            prefer_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else (len(_API_KEYS) > 1))
+            # Allow multi-API orchestration even with a single key to leverage
+            # per-key concurrency settings
+            prefer_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else (len(_API_KEYS) >= 1))
             try:
                 logger.info(f"generate_partial_jokbo: prefer_multi={prefer_multi}, API_KEYS_count={len(_API_KEYS) if isinstance(_API_KEYS, list) else 0}")
                 if prefer_multi and (not isinstance(_API_KEYS, list) or len(_API_KEYS) < 2):
@@ -712,7 +716,7 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
 
             # Ask Gemini for question spans (use multi when requested and keys available)
             try:
-                if prefer_multi and isinstance(_API_KEYS, list) and len(_API_KEYS) > 1:
+                if prefer_multi and isinstance(_API_KEYS, list) and len(_API_KEYS) >= 1:
                     analysis = processor.analyze_partial_jokbo_multi_api(jokbo_paths, lesson_paths, api_keys=_API_KEYS)
                 else:
                     analysis = processor.analyze_partial_jokbo(jokbo_paths, lesson_paths)

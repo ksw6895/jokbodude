@@ -269,6 +269,34 @@ class MultiAPIAnalyzer:
         """
         # Prepare tasks as (index, (chunk_path, start_page, end_page)) tuples
         tasks = [(i, chunk_info) for i, chunk_info in enumerate(chunks)]
+
+        # Best-effort resume: if this session already has saved results for some
+        # chunk indices, preload them and do not resubmit those tasks.
+        preload_results: dict[int, dict] = {}
+        try:
+            from pathlib import Path as _P
+            base = f"{mode}-{_P(file_path).stem}"
+            cdir = _P("output/temp/sessions") / self.session_id / "chunks" / base
+            if cdir.exists():
+                for i in range(len(tasks)):
+                    p = cdir / f"chunk_{i:03d}.json"
+                    if not p.exists():
+                        continue
+                    try:
+                        import json as _json
+                        with open(p, "r", encoding="utf-8") as f:
+                            payload = _json.load(f)
+                        res = payload.get("result") if isinstance(payload, dict) else None
+                        if isinstance(res, dict):
+                            preload_results[i] = res
+                    except Exception:
+                        continue
+            # Filter out preloaded indices from the task list
+            if preload_results:
+                tasks = [(i, t) for (i, t) in tasks if i not in preload_results]
+        except Exception:
+            # Resume is best-effort; continue normally on any error
+            pass
         
         # Determine a suitable level of parallelism
         try:
@@ -338,7 +366,12 @@ class MultiAPIAnalyzer:
         )
         
         # Collect results back into original order
-        ordered_results = [None] * len(tasks)
+        ordered_results = [None] * (len(chunks))
+        # Place preloaded results first
+        for idx, res in preload_results.items():
+            if 0 <= idx < len(ordered_results):
+                ordered_results[idx] = res
+        # Fill with newly computed results
         for entry in results_raw:
             if isinstance(entry, tuple) and len(entry) == 2:
                 idx, result = entry

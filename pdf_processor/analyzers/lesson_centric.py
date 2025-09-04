@@ -120,8 +120,40 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         logger.info(f"Processing {len(chunks)} chunks for {Path(lesson_path).name}")
         
         chunk_results: List[Dict[str, Any]] = []
-        
+
+        # Resume support: preload any previously saved chunk results
+        base = f"{self.get_mode()}-{Path(lesson_path).stem}"
+        from pathlib import Path as _P
+        import json as _json
+        chunk_dir = _P("output/temp/sessions") / self.session_id / "chunks" / base
+        try:
+            if chunk_dir.exists():
+                for i in range(len(chunks)):
+                    p = chunk_dir / f"chunk_{i:03d}.json"
+                    if not p.exists():
+                        continue
+                    try:
+                        with open(p, "r", encoding="utf-8") as f:
+                            payload = _json.load(f)
+                        res = payload.get("result") if isinstance(payload, dict) else None
+                        if isinstance(res, dict):
+                            chunk_results.append(res)
+                            # Do NOT increment progress here; it should already be reflected in Redis
+                            continue
+                    except Exception:
+                        pass
+                # If we preloaded some but not all, continue loop below for missing
+        except Exception:
+            pass
+
         for i, (path, start_page, end_page) in enumerate(chunks):
+            # If this chunk was already preloaded above, skip recomputation
+            try:
+                if (chunk_dir / f"chunk_{i:03d}.json").exists():
+                    # Already accounted for in chunk_results
+                    continue
+            except Exception:
+                pass
             logger.info(f"Processing chunk {i+1}/{len(chunks)}: pages {start_page}-{end_page}")
             # Cooperative cancellation check between chunks
             try:
@@ -142,6 +174,22 @@ class LessonCentricAnalyzer(BaseAnalyzer):
                 result = self.analyze(
                     jokbo_path, chunk_path, None, chunk_info=(start_page, end_page)
                 )
+                # Persist this chunk for resume/merge determinism
+                try:
+                    chunk_dir.mkdir(parents=True, exist_ok=True)
+                    payload = {
+                        "session_id": self.session_id,
+                        "mode": self.get_mode(),
+                        "file": str(lesson_path),
+                        "center_file": str(jokbo_path),
+                        "chunk_index": i,
+                        "chunk_info": [start_page, end_page],
+                        "result": result,
+                    }
+                    with open(chunk_dir / f"chunk_{i:03d}.json", "w", encoding="utf-8") as f:
+                        _json.dump(payload, f, ensure_ascii=False, indent=2)
+                except Exception:
+                    pass
                 # Optional: mirror chunk result to Redis debug storage (best effort)
                 try:
                     from storage_manager import StorageManager

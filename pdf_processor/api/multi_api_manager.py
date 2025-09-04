@@ -443,12 +443,13 @@ class MultiAPIManager:
         if parallel:
             from concurrent.futures import ThreadPoolExecutor, as_completed
             
-            # Clamp workers to number of API keys and number of tasks
+            # Clamp workers to effective capacity: api_keys * per_key_limit
             try:
                 desired = max_workers if isinstance(max_workers, int) and max_workers > 0 else len(self.api_keys)
-                safe_workers = max(1, min(desired, len(self.api_keys), len(tasks)))
+                capacity = len(self.api_keys) * max(1, int(getattr(self, 'per_key_limit', 1)))
+                safe_workers = max(1, min(desired, capacity, len(tasks)))
             except Exception:
-                safe_workers = max_workers or 1
+                safe_workers = max(1, min(int(max_workers) if max_workers else 1, len(tasks)))
             with ThreadPoolExecutor(max_workers=safe_workers) as executor:
                 future_to_task = {}
                 
