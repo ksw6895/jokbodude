@@ -186,6 +186,9 @@ async def health_check(request: Request, stall_minutes: int = Query(10, ge=1, le
                         "idle_seconds": int(idle),
                         "message": _d(_g("message", "")),
                     })
+            except Exception:
+                # Ignore malformed progress entries and keep scanning
+                continue
     except Exception:
         pass
     details["watchdog"]["stalled_jobs"] = stalled
@@ -443,3 +446,182 @@ def admin_prune_results(
     filt = ResultsFilter(older_than_hours=older_than_hours, limit=10_000, offset=0)
     payload = DeleteRequest(filter=filt, dry_run=dry_run)
     return admin_delete_results(request, payload, password=password, user=user)  # type: ignore[arg-type]
+
+
+# ----------------------
+# Admin: Active/Ghost tasks
+# ----------------------
+
+class RevokeRequest(BaseModel):
+    task_id: str | None = None
+    job_id: str | None = None
+    terminate: bool = True
+    signal: str = "SIGTERM"
+
+
+def _parse_job_id_from_task(task: dict) -> str | None:
+    """Best-effort extract job_id from Celery task args/kwargs.
+    Our tasks take job_id as the first positional arg.
+    """
+    # Try kwargs first
+    try:
+        kwargs = task.get("kwargs")
+        if isinstance(kwargs, dict):
+            jid = kwargs.get("job_id")
+            if isinstance(jid, str) and len(jid) > 10:
+                return jid
+    except Exception:
+        pass
+    # Try args string via literal_eval
+    try:
+        import ast
+        args_str = task.get("args")
+        if isinstance(args_str, str) and args_str:
+            tup = ast.literal_eval(args_str)
+            if isinstance(tup, (list, tuple)) and len(tup) >= 1 and isinstance(tup[0], str):
+                if len(tup[0]) > 10:
+                    return tup[0]
+    except Exception:
+        pass
+    return None
+
+
+def _collect_tasks():
+    insp = celery_app.control.inspect()
+    payload = {
+        "active": insp.active() or {},
+        "reserved": insp.reserved() or {},
+        "scheduled": insp.scheduled() or {},
+    }
+    items: list[dict] = []
+    for state in ("active", "reserved", "scheduled"):
+        m = payload.get(state) or {}
+        for worker, entries in m.items():
+            for t in (entries or []):
+                d = dict(t)
+                d["state"] = state
+                d["worker"] = worker
+                items.append(d)
+    return items
+
+
+@router.get("/admin/active-tasks")
+def admin_active_tasks(request: Request, password: str | None = Query(None), user=Depends(_get_current_user)):
+    """List active/reserved/scheduled tasks with job_id and ghost flag (admin-only)."""
+    _require_admin(password, user)
+    sm = request.app.state.storage_manager
+    items = _collect_tasks()
+    out: list[dict] = []
+    for t in items:
+        jid = _parse_job_id_from_task(t)
+        ghost = False
+        cancel_flag = False
+        if jid:
+            try:
+                ghost = sm.get_progress(jid) is None
+            except Exception:
+                ghost = False
+            try:
+                cancel_flag = sm.is_cancelled(jid)
+            except Exception:
+                cancel_flag = False
+        out.append({
+            "state": t.get("state"),
+            "worker": t.get("worker"),
+            "task_id": t.get("id") or t.get("request", {}).get("id"),
+            "name": t.get("name"),
+            "routing": (t.get("delivery_info") or {}).get("routing_key"),
+            "job_id": jid,
+            "ghost": bool(ghost),
+            "cancel": bool(cancel_flag),
+        })
+    return {"count": len(out), "tasks": out}
+
+
+@router.post("/admin/revoke")
+def admin_revoke_task(request: Request, payload: RevokeRequest, password: str | None = Query(None), user=Depends(_get_current_user)):
+    """Revoke a running task by task_id or job_id (admin-only). Also marks job as cancelled.
+
+    Provide at least one of task_id or job_id.
+    """
+    _require_admin(password, user)
+    sm = request.app.state.storage_manager
+    to_revoke: set[str] = set()
+    # If job_id provided, mark cancel and find matching tasks
+    if payload.job_id:
+        try:
+            sm.request_cancel(payload.job_id)
+        except Exception:
+            pass
+        for t in _collect_tasks():
+            jid = _parse_job_id_from_task(t)
+            if jid and jid == payload.job_id:
+                tid = t.get("id") or (t.get("request") or {}).get("id")
+                if isinstance(tid, str):
+                    to_revoke.add(tid)
+    # If task_id provided, add directly
+    if payload.task_id:
+        to_revoke.add(payload.task_id)
+    revoked = 0
+    for tid in to_revoke:
+        try:
+            celery_app.control.revoke(tid, terminate=bool(payload.terminate), signal=str(payload.signal))
+            revoked += 1
+        except Exception:
+            continue
+    return {"requested": len(to_revoke), "revoked": revoked}
+
+
+class KillGhostsRequest(BaseModel):
+    dry_run: bool = True
+    include_reserved: bool = True
+    include_scheduled: bool = False
+
+
+@router.post("/admin/kill-ghosts")
+def admin_kill_ghosts(request: Request, payload: KillGhostsRequest, password: str | None = Query(None), user=Depends(_get_current_user)):
+    """Find tasks with no matching progress key and revoke them (admin-only).
+
+    Ghost criterion: task has a job_id but `progress:{job_id}` is missing.
+    """
+    _require_admin(password, user)
+    sm = request.app.state.storage_manager
+    tasks = _collect_tasks()
+    victims: list[dict] = []
+    for t in tasks:
+        st = t.get("state")
+        if st not in ("active", "reserved", "scheduled"):
+            continue
+        if st == "reserved" and not payload.include_reserved:
+            continue
+        if st == "scheduled" and not payload.include_scheduled:
+            continue
+        jid = _parse_job_id_from_task(t)
+        if not jid:
+            continue
+        try:
+            is_ghost = sm.get_progress(jid) is None
+        except Exception:
+            is_ghost = False
+        if not is_ghost:
+            continue
+        tid = t.get("id") or (t.get("request") or {}).get("id")
+        victims.append({"task_id": tid, "job_id": jid, "state": st, "worker": t.get("worker")})
+    if payload.dry_run:
+        return {"ghosts": victims, "count": len(victims), "dry_run": True}
+    revoked = 0
+    for v in victims:
+        jid = v.get("job_id")
+        tid = v.get("task_id")
+        if isinstance(jid, str):
+            try:
+                sm.request_cancel(jid)
+            except Exception:
+                pass
+        if isinstance(tid, str):
+            try:
+                celery_app.control.revoke(tid, terminate=True, signal="SIGTERM")
+                revoked += 1
+            except Exception:
+                continue
+    return {"ghosts": victims, "count": len(victims), "revoked": revoked, "dry_run": False}
