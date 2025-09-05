@@ -216,7 +216,9 @@ def admin_cleanup(
     clear_cache: bool = Query(True),
     clear_debug: bool = Query(True),
     clear_temp_sessions: bool = Query(True),
-    older_than_hours: int | None = Query(None, ge=1, description="Only delete files older than this many hours"),
+    clear_storage: bool = Query(False, description="Also clear output/storage (intermediate local cache)"),
+    clear_tmpdir: bool = Query(False, description="Also clear TMPDIR if set"),
+    older_than_hours: int | None = Query(None, ge=0, description="Only delete files older than this many hours; 0 means delete all"),
     user=Depends(_get_current_user),
 ):
     """Administrative cleanup: clear cache and prune debug/temp files."""
@@ -238,6 +240,21 @@ def admin_cleanup(
             summary["temp_sessions_deleted"] = delete_path_contents(Path("output/temp/sessions"), older_than_hours)
         except Exception as e:
             summary["temp_sessions_deleted"] = {"error": str(e)}
+    if clear_storage:
+        try:
+            summary["storage_deleted"] = delete_path_contents(Path("output/storage"), older_than_hours)
+        except Exception as e:
+            summary["storage_deleted"] = {"error": str(e)}
+    if clear_tmpdir:
+        try:
+            import os as _os
+            td = _os.getenv("TMPDIR")
+            if td:
+                summary["tmpdir_deleted"] = delete_path_contents(Path(td), older_than_hours)
+            else:
+                summary["tmpdir_deleted"] = {"skipped": True, "reason": "TMPDIR not set"}
+        except Exception as e:
+            summary["tmpdir_deleted"] = {"error": str(e)}
     return summary
 
 
@@ -262,11 +279,13 @@ def storage_stats(password: Optional[str] = Query(None), user=Depends(_get_curre
     results_dir = (base_storage / "results").resolve()
     debug_dir = Path("output/debug").resolve()
     sessions_dir = Path("output/temp/sessions").resolve()
+    storage_dir = Path("output/storage").resolve()
     tmpdir = Path(os.getenv("TMPDIR", "")).resolve() if os.getenv("TMPDIR") else None
     return {
         "results": dir_stats(results_dir),
         "debug": dir_stats(debug_dir),
         "sessions": dir_stats(sessions_dir),
+        "storage": dir_stats(storage_dir),
         "tmp": dir_stats(tmpdir) if tmpdir else None,
         "timestamp": datetime.now().isoformat(),
     }

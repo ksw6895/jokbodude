@@ -284,8 +284,23 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
         current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "timeout"})
         raise Ignore()
     except Exception as e:
-        # Celery will catch this exception and store it in the task result backend
-        raise e
+        # Normalize failure without relying on backend exception encoding
+        try:
+            # Surface user-friendly status and freeze progress
+            storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), str(e))
+            storage_manager.finalize_progress(job_id, "실패")
+        except Exception:
+            pass
+        try:
+            current_task.update_state(state='FAILURE', meta={
+                "job_id": job_id,
+                "exc_type": e.__class__.__name__,
+                "error": str(e),
+            })
+        except Exception:
+            pass
+        # Avoid Celery JSON exception serialization pitfalls
+        raise Ignore()
 
 @celery_app.task(name="tasks.run_lesson_analysis")
 def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional[bool] = None):
@@ -501,8 +516,20 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
         current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "timeout"})
         raise Ignore()
     except Exception as e:
-        # Celery will catch this exception and store it in the task result backend
-        raise e
+        try:
+            storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), str(e))
+            storage_manager.finalize_progress(job_id, "실패")
+        except Exception:
+            pass
+        try:
+            current_task.update_state(state='FAILURE', meta={
+                "job_id": job_id,
+                "exc_type": e.__class__.__name__,
+                "error": str(e),
+            })
+        except Exception:
+            pass
+        raise Ignore()
 
 
 # --- Batch (multi-request in one server call) ---
@@ -793,7 +820,20 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
         current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "timeout"})
         raise Ignore()
     except Exception as exc:
-        raise exc
+        try:
+            sm.update_progress(job_id, int((sm.get_progress(job_id) or {}).get('progress', 0) or 0), str(exc))
+            sm.finalize_progress(job_id, "실패")
+        except Exception:
+            pass
+        try:
+            current_task.update_state(state='FAILURE', meta={
+                "job_id": job_id,
+                "exc_type": exc.__class__.__name__,
+                "error": str(exc),
+            })
+        except Exception:
+            pass
+        raise Ignore()
 
 
 @celery_app.task(name="tasks.aggregate_batch")
