@@ -442,6 +442,7 @@ class MultiAPIManager:
         
         if parallel:
             from concurrent.futures import ThreadPoolExecutor, as_completed
+            import threading
             
             # Clamp workers to effective capacity: api_keys * per_key_limit
             try:
@@ -450,6 +451,7 @@ class MultiAPIManager:
                 safe_workers = max(1, min(desired, capacity, len(tasks)))
             except Exception:
                 safe_workers = max(1, min(int(max_workers) if max_workers else 1, len(tasks)))
+            logger.info(f"Distributing {len(tasks)} tasks across up to {safe_workers} workers")
             with ThreadPoolExecutor(max_workers=safe_workers) as executor:
                 future_to_task = {}
                 
@@ -475,7 +477,8 @@ class MultiAPIManager:
                     finally:
                         try:
                             if on_progress:
-                                on_progress(task)
+                                # Avoid blocking the collector loop on slow progress sinks (e.g., Redis)
+                                threading.Thread(target=lambda t=task: on_progress(t), daemon=True).start()
                         except Exception:
                             pass
         else:

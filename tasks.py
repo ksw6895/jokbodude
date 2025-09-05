@@ -145,8 +145,10 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
                 for lp in lesson_paths:
                     lesson_chunks += len(PDFOperations.split_pdf_for_chunks(lp))
                 total_chunks = max(1, total_jokbos * lesson_chunks)
+                logger.info(f"Initializing progress for job {job_id}: jokbos={total_jokbos} lesson_chunks={lesson_chunks} total_chunks={total_chunks}")
                 storage_manager.init_progress(job_id, total_chunks, f"총 청크: {total_chunks}")
-            except Exception:
+            except Exception as e:
+                logger.warning(f"Progress init fallback for job {job_id}: {e}")
                 storage_manager.init_progress(job_id, 1, "진행률 초기화")
 
             # Configure API and create model
@@ -217,6 +219,7 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
                 output_filename = f"jokbo_centric_{jokbo_path.stem}_all_lessons.pdf"
                 output_path = output_dir / output_filename
                 
+                logger.info(f"Creating jokbo-centric PDF for {jokbo_path.name} ...")
                 creator.create_jokbo_centric_pdf(
                     str(jokbo_path),
                     analysis_result,
@@ -225,7 +228,11 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
                 )
                 
                 # Store result in Redis
-                storage_manager.store_result(job_id, output_path)
+                try:
+                    key = storage_manager.store_result(job_id, output_path)
+                    logger.info(f"Stored result for job {job_id}: key={key}")
+                except Exception as e:
+                    logger.warning(f"Failed to store result for job {job_id}: {e}")
             
             # Clean up processor resources
             processor.cleanup_session()
@@ -233,8 +240,8 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             # Finalize progress to 100% and clamp chunks
             try:
                 storage_manager.finalize_progress(job_id, "완료")
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"Failed to finalize progress for job {job_id}: {e}")
 
             result_payload = {
                 "status": "Complete",

@@ -97,7 +97,15 @@ class StorageManager:
                     retry_on_timeout=True,
                 )
                 self.redis_client.ping()  # Test connection
-                logger.info("Redis connection established")
+                # Avoid leaking credentials or passwords in logs
+                try:
+                    safe_url = self.redis_url
+                    if "@" in safe_url:
+                        safe_url = safe_url.split("@", 1)[-1]
+                    logger.info("Redis connection established")
+                    logger.debug(f"Redis connected to: {safe_url}")
+                except Exception:
+                    logger.info("Redis connection established")
                 return
             except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError) as e:
                 if attempt == max_retries - 1:
@@ -468,6 +476,10 @@ class StorageManager:
                 })
             self._with_retry(self.redis_client.hset, key, mapping=mapping)
             self._with_retry(self.redis_client.expire, key, 172800)
+            try:
+                logger.info(f"Progress finalized for job {job_id}: completed {total_chunks} chunks")
+            except Exception:
+                pass
         except Exception as e:
             logger.error(f"Failed to finalize progress: {e}")
     
@@ -638,6 +650,12 @@ class StorageManager:
                     }
                 )
                 self._with_retry(self.redis_client.expire, f"progress:{job_id}", 172800)
+                try:
+                    logger.info(
+                        f"Progress initialized for job {job_id}: total_chunks={safe_total}, completed={safe_completed}"
+                    )
+                except Exception:
+                    pass
             except Exception as e:
                 logger.error(f"Failed to init progress: {e}")
 
@@ -646,6 +664,12 @@ class StorageManager:
         if self.use_local_only or not self.redis_client:
             return
         try:
+            try:
+                logger.debug(
+                    f"increment_chunk start: job={job_id} inc={int(inc)} msg={(message or '')[:80]}"
+                )
+            except Exception:
+                pass
             # Optional CBT token consumption per chunk (best-effort)
             try:
                 self._consume_tokens_for_job(job_id, inc)
@@ -699,6 +723,12 @@ class StorageManager:
                 }
             )
             self._with_retry(self.redis_client.expire, key, 172800)
+            try:
+                logger.info(
+                    f"Progress updated for job {job_id}: {completed_clamped}/{total_chunks} ({progress}%) ETA={eta:.1f}s"
+                )
+            except Exception:
+                pass
         except Exception as e:
             logger.error(f"Failed to increment chunk progress: {e}")
 
