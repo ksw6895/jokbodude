@@ -293,8 +293,33 @@ class GeminiAPIClient:
                 if self.safety_settings:
                     gen_kwargs["safety_settings"] = self.safety_settings
 
+                # Helper: run the SDK call with a hard timeout to avoid indefinite stalls
+                def _call_with_timeout(call_kwargs: Dict[str, Any]):
+                    from concurrent.futures import ThreadPoolExecutor, TimeoutError as _Timeout
+                    try:
+                        import os as _os
+                        timeout_s = float(_os.getenv("GENAI_GENERATE_TIMEOUT_SECONDS", "180"))
+                    except Exception:
+                        timeout_s = 180.0
+                    start = time.time()
+                    logger.info(f"Invoking generate_content (model={call_kwargs.get('model')}) [key={self._key_tag()}]")
+                    with ThreadPoolExecutor(max_workers=1) as _exec:
+                        fut = _exec.submit(lambda: self._client.models.generate_content(**call_kwargs))
+                        try:
+                            resp = fut.result(timeout=timeout_s)
+                            try:
+                                dur = time.time() - start
+                                logger.info(f"generate_content returned in {dur:.2f}s [key={self._key_tag()}]")
+                            except Exception:
+                                pass
+                            return resp
+                        except _Timeout:
+                            raise ContentGenerationError(
+                                f"Generation call timed out after {int(timeout_s)}s"
+                            )
+
                 try:
-                    response = self._client.models.generate_content(**gen_kwargs)
+                    response = _call_with_timeout(gen_kwargs)
                 except TypeError as te:
                     msg = str(te).lower()
                     # If this SDK doesn't support `config`, try legacy `generation_config`
@@ -303,19 +328,19 @@ class GeminiAPIClient:
                             if final_gen_cfg:
                                 gen_kwargs.pop("config", None)
                                 gen_kwargs["generation_config"] = final_gen_cfg
-                            response = self._client.models.generate_content(**gen_kwargs)
+                            response = _call_with_timeout(gen_kwargs)
                         except TypeError as te2:
                             # If `safety_settings` is also unsupported, drop it and retry once
                             msg2 = str(te2).lower()
                             if "unexpected keyword" in msg2 and "safety_settings" in msg2:
                                 gen_kwargs.pop("safety_settings", None)
-                                response = self._client.models.generate_content(**gen_kwargs)
+                                response = _call_with_timeout(gen_kwargs)
                             else:
                                 raise
                     # If `safety_settings` alone is unsupported, drop it and retry
                     elif "unexpected keyword" in msg and "safety_settings" in msg:
                         gen_kwargs.pop("safety_settings", None)
-                        response = self._client.models.generate_content(**gen_kwargs)
+                        response = _call_with_timeout(gen_kwargs)
                     else:
                         raise
                 
