@@ -298,9 +298,11 @@ class GeminiAPIClient:
                     from concurrent.futures import ThreadPoolExecutor, TimeoutError as _Timeout
                     try:
                         import os as _os
-                        timeout_s = float(_os.getenv("GENAI_GENERATE_TIMEOUT_SECONDS", "180"))
+                        # Generation with file inputs can legitimately exceed 3 minutes.
+                        # Default to 480s unless overridden via env.
+                        timeout_s = float(_os.getenv("GENAI_GENERATE_TIMEOUT_SECONDS", "480"))
                     except Exception:
-                        timeout_s = 180.0
+                        timeout_s = 480.0
                     start = time.time()
                     logger.info(f"Invoking generate_content (model={call_kwargs.get('model')}) [key={self._key_tag()}]")
                     with ThreadPoolExecutor(max_workers=1) as _exec:
