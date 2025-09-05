@@ -222,11 +222,17 @@ def delete_job(request: Request, job_id: str, cancel_if_running: bool = True, us
             # As a safe fallback, require explicit ownership when we cannot verify membership
             raise HTTPException(status_code=403, detail="Not authorized for this job")
     if cancel_if_running:
+        # Mark as cancelled so any in-flight worker can observe and exit cooperatively
+        try:
+            storage_manager.request_cancel(job_id)
+        except Exception:
+            pass
         try:
             task_id = storage_manager.get_job_task(job_id)
             if task_id:
                 tr = celery_app.AsyncResult(task_id)
                 if tr.status in ("PENDING", "STARTED", "RETRY"):
+                    # Try hard revoke; for prefork this kills the child process
                     celery_app.control.revoke(task_id, terminate=True, signal="SIGTERM")
         except Exception:
             pass

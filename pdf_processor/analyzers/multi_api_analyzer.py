@@ -307,6 +307,15 @@ class MultiAPIAnalyzer:
         
         # Define how to process a single chunk with a specific API client
         def operation(task, api_client, model):
+            # Cancel-aware: if the session/job was cancelled, bail out early
+            try:
+                from storage_manager import StorageManager as _SM
+                if _SM().is_cancelled(self.session_id):
+                    raise PDFProcessorError("cancelled")
+            except PDFProcessorError:
+                raise
+            except Exception:
+                pass
             idx, (chunk_path, start_page, end_page) = task
             # Optional purge per chunk (disabled by default)
             try:

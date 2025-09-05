@@ -530,9 +530,17 @@ class StorageManager:
 
         if not self.use_local_only and self.redis_client:
             try:
-                # Delete all Redis keys for this job
+                # Delete all Redis keys for this job, but preserve the cancel flag
+                # so in-flight workers still observe the cancellation and exit early.
                 pattern = f"*:{job_id}:*"
+                cancel_key = f"job:{job_id}:cancel"
                 for key in self.redis_client.scan_iter(match=pattern):
+                    try:
+                        k = key.decode() if isinstance(key, (bytes, bytearray)) else str(key)
+                    except Exception:
+                        k = str(key)
+                    if k == cancel_key:
+                        continue
                     self.redis_client.delete(key)
             except Exception as e:
                 logger.error(f"Failed to cleanup Redis keys: {e}")

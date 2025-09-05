@@ -335,6 +335,13 @@ class PDFProcessor:
 
             # Define chunk operation for distribution
             def _op(task, api_client, model):
+                # Cooperative cancel check before doing any remote work
+                try:
+                    from storage_manager import StorageManager as _SM
+                    if _SM().is_cancelled(self.session_id):
+                        raise RuntimeError("cancelled")
+                except Exception:
+                    pass
                 lidx, lpath, cpath, start, end = task
                 fm = FileManager(api_client)
                 analyzer = JokboCentricAnalyzer(api_client, fm, self.session_id, self.debug_dir)
