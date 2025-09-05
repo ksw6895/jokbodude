@@ -73,27 +73,135 @@ def get_config():
 
 
 @router.get("/health")
-async def health_check(request: Request):
-    """Health check endpoint for monitoring."""
+async def health_check(request: Request, stall_minutes: int = Query(10, ge=1, le=120)):
+    """Health endpoint with worker status, queue depth, and stall watchdog.
+
+    - stall_minutes: threshold in minutes without any chunk completion to flag a job as stalled.
+    """
     storage_manager = request.app.state.storage_manager
     checks = {"web": "healthy", "redis": "unknown", "worker": "unknown"}
+    details: dict = {"celery": {}, "watchdog": {}}
+
+    # Redis check
     try:
         storage_manager.redis_client.ping()
         checks["redis"] = "healthy"
     except Exception as e:
         checks["redis"] = f"unhealthy: {str(e)}"
+
+    # Celery worker/queues
     try:
         inspector = celery_app.control.inspect()
-        active_workers = inspector.active()
-        if active_workers:
-            checks["worker"] = "healthy"
-        else:
-            checks["worker"] = "no active workers"
+        active = inspector.active() or {}
+        reserved = inspector.reserved() or {}
+        scheduled = inspector.scheduled() or {}
+        # Aggregate totals
+        def _agg_total(m):
+            try:
+                return sum(len(v or []) for v in m.values())
+            except Exception:
+                return None
+        totals = {
+            "active": _agg_total(active) or 0,
+            "reserved": _agg_total(reserved) or 0,
+            "scheduled": _agg_total(scheduled) or 0,
+        }
+        # Breakdown by routing_key if delivery_info present
+        def _by_route(m):
+            out: dict[str, int] = {}
+            try:
+                for entries in m.values():
+                    for t in entries or []:
+                        try:
+                            di = t.get("delivery_info") or {}
+                            rk = (di.get("routing_key") or di.get("exchange") or "unknown").split(".")[0]
+                        except Exception:
+                            rk = "unknown"
+                        out[rk] = out.get(rk, 0) + 1
+            except Exception:
+                pass
+            return out
+        details["celery"]["active_by_queue"] = _by_route(active)
+        details["celery"]["reserved_by_queue"] = _by_route(reserved)
+        details["celery"]["scheduled_by_queue"] = _by_route(scheduled)
+        details["celery"].update(totals)
+        checks["worker"] = "healthy" if totals["active"] is not None else "unknown"
     except Exception as e:
         checks["worker"] = f"unhealthy: {str(e)}"
-    all_healthy = all(v == "healthy" for v in checks.values())
+
+    # Redis queue LLEN best-effort
+    redis_depths: dict[str, int] = {}
+    try:
+        r = storage_manager.redis_client
+        candidates = [
+            "celery",  # default queue
+            "default", "analysis",
+            "celery:queue:celery", "celery:queue:default", "celery:queue:analysis",
+        ]
+        for k in candidates:
+            try:
+                t = r.type(k)
+                if (t or b"").decode() != "list":
+                    continue
+                n = r.llen(k)
+                if int(n or 0) > 0:
+                    redis_depths[k] = int(n)
+            except Exception:
+                continue
+    except Exception:
+        pass
+    details["celery"]["redis_queue_depths"] = redis_depths
+
+    # Watchdog: stalled jobs with no recent chunk
+    stalled: list[dict] = []
+    try:
+        now = time.time()
+        threshold = float(max(1, int(stall_minutes))) * 60.0
+        r = storage_manager.redis_client
+        for key in r.scan_iter(match="progress:*"):
+            try:
+                pdata = r.hgetall(key) or {}
+                # Decode helpers
+                def _g(name, default=""):
+                    return (pdata.get(name) or pdata.get(name.encode()) or default)
+                def _d(v):
+                    return v.decode() if isinstance(v, (bytes, bytearray)) else v
+                prog = int((_g("progress", "0")))
+                if prog >= 100:
+                    continue  # completed
+                total = int((_g("total_chunks", "0")))
+                done = int((_g("completed_chunks", "0")))
+                last_chunk_at = float((_g("last_chunk_at", "0") or 0) or 0)
+                if last_chunk_at <= 0:
+                    # Fallback to started_at or consider non-stalled if no info
+                    last_chunk_at = float((_g("started_at", "0") or 0) or 0)
+                idle = now - last_chunk_at if last_chunk_at > 0 else 0
+                if idle >= threshold and done < total:
+                    jid = _d(key)[len("progress:"):] if isinstance(key, (bytes, bytearray)) else str(key).split(":",1)[-1]
+                    stalled.append({
+                        "job_id": jid,
+                        "progress": prog,
+                        "completed_chunks": done,
+                        "total_chunks": total,
+                        "idle_seconds": int(idle),
+                        "message": _d(_g("message", "")),
+                    })
+    except Exception:
+        pass
+    details["watchdog"]["stalled_jobs"] = stalled
+    details["watchdog"]["stall_minutes_threshold"] = stall_minutes
+
+    all_healthy = (checks.get("redis") == "healthy" and isinstance(details.get("celery", {}).get("active", 0), int))
     status_code = 200 if all_healthy else 503
-    return JSONResponse(content={"status": "healthy" if all_healthy else "degraded", "checks": checks, "timestamp": datetime.now().isoformat()}, status_code=status_code)
+    return JSONResponse(
+        content={
+            "status": "healthy" if status_code == 200 else "degraded",
+            "checks": checks,
+            "details": details,
+            "timestamp": datetime.now().isoformat(),
+        },
+        status_code=status_code,
+    )
 
 
 from .auth import get_current_user as _get_current_user  # lazy import to avoid cycles
