@@ -6,6 +6,7 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query, Request, Depends
 from fastapi.responses import FileResponse, JSONResponse
+from pydantic import BaseModel
 
 from pdf_processor.pdf.cache import clear_global_cache
 
@@ -158,3 +159,179 @@ def storage_stats(password: Optional[str] = Query(None), user=Depends(_get_curre
         "tmp": dir_stats(tmpdir) if tmpdir else None,
         "timestamp": datetime.now().isoformat(),
     }
+
+
+# --- Admin: results index and bulk delete ---
+
+class ResultsFilter(BaseModel):
+    user_id: Optional[str] = None
+    user_email: Optional[str] = None
+    older_than_hours: Optional[int] = None
+    filename_contains: Optional[str] = None
+    limit: Optional[int] = 100
+    offset: Optional[int] = 0
+
+
+def _scan_results_index(request: Request):
+    sm = request.app.state.storage_manager
+    root = getattr(sm, "results_dir", Path(os.getenv("RENDER_STORAGE_PATH", "output")) / "results")
+    now = time.time()
+    if not root.exists():
+        return []
+    items: list[dict] = []
+    for job_dir in sorted([p for p in root.iterdir() if p.is_dir()], key=lambda p: p.name):
+        job_id = job_dir.name
+        for p in job_dir.glob("*.pdf"):
+            try:
+                st = p.stat()
+                mtime = st.st_mtime
+                age_hours = (now - mtime) / 3600.0
+                size_bytes = int(st.st_size)
+                owner_id = None
+                owner_email = None
+                try:
+                    owner_id = sm.get_job_owner(job_id)
+                except Exception:
+                    owner_id = None
+                if owner_id:
+                    try:
+                        prof = sm.get_user_profile(owner_id) or {}
+                        owner_email = prof.get("email")
+                    except Exception:
+                        owner_email = None
+                has_redis_copy = False
+                try:
+                    if getattr(sm, "redis_client", None):
+                        key = f"result:{job_id}:{p.name}"
+                        has_redis_copy = bool(sm.redis_client.exists(key))  # type: ignore[attr-defined]
+                except Exception:
+                    has_redis_copy = False
+                items.append({
+                    "job_id": job_id,
+                    "filename": p.name,
+                    "size_bytes": size_bytes,
+                    "modified_at": datetime.fromtimestamp(mtime).isoformat(),
+                    "age_hours": age_hours,
+                    "owner_id": owner_id,
+                    "owner_email": owner_email,
+                    "has_redis_copy": has_redis_copy,
+                })
+            except Exception:
+                continue
+    return items
+
+
+def _apply_results_filters(items: list[dict], filt: ResultsFilter) -> list[dict]:
+    out: list[dict] = []
+    uid_q = (filt.user_id or "").strip().lower() or None
+    email_q = (filt.user_email or "").strip().lower() or None
+    name_q = (filt.filename_contains or "").strip().lower() or None
+    older = filt.older_than_hours
+    for it in items:
+        if older is not None:
+            try:
+                if float(it.get("age_hours", 0.0)) < float(older):
+                    continue
+            except Exception:
+                pass
+        if name_q and name_q not in str(it.get("filename", "")).lower():
+            continue
+        if uid_q and uid_q not in str(it.get("owner_id", "")).lower():
+            continue
+        if email_q and email_q not in str(it.get("owner_email", "")).lower():
+            continue
+        out.append(it)
+    return out
+
+
+@router.get("/admin/results-index")
+def admin_results_index(
+    request: Request,
+    password: Optional[str] = Query(None),
+    user=Depends(_get_current_user),
+    user_id: Optional[str] = Query(None),
+    user_email: Optional[str] = Query(None),
+    older_than_hours: Optional[int] = Query(None, ge=0),
+    filename_contains: Optional[str] = Query(None),
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+):
+    """Scan the results directory and return an index of generated PDFs (admin-only)."""
+    _require_admin(password, user)
+    items = _scan_results_index(request)
+    filtered = _apply_results_filters(items, ResultsFilter(
+        user_id=user_id,
+        user_email=user_email,
+        older_than_hours=older_than_hours,
+        filename_contains=filename_contains,
+        limit=limit,
+        offset=offset,
+    ))
+    total = len(filtered)
+    start = max(0, int(offset))
+    end = start + int(limit)
+    page = filtered[start:end]
+    next_offset = end if end < total else None
+    return {"items": page, "total": total, "next_offset": next_offset}
+
+
+class DeleteRequest(BaseModel):
+    filter: ResultsFilter
+    dry_run: bool = True
+
+
+@router.post("/admin/delete-results")
+def admin_delete_results(request: Request, payload: DeleteRequest, password: Optional[str] = Query(None), user=Depends(_get_current_user)):
+    """Bulk delete results by filter (admin-only). Use dry_run to preview deletions."""
+    _require_admin(password, user)
+    # Scan and filter
+    items = _scan_results_index(request)
+    filtered = _apply_results_filters(items, payload.filter)
+    # Apply pagination from filter if provided
+    start = max(0, int(payload.filter.offset or 0))
+    lim = int(payload.filter.limit or len(filtered) or 0)
+    end = start + lim
+    targets = filtered[start:end]
+    # Prepare response summary
+    summary_items: list[dict] = []
+    total_bytes = 0
+    deleted_count = 0
+    sm = request.app.state.storage_manager
+    for it in targets:
+        size_b = int(it.get("size_bytes", 0) or 0)
+        total_bytes += size_b
+        summary_items.append({"job_id": it.get("job_id"), "filename": it.get("filename"), "bytes": size_b})
+        if not payload.dry_run:
+            try:
+                if sm.delete_result(str(it.get("job_id")), str(it.get("filename"))):
+                    deleted_count += 1
+            except Exception:
+                continue
+    resp = {
+        ("deleted_count" if not payload.dry_run else "would_delete_count"): deleted_count if not payload.dry_run else len(targets),
+        "total_bytes": total_bytes,
+        "items": summary_items,
+    }
+    return resp
+
+
+@router.post("/admin/prune-results")
+def admin_prune_results(
+    request: Request,
+    password: Optional[str] = Query(None),
+    user=Depends(_get_current_user),
+    older_than_hours: Optional[int] = Query(None, ge=0),
+    dry_run: bool = Query(False),
+):
+    """Prune on-disk results older than the given threshold (admin-only)."""
+    _require_admin(password, user)
+    # Default to env RESULT_RETENTION_HOURS if not provided
+    if older_than_hours is None:
+        try:
+            older_than_hours = int(os.getenv("RESULT_RETENTION_HOURS", "720"))
+        except Exception:
+            older_than_hours = 720
+    # Reuse the delete endpoint logic without user/email filters
+    filt = ResultsFilter(older_than_hours=older_than_hours, limit=10_000, offset=0)
+    payload = DeleteRequest(filter=filt, dry_run=dry_run)
+    return admin_delete_results(request, payload, password=password, user=user)  # type: ignore[arg-type]

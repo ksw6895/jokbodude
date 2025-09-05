@@ -62,6 +62,83 @@
         <div id="jobs_list" class="bg-gray-900/70 border border-gray-800 rounded-lg p-4 min-h-[80px]" style="display:block;align-items:stretch;justify-content:flex-start;"></div>
       </div>
     </div>
+
+    <!-- Admin Panel -->
+    <div id="admin_panel" class="glass-card" style="display:none; margin-top:1.25rem;">
+      <div class="p-6 border-b border-gray-800">
+        <h2 class="text-xl font-bold text-white">Admin · Storage & Results</h2>
+        <p class="text-gray-400">Storage Usage, Results Index, and Bulk Delete (admin only)</p>
+      </div>
+      <div class="p-6" style="display:flex; flex-direction:column; gap:1.25rem;">
+        <!-- Storage Usage -->
+        <section>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.5rem;">
+            <h3 style="margin:0;">Storage Usage</h3>
+            <button id="btn_storage_stats" class="tab">Refresh Stats</button>
+          </div>
+          <div id="storage_stats" class="bg-gray-900/70 border border-gray-800 rounded-lg p-4" style="min-height:60px;">
+            <div class="text-gray-500">No data yet.</div>
+          </div>
+        </section>
+
+        <!-- Results Index & Filters -->
+        <section>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.5rem;">
+            <h3 style="margin:0;">Results Index</h3>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+              <button id="btn_results_prev" class="tab" title="Prev">Prev</button>
+              <button id="btn_results_next" class="tab" title="Next">Next</button>
+              <button id="btn_results_load" class="tab">Load Index</button>
+            </div>
+          </div>
+          <div class="bg-gray-900/40 border border-gray-800 rounded-lg p-3" style="display:flex; flex-wrap:wrap; gap:0.5rem; align-items:flex-end;">
+            <div>
+              <label class="text-xs text-gray-400">User ID</label>
+              <input id="filter_user_id" class="input" placeholder="partial user_id" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-400">User Email</label>
+              <input id="filter_user_email" class="input" placeholder="partial email" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-400">Filename Contains</label>
+              <input id="filter_filename" class="input" placeholder="substring" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-400">Older Than (h)</label>
+              <input id="filter_older" type="number" class="input" value="48" min="0" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-400">Limit</label>
+              <input id="filter_limit" type="number" class="input" value="50" min="1" max="1000" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-400">Offset</label>
+              <input id="filter_offset" type="number" class="input" value="0" min="0" />
+            </div>
+          </div>
+          <div id="results_index_list" class="bg-gray-900/70 border border-gray-800 rounded-lg p-4" style="min-height:80px; margin-top:0.5rem;"></div>
+        </section>
+
+        <!-- Bulk Delete -->
+        <section>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.5rem;">
+            <h3 style="margin:0;">Bulk Delete</h3>
+            <div style="display:flex; gap:0.5rem;">
+              <button id="btn_dry_run" class="tab" title="Preview deletions">Dry Run</button>
+              <button id="btn_bulk_delete" class="tab" style="background:#7f1d1d;border-color:#7f1d1d;">Delete Matched</button>
+            </div>
+          </div>
+          <div id="bulk_delete_out" class="bg-gray-900/70 border border-gray-800 rounded-lg p-4" style="min-height:60px;">
+            <div class="text-gray-500">Use the filters above. Default older_than_hours=48.</div>
+          </div>
+          <div style="margin-top:0.5rem; display:flex; gap:0.5rem; align-items:center;">
+            <input id="prune_hours" type="number" class="input" value="48" min="0" style="width:140px;" />
+            <button id="btn_prune_now" class="tab" title="Prune old results on disk">Prune Results Now</button>
+          </div>
+        </section>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -221,9 +298,139 @@
       await fetchAuthConfig();
       const me = await ensureAuth();
       if (me && me.user_id) await loadJobs(me.user_id);
+      try { if (me && me.admin) { document.getElementById('admin_panel').style.display = 'block'; await adminLoadStats(); await adminLoadIndex(); } } catch {}
     }
 
     boot();
+
+    // --- Admin helpers ---
+    function getFilters() {
+      return {
+        user_id: document.getElementById('filter_user_id').value.trim() || undefined,
+        user_email: document.getElementById('filter_user_email').value.trim() || undefined,
+        filename_contains: document.getElementById('filter_filename').value.trim() || undefined,
+        older_than_hours: parseInt(document.getElementById('filter_older').value || '0', 10),
+        limit: parseInt(document.getElementById('filter_limit').value || '50', 10),
+        offset: parseInt(document.getElementById('filter_offset').value || '0', 10)
+      };
+    }
+
+    function setOffset(val) {
+      const el = document.getElementById('filter_offset');
+      el.value = String(Math.max(0, val|0));
+    }
+
+    async function adminLoadStats() {
+      const box = document.getElementById('storage_stats');
+      box.innerHTML = '<div class="text-gray-500">Loading…</div>';
+      try {
+        const r = await fetch('/admin/storage-stats', { credentials: 'include' });
+        if (!r.ok) { if (r.status === 403) { document.getElementById('admin_panel').style.display='none'; } throw new Error('HTTP '+r.status); }
+        const j = await r.json();
+        const fmt = (n) => new Intl.NumberFormat().format(n||0);
+        const mk = (k) => j[k] ? `<div><b>${k}</b>: files ${fmt(j[k].files)}, bytes ${fmt(j[k].bytes)} · <span class="text-gray-500">${j[k].path||''}</span></div>` : '';
+        box.innerHTML = [mk('results'), mk('debug'), mk('sessions'), mk('tmp')].join('') + `<div class="text-gray-500" style="margin-top:.25rem;">${j.timestamp||''}</div>`;
+      } catch (e) {
+        box.innerHTML = `<div class="text-red-400">Failed to load: ${e.message}</div>`;
+      }
+    }
+
+    async function adminLoadIndex() {
+      const list = document.getElementById('results_index_list');
+      list.innerHTML = '<div class="text-gray-500">Loading…</div>';
+      const f = getFilters();
+      const params = new URLSearchParams();
+      if (f.user_id) params.set('user_id', f.user_id);
+      if (f.user_email) params.set('user_email', f.user_email);
+      if (f.filename_contains) params.set('filename_contains', f.filename_contains);
+      if (!isNaN(f.older_than_hours)) params.set('older_than_hours', String(f.older_than_hours));
+      params.set('limit', String(f.limit));
+      params.set('offset', String(f.offset));
+      try {
+        const r = await fetch(`/admin/results-index?${params.toString()}`, { credentials: 'include' });
+        if (!r.ok) { if (r.status === 403) { document.getElementById('admin_panel').style.display='none'; } throw new Error('HTTP '+r.status); }
+        const j = await r.json();
+        const items = j.items || [];
+        const fmt = (n) => new Intl.NumberFormat().format(n||0);
+        if (!items.length) { list.innerHTML = '<div class="text-gray-500">No results.</div>'; return; }
+        let html = '<div class="text-gray-400" style="margin-bottom:.5rem;">Total: '+fmt(j.total)+' · Showing '+fmt(items.length)+(j.next_offset?(' · next_offset='+j.next_offset):'')+'</div>';
+        html += '<div style="display:grid;grid-template-columns:1.2fr 1fr 0.8fr 0.6fr 1fr 0.6fr;gap:.35rem;align-items:center;">'
+             + '<div class="text-sm text-gray-500">job_id / filename</div>'
+             + '<div class="text-sm text-gray-500">modified_at</div>'
+             + '<div class="text-sm text-gray-500">age_hours</div>'
+             + '<div class="text-sm text-gray-500">size</div>'
+             + '<div class="text-sm text-gray-500">owner</div>'
+             + '<div class="text-sm text-gray-500">redis</div>';
+        for (const it of items) {
+          html += '<div class="text-xs">'+it.job_id+'<br/><span class="text-gray-400">'+it.filename+'</span></div>'
+               + '<div class="text-xs text-gray-300">'+(it.modified_at||'')+'</div>'
+               + '<div class="text-xs">'+(it.age_hours?it.age_hours.toFixed?it.age_hours.toFixed(1):it.age_hours:0)+'</div>'
+               + '<div class="text-xs">'+fmt(it.size_bytes||0)+'</div>'
+               + '<div class="text-xs">'+(it.owner_email||it.owner_id||'-')+'</div>'
+               + '<div class="text-xs">'+(it.has_redis_copy?'yes':'no')+'</div>';
+        }
+        html += '</div>';
+        list.innerHTML = html;
+        if (j.next_offset != null) setOffset(j.next_offset);
+      } catch (e) {
+        list.innerHTML = `<div class="text-red-400">Failed to load index: ${e.message}</div>`;
+      }
+    }
+
+    async function adminBulkDelete(dryRun) {
+      const box = document.getElementById('bulk_delete_out');
+      box.innerHTML = '<div class="text-gray-500">Processing…</div>';
+      const filter = getFilters();
+      try {
+        if (!dryRun) {
+          if (!confirm('정말 삭제하시겠습니까? 필터에 매칭되는 결과 파일을 삭제합니다.')) { box.innerHTML = '<div class="text-gray-500">Cancelled.</div>'; return; }
+        }
+        const r = await fetch('/admin/delete-results', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filter, dry_run: !!dryRun })
+        });
+        if (!r.ok) { if (r.status === 403) { document.getElementById('admin_panel').style.display='none'; } throw new Error('HTTP '+r.status); }
+        const j = await r.json();
+        const fmt = (n) => new Intl.NumberFormat().format(n||0);
+        const count = j.deleted_count != null ? j.deleted_count : (j.would_delete_count || 0);
+        const items = j.items || [];
+        let html = '<div><b>'+ (dryRun ? 'Would delete' : 'Deleted') +'</b>: '+fmt(count)+' files · '+fmt(j.total_bytes||0)+' bytes</div>';
+        if (items.length) {
+          html += '<div style="margin-top:.35rem;max-height:180px;overflow:auto;">';
+          for (const it of items) html += '<div class="text-xs text-gray-400">'+it.job_id+' · '+it.filename+' · '+fmt(it.bytes||0)+' bytes</div>';
+          html += '</div>';
+        }
+        box.innerHTML = html;
+        try { await adminLoadStats(); await adminLoadIndex(); } catch {}
+      } catch (e) {
+        box.innerHTML = `<div class=\"text-red-400\">Failed: ${e.message}</div>`;
+      }
+    }
+
+    async function adminPruneNow() {
+      const hours = parseInt(document.getElementById('prune_hours').value || '48', 10);
+      if (!confirm(`Delete on-disk results older than ${hours}h?`)) return;
+      try {
+        const r = await fetch(`/admin/prune-results?older_than_hours=${encodeURIComponent(hours)}&dry_run=false`, { method: 'POST', credentials: 'include' });
+        if (!r.ok) throw new Error('HTTP '+r.status);
+        const j = await r.json();
+        alert(`Deleted ${j.deleted_count||0} files, ${new Intl.NumberFormat().format(j.total_bytes||0)} bytes`);
+        try { await adminLoadStats(); await adminLoadIndex(); } catch {}
+      } catch (e) {
+        alert('Failed to prune: '+e.message);
+      }
+    }
+
+    // Admin UI events
+    document.getElementById('btn_storage_stats').addEventListener('click', adminLoadStats);
+    document.getElementById('btn_results_load').addEventListener('click', adminLoadIndex);
+    document.getElementById('btn_results_next').addEventListener('click', () => { const f = getFilters(); setOffset((f.offset||0) + (f.limit||50)); adminLoadIndex(); });
+    document.getElementById('btn_results_prev').addEventListener('click', () => { const f = getFilters(); const step = (f.limit||50); setOffset(Math.max(0, (f.offset||0) - step)); adminLoadIndex(); });
+    document.getElementById('btn_dry_run').addEventListener('click', () => adminBulkDelete(true));
+    document.getElementById('btn_bulk_delete').addEventListener('click', () => adminBulkDelete(false));
+    document.getElementById('btn_prune_now').addEventListener('click', adminPruneNow);
   </script>
 </body>
 </html>
