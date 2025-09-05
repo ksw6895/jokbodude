@@ -149,6 +149,15 @@ class GeminiAPIClient:
             )
             
             # Wait until file is ACTIVE per new SDK semantics
+            # Add a hard timeout to avoid indefinite hangs if the file never
+            # transitions to ACTIVE in the service.
+            import os
+            start_wait = time.time()
+            try:
+                max_wait = float(os.getenv("GEMINI_UPLOAD_ACTIVATE_TIMEOUT_SECONDS", "180"))
+            except Exception:
+                max_wait = 180.0
+            next_warn = 10.0  # warn after 10s, then roughly every 10s
             while True:
                 try:
                     state = getattr(uploaded_file, "state", None)
@@ -159,7 +168,21 @@ class GeminiAPIClient:
                     break
                 if state_name == "FAILED":
                     raise FileUploadError(f"File processing failed: {display_name}")
-                logger.debug(f"Processing {display_name} (state={state_name or 'UNKNOWN'})... [key={self._key_tag()}]")
+                waited = time.time() - start_wait
+                if waited >= next_warn:
+                    try:
+                        logger.warning(
+                            f"Processing {display_name} still pending after {int(waited)}s "
+                            f"(state={state_name or 'UNKNOWN'}) [key={self._key_tag()}]"
+                        )
+                    except Exception:
+                        pass
+                    next_warn += 10.0
+                if waited >= max_wait:
+                    raise FileUploadError(
+                        f"File processing not ACTIVE after {int(max_wait)}s: {display_name} "
+                        f"(last_state={state_name or 'UNKNOWN'})"
+                    )
                 time.sleep(2)
                 uploaded_file = self._client.files.get(name=uploaded_file.name)
                 

@@ -468,11 +468,13 @@ class StorageManager:
             mapping = {
                 "progress": "100",
                 "message": message,
+                "timestamp": __import__('datetime').datetime.now().isoformat(),
             }
             if total_chunks > 0:
                 mapping.update({
                     "completed_chunks": str(total_chunks),
                     "eta_seconds": "0",
+                    "last_chunk_at": str(time.time()),
                 })
             self._with_retry(self.redis_client.hset, key, mapping=mapping)
             self._with_retry(self.redis_client.expire, key, 172800)
@@ -643,6 +645,7 @@ class StorageManager:
                         "message": message or "작업을 시작합니다",
                         "timestamp": datetime.now().isoformat(),
                         "started_at": str(now),
+                        "last_chunk_at": str(now),
                         "total_chunks": str(safe_total),
                         "completed_chunks": str(safe_completed),
                         "eta_seconds": "-1",
@@ -660,7 +663,15 @@ class StorageManager:
                 logger.error(f"Failed to init progress: {e}")
 
     def increment_chunk(self, job_id: str, inc: int = 1, message: Optional[str] = None) -> None:
-        """Increment completed chunk count and update ETA and percent (atomically)."""
+        """Increment completed chunk count and update ETA and percent (atomically).
+
+        Notes:
+        - Intentionally clamps visual progress to 99% regardless of remaining chunks.
+          Final 100% is only set by finalize_progress() to avoid confusion when
+          post-processing (merge/PDF build) is still running after all chunks finish.
+        - If increments overshoot the declared total_chunks (e.g., duplicate callbacks),
+          we no-op to avoid spamming identical 100% updates.
+        """
         if self.use_local_only or not self.redis_client:
             return
         try:
@@ -700,14 +711,20 @@ class StorageManager:
             # Clamp completed to not exceed total for display consistency
             completed_clamped = min(completed, total_chunks) if total_chunks > 0 else completed
 
+            # If we've already exceeded total_chunks due to duplicate callbacks,
+            # avoid writing/logging identical updates repeatedly.
+            if total_chunks > 0 and completed > total_chunks:
+                return
+
             now = time.time()
             elapsed = max(0.0, now - started_at)
             avg = (elapsed / completed_clamped) if completed_clamped > 0 else 0.0
             remaining = max(0, total_chunks - completed_clamped)
             eta = avg * remaining if completed_clamped > 0 else -1
             progress = int((completed_clamped / total_chunks) * 100) if total_chunks > 0 else 0
-            # Avoid showing 100% until finalization elsewhere
-            progress = min(progress, 99 if remaining > 0 else 100)
+            # Always clamp to 99%; only finalize_progress() sets 100%.
+            if progress >= 100:
+                progress = 99
             auto_msg = message or f"청크 진행: {completed_clamped}/{total_chunks} 완료"
 
             self._with_retry(
@@ -720,6 +737,9 @@ class StorageManager:
                     "eta_seconds": f"{eta:.2f}",
                     "avg_chunk_seconds": f"{avg:.2f}",
                     "message": auto_msg,
+                    # Update recency markers for watchdogs and UI
+                    "timestamp": __import__('datetime').datetime.now().isoformat(),
+                    "last_chunk_at": str(now),
                 }
             )
             self._with_retry(self.redis_client.expire, key, 172800)
