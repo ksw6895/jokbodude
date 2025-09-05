@@ -334,7 +334,7 @@ class MultiAPIAnalyzer:
                         log_context=f"{mode}_chunk_preupload#{idx}"
                     )
                 except Exception:
-                    logger.info("Chunk preupload purge skipped due to error; continuing")
+                    logger.info(f"[job={self.session_id}] Chunk preupload purge skipped due to error; continuing")
             if mode == "lesson-centric":
                 fm = FileManager(api_client)
                 analyzer = LessonCentricAnalyzer(
@@ -463,7 +463,7 @@ class MultiAPIAnalyzer:
                         for i in failed_indices
                     )
                 if _all_blocked:
-                    logger.info("All failed chunks were prompt-blocked; skipping adaptive split retries")
+                    logger.info(f"[job={self.session_id}] All failed chunks were prompt-blocked; skipping adaptive split retries")
                     raise StopIteration  # short-circuit adaptive retry block
             except Exception:
                 # If detection fails, proceed with best-effort adaptive retry below

@@ -102,7 +102,7 @@ class APIKeyStatus:
 class MultiAPIManager:
     """Manages multiple API keys with load balancing and failover."""
     
-    def __init__(self, api_keys: List[str], model_config: Dict[str, Any]):
+    def __init__(self, api_keys: List[str], model_config: Dict[str, Any], context_tag: Optional[str] = None):
         """
         Initialize the multi-API manager.
         
@@ -115,6 +115,8 @@ class MultiAPIManager:
         self.api_statuses = [APIKeyStatus(key, i) for i, key in enumerate(api_keys)]
         self.current_index = 0
         self._lock = threading.Lock()
+        # Optional context tag for log prefixing (e.g., job/session id)
+        self.context_tag = (context_tag or "").strip()
         # Per-key concurrency limit (allow >1 to enable parallel ops on same key)
         try:
             self.per_key_limit = max(1, int(os.getenv("GEMINI_PER_KEY_CONCURRENCY", "1")))
@@ -148,7 +150,22 @@ class MultiAPIManager:
             self.api_clients.append(client)
             
         safe_ids = [f"k{i}:***{(k or '')[-4:] if k else '????'}" for i, k in enumerate(api_keys)]
-        logger.info(f"Initialized MultiAPIManager with {len(api_keys)} API keys: {', '.join(safe_ids)}")
+        self._log_info(f"Initialized MultiAPIManager with {len(api_keys)} API keys: {', '.join(safe_ids)}")
+
+    # -----------------------------
+    # Internal logging helper
+    # -----------------------------
+    def _pfx(self) -> str:
+        return (f"[job={self.context_tag}] " if self.context_tag else "")
+
+    def _log_info(self, msg: str) -> None:
+        logger.info(self._pfx() + msg)
+
+    def _log_warning(self, msg: str) -> None:
+        logger.warning(self._pfx() + msg)
+
+    def _log_error(self, msg: str) -> None:
+        logger.error(self._pfx() + msg)
 
     @staticmethod
     def _categorize_error(error_msg: str) -> str:
@@ -314,11 +331,11 @@ class MultiAPIManager:
             excluded_now = tried_indices | global_excluded
             # If nothing remains to try, abort immediately (avoid 60s wait loops)
             if len(excluded_now) >= len(self.api_keys):
-                logger.warning("All API keys already tried for this prompt; aborting immediately")
+                self._log_warning("All API keys already tried for this prompt; aborting immediately")
                 break
             api_index = self._acquire_api_index_excluding(excluded_now, wait=True, timeout=60.0)
             if api_index is None:
-                logger.warning("No available APIs after waiting; aborting further retries for this operation")
+                self._log_warning("No available APIs after waiting; aborting further retries for this operation")
                 break
             
             api_client = self.api_clients[api_index]
@@ -327,14 +344,14 @@ class MultiAPIManager:
             
             try:
                 key_suffix = (self.api_keys[api_index] or "")[-4:] if self.api_keys else "????"
-                logger.info(f"Attempting operation with API key {api_index} (***{key_suffix})")
+                self._log_info(f"Attempting operation with API key {api_index} (***{key_suffix})")
                 
                 # Execute operation
                 result = operation(api_client, model)
                 
                 # Record success
                 status.record_success()
-                logger.info(f"Operation successful with API key {api_index} (***{key_suffix})")
+                self._log_info(f"Operation successful with API key {api_index} (***{key_suffix})")
                 # On success, clear any prompt-block global state to allow future operations normally
                 with self._lock:
                     self._block_mode_active = False
@@ -344,7 +361,7 @@ class MultiAPIManager:
             except Exception as e:
                 error_msg = str(e)
                 category = self._categorize_error(error_msg)
-                logger.error(f"API key {api_index} (***{key_suffix}) failed: {error_msg}")
+                self._log_error(f"API key {api_index} (***{key_suffix}) failed: {error_msg}")
 
                 # Record failure with category-aware policy
                 status.record_failure(
@@ -356,11 +373,11 @@ class MultiAPIManager:
 
                 # Hints in logs
                 if category == "rate_limit":
-                    logger.warning(f"API key {api_index} (***{key_suffix}) rate limited; rotating to next key")
+                    self._log_warning(f"API key {api_index} (***{key_suffix}) rate limited; rotating to next key")
                 elif category == "auth":
-                    logger.warning(f"API key {api_index} (***{key_suffix}) permission/auth issue")
+                    self._log_warning(f"API key {api_index} (***{key_suffix}) permission/auth issue")
                 elif category == "prompt_block":
-                    logger.info(
+                    self._log_info(
                         f"Prompt blocked; not penalizing key {api_index} and not retrying same key for this prompt"
                     )
                     prompt_block_seen = True
@@ -451,7 +468,7 @@ class MultiAPIManager:
                 safe_workers = max(1, min(desired, capacity, len(tasks)))
             except Exception:
                 safe_workers = max(1, min(int(max_workers) if max_workers else 1, len(tasks)))
-            logger.info(f"Distributing {len(tasks)} tasks across up to {safe_workers} workers")
+            self._log_info(f"Distributing {len(tasks)} tasks across up to {safe_workers} workers")
             with ThreadPoolExecutor(max_workers=safe_workers) as executor:
                 future_to_task = {}
                 
@@ -472,7 +489,7 @@ class MultiAPIManager:
                         result = future.result()
                         results.append(result)
                     except Exception as e:
-                        logger.error(f"Task failed: {str(e)}")
+                        self._log_error(f"Task failed: {str(e)}")
                         results.append({"error": str(e), "task": task})
                     finally:
                         try:
@@ -490,7 +507,7 @@ class MultiAPIManager:
                     )
                     results.append(result)
                 except Exception as e:
-                    logger.error(f"Task failed: {str(e)}")
+                    self._log_error(f"Task failed: {str(e)}")
                     results.append({"error": str(e), "task": task})
                 finally:
                     try:

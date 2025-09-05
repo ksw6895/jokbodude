@@ -76,7 +76,7 @@ class PDFProcessor:
         # PDF cache
         self.pdf_cache = get_global_cache()
         
-        logger.info(f"Initialized PDFProcessor with session ID: {self.session_id}")
+        logger.info(f"[job={self.session_id}] Initialized PDFProcessor with session ID: {self.session_id}")
 
     def set_relevance_threshold(self, score: int) -> None:
         """Set minimum relevance score across analyzers (0..110)."""
@@ -112,7 +112,7 @@ class PDFProcessor:
         Returns:
             Analysis results
         """
-        logger.info(f"Starting lesson-centric analysis: {len(jokbo_paths)} jokbos, 1 lesson")
+        logger.info(f"[job={self.session_id}] Starting lesson-centric analysis: {len(jokbo_paths)} jokbos, 1 lesson")
         
         results = self.lesson_analyzer.analyze_multiple_jokbos(jokbo_paths, lesson_path)
         
@@ -135,7 +135,7 @@ class PDFProcessor:
         Returns:
             Analysis results
         """
-        logger.info(f"Starting jokbo-centric analysis: {len(lesson_paths)} lessons, 1 jokbo")
+        logger.info(f"[job={self.session_id}] Starting jokbo-centric analysis: {len(lesson_paths)} lessons, 1 jokbo")
         
         return self.jokbo_analyzer.analyze_multiple_lessons(lesson_paths, jokbo_path)
     
@@ -156,11 +156,11 @@ class PDFProcessor:
         Returns:
             Analysis results
         """
-        logger.info(f"Starting multi-API lesson-centric analysis with {len(api_keys)} keys")
+        logger.info(f"[job={self.session_id}] Starting multi-API lesson-centric analysis with {len(api_keys)} keys")
         
         # Create multi-API manager
         model_config = self._get_model_config()
-        api_manager = MultiAPIManager(api_keys, model_config)
+        api_manager = MultiAPIManager(api_keys, model_config, context_tag=self.session_id)
         
         # Create multi-API analyzer
         multi_analyzer = MultiAPIAnalyzer(api_manager, self.session_id, self.debug_dir)
@@ -207,7 +207,7 @@ class PDFProcessor:
         
         # Log API status
         status = api_manager.get_status_report()
-        logger.info(f"API Status: {status['available_apis']}/{status['total_apis']} available")
+        logger.info(f"[job={self.session_id}] API Status: {status['available_apis']}/{status['total_apis']} available")
         
         # Merge results
         return self._merge_lesson_centric_results(results)
@@ -259,7 +259,7 @@ class PDFProcessor:
         Each jokbo is analyzed independently, then concatenated. Failures are reported in warnings.
         """
         model_config = self._get_model_config()
-        api_manager = MultiAPIManager(api_keys, model_config)
+        api_manager = MultiAPIManager(api_keys, model_config, context_tag=self.session_id)
         multi = MultiAPIAnalyzer(api_manager, self.session_id, self.debug_dir)
         results = multi.analyze_partial_multiple(jokbo_paths or [], lesson_paths or [], parallel=True, max_workers=max_workers)
         all_questions: List[Dict[str, Any]] = []
@@ -295,11 +295,11 @@ class PDFProcessor:
         Returns:
             Analysis results
         """
-        logger.info(f"Starting multi-API jokbo-centric analysis with {len(api_keys)} keys")
+        logger.info(f"[job={self.session_id}] Starting multi-API jokbo-centric analysis with {len(api_keys)} keys")
         
         # Create multi-API manager
         model_config = self._get_model_config()
-        api_manager = MultiAPIManager(api_keys, model_config)
+        api_manager = MultiAPIManager(api_keys, model_config, context_tag=self.session_id)
         
         # Create multi-API analyzer (kept for threshold propagation if needed)
         multi_analyzer = MultiAPIAnalyzer(api_manager, self.session_id, self.debug_dir)
@@ -409,7 +409,7 @@ class PDFProcessor:
         
         # Log API status
         status = api_manager.get_status_report()
-        logger.info(f"API Status: {status['available_apis']}/{status['total_apis']} available")
+        logger.info(f"[job={self.session_id}] API Status: {status['available_apis']}/{status['total_apis']} available")
         
         # Merge results
         return self.jokbo_analyzer._merge_lesson_results(results, jokbo_path)

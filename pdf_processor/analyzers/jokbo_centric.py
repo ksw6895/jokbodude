@@ -76,7 +76,7 @@ class JokboCentricAnalyzer(BaseAnalyzer):
         lesson_filename = Path(lesson_path).name
         jokbo_filename = Path(jokbo_path).name
         
-        logger.info(f"Analyzing lesson '{lesson_filename}' with jokbo '{jokbo_filename}'")
+        logger.info(f"[job={self.session_id}] Analyzing lesson '{lesson_filename}' with jokbo '{jokbo_filename}'")
         
         # Build prompt
         prompt = self.build_prompt(lesson_filename)
@@ -122,7 +122,7 @@ class JokboCentricAnalyzer(BaseAnalyzer):
         from ..pdf.operations import PDFOperations
 
         chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
-        logger.info(f"Processing {len(chunks)} chunks for {Path(lesson_path).name}")
+        logger.info(f"[job={self.session_id}] Processing {len(chunks)} chunks for {Path(lesson_path).name}")
 
         chunk_results = []
 
@@ -178,7 +178,7 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                 raise
             except Exception:
                 pass
-            logger.info(f"Processing chunk {i+1}/{len(chunks)}: pages {start_page}-{end_page}")
+            logger.info(f"[job={self.session_id}] Processing chunk {i+1}/{len(chunks)}: pages {start_page}-{end_page}")
             
             # Extract chunk
             chunk_path = PDFOperations.extract_pages(path, start_page, end_page)
@@ -609,7 +609,9 @@ class JokboCentricAnalyzer(BaseAnalyzer):
             "jokbo_pages": sorted(final_pages.values(), key=lambda x: int(str(x["jokbo_page"]) or 0))
         }
         
-        logger.info(f"Merged results: {len(result['jokbo_pages'])} pages, "
-                   f"{sum(len(p['questions']) for p in result['jokbo_pages'])} questions")
+        logger.info(
+            f"[job={self.session_id}] Merged results: {len(result['jokbo_pages'])} pages, "
+            f"{sum(len(p['questions']) for p in result['jokbo_pages'])} questions"
+        )
         
         return result

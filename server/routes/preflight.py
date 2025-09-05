@@ -243,7 +243,9 @@ async def preflight_jokbo_centric(
                 lesson_chunks += int(li.get("chunks", 1))
             except Exception:
                 lesson_chunks += 1
-        total_chunks = max(1, total_jokbos * lesson_chunks)
+        # Include a per-jokbo post-processing slot for PDF build/store
+        postprocess_slots = max(0, total_jokbos)
+        total_chunks = max(1, total_jokbos * lesson_chunks + postprocess_slots)
         pct_per_chunk = 100 / total_chunks if total_chunks > 0 else 100
         tokens_per_chunk = _per_chunk_tokens(model)
         est_tokens = tokens_per_chunk * total_chunks
@@ -362,7 +364,9 @@ async def preflight_lesson_centric(
                 lesson_chunks += int(li.get("chunks", 1))
             except Exception:
                 lesson_chunks += 1
-        total_chunks = max(1, lesson_chunks * max(1, total_jokbos))
+        # Include a per-lesson post-processing slot for PDF build/store
+        postprocess_slots = max(0, total_lessons)
+        total_chunks = max(1, lesson_chunks * max(1, total_jokbos) + postprocess_slots)
         pct_per_chunk = 100 / total_chunks if total_chunks > 0 else 100
         tokens_per_chunk = _per_chunk_tokens(model)
         est_tokens = tokens_per_chunk * total_chunks

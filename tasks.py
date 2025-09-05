@@ -205,8 +205,13 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
                 lesson_chunks = 0
                 for lp in lesson_paths:
                     lesson_chunks += len(PDFOperations.split_pdf_for_chunks(lp))
-                total_chunks = max(1, total_jokbos * lesson_chunks)
-                logger.info(f"Initializing progress for job {job_id}: jokbos={total_jokbos} lesson_chunks={lesson_chunks} total_chunks={total_chunks}")
+                # Add one extra slot per jokbo for the PDF build/store phase so
+                # the UI does not show 100% until files are actually generated.
+                postprocess_slots = max(0, total_jokbos)
+                total_chunks = max(1, total_jokbos * lesson_chunks + postprocess_slots)
+                logger.info(
+                    f"Initializing progress for job {job_id}: jokbos={total_jokbos} lesson_chunks={lesson_chunks} post_slots={postprocess_slots} total_chunks={total_chunks}"
+                )
                 storage_manager.init_progress(job_id, total_chunks, f"총 청크: {total_chunks}")
             except Exception as e:
                 logger.warning(f"Progress init fallback for job {job_id}: {e}")
@@ -280,7 +285,7 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
                 output_filename = f"jokbo_centric_{jokbo_path.stem}_all_lessons.pdf"
                 output_path = output_dir / output_filename
                 
-                logger.info(f"Creating jokbo-centric PDF for {jokbo_path.name} ...")
+                logger.info(f"[job={job_id}] Creating jokbo-centric PDF for {jokbo_path.name} ...")
                 creator.create_jokbo_centric_pdf(
                     str(jokbo_path),
                     analysis_result,
@@ -291,9 +296,14 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
                 # Store result in Redis
                 try:
                     key = storage_manager.store_result(job_id, output_path)
-                    logger.info(f"Stored result for job {job_id}: key={key}")
+                    logger.info(f"[job={job_id}] Stored result for job {job_id}: key={key}")
                 except Exception as e:
                     logger.warning(f"Failed to store result for job {job_id}: {e}")
+                # Count one post-processing unit for this jokbo (PDF build/store)
+                try:
+                    storage_manager.increment_chunk(job_id, 1, message=f"PDF 완료: {jokbo_path.name}")
+                except Exception:
+                    pass
             
             # Clean up processor resources
             processor.cleanup_session()
@@ -445,7 +455,9 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
                 lesson_chunks = 0
                 for lp in lesson_paths:
                     lesson_chunks += len(PDFOperations.split_pdf_for_chunks(lp))
-                total_chunks = max(1, lesson_chunks * max(1, total_jokbos))
+                # Add one extra slot per lesson for the PDF build/store phase
+                postprocess_slots = max(0, total_lessons)
+                total_chunks = max(1, lesson_chunks * max(1, total_jokbos) + postprocess_slots)
                 storage_manager.init_progress(job_id, total_chunks, f"총 청크: {total_chunks}")
             except Exception:
                 storage_manager.init_progress(job_id, 1, "진행률 초기화")
@@ -518,6 +530,10 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
                 output_filename = f"filtered_{lesson_path.stem}_all_jokbos.pdf"
                 output_path = output_dir / output_filename
                 
+                try:
+                    logger.info(f"[job={job_id}] Creating lesson-centric PDF for {lesson_path.name} ...")
+                except Exception:
+                    pass
                 creator.create_lesson_centric_pdf(
                     str(lesson_path),
                     analysis_result,
@@ -527,6 +543,11 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
                 
                 # Store result in Redis
                 storage_manager.store_result(job_id, output_path)
+                # Count one post-processing unit for this lesson (PDF build/store)
+                try:
+                    storage_manager.increment_chunk(job_id, 1, message=f"PDF 완료: {lesson_path.name}")
+                except Exception:
+                    pass
             
             # Clean up processor resources
             processor.cleanup_session()
