@@ -216,12 +216,17 @@ def admin_cleanup(
     clear_cache: bool = Query(True),
     clear_debug: bool = Query(True),
     clear_temp_sessions: bool = Query(True),
-    clear_storage: bool = Query(False, description="Also clear output/storage (intermediate local cache)"),
+    clear_results: bool = Query(True, description="Also prune results under RENDER_STORAGE_PATH/results"),
+    clear_storage: bool = Query(False, description="Also prune base RENDER_STORAGE_PATH"),
     clear_tmpdir: bool = Query(False, description="Also clear TMPDIR if set"),
     older_than_hours: int | None = Query(None, ge=0, description="Only delete files older than this many hours; 0 means delete all"),
     user=Depends(_get_current_user),
 ):
-    """Administrative cleanup: clear cache and prune debug/temp files."""
+    """Administrative cleanup: clear cache and prune debug/temp files.
+
+    - When clear_results is True, prunes files under `<RENDER_STORAGE_PATH>/results`.
+    - When clear_storage is True, prunes files directly under `RENDER_STORAGE_PATH`.
+    """
     _require_admin(password, user)
     summary: dict[str, dict | bool] = {}
     if clear_cache:
@@ -240,11 +245,21 @@ def admin_cleanup(
             summary["temp_sessions_deleted"] = delete_path_contents(Path("output/temp/sessions"), older_than_hours)
         except Exception as e:
             summary["temp_sessions_deleted"] = {"error": str(e)}
+    # Results pruning (under RENDER_STORAGE_PATH/results)
+    if clear_results:
+        try:
+            base_storage = Path(os.getenv("RENDER_STORAGE_PATH", "output"))
+            results_dir = (base_storage / "results").resolve()
+            summary["results_deleted"] = delete_path_contents(results_dir, older_than_hours)
+        except Exception as e:
+            summary["results_deleted"] = {"error": str(e)}
+    # Base storage pruning (RENDER_STORAGE_PATH root)
     if clear_storage:
         try:
-            summary["storage_deleted"] = delete_path_contents(Path("output/storage"), older_than_hours)
+            base_storage = Path(os.getenv("RENDER_STORAGE_PATH", "output"))
+            summary["render_storage_deleted"] = delete_path_contents(base_storage.resolve(), older_than_hours)
         except Exception as e:
-            summary["storage_deleted"] = {"error": str(e)}
+            summary["render_storage_deleted"] = {"error": str(e)}
     if clear_tmpdir:
         try:
             import os as _os
@@ -275,11 +290,12 @@ def storage_stats(password: Optional[str] = Query(None), user=Depends(_get_curre
                     continue
         return {"path": str(base), "files": files, "bytes": total}
 
-    base_storage = Path(os.getenv("RENDER_STORAGE_PATH", "output"))
+    base_storage = Path(os.getenv("RENDER_STORAGE_PATH", "output")).resolve()
     results_dir = (base_storage / "results").resolve()
     debug_dir = Path("output/debug").resolve()
     sessions_dir = Path("output/temp/sessions").resolve()
-    storage_dir = Path("output/storage").resolve()
+    # Report the actual base RENDER_STORAGE_PATH usage for admin visibility
+    storage_dir = base_storage
     tmpdir = Path(os.getenv("TMPDIR", "")).resolve() if os.getenv("TMPDIR") else None
     return {
         "results": dir_stats(results_dir),

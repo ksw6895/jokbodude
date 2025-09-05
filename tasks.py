@@ -1,6 +1,8 @@
 # tasks.py
 import os
 import tempfile
+import time
+import threading
 from pathlib import Path
 from celery import Celery, current_task
 from celery.exceptions import Ignore, SoftTimeLimitExceeded
@@ -49,6 +51,65 @@ celery_app.config_from_object('celeryconfig')
 # Fix deprecated warnings for Celery 6.0
 celery_app.conf.broker_connection_retry_on_startup = True
 celery_app.conf.worker_cancel_long_running_tasks_on_connection_loss = True
+
+# --- Worker-side periodic storage prune (keeps ephemeral/persistent disk in check) ---
+def _prune_path(base: Path, older_than_hours: int) -> None:
+    now = time.time()
+    if not base.exists():
+        return
+    for p in base.rglob("*"):
+        try:
+            if p.is_file():
+                age_hours = (now - p.stat().st_mtime) / 3600.0
+                if age_hours >= max(0, int(older_than_hours)):
+                    p.unlink(missing_ok=True)
+        except Exception:
+            continue
+    # Remove empty dirs
+    for d in sorted(base.rglob("*"), key=lambda x: len(str(x)), reverse=True):
+        try:
+            if d.is_dir():
+                next(d.iterdir())
+        except StopIteration:
+            try:
+                d.rmdir()
+            except Exception:
+                pass
+
+
+def _start_storage_pruner_thread() -> None:
+    try:
+        base = Path(os.getenv("RENDER_STORAGE_PATH", "output")).resolve()
+        try:
+            retention = int(os.getenv("STORAGE_RETENTION_HOURS", "24"))
+        except Exception:
+            retention = 24
+        try:
+            interval = int(os.getenv("PRUNE_INTERVAL_MINUTES", "60"))
+        except Exception:
+            interval = 60
+
+        def _loop():
+            while True:
+                try:
+                    if base.exists():
+                        _prune_path(base, retention)
+                except Exception:
+                    pass
+                time.sleep(max(60, interval * 60))
+
+        t = threading.Thread(target=_loop, name="storage-pruner", daemon=True)
+        t.start()
+        try:
+            logger.info("Worker storage-pruner thread started")
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+
+# Start the pruner when the module is imported (once per worker process)
+_start_storage_pruner_thread()
 
 # --- Analysis Tasks ---
 @celery_app.task(name="tasks.run_jokbo_analysis")
