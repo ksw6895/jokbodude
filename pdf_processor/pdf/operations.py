@@ -447,6 +447,143 @@ class PDFOperations:
                 return True
         except:
             return False
+
+    # -----------------------------
+    # Exam-only helpers (OCR-aided)
+    # -----------------------------
+    @staticmethod
+    def _detect_question_numbers_on_page(page: fitz.Page) -> list[int]:
+        """Return a list of candidate question numbers detected on a page.
+
+        - Uses text extraction with left-margin heuristic first
+        - Falls back to pytesseract OCR if no reliable words extracted
+        - Returns unique numbers (ascending)
+        """
+        nums: set[int] = set()
+        try:
+            words = page.get_text("words") or []
+        except Exception:
+            words = []
+        w = page.rect.width
+        if words:
+            import re as _re
+            for x0, y0, x1, y1, text, *_ in words:
+                t = str(text or "").strip()
+                if not t:
+                    continue
+                # left margin filter to reduce noise from choices like "1)" in center
+                if float(x0) > (w * 0.4):
+                    continue
+                m = _re.search(r"^\(?\s*(\d{1,3})\s*\)?[\.)]?|^(\d{1,3})번$|^Q\s*(\d{1,3})$", t)
+                if m:
+                    try:
+                        n = int(next(g for g in m.groups() if g))
+                        if 0 < n < 1000:
+                            nums.add(n)
+                    except Exception:
+                        pass
+        # OCR fallback if nothing found
+        if not nums:
+            try:
+                from PIL import Image
+                import io as _io
+                import pytesseract
+                pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                img = Image.open(_io.BytesIO(pix.tobytes("png")))
+                data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
+                import re as _re
+                n = len(data.get("text", []))
+                for i in range(n):
+                    t = (data["text"][i] or "").strip()
+                    if not t:
+                        continue
+                    m = _re.search(r"^\(?\s*(\d{1,3})\s*\)?[\.)]?|^(\d{1,3})번$|^Q\s*(\d{1,3})$", t)
+                    if m:
+                        try:
+                            n = int(next(g for g in m.groups() if g))
+                            if 0 < n < 1000:
+                                nums.add(n)
+                        except Exception:
+                            pass
+            except Exception:
+                pass
+        return sorted(nums)
+
+    @staticmethod
+    def index_questions(pdf_path: str) -> list[tuple[int, int]]:
+        """Scan the PDF and return a list of (page_number, question_number) tuples.
+
+        The list is sorted by page_number then by question_number.
+        """
+        out: list[tuple[int, int]] = []
+        try:
+            with fitz.open(str(pdf_path)) as doc:
+                for i in range(len(doc)):
+                    page = doc[i]
+                    qnums = PDFOperations._detect_question_numbers_on_page(page)
+                    for q in qnums:
+                        out.append((i + 1, int(q)))
+        except Exception:
+            return []
+        # De-duplicate per (page, qnum)
+        try:
+            out = sorted(set(out), key=lambda t: (t[0], t[1]))
+        except Exception:
+            pass
+        return out
+
+    @staticmethod
+    def split_by_question_groups(pdf_path: str, group_size: int = 20) -> list[tuple[int, int, int, int]]:
+        """Compute contiguous page ranges that roughly cover every group of N questions.
+
+        Returns a list of tuples: (start_page, end_page, group_start_q, group_end_q)
+        """
+        index = PDFOperations.index_questions(pdf_path)
+        if not index:
+            # fallback: use default page chunking as a last resort
+            chunks = PDFOperations.split_pdf_for_chunks(pdf_path)
+            return [(s, e, 1, group_size) for (_p, s, e) in chunks]
+        # Build qnum -> first page map
+        first_page_for_q: dict[int, int] = {}
+        for p, q in index:
+            if q not in first_page_for_q:
+                first_page_for_q[q] = p
+        qnums_sorted = sorted(first_page_for_q.keys())
+        if not qnums_sorted:
+            chunks = PDFOperations.split_pdf_for_chunks(pdf_path)
+            return [(s, e, 1, group_size) for (_p, s, e) in chunks]
+        try:
+            with fitz.open(str(pdf_path)) as doc:
+                total_pages = len(doc)
+        except Exception:
+            total_pages = 0
+        groups: list[tuple[int, int, int, int]] = []
+        # Group by block of group_size (1-20, 21-40, ...)
+        seen_groups: set[int] = set()
+        for q in qnums_sorted:
+            gidx = (int(q) - 1) // int(max(1, group_size))
+            if gidx in seen_groups:
+                continue
+            seen_groups.add(gidx)
+            g_start = gidx * group_size + 1
+            g_end = g_start + group_size - 1
+            # Determine page span
+            start_page = min(first_page_for_q.get(qq) for qq in qnums_sorted if g_start <= qq <= g_end)
+            # find next group's first page
+            next_gidx = gidx + 1
+            next_g_start = next_gidx * group_size + 1
+            next_qs = [qq for qq in qnums_sorted if qq >= next_g_start]
+            if next_qs:
+                next_first_page = first_page_for_q.get(next_qs[0])
+                end_page = max(start_page, int(next_first_page) - 1) if next_first_page else total_pages
+            else:
+                end_page = total_pages
+            if total_pages and end_page > total_pages:
+                end_page = total_pages
+            groups.append((int(start_page), int(end_page or start_page), int(g_start), int(g_end)))
+        # Sort by start_page
+        groups.sort(key=lambda t: (t[0], t[2]))
+        return groups
     
     @staticmethod
     def get_page_metadata(pdf_path: str, page_num: int) -> Dict[str, Any]:

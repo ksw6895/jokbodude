@@ -429,3 +429,68 @@ async def analyze_partial_jokbo(
         return {"job_id": job_id, "task_id": task.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
+@router.post("/analyze/exam-only", status_code=202)
+async def analyze_exam_only(
+    request: Request,
+    jokbo_files: list[UploadFile] = File(...),
+    # No lesson files in exam-only mode
+    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    multi_api: bool = Query(False),
+    # Accept these as form overrides too, for consistency with other endpoints
+    multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
+    user: dict = Depends(require_user),
+):
+    job_id = str(uuid.uuid4())
+    storage_manager = request.app.state.storage_manager
+
+    try:
+        for f in jokbo_files:
+            if f.size and f.size > MAX_FILE_SIZE:
+                raise HTTPException(status_code=413, detail=f"File {f.filename} exceeds maximum size of 50MB")
+
+        jokbo_keys: list[str] = []
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tdir = Path(temp_dir)
+            for f in jokbo_files:
+                p = tdir / f.filename
+                content = await f.read()
+                p.write_bytes(content)
+                k = storage_manager.store_file(p, job_id, "jokbo")
+                jokbo_keys.append(k)
+                if not storage_manager.verify_file_available(k):
+                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+
+        try:
+            storage_manager.refresh_ttls(jokbo_keys)
+        except Exception:
+            pass
+
+        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        metadata = {
+            "mode": "exam-only",
+            "jokbo_keys": jokbo_keys,
+            "lesson_keys": [],
+            "model": model,
+            "multi_api": effective_multi,
+            "user_id": user.get("sub"),
+        }
+        storage_manager.store_job_metadata(job_id, metadata)
+        user_id = user.get("sub")
+        if user_id:
+            storage_manager.add_user_job(user_id, job_id)
+
+        task = celery_app.send_task(
+            "tasks.run_exam_only",
+            args=[job_id],
+            kwargs={"model_type": model, "multi_api": effective_multi},
+            queue="analysis",
+        )
+        try:
+            storage_manager.set_job_task(job_id, task.id)
+        except Exception:
+            pass
+        return {"job_id": job_id, "task_id": task.id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")

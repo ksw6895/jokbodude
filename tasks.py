@@ -817,3 +817,192 @@ def aggregate_batch(results: list, job_id: str):
         return {"job_id": job_id, "subtask_results": results}
     except Exception as e:
         raise e
+
+
+@celery_app.task(name="tasks.run_exam_only")
+def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Optional[bool] = None) -> dict:
+    """Run Exam Only mode: input jokbo only, output problems with detailed explanations.
+
+    Flow:
+    - Download jokbo files
+    - Detect question ranges and split into 20-question chunks (by page spans)
+    - Fan out chunks (multi-API when enabled) and collect questions
+    - Crop questions and assemble final PDF: [Q pages] + [explanation page]
+    """
+    sm = StorageManager()
+    try:
+        metadata = sm.get_job_metadata(job_id)
+        if not metadata:
+            raise Exception(f"Job metadata not found for {job_id}")
+        jokbo_keys = list(metadata.get("jokbo_keys", []) or [])
+        # Resolve model + multi-api
+        selected_model = model_type or metadata.get("model") or MODEL_TYPE
+        prefer_multi = metadata.get("multi_api") if metadata.get("multi_api") is not None else multi_api
+
+        # Prepare temp dirs
+        with tempfile.TemporaryDirectory() as temp_dir:
+            base = Path(temp_dir)
+            jokbo_dir = base / "jokbo"
+            out_dir = base / "output"
+            jokbo_dir.mkdir(parents=True, exist_ok=True)
+            out_dir.mkdir(parents=True, exist_ok=True)
+
+            # Download jokbos
+            jokbo_paths: list[str] = []
+            for k in jokbo_keys:
+                name = k.split(":")[-2]
+                lp = jokbo_dir / name
+                sm.save_file_locally(k, lp)
+                jokbo_paths.append(str(lp))
+
+            # Build chunks across all jokbos and initialize progress
+            from pdf_processor.pdf.operations import PDFOperations as _PDFOps
+            all_chunks: list[tuple[str, tuple[int, int, int, int]]] = []  # (jokbo_path, (s, e, qstart, qend))
+            for jp in jokbo_paths:
+                try:
+                    for (s, e, qs, qe) in _PDFOps.split_by_question_groups(jp, group_size=20):
+                        all_chunks.append((jp, (int(s), int(e), int(qs), int(qe))))
+                except Exception:
+                    # Fallback: treat whole file as one chunk
+                    try:
+                        pc = _PDFOps.get_page_count(jp)
+                    except Exception:
+                        pc = 1
+                    all_chunks.append((jp, (1, pc, 1, 20)))
+
+            total_chunks = max(1, len(all_chunks))
+            try:
+                sm.init_progress(job_id, total_chunks, f"청크 준비 완료: {total_chunks}개")
+            except Exception:
+                pass
+
+            # Configure API + model
+            configure_api()
+            model = create_model(selected_model)
+
+            # Analyzer runner per chunk
+            from pdf_processor.analyzers.exam_only import ExamOnlyAnalyzer
+            from pdf_processor.api.multi_api_manager import MultiAPIManager
+            from pdf_processor.api.file_manager import FileManager
+
+            questions_acc: list[dict] = []
+
+            if prefer_multi and isinstance(API_KEYS, list) and len(API_KEYS) > 1:
+                # Extract chunk PDFs first to enable distribution
+                task_items: list[tuple[str, str, tuple[int, int], tuple[int, int, int, int]]] = []
+                tmp_paths: list[Path] = []
+                for jp, (s, e, qs, qe) in all_chunks:
+                    cpath = _PDFOps.extract_pages(jp, s, e)
+                    tmp_paths.append(Path(cpath))
+                    task_items.append((jp, cpath, (s, e), (qs, qe)))
+
+                # Distribute across keys
+                api_manager = MultiAPIManager(API_KEYS, {"model": selected_model})
+
+                def op(task, api_client, _model):
+                    orig_jp, chunk_path, (s, e), (qs, qe) = task
+                    analyzer = ExamOnlyAnalyzer(api_client, FileManager(api_client), job_id, Path("output/debug"))
+                    res = analyzer.analyze_chunk(chunk_path, Path(orig_jp).name, (qs, qe), chunk_info=(s, e))
+                    return res
+
+                def on_progress(_):
+                    try:
+                        sm.increment_chunk(job_id, 1)
+                    except Exception:
+                        pass
+
+                results = api_manager.distribute_tasks(task_items, op, parallel=True, max_workers=None, on_progress=on_progress)
+
+                for r in results or []:
+                    if isinstance(r, dict):
+                        for q in (r.get("questions") or []):
+                            qq = dict(q)
+                            questions_acc.append(qq)
+
+                # Cleanup tmp chunk PDFs
+                for p in tmp_paths:
+                    try:
+                        p.unlink(missing_ok=True)
+                    except Exception:
+                        pass
+            else:
+                # Single-key sequential processing
+                _pp = PDFProcessor(model, session_id=job_id)
+                analyzer = ExamOnlyAnalyzer(_pp.api_client, FileManager(_pp.api_client), job_id, Path("output/debug"))
+                for jp, (s, e, qs, qe) in all_chunks:
+                    try:
+                        cpath = _PDFOps.extract_pages(jp, s, e)
+                        res = analyzer.analyze_chunk(cpath, Path(jp).name, (qs, qe), chunk_info=(s, e))
+                        for q in (res.get("questions") or []):
+                            questions_acc.append(dict(q))
+                    finally:
+                        try:
+                            Path(cpath).unlink(missing_ok=True)
+                        except Exception:
+                            pass
+                    try:
+                        sm.increment_chunk(job_id, 1)
+                    except Exception:
+                        pass
+
+            # Crop and assemble final PDF per jokbo (questions are page-referenced to original)
+            creator = PDFCreator()
+            # Group questions by jokbo file? analyzer produced no jokbo_filename mandatory; page_start refers to original
+            # For simplicity, assemble a single consolidated PDF per jokbo path
+            for jp in jokbo_paths:
+                jp_name = Path(jp).name
+                # Select questions belonging to this jokbo by conservative rule: page_start within its page count
+                try:
+                    pc = _PDFOps.get_page_count(jp)
+                except Exception:
+                    pc = 0
+                qs_for_file = []
+                for q in questions_acc:
+                    ps = int(q.get("page_start") or 0)
+                    if pc <= 0 or 1 <= ps <= pc:
+                        qs_for_file.append(q)
+                # Build cropped question PDFs
+                items: list[dict] = []
+                for q in qs_for_file:
+                    try:
+                        ps = int(q.get("page_start") or 0)
+                        nqs = q.get("next_question_start")
+                        nqs_i = int(nqs) if nqs is not None else None
+                        qnum = q.get("question_number")
+                        q_pdf = _PDFOps.extract_question_region(jp, ps, nqs_i, qnum)
+                        text_block = (q.get("explanation") or "").strip()
+                        bg = (q.get("background_knowledge") or "").strip()
+                        if bg:
+                            text_block += ("\n\n[배경 지식]\n" + bg)
+                        items.append({"question_pdf": q_pdf, "explanation": text_block})
+                    except Exception:
+                        continue
+                if not items:
+                    continue
+                out_path = out_dir / f"exam_only_{Path(jp).stem}.pdf"
+                creator.create_partial_jokbo_pdf(items, str(out_path))
+                sm.store_result(job_id, out_path)
+
+            try:
+                sm.finalize_progress(job_id, "완료")
+            except Exception:
+                pass
+            return {"status": "OK", "job_id": job_id, "files_generated": len(list(out_dir.glob('*.pdf')))}
+    except CancelledError:
+        try:
+            sm.update_progress(job_id, int((sm.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
+            sm.finalize_progress(job_id, "취소됨")
+        except Exception:
+            pass
+        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+        raise Ignore()
+    except SoftTimeLimitExceeded:
+        try:
+            sm.update_progress(job_id, int((sm.get_progress(job_id) or {}).get('progress', 0) or 0), "시간 제한으로 취소됨")
+            sm.finalize_progress(job_id, "취소됨")
+        except Exception:
+            pass
+        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "timeout"})
+        raise Ignore()
+    except Exception as exc:
+        raise exc

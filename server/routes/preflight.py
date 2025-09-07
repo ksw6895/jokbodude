@@ -44,6 +44,106 @@ def _build_file_info(path: Path) -> dict:
     return {"filename": path.name, "pages": pages, "chunks": chunks}
 
 
+@router.post("/preflight/exam-only")
+async def preflight_exam_only(
+    request: Request,
+    jokbo_files: list[UploadFile] = File(...),
+    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    multi_api: bool = Query(False),
+    multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
+    user: dict = Depends(require_user),
+):
+    """Preflight for exam-only mode: store jokbo files and estimate chunks by 20-question groups.
+
+    Estimation uses OCR-aided question detection to split by 20-question groups.
+    """
+    from pdf_processor.pdf.operations import PDFOperations
+    storage_manager = request.app.state.storage_manager
+    job_id = str(uuid.uuid4())
+
+    try:
+        for f in jokbo_files:
+            if f.size and f.size > MAX_FILE_SIZE:
+                raise HTTPException(status_code=413, detail=f"File {f.filename} exceeds maximum size of 50MB")
+
+        jokbo_keys: list[str] = []
+        joker_info: list[dict] = []
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tdir = Path(temp_dir)
+            for f in jokbo_files:
+                p = tdir / f.filename
+                content = await f.read()
+                p.write_bytes(content)
+                # Enhanced info includes detected groups
+                try:
+                    groups = PDFOperations.split_by_question_groups(str(p))
+                    group_count = len(groups)
+                except Exception:
+                    try:
+                        group_count = len(PDFOperations.split_pdf_for_chunks(str(p)))
+                    except Exception:
+                        group_count = 1
+                info = _build_file_info(p)
+                info["question_groups"] = group_count
+                joker_info.append(info)
+                k = storage_manager.store_file(p, job_id, "jokbo")
+                jokbo_keys.append(k)
+                if not storage_manager.verify_file_available(k):
+                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+
+        try:
+            storage_manager.refresh_ttls(jokbo_keys)
+        except Exception:
+            pass
+
+        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        # total chunks = sum(question_groups) across jokbos
+        try:
+            total_chunks = sum(int(max(1, (ji.get('question_groups') or 1))) for ji in (joker_info or []))
+        except Exception:
+            total_chunks = len(joker_info) if joker_info else 1
+        total_chunks = max(1, int(total_chunks))
+        tokens_per_chunk = _per_chunk_tokens(model)
+        est_tokens = tokens_per_chunk * total_chunks
+        pct_per_chunk = 100 / total_chunks if total_chunks > 0 else 100
+
+        metadata = {
+            "mode": "exam-only",
+            "jokbo_keys": jokbo_keys,
+            "lesson_keys": [],
+            "model": model,
+            "multi_api": effective_multi,
+            "user_id": user.get("sub"),
+            "preflight": True,
+            "preflight_stats": {
+                "jokbo": joker_info,
+                "total_chunks": total_chunks,
+                "tokens_per_chunk": tokens_per_chunk,
+                "estimated_tokens": est_tokens,
+            },
+        }
+        storage_manager.store_job_metadata(job_id, metadata)
+        user_id = user.get("sub")
+        if user_id:
+            storage_manager.add_user_job(user_id, job_id)
+
+        return {
+            "job_id": job_id,
+            "mode": "exam-only",
+            "model": model,
+            "multi_api": effective_multi,
+            "files": {"jokbo": joker_info},
+            "total_chunks": total_chunks,
+            "tokens_per_chunk": tokens_per_chunk,
+            "estimated_tokens": est_tokens,
+            "pct_per_chunk": pct_per_chunk,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Preflight failed: {str(e)}")
+
+
 @router.post("/preflight/partial-jokbo")
 async def preflight_partial_jokbo(
     request: Request,
@@ -458,6 +558,13 @@ def start_preflight_job(request: Request, job_id: str, user: dict = Depends(requ
     elif mode == "partial-jokbo":
         task = celery_app.send_task(
             "tasks.generate_partial_jokbo",
+            args=[job_id],
+            kwargs={"model_type": model, "multi_api": use_multi},
+            queue="analysis",
+        )
+    elif mode == "exam-only":
+        task = celery_app.send_task(
+            "tasks.run_exam_only",
             args=[job_id],
             kwargs={"model_type": model, "multi_api": use_multi},
             queue="analysis",

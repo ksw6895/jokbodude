@@ -284,3 +284,45 @@ PARTIAL_JOKBO_OUTPUT_FORMAT = """출력 형식 (반드시 순수 JSON만 응답�
 # 기타 설정
 MAX_CONNECTIONS_PER_QUESTION = 2  # 족보 중심 모드에서 문제당 최대 연결 수
 RELEVANCE_SCORE_THRESHOLD = 70    # 관련성 점수 최소 기준 (100점 만점 기준)
+
+# ----------------------
+# Exam-only (설명 중심) 모드
+# ----------------------
+EXAM_ONLY_TASK = """작업 (Exam Only - 설명 중심):
+모든 응답은 한국어로 작성하되, 의학 등 전문 용어는 반드시 영어를 병기하세요. 표기 예: 세포자멸사(apoptosis), 염증(inflammation).
+
+1. 업로드된 족보 PDF에서 지정된 문제 범위(예: 1~20번)만 분석하세요.
+2. 각 문제에 대해 반드시 정답(answer)을 보고하고, 상세한 해설(explanation)을 작성하세요.
+3. 문제 풀이에 도움이 되는 배경 지식(background_knowledge)을 500자 내외로 추가로 작성하세요.
+4. 선택지가 있는 경우 오답 각각에 대한 간단한 반박(wrong_answer_explanations)을 제공하세요.
+
+중요 규칙:
+- 파란색(blue) 글씨로 표시된 정답이 존재한다면 반드시 그 선택지를 정답으로 채택하세요. 모델의 추론으로 정답을 바꾸지 마세요.
+- 페이지 번호는 현재 업로드된 PDF 기준으로 1부터 시작합니다.
+  (서버는 청크를 원본에 다시 매핑하므로, 모델은 청크 내부 기준으로만 표기하면 됩니다)
+- page_start는 해당 문제의 ‘처음 시작되는 페이지’를 의미합니다.
+- next_question_start는 다음 문제의 시작 페이지입니다. 같은 페이지에서 시작되면 현재 페이지 번호를 넣으세요. 모르는 경우 생략 가능합니다.
+- JSON 이외의 텍스트나 주석은 절대 포함하지 마세요.
+"""
+
+EXAM_ONLY_OUTPUT_FORMAT = """출력 형식 (반드시 순수 JSON만 응답):
+{
+  "questions": [
+    {
+      "question_number": "12",
+      "page_start": 7,
+      "next_question_start": 8,
+      "question_text": "(선택) 문제 본문 요약",
+      "answer": "정답(파란색 표시된 선택지 그대로)",
+      "explanation": "왜 이 답이 맞는지, 핵심 근거와 함께 2~5문장",
+      "background_knowledge": "문제를 푸는 데 도움이 되는 배경 지식 (약 500자)",
+      "wrong_answer_explanations": {
+        "1번": "왜 1번이 오답인지",
+        "2번": "왜 2번이 오답인지",
+        "3번": "왜 3번이 오답인지",
+        "4번": "왜 4번이 오답인지"
+      }
+    }
+  ]
+}
+"""

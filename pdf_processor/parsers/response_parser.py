@@ -366,6 +366,8 @@ class ResponseParser:
             return "related_slides" in data and isinstance(data["related_slides"], list)
         if mode == "partial-jokbo":
             return "questions" in data and isinstance(data["questions"], list)
+        if mode == "exam-only":
+            return "questions" in data and isinstance(data["questions"], list)
         return False
 
     # --------------------
@@ -591,6 +593,46 @@ class ResponseParser:
                 pass
             return {"questions": cleaned_qs}
 
+        if mode == "exam-only":
+            qs = data.get("questions")
+            if not isinstance(qs, list):
+                return {"questions": []}
+            cleaned_qs: List[Dict[str, Any]] = []
+            for q in qs:
+                if not isinstance(q, dict):
+                    continue
+                qnum_raw = str(q.get("question_number", "")).strip()
+                qnum_int = ResponseParser._to_int_safe(qnum_raw, 0)
+                qnum = str(qnum_int) if qnum_int > 0 else qnum_raw
+                ps = ResponseParser._to_int_safe(q.get("page_start"), 0)
+                if ps <= 0 or not qnum:
+                    continue
+                nqs = None
+                if q.get("next_question_start") is not None:
+                    nqs = ResponseParser._to_int_safe(q.get("next_question_start"), 0)
+                    if nqs <= 0:
+                        nqs = None
+                ans = (q.get("answer") or "").strip()
+                expl = (q.get("explanation") or "").strip()
+                bg = (q.get("background_knowledge") or q.get("background") or "").strip()
+                wae = ResponseParser._norm_wrong_answer_explanations(q.get("wrong_answer_explanations"))
+                item = {
+                    "question_number": qnum,
+                    "page_start": ps,
+                    **({"next_question_start": nqs} if nqs is not None else {}),
+                    **({"question_text": (q.get("question_text") or "").strip()} if isinstance(q.get("question_text"), str) else {}),
+                    **({"answer": ans} if ans else {}),
+                    **({"explanation": expl} if expl else {}),
+                    **({"background_knowledge": bg} if bg else {}),
+                    **({"wrong_answer_explanations": wae} if wae else {}),
+                }
+                cleaned_qs.append(item)
+            try:
+                cleaned_qs.sort(key=lambda x: (x.get("page_start", 0), ResponseParser._to_int_safe(x.get("question_number"), 0)))
+            except Exception:
+                pass
+            return {"questions": cleaned_qs}
+
         # lesson-centric normalization
         slides = data.get("related_slides")
         if not isinstance(slides, list):
@@ -759,6 +801,27 @@ class ResponseParser:
                     pass
                 # Require at least one non-placeholder explanation across the set
                 if non_placeholder_expl == 0:
+                    return True
+                return False
+            elif mode == "exam-only":
+                qs = data.get("questions") or []
+                if not isinstance(qs, list) or len(qs) == 0:
+                    return True
+                total = len(qs)
+                valid_ps = 0
+                have_expl = 0
+                for q in qs:
+                    try:
+                        ps = int((q or {}).get("page_start") or 0)
+                    except Exception:
+                        ps = 0
+                    if ps > 0:
+                        valid_ps += 1
+                    if isinstance((q or {}).get("explanation"), str) and (q or {}).get("explanation").strip():
+                        have_expl += 1
+                if valid_ps == 0:
+                    return True
+                if have_expl == 0:
                     return True
                 return False
             else:
