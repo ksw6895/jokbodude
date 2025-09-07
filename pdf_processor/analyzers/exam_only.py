@@ -43,6 +43,13 @@ class ExamOnlyAnalyzer(BaseAnalyzer):
 """
         return prompt.strip()
 
+    def analyze(self, *args, **kwargs) -> Dict[str, Any]:
+        """Provide a concrete implementation to satisfy the abstract interface.
+
+        Exam-only mode is chunk-oriented; use analyze_chunk() in callers.
+        """
+        raise NotImplementedError("ExamOnlyAnalyzer is chunk-oriented; use analyze_chunk()")
+
     def analyze_chunk(
         self,
         jokbo_chunk_path: str,
@@ -101,4 +108,3 @@ class ExamOnlyAnalyzer(BaseAnalyzer):
             except Exception:
                 pass
         return result
-

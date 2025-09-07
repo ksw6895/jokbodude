@@ -540,9 +540,14 @@ class PDFOperations:
         """
         index = PDFOperations.index_questions(pdf_path)
         if not index:
-            # fallback: use default page chunking as a last resort
-            chunks = PDFOperations.split_pdf_for_chunks(pdf_path)
-            return [(s, e, 1, group_size) for (_p, s, e) in chunks]
+            # Conservative fallback: treat whole file as a single 20-question group.
+            # This avoids over-counting chunks when OCR fails to detect markers.
+            try:
+                with fitz.open(str(pdf_path)) as doc:
+                    total_pages = len(doc)
+            except Exception:
+                total_pages = 1
+            return [(1, max(1, int(total_pages)), 1, int(group_size))]
         # Build qnum -> first page map
         first_page_for_q: dict[int, int] = {}
         for p, q in index:
@@ -550,8 +555,12 @@ class PDFOperations:
                 first_page_for_q[q] = p
         qnums_sorted = sorted(first_page_for_q.keys())
         if not qnums_sorted:
-            chunks = PDFOperations.split_pdf_for_chunks(pdf_path)
-            return [(s, e, 1, group_size) for (_p, s, e) in chunks]
+            try:
+                with fitz.open(str(pdf_path)) as doc:
+                    total_pages = len(doc)
+            except Exception:
+                total_pages = 1
+            return [(1, max(1, int(total_pages)), 1, int(group_size))]
         try:
             with fitz.open(str(pdf_path)) as doc:
                 total_pages = len(doc)

@@ -821,9 +821,12 @@
             const tc = pf.total_chunks || 0;
             const tpc = pf.tokens_per_chunk || 0;
             const et = pf.estimated_tokens || 0;
+            const filesLine = (mode === 'exam-only')
+              ? `Files: ${jbCnt} exam`
+              : `Files: ${jbCnt} exam · ${lsCnt} lecture`;
             el.innerHTML = tc > 0 ? `
               <div class="mt-2 p-2 bg-gray-900/60 border border-gray-800 rounded">
-                <div>Files: ${jbCnt} exam · ${lsCnt} lecture</div>
+                <div>${filesLine}</div>
                 <div>Chunks: <strong>${tc}</strong> (approx.)</div>
                 <div>Tokens: ~ <strong>${et}</strong> (${tpc} / chunk)</div>
               </div>` : '';
