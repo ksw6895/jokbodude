@@ -104,9 +104,10 @@
             <div class="p-6">
                 <!-- Model password removed; Pro access is token-based -->
                 <div class="flex p-1 bg-gray-900/70 border border-gray-700 rounded-xl mb-6">
-                    <button class="tab w-1/3 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800 active" onclick="switchTab('jokbo', event)">Exam-Centric Analysis</button>
-                    <button class="tab w-1/3 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('lesson', event)">Lecture-Centric Analysis</button>
-                    <button class="tab w-1/3 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('partial', event)">Partial Jokbo Analysis</button>
+                    <button class="tab w-1/4 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800 active" onclick="switchTab('jokbo', event)">Exam-Centric Analysis</button>
+                    <button class="tab w-1/4 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('lesson', event)">Lecture-Centric Analysis</button>
+                    <button class="tab w-1/4 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('partial', event)">Partial Jokbo Analysis</button>
+                    <button class="tab w-1/4 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('exam', event)">Exam Only</button>
                 </div>
                 
                 <!-- Jokbo-Centric Tab (Tailwind) -->
@@ -333,6 +334,64 @@
                     </form>
                 </div>
 
+                <!-- Exam-Only Tab (Tailwind) -->
+                <div id="exam-tab" class="tab-content">
+                    <form id="examForm" class="space-y-6">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Configuration</h3>
+                                <button type="button" class="tab px-2 py-1 rounded-md text-sm" aria-expanded="false" data-help-target="exam_help">모드 설명</button>
+                            </div>
+                            <div id="exam_help" class="help-panel">
+                                <div class="text-white font-semibold">Exam Only (해설 중심)</div>
+                                <div class="text-gray-400">족보만 업로드하면, 각 문제에 대한 정답과 상세 해설을 생성하고 500자 내외의 배경 지식을 제공합니다. 멀티 API 사용 시 청크를 병렬 처리하여 더 빠르게 완료됩니다.</div>
+                            </div>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="exam_model" class="block text-sm font-medium text-gray-300 mb-1">AI Model</label>
+                                    <select id="exam_model" name="model" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                                        <option value="flash" selected>Gemini 2.5 Flash - Balanced</option>
+                                        <option value="pro">Gemini 2.5 Pro - Quality</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Processing Mode</label>
+                                    <div class="flex items-center gap-2">
+                                        <div id="exam_multi_api_group" class="inline-flex rounded-md shadow-sm bg-gray-900 border border-gray-700">
+                                            <button type="button" data-value="single" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-l-md text-xs font-medium text-gray-400 hover:bg-gray-800">Single API</button>
+                                            <button type="button" data-value="multi" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-r-md text-xs font-medium text-gray-400 hover:bg-gray-800">Multi-API</button>
+                                        </div>
+                                        <span id="exam_multi_api_note" class="text-xs text-gray-500"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">File Upload</h3>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Exam PDFs</label>
+                                    <input type="file" id="exam_jokbo_files" multiple accept=".pdf" class="hidden">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('exam_jokbo_files').click()">
+                                        <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
+                                        <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
+                                        <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
+                                    </div>
+                                    <div class="text-red-400 text-xs mt-2" id="exam_jokbo_error"></div>
+                                    <div class="mt-4 space-y-2" id="exam_jokbo_file_list"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="exam_estimate" class="text-xs text-gray-400"></div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-500 transform hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2">Start Exam-Only →</button>
+                        </div>
+                    </form>
+                </div>
+
                 <div class="mt-8">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold text-white">Processing Status</h3>
@@ -445,6 +504,13 @@
                 JD_CONFIG.multi_api_available,
                 JD_CONFIG.api_keys_count
             );
+            initProcessingToggle(
+                'exam_multi_api_group',
+                'exam_multi_api_note',
+                'jd_multi_api_exam',
+                JD_CONFIG.multi_api_available,
+                JD_CONFIG.api_keys_count
+            );
         }
 
         function initProcessingToggle(groupId, noteId, storageKey, available, keysCount) {
@@ -511,6 +577,7 @@
             let groupId = 'jokbo_multi_api_group';
             if (mode === 'lesson-centric') groupId = 'lesson_multi_api_group';
             if (mode === 'partial-jokbo') groupId = 'partial_multi_api_group';
+            if (mode === 'exam-only') groupId = 'exam_multi_api_group';
             const group = document.getElementById(groupId);
             const [singleBtn, multiBtn] = group.querySelectorAll('.toggle-option');
             return multiBtn.classList.contains('active') && !multiBtn.classList.contains('disabled');
@@ -654,6 +721,8 @@
             handleFileSelectStaged('partial_jokbo_files', 'partial_jokbo_file_list', 'partial_jokbo_error'));
         document.getElementById('partial_lesson_files').addEventListener('change', () =>
             handleFileSelectStaged('partial_lesson_files', 'partial_lesson_file_list', 'partial_lesson_error'));
+        document.getElementById('exam_jokbo_files').addEventListener('change', () =>
+            handleFileSelectStaged('exam_jokbo_files', 'exam_jokbo_file_list', 'exam_jokbo_error'));
         // Removal handlers via event delegation
         document.getElementById('jokbo_file_list').addEventListener('click', (e) => {
             if (e.target && e.target.classList.contains('file-remove')) {
@@ -685,9 +754,14 @@
                 removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'partial_lesson_file_list');
             }
         });
+        document.getElementById('exam_jokbo_file_list').addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('file-remove')) {
+                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'exam_jokbo_file_list');
+            }
+        });
         
         // Preflight cache keyed by mode
-        const LATEST_PREFLIGHT = { 'jokbo-centric': null, 'lesson-centric': null, 'partial-jokbo': null };
+        const LATEST_PREFLIGHT = { 'jokbo-centric': null, 'lesson-centric': null, 'partial-jokbo': null, 'exam-only': null };
         function currentOptions(mode) {
             const multiApi = getMultiApiState(mode);
             let minRel = 70;
@@ -737,7 +811,7 @@
               ? 'jokbo_estimate'
               : (mode === 'lesson-centric'
                  ? 'lesson_estimate'
-                 : (mode === 'partial-jokbo' ? 'partial_estimate' : null));
+                 : (mode === 'partial-jokbo' ? 'partial_estimate' : (mode === 'exam-only' ? 'exam_estimate' : null)));
             if (!elId) return;
             const el = document.getElementById(elId);
             if (!el) return;
@@ -764,15 +838,16 @@
             const jokboFiles = stagedFiles[jokboInputId] || [];
             const lessonFiles = stagedFiles[lessonInputId] || [];
             
-            if (jokboFiles.length === 0 || lessonFiles.length === 0) {
+            const needsLesson = (mode !== 'exam-only');
+            if (jokboFiles.length === 0 || (needsLesson && lessonFiles.length === 0)) {
                 statusBadge.className = 'status-badge error';
                 statusBadge.textContent = 'ERROR';
-                statusMessage.textContent = 'Please select both exam and lecture files';
+                statusMessage.textContent = needsLesson ? 'Please select both exam and lecture files' : 'Please select exam files';
                 return;
             }
             
             // Check file sizes
-            for (let file of [...jokboFiles, ...lessonFiles]) {
+            for (let file of [...jokboFiles, ...(needsLesson ? lessonFiles : [])]) {
                 if (file.size > MAX_FILE_SIZE) {
                     statusBadge.className = 'status-badge error';
                     statusBadge.textContent = 'ERROR';
@@ -1011,7 +1086,8 @@
             const jb = stagedFiles[jokboId] || [];
             const ls = stagedFiles[lessonId] || [];
             if (!CURRENT_USER) return; // require login to preflight (uses server)
-            if (jb.length === 0 || ls.length === 0) return;
+            const needsLesson = (mode !== 'exam-only');
+            if (jb.length === 0 || (needsLesson && ls.length === 0)) return;
             const opts = currentOptions(mode);
             const fp = filesFingerprint(jokboId, lessonId, model, opts);
             const cached = LATEST_PREFLIGHT[mode];
@@ -1069,6 +1145,22 @@
             e.preventDefault();
             const model = document.getElementById('partial_model').value;
             await submitAnalysis('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', model);
+        });
+
+        // Exam-only preflight triggers
+        document.getElementById('exam_jokbo_files').addEventListener('change', () => {
+            const model = document.getElementById('exam_model').value;
+            // lesson bucket unused for this mode
+            maybePreflight('exam-only', 'exam_jokbo_files', 'unused', model);
+        });
+        document.getElementById('exam_model').addEventListener('change', () => {
+            const model = document.getElementById('exam_model').value;
+            maybePreflight('exam-only', 'exam_jokbo_files', 'unused', model);
+        });
+        document.getElementById('examForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const model = document.getElementById('exam_model').value;
+            await submitAnalysis('exam-only', 'exam_jokbo_files', 'unused', model);
         });
 
         // Admin cleanup: POST /admin/cleanup with optional older-than filter
