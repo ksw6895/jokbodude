@@ -474,7 +474,10 @@ class PDFOperations:
                 # left margin filter to reduce noise from choices like "1)" in center
                 if float(x0) > (w * 0.4):
                     continue
-                m = _re.search(r"^\(?\s*(\d{1,3})\s*\)?[\.)]?|^(\d{1,3})번$|^Q\s*(\d{1,3})$", t)
+                # Strict token match: the token must be exactly a question marker
+                # Examples that should match: "1", "(1)", "1.", "1)", "1번", "Q 1"
+                # Avoid partial matches like "2020년" (previously captured as 202).
+                m = _re.search(r"^(?:\(?\s*(\d{1,3})\s*\)?[\.)]?|((?:\d{1,3}))번|Q\s*(\d{1,3}))$", t)
                 if m:
                     try:
                         n = int(next(g for g in m.groups() if g))
@@ -497,7 +500,8 @@ class PDFOperations:
                     t = (data["text"][i] or "").strip()
                     if not t:
                         continue
-                    m = _re.search(r"^\(?\s*(\d{1,3})\s*\)?[\.)]?|^(\d{1,3})번$|^Q\s*(\d{1,3})$", t)
+                    # Same strict token rule for OCR tokens
+                    m = _re.search(r"^(?:\(?\s*(\d{1,3})\s*\)?[\.)]?|((?:\d{1,3}))번|Q\s*(\d{1,3}))$", t)
                     if m:
                         try:
                             n = int(next(g for g in m.groups() if g))
@@ -534,63 +538,71 @@ class PDFOperations:
 
     @staticmethod
     def split_by_question_groups(pdf_path: str, group_size: int = 20) -> list[tuple[int, int, int, int]]:
-        """Compute contiguous page ranges that roughly cover every group of N questions.
+        """Compute contiguous page ranges for groups of questions by appearance order.
+
+        More robust than numeric bucketing (1–20, 21–40...), this uses the
+        first appearance order of detected question numbers across pages and
+        chunks them into blocks of `group_size` questions. This avoids creating
+        spurious groups like 201–220 when headers such as "2020" are present.
 
         Returns a list of tuples: (start_page, end_page, group_start_q, group_end_q)
+        where group_start_q/group_end_q are the first/last detected question numbers
+        in that block (not synthetic ranges).
         """
         index = PDFOperations.index_questions(pdf_path)
+        # Fallback: whole file as one chunk if nothing detected
         if not index:
-            # Conservative fallback: treat whole file as a single 20-question group.
-            # This avoids over-counting chunks when OCR fails to detect markers.
             try:
                 with fitz.open(str(pdf_path)) as doc:
                     total_pages = len(doc)
             except Exception:
                 total_pages = 1
             return [(1, max(1, int(total_pages)), 1, int(group_size))]
-        # Build qnum -> first page map
+
+        # Build qnum -> first page map, and an ordered list by first appearance (page ascending)
         first_page_for_q: dict[int, int] = {}
-        for p, q in index:
+        ordered_unique_q: list[int] = []
+        for p, q in sorted(index, key=lambda t: (t[0], t[1])):
             if q not in first_page_for_q:
                 first_page_for_q[q] = p
-        qnums_sorted = sorted(first_page_for_q.keys())
-        if not qnums_sorted:
+                ordered_unique_q.append(q)
+
+        if not ordered_unique_q:
             try:
                 with fitz.open(str(pdf_path)) as doc:
                     total_pages = len(doc)
             except Exception:
                 total_pages = 1
             return [(1, max(1, int(total_pages)), 1, int(group_size))]
+
         try:
             with fitz.open(str(pdf_path)) as doc:
                 total_pages = len(doc)
         except Exception:
             total_pages = 0
+
         groups: list[tuple[int, int, int, int]] = []
-        # Group by block of group_size (1-20, 21-40, ...)
-        seen_groups: set[int] = set()
-        for q in qnums_sorted:
-            gidx = (int(q) - 1) // int(max(1, group_size))
-            if gidx in seen_groups:
-                continue
-            seen_groups.add(gidx)
-            g_start = gidx * group_size + 1
-            g_end = g_start + group_size - 1
-            # Determine page span
-            start_page = min(first_page_for_q.get(qq) for qq in qnums_sorted if g_start <= qq <= g_end)
-            # find next group's first page
-            next_gidx = gidx + 1
-            next_g_start = next_gidx * group_size + 1
-            next_qs = [qq for qq in qnums_sorted if qq >= next_g_start]
-            if next_qs:
-                next_first_page = first_page_for_q.get(next_qs[0])
-                end_page = max(start_page, int(next_first_page) - 1) if next_first_page else total_pages
+        n = len(ordered_unique_q)
+        i = 0
+        while i < n:
+            block = ordered_unique_q[i : min(i + int(max(1, group_size)), n)]
+            g_start_q = int(block[0])
+            g_end_q = int(block[-1])
+            start_page = int(first_page_for_q[g_start_q])
+            # Determine end_page by looking at next block's first page
+            j = i + int(max(1, group_size))
+            if j < n:
+                next_first_q = int(ordered_unique_q[j])
+                next_first_page = int(first_page_for_q.get(next_first_q, total_pages))
+                end_page = max(start_page, next_first_page - 1)
             else:
                 end_page = total_pages
             if total_pages and end_page > total_pages:
                 end_page = total_pages
-            groups.append((int(start_page), int(end_page or start_page), int(g_start), int(g_end)))
-        # Sort by start_page
+            groups.append((start_page, int(end_page or start_page), g_start_q, g_end_q))
+            i = j
+
+        # Ensure sorted by page order
         groups.sort(key=lambda t: (t[0], t[2]))
         return groups
     

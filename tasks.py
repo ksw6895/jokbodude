@@ -860,7 +860,12 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
             all_chunks: list[tuple[str, tuple[int, int, int, int]]] = []  # (jokbo_path, (s, e, qstart, qend))
             for jp in jokbo_paths:
                 try:
-                    for (s, e, qs, qe) in _PDFOps.split_by_question_groups(jp, group_size=20):
+                    groups = _PDFOps.split_by_question_groups(jp, group_size=20)
+                    try:
+                        logger.info(f"exam-only: {Path(jp).name} -> {len(groups)} chunk(s) by ordinal question grouping")
+                    except Exception:
+                        pass
+                    for (s, e, qs, qe) in groups:
                         all_chunks.append((jp, (int(s), int(e), int(qs), int(qe))))
                 except Exception:
                     # Fallback: treat whole file as one chunk
@@ -873,6 +878,12 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
             total_chunks = max(1, len(all_chunks))
             try:
                 sm.init_progress(job_id, total_chunks, f"청크 준비 완료: {total_chunks}개")
+                # Brief chunk list snapshot for debugging order issues
+                try:
+                    preview = [f"{Path(jp).name}:{s}-{e}(Q{qs}-{qe})" for jp, (s, e, qs, qe) in all_chunks[:10]]
+                    logger.info(f"exam-only: first chunks => {preview}")
+                except Exception:
+                    pass
             except Exception:
                 pass
 
@@ -903,6 +914,14 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
                     orig_jp, chunk_path, (s, e), (qs, qe) = task
                     analyzer = ExamOnlyAnalyzer(api_client, FileManager(api_client), job_id, Path("output/debug"))
                     res = analyzer.analyze_chunk(chunk_path, Path(orig_jp).name, (qs, qe), chunk_info=(s, e))
+                    # Tag each question with its source jokbo filename for reliable grouping later
+                    try:
+                        src_name = Path(orig_jp).name
+                        for q in (res.get("questions") or []):
+                            if isinstance(q, dict):
+                                q["source_filename"] = src_name
+                    except Exception:
+                        pass
                     return res
 
                 def on_progress(_):
@@ -933,8 +952,16 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
                     try:
                         cpath = _PDFOps.extract_pages(jp, s, e)
                         res = analyzer.analyze_chunk(cpath, Path(jp).name, (qs, qe), chunk_info=(s, e))
-                        for q in (res.get("questions") or []):
-                            questions_acc.append(dict(q))
+                        # Tag questions with source
+                        try:
+                            src_name = Path(jp).name
+                            for q in (res.get("questions") or []):
+                                qq = dict(q)
+                                qq["source_filename"] = src_name
+                                questions_acc.append(qq)
+                        except Exception:
+                            for q in (res.get("questions") or []):
+                                questions_acc.append(dict(q))
                     finally:
                         try:
                             Path(cpath).unlink(missing_ok=True)
@@ -950,21 +977,46 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
             # For each jokbo, assemble a consolidated PDF preserving order by page_start then question_number
             for jp in jokbo_paths:
                 jp_name = Path(jp).name
-                # Select questions belonging to this jokbo by conservative rule: page_start within its page count
+                # Select questions belonging to this jokbo via explicit source tag;
+                # fall back to page-range heuristic if tag is missing.
                 try:
                     pc = _PDFOps.get_page_count(jp)
                 except Exception:
                     pc = 0
                 qs_for_file: list[dict] = []
                 for q in questions_acc:
-                    ps = int(q.get("page_start") or 0)
-                    if pc <= 0 or 1 <= ps <= pc:
+                    src = q.get("source_filename")
+                    if src == jp_name:
                         qs_for_file.append(q)
+                    else:
+                        # Heuristic fallback for legacy results
+                        try:
+                            ps = int(q.get("page_start") or 0)
+                        except Exception:
+                            ps = 0
+                        if src is None and (pc <= 0 or 1 <= ps <= pc):
+                            qs_for_file.append(q)
                 # Build cropped question PDFs
                 items: list[dict] = []
                 # Order
                 try:
-                    qs_for_file.sort(key=lambda x: (int(x.get('page_start') or 0), int(str(x.get('question_number') or '0') or 0)))
+                    # Primary: by page_start; secondary: by next_question_start if available; tertiary: by question_number
+                    def _key(x: dict):
+                        try:
+                            ps = int(x.get('page_start') or 0)
+                        except Exception:
+                            ps = 0
+                        try:
+                            nqs = x.get('next_question_start')
+                            nqs_i = int(nqs) if nqs is not None else 10**9
+                        except Exception:
+                            nqs_i = 10**9
+                        try:
+                            qn = int(str(x.get('question_number') or '0') or 0)
+                        except Exception:
+                            qn = 0
+                        return (ps, nqs_i, qn)
+                    qs_for_file.sort(key=_key)
                 except Exception:
                     pass
                 for q in qs_for_file:
