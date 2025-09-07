@@ -1000,21 +1000,20 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
                 items: list[dict] = []
                 # Order
                 try:
-                    # Primary: by page_start; secondary: by next_question_start if available; tertiary: by question_number
+                    import re as _re
+                    # Primary: by page_start; secondary: by next_question_start; tertiary: by question_number (numeric part only)
+                    def _num(val) -> int:
+                        try:
+                            s = str(val or "")
+                            m = _re.search(r"(\d+)", s)
+                            return int(m.group(1)) if m else 0
+                        except Exception:
+                            return 0
                     def _key(x: dict):
-                        try:
-                            ps = int(x.get('page_start') or 0)
-                        except Exception:
-                            ps = 0
-                        try:
-                            nqs = x.get('next_question_start')
-                            nqs_i = int(nqs) if nqs is not None else 10**9
-                        except Exception:
-                            nqs_i = 10**9
-                        try:
-                            qn = int(str(x.get('question_number') or '0') or 0)
-                        except Exception:
-                            qn = 0
+                        ps = _num(x.get('page_start'))
+                        nqs = x.get('next_question_start')
+                        nqs_i = _num(nqs) if nqs is not None else 10**9
+                        qn = _num(x.get('question_number'))
                         return (ps, nqs_i, qn)
                     qs_for_file.sort(key=_key)
                 except Exception:

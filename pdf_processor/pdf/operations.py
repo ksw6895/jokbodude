@@ -65,11 +65,14 @@ class PDFOperations:
         return rf"^\(?\s*{s}\s*\)?[\.)]?$"
 
     @staticmethod
-    def detect_dominant_number_style(pdf_path: str, sample_pages: int = 10) -> Optional[str]:
-        """Detect the predominant question-number token style in the PDF.
+    def detect_dominant_number_style(pdf_path: str, sample_numbers: int = 25) -> Optional[str]:
+        """Detect the predominant numbering style by checking actual question numbers.
 
-        Scans up to sample_pages with left-margin heuristics and returns the
-        style key with the highest frequency. Caches per-process.
+        Strategy: build an index of detected question numbers by page. For the
+        first up-to N unique numbers in appearance order, find which canonical
+        style token (e.g., "1.", "(1)") appears on that page for that number,
+        preferring the left-most/top-most token. The style with the highest
+        frequency wins. This avoids bias from multiple-choice options (1~5).
         """
         try:
             key = str(Path(pdf_path))
@@ -78,28 +81,55 @@ class PDFOperations:
             pats = PDFOperations._style_patterns()
             import re as _re
             compiled = {k: _re.compile(v) for k, v in pats.items()}
+
+            # Build ordered list of unique question numbers by first appearance
+            index = PDFOperations.index_questions(pdf_path)
+            if not index:
+                PDFOperations._style_cache[key] = None
+                return None
+            ordered_unique: list[int] = []
+            first_page: Dict[int, int] = {}
+            for p, q in sorted(index, key=lambda t: (t[0], t[1])):
+                if q not in first_page:
+                    first_page[q] = p
+                    ordered_unique.append(q)
+            if not ordered_unique:
+                PDFOperations._style_cache[key] = None
+                return None
+
             counts: Dict[str, int] = {k: 0 for k in pats}
+            limit = min(len(ordered_unique), max(1, int(sample_numbers)))
             with fitz.open(str(pdf_path)) as doc:
-                total = len(doc)
-                limit = min(total, max(1, int(sample_pages)))
                 for i in range(limit):
-                    page = doc[i]
+                    qn = int(ordered_unique[i])
+                    pno = int(first_page.get(qn, 1))
+                    pno = max(1, min(len(doc), pno))
+                    page = doc[pno - 1]
                     try:
                         words = page.get_text("words") or []
                     except Exception:
                         words = []
                     w = page.rect.width
+                    # Among tokens that match ANY style for this specific number,
+                    # choose the one with smallest x0 (left-most), break ties by y0 (top-most)
+                    candidates: list[tuple[float, float, str]] = []  # (x0, y0, style)
                     for x0, y0, x1, y1, text, *_ in words:
                         t = str(text or "").strip()
                         if not t:
                             continue
-                        if float(x0) > (w * 0.35):
+                        if float(x0) > (w * 0.45):
                             continue
                         for name, cp in compiled.items():
-                            if cp.match(t):
-                                counts[name] += 1
+                            # Replace the number with concrete value pattern
+                            cn = _re.compile(PDFOperations._pattern_for_number(name, qn))
+                            if cn.match(t):
+                                candidates.append((float(x0), float(y0), name))
                                 break
-            # Choose the style with max count; break ties by a sensible priority
+                    if candidates:
+                        candidates.sort(key=lambda t: (t[0], t[1]))
+                        style = candidates[0][2]
+                        counts[style] += 1
+            # Choose max; tie-breaker priority
             priority = ["dot", "paren", "right_paren", "paren_dot", "hangul", "q", "plain"]
             best_style = None
             best_count = 0
@@ -703,7 +733,9 @@ class PDFOperations:
             if j < n:
                 next_first_q = int(ordered_unique_q[j])
                 next_first_page = int(first_page_for_q.get(next_first_q, total_pages))
-                end_page = max(start_page, next_first_page - 1)
+                # Include the next block's first-page as overlap to allow the model
+                # to see the boundary marker for the last question of this chunk.
+                end_page = max(start_page, next_first_page)
             else:
                 end_page = total_pages
             if total_pages and end_page > total_pages:
