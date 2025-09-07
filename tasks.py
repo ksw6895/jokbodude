@@ -947,8 +947,7 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
 
             # Crop and assemble final PDF per jokbo (questions are page-referenced to original)
             creator = PDFCreator()
-            # Group questions by jokbo file? analyzer produced no jokbo_filename mandatory; page_start refers to original
-            # For simplicity, assemble a single consolidated PDF per jokbo path
+            # For each jokbo, assemble a consolidated PDF preserving order by page_start then question_number
             for jp in jokbo_paths:
                 jp_name = Path(jp).name
                 # Select questions belonging to this jokbo by conservative rule: page_start within its page count
@@ -956,13 +955,18 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
                     pc = _PDFOps.get_page_count(jp)
                 except Exception:
                     pc = 0
-                qs_for_file = []
+                qs_for_file: list[dict] = []
                 for q in questions_acc:
                     ps = int(q.get("page_start") or 0)
                     if pc <= 0 or 1 <= ps <= pc:
                         qs_for_file.append(q)
                 # Build cropped question PDFs
                 items: list[dict] = []
+                # Order
+                try:
+                    qs_for_file.sort(key=lambda x: (int(x.get('page_start') or 0), int(str(x.get('question_number') or '0') or 0)))
+                except Exception:
+                    pass
                 for q in qs_for_file:
                     try:
                         ps = int(q.get("page_start") or 0)
@@ -970,17 +974,22 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
                         nqs_i = int(nqs) if nqs is not None else None
                         qnum = q.get("question_number")
                         q_pdf = _PDFOps.extract_question_region(jp, ps, nqs_i, qnum)
-                        text_block = (q.get("explanation") or "").strip()
-                        bg = (q.get("background_knowledge") or "").strip()
-                        if bg:
-                            text_block += ("\n\n[배경 지식]\n" + bg)
-                        items.append({"question_pdf": q_pdf, "explanation": text_block})
+                        item = {
+                            "question_pdf": q_pdf,
+                            "question_number": q.get("question_number"),
+                            "question_text": q.get("question_text"),
+                            "answer": q.get("answer"),
+                            "explanation": q.get("explanation"),
+                            "background_knowledge": q.get("background_knowledge"),
+                            "wrong_answer_explanations": q.get("wrong_answer_explanations") if isinstance(q.get("wrong_answer_explanations"), dict) else {},
+                        }
+                        items.append(item)
                     except Exception:
                         continue
                 if not items:
                     continue
                 out_path = out_dir / f"exam_only_{Path(jp).stem}.pdf"
-                creator.create_partial_jokbo_pdf(items, str(out_path))
+                creator.create_exam_only_pdf(items, str(out_path))
                 sm.store_result(job_id, out_path)
 
             try:

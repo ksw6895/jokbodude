@@ -1180,3 +1180,86 @@ class PDFCreator:
 
         doc.save(output_path)
         doc.close()
+
+    def create_exam_only_pdf(self, questions: List[Dict[str, Any]], output_path: str) -> None:
+        """Create a PDF for Exam-Only mode with rich explanation pages.
+
+        Each entry in `questions` should include:
+        - question_pdf: path to cropped pages of the question
+        - question_number: str/int identifier
+        - answer: string (if known)
+        - explanation: string
+        - background_knowledge: string (optional)
+        - wrong_answer_explanations: dict[str,str] (optional)
+        - question_text: optional summary
+        """
+
+        def _nz(s: str | None) -> str:
+            return (s or '').strip()
+
+        doc = fitz.open()
+        if not questions:
+            page = doc.new_page()
+            fontname = self._register_font(page)
+            text_rect = fitz.Rect(50, 50, page.rect.width - 50, page.rect.height - 50)
+            page.insert_textbox(
+                text_rect,
+                self._normalize_korean("Exam Only 결과가 비어 있습니다. 입력 파일과 설정을 확인하세요."),
+                fontsize=12,
+                fontname=fontname,
+                align=fitz.TEXT_ALIGN_LEFT,
+            )
+            doc.save(output_path)
+            doc.close()
+            return
+
+        for q in questions:
+            q_pdf = q.get("question_pdf")
+            if q_pdf and Path(q_pdf).exists():
+                with fitz.open(q_pdf) as src:
+                    doc.insert_pdf(src)
+
+            # Explanation page
+            page = doc.new_page()
+            fontname = self._register_font(page)
+            text_rect = fitz.Rect(50, 50, page.rect.width - 50, page.rect.height - 50)
+
+            qnum = str(q.get("question_number") or "").strip()
+            ans = _nz(q.get("answer"))
+            qtext = _nz(q.get("question_text"))
+            expl = _nz(q.get("explanation"))
+            bk = _nz(q.get("background_knowledge"))
+            wae = q.get("wrong_answer_explanations") if isinstance(q.get("wrong_answer_explanations"), dict) else {}
+
+            lines: list[str] = []
+            header = f"문제 {qnum} 해설" if qnum else "문제 해설"
+            lines.append(header)
+            if ans:
+                lines.append(f"정답: {ans}")
+            if qtext:
+                lines.append("")
+                lines.append(f"문제 요약: {qtext}")
+            if expl:
+                lines.append("")
+                lines.append("해설:")
+                lines.append(expl)
+            if bk:
+                lines.append("")
+                lines.append("배경 지식:")
+                lines.append(bk)
+            if wae:
+                lines.append("")
+                lines.append("오답 해설:")
+                # Keep deterministic order 1~5 then others
+                keys = sorted(wae.keys(), key=lambda k: (0 if str(k).startswith(('1', '2', '3', '4', '5')) else 1, str(k)))
+                for k in keys:
+                    v = _nz(wae.get(k))
+                    if not v:
+                        continue
+                    lines.append(f"- {k}: {v}")
+
+            content = self._normalize_korean("\n".join(lines))
+            page.insert_textbox(text_rect, content, fontsize=11, fontname=fontname, align=fitz.TEXT_ALIGN_LEFT)
+
+        doc.save(output_path)
+        doc.close()

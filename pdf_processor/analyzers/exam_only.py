@@ -32,12 +32,15 @@ class ExamOnlyAnalyzer(BaseAnalyzer):
         from constants import (
             EXAM_ONLY_TASK,
             EXAM_ONLY_OUTPUT_FORMAT,
+            EXPLANATION_GUIDELINES,
         )
 
         prompt = f"""
 다음은 족보 PDF 일부({q_start}~{q_end}번)입니다. 원본 파일명: {jokbo_filename}
 
 {EXAM_ONLY_TASK}
+
+{EXPLANATION_GUIDELINES}
 
 {EXAM_ONLY_OUTPUT_FORMAT}
 """
