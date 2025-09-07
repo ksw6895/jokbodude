@@ -17,11 +17,112 @@ logger = get_logger(__name__)
 class PDFOperations:
     """Handles all PDF manipulation operations."""
 
+    # Cache of detected dominant numbering style per PDF path
+    _style_cache: Dict[str, Optional[str]] = {}
+
+    @staticmethod
+    def _style_patterns() -> Dict[str, str]:
+        """Return canonical token regex (no capture) for numbering styles.
+
+        Keys:
+        - dot: "1."
+        - right_paren: "1)"
+        - paren: "(1)"
+        - paren_dot: "(1)."
+        - hangul: "1번"
+        - q: "Q 1"
+        - plain: "1"
+        """
+        return {
+            "dot": r"^\d{1,3}\.$",
+            "right_paren": r"^\d{1,3}\)$",
+            "paren": r"^\(\s*\d{1,3}\s*\)$",
+            "paren_dot": r"^\(\s*\d{1,3}\s*\)\.$",
+            "hangul": r"^\d{1,3}\s*번$",
+            "q": r"^Q\s*\d{1,3}$",
+            "plain": r"^\d{1,3}$",
+        }
+
+    @staticmethod
+    def _pattern_for_number(style: str, n: int) -> str:
+        """Return exact-token regex for a given number in a given style."""
+        s = str(int(n))
+        if style == "dot":
+            return rf"^{s}\.$"
+        if style == "right_paren":
+            return rf"^{s}\)$"
+        if style == "paren":
+            return rf"^\(\s*{s}\s*\)$"
+        if style == "paren_dot":
+            return rf"^\(\s*{s}\s*\)\.$"
+        if style == "hangul":
+            return rf"^{s}\s*번$"
+        if style == "q":
+            return rf"^Q\s*{s}$"
+        if style == "plain":
+            return rf"^{s}$"
+        # Fallback: strict generic
+        return rf"^\(?\s*{s}\s*\)?[\.)]?$"
+
+    @staticmethod
+    def detect_dominant_number_style(pdf_path: str, sample_pages: int = 10) -> Optional[str]:
+        """Detect the predominant question-number token style in the PDF.
+
+        Scans up to sample_pages with left-margin heuristics and returns the
+        style key with the highest frequency. Caches per-process.
+        """
+        try:
+            key = str(Path(pdf_path))
+            if key in PDFOperations._style_cache:
+                return PDFOperations._style_cache[key]
+            pats = PDFOperations._style_patterns()
+            import re as _re
+            compiled = {k: _re.compile(v) for k, v in pats.items()}
+            counts: Dict[str, int] = {k: 0 for k in pats}
+            with fitz.open(str(pdf_path)) as doc:
+                total = len(doc)
+                limit = min(total, max(1, int(sample_pages)))
+                for i in range(limit):
+                    page = doc[i]
+                    try:
+                        words = page.get_text("words") or []
+                    except Exception:
+                        words = []
+                    w = page.rect.width
+                    for x0, y0, x1, y1, text, *_ in words:
+                        t = str(text or "").strip()
+                        if not t:
+                            continue
+                        if float(x0) > (w * 0.35):
+                            continue
+                        for name, cp in compiled.items():
+                            if cp.match(t):
+                                counts[name] += 1
+                                break
+            # Choose the style with max count; break ties by a sensible priority
+            priority = ["dot", "paren", "right_paren", "paren_dot", "hangul", "q", "plain"]
+            best_style = None
+            best_count = 0
+            for name in priority:
+                c = counts.get(name, 0)
+                if c > best_count:
+                    best_style = name
+                    best_count = c
+            PDFOperations._style_cache[key] = best_style
+            return best_style
+        except Exception:
+            return None
+
+    @staticmethod
+    def _preferred_style(pdf_path: str) -> Optional[str]:
+        """Get cached dominant style, computing it if needed."""
+        return PDFOperations.detect_dominant_number_style(pdf_path)
+
     # -----------------------------
     # Low-level marker search utils
     # -----------------------------
     @staticmethod
-    def find_question_marker_y(page: fitz.Page, target_num: int) -> Optional[float]:
+    def find_question_marker_y(page: fitz.Page, target_num: int, preferred_style: Optional[str] = None) -> Optional[float]:
         """Find the Y-coordinate of the question-number marker on a page.
 
         - Prefers text extraction via PyMuPDF words with left-margin heuristic
@@ -36,12 +137,15 @@ class PDFOperations:
         candidates: list[tuple[float, float]] = []  # (y0, x0)
         if words:
             import re as _re
-            pats = [
-                rf"^\(?{target_num}\)?[\.)]$",
-                rf"^\(?{target_num}\)?$",
-                rf"^{target_num}번$",
-                rf"^Q\s*{target_num}$",
-            ]
+            if preferred_style:
+                pats = [PDFOperations._pattern_for_number(preferred_style, target_num)]
+            else:
+                pats = [
+                    rf"^\(?{target_num}\)?[\.)]$",
+                    rf"^\(?{target_num}\)?$",
+                    rf"^{target_num}번$",
+                    rf"^Q\s*{target_num}$",
+                ]
             compiled = [_re.compile(p) for p in pats]
             for x0, y0, x1, y1, text, *_ in words:
                 t = str(text or "").strip()
@@ -67,12 +171,15 @@ class PDFOperations:
                 # map pixels to PDF units
                 scale_y = page.rect.height / float(ih or 1)
                 import re as _re
-                pats = [
-                    rf"^\(?{target_num}\)?[\.)]$",
-                    rf"^\(?{target_num}\)?$",
-                    rf"^{target_num}번$",
-                    rf"^Q\s*{target_num}$",
-                ]
+                if preferred_style:
+                    pats = [PDFOperations._pattern_for_number(preferred_style, target_num)]
+                else:
+                    pats = [
+                        rf"^\(?{target_num}\)?[\.)]$",
+                        rf"^\(?{target_num}\)?$",
+                        rf"^{target_num}번$",
+                        rf"^Q\s*{target_num}$",
+                    ]
                 compiled = [_re.compile(p) for p in pats]
                 n = len(data.get("text", []))
                 for i in range(n):
@@ -233,6 +340,7 @@ class PDFOperations:
                 return default
 
         try:
+            style = PDFOperations._preferred_style(pdf_path)
             with fitz.open(str(pdf_path)) as src:
                 total_pages = len(src)
                 if page_start < 1 or page_start > total_pages:
@@ -263,13 +371,13 @@ class PDFOperations:
                     y1 = rect.height
                     if pno == page_start:
                         if qnum_int > 0:
-                            y_found = PDFOperations.find_question_marker_y(page, qnum_int)
+                            y_found = PDFOperations.find_question_marker_y(page, qnum_int, preferred_style=style)
                             if y_found is not None:
                                 y0 = max(0.0, y_found - 4)  # small margin
                         # If next question is also on this same page, crop to its marker
                         if same_page_next and (qnum_int > 0 or next_same_int > 0):
                             target_next = next_same_int if next_same_int > 0 else (qnum_int + 1 if qnum_int > 0 else 0)
-                            yn = PDFOperations.find_question_marker_y(page, target_next) if target_next > 0 else None
+                            yn = PDFOperations.find_question_marker_y(page, target_next, preferred_style=style) if target_next > 0 else None
                             if yn is not None and yn > y0:
                                 y1 = yn - 4
                     elif pno == page_end and same_page_next is False:
@@ -294,7 +402,7 @@ class PDFOperations:
                         next_page = src[page_start]  # 0-based index -> next page
                         rect = next_page.rect
                         target_next = qnum_int + 1
-                        yn = PDFOperations.find_question_marker_y(next_page, target_next)
+                        yn = PDFOperations.find_question_marker_y(next_page, target_next, preferred_style=style)
                         if yn is not None and yn > 10.0:
                             clip = fitz.Rect(0, 0, rect.width, max(10.0, yn - 4))
                             out_page = out_doc.new_page(width=rect.width, height=clip.height)
@@ -352,6 +460,7 @@ class PDFOperations:
                 return default
 
         try:
+            style = PDFOperations._preferred_style(pdf_path)
             with fitz.open(str(pdf_path)) as src:
                 if page_num < 1 or page_num > len(src):
                     return None
@@ -360,7 +469,7 @@ class PDFOperations:
                 y1 = rect.height
                 tnum = _to_int(target_number, 0)
                 if tnum > 0:
-                    yn = PDFOperations.find_question_marker_y(page, tnum)
+                    yn = PDFOperations.find_question_marker_y(page, tnum, preferred_style=style)
                     if yn is not None and yn > 0:
                         # crop to just above the marker
                         y1 = max(10.0, min(rect.height, yn - 4))
