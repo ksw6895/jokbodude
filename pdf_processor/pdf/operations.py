@@ -145,8 +145,186 @@ class PDFOperations:
 
     @staticmethod
     def _preferred_style(pdf_path: str) -> Optional[str]:
-        """Get cached dominant style, computing it if needed."""
-        return PDFOperations.detect_dominant_number_style(pdf_path)
+        """Get cached dominant numbering style using a robust detector.
+
+        Preference order:
+        1) Consecutive-run detector (1..k with a single style)
+        2) Fallback to frequency-based detector
+        """
+        key = str(Path(pdf_path))
+        if key in PDFOperations._style_cache:
+            return PDFOperations._style_cache[key]
+        style = PDFOperations.detect_question_style_consecutive(pdf_path)
+        if style is None:
+            style = PDFOperations.detect_dominant_number_style(pdf_path)
+        PDFOperations._style_cache[key] = style
+        return style
+
+    @staticmethod
+    def _style_capture_patterns() -> Dict[str, str]:
+        """Return capturing regex for each numbering style (group(1) = number)."""
+        return {
+            "dot": r"^(\d{1,3})\.$",
+            "right_paren": r"^(\d{1,3})\)$",
+            "paren": r"^\(\s*(\d{1,3})\s*\)$",
+            "paren_dot": r"^\(\s*(\d{1,3})\s*\)\.$",
+            "hangul": r"^(\d{1,3})\s*번$",
+            "q": r"^Q\s*(\d{1,3})$",
+            "plain": r"^(\d{1,3})$",
+        }
+
+    @staticmethod
+    def detect_question_style_consecutive(pdf_path: str, max_pages: int = 50) -> Optional[str]:
+        """Detect question-number style by longest consecutive run from 1.
+
+        Scans up to `max_pages` pages for tokens at the left margin that match a
+        style-specific numeric marker. Builds a number set per style, then selects
+        the style with the longest 1..k consecutive run. Ties resolved by a
+        stable priority.
+        """
+        try:
+            pats = PDFOperations._style_capture_patterns()
+            import re as _re
+            compiled = {k: _re.compile(v) for k, v in pats.items()}
+            with fitz.open(str(pdf_path)) as doc:
+                total = len(doc)
+                limit = min(total, max(1, int(max_pages)))
+                numbers_by_style: Dict[str, set] = {k: set() for k in pats}
+                for i in range(limit):
+                    page = doc[i]
+                    try:
+                        words = page.get_text("words") or []
+                    except Exception:
+                        words = []
+                    if not words:
+                        continue
+                    w = page.rect.width
+                    for x0, y0, x1, y1, text, *_ in words:
+                        t = str(text or "").strip()
+                        if not t:
+                            continue
+                        # left-margin bias to reduce choice tokens
+                        if float(x0) > (w * 0.4):
+                            continue
+                        for name, cp in compiled.items():
+                            m = cp.match(t)
+                            if not m:
+                                continue
+                            try:
+                                n = int(m.group(1))
+                            except Exception:
+                                continue
+                            if 0 < n < 1000:
+                                numbers_by_style[name].add(n)
+                            break
+                # Compute longest 1..k run per style
+                def longest_run_from_one(nums: set[int]) -> int:
+                    k = 0
+                    n = 1
+                    while n in nums:
+                        k += 1
+                        n += 1
+                    return k
+                runs = {name: longest_run_from_one(nums) for name, nums in numbers_by_style.items()}
+                # Choose the style with largest run; require at least 2 to be meaningful
+                priority = ["dot", "paren", "right_paren", "paren_dot", "hangul", "q", "plain"]
+                best = None
+                best_len = 0
+                for name in priority:
+                    rl = int(runs.get(name, 0))
+                    if rl > best_len:
+                        best = name
+                        best_len = rl
+                if best and best_len >= 2:
+                    return best
+                return None
+        except Exception:
+            return None
+
+    @staticmethod
+    def _find_next_marker_in_doc(doc: fitz.Document, style: Optional[str], start_page: int, current_y: float, lookahead_pages: int = 3) -> Optional[Tuple[int, int, float]]:
+        """Find the next question marker after (start_page, current_y).
+
+        Returns (page_number, number, y) or None if not found.
+        - Same-page: next token with y > current_y that matches `style`.
+        - Next pages: the top-most token that matches `style`.
+        """
+        import re as _re
+        if doc is None:
+            return None
+        total = len(doc)
+        # Compile capture for selected style or accept any style when None
+        if style:
+            pats = {style: PDFOperations._style_capture_patterns().get(style)}
+        else:
+            pats = PDFOperations._style_capture_patterns()
+        compiled = {k: _re.compile(v) for k, v in pats.items() if v}
+
+        # Same-page search
+        try:
+            page = doc[int(start_page) - 1]
+            words = page.get_text("words") or []
+        except Exception:
+            words = []
+        candidates: list[tuple[float, float, int]] = []  # (y, x, num)
+        if words:
+            w = page.rect.width
+            for x0, y0, x1, y1, text, *_ in words:
+                t = str(text or "").strip()
+                if not t:
+                    continue
+                if float(x0) > (w * 0.4):
+                    continue
+                if float(y0) <= float(current_y) + 6.0:
+                    continue
+                for name, cp in compiled.items():
+                    m = cp.match(t)
+                    if m:
+                        try:
+                            n = int(m.group(1))
+                            if 0 < n < 1000:
+                                candidates.append((float(y0), float(x0), int(n)))
+                                break
+                        except Exception:
+                            pass
+        if candidates:
+            candidates.sort(key=lambda t: (t[0], t[1]))
+            y, x, n = candidates[0]
+            return (int(start_page), int(n), float(y))
+
+        # Next pages search (limited lookahead)
+        max_p = min(total, int(start_page) + int(max(0, lookahead_pages)))
+        for p in range(int(start_page) + 1, max_p + 1):
+            try:
+                page = doc[int(p) - 1]
+                words = page.get_text("words") or []
+            except Exception:
+                words = []
+            if not words:
+                continue
+            w = page.rect.width
+            pg_candidates: list[tuple[float, float, int]] = []
+            for x0, y0, x1, y1, text, *_ in words:
+                t = str(text or "").strip()
+                if not t:
+                    continue
+                if float(x0) > (w * 0.4):
+                    continue
+                for name, cp in compiled.items():
+                    m = cp.match(t)
+                    if m:
+                        try:
+                            n = int(m.group(1))
+                            if 0 < n < 1000:
+                                pg_candidates.append((float(y0), float(x0), int(n)))
+                                break
+                        except Exception:
+                            pass
+            if pg_candidates:
+                pg_candidates.sort(key=lambda t: (t[0], t[1]))
+                y, x, n = pg_candidates[0]
+                return (int(p), int(n), float(y))
+        return None
 
     # -----------------------------
     # Low-level marker search utils
@@ -377,18 +555,8 @@ class PDFOperations:
                     raise ValueError("Invalid page_start")
 
                 # Determine page_end handling possible same-page next start
-                same_page_next = (
-                    next_question_start is not None and _to_int(next_question_start) == _to_int(page_start)
-                )
-                # Safer default: if the model didn't provide next_question_start,
-                # do NOT append the rest of the document. Default to a single page
-                # and try a best-effort lookahead crop on the next page (below).
-                if next_question_start is None:
-                    page_end = page_start
-                elif same_page_next:
-                    page_end = page_start
-                else:
-                    page_end = max(page_start, min(total_pages, int(next_question_start) - 1))
+                same_page_next = False  # prefer scanning-based boundary
+                page_end = page_start  # conservative default
 
                 out_doc = fitz.open()
                 qnum_int = _to_int(question_number, 0) if question_number is not None else 0
@@ -404,12 +572,12 @@ class PDFOperations:
                             y_found = PDFOperations.find_question_marker_y(page, qnum_int, preferred_style=style)
                             if y_found is not None:
                                 y0 = max(0.0, y_found - 4)  # small margin
-                        # If next question is also on this same page, crop to its marker
-                        if same_page_next and (qnum_int > 0 or next_same_int > 0):
-                            target_next = next_same_int if next_same_int > 0 else (qnum_int + 1 if qnum_int > 0 else 0)
-                            yn = PDFOperations.find_question_marker_y(page, target_next, preferred_style=style) if target_next > 0 else None
-                            if yn is not None and yn > y0:
-                                y1 = yn - 4
+                        # Attempt to find the next question marker on this page by scanning
+                        scan_next = PDFOperations._find_next_marker_in_doc(src, style, page_start, y0)
+                        if scan_next and int(scan_next[0]) == int(page_start):
+                            yn = float(scan_next[2])
+                            if yn > y0:
+                                y1 = min(y1, yn - 4)
                     elif pno == page_end and same_page_next is False:
                         # last page of a multi-page question: keep full page (robust)
                         y0 = 0.0
@@ -422,26 +590,30 @@ class PDFOperations:
                         fitz.Rect(0, 0, rect.width, new_h), src, pno - 1, clip=clip
                     )
 
-                # If we don't know the next_question_start and the question may
-                # spill onto the next page, attempt a best-effort crop of the top
-                # of the next page until the next question marker (qnum+1).
-                # This avoids producing excessively long outputs while capturing
-                # common two-page questions.
+                # After cropping the start page, scan ahead for the next header and append accordingly
                 try:
-                    if (next_question_start is None) and (qnum_int > 0) and (page_start < total_pages):
-                        next_page = src[page_start]  # 0-based index -> next page
-                        rect = next_page.rect
-                        target_next = qnum_int + 1
-                        yn = PDFOperations.find_question_marker_y(next_page, target_next, preferred_style=style)
-                        if yn is not None and yn > 10.0:
-                            clip = fitz.Rect(0, 0, rect.width, max(10.0, yn - 4))
-                            out_page = out_doc.new_page(width=rect.width, height=clip.height)
-                            out_page.show_pdf_page(
-                                fitz.Rect(0, 0, rect.width, clip.height), src, page_start, clip=clip
-                            )
+                    next_marker = PDFOperations._find_next_marker_in_doc(src, style, page_start, y0)
                 except Exception:
-                    # Best-effort only; ignore on failure
-                    pass
+                    next_marker = None
+                if next_marker and int(next_marker[0]) > int(page_start):
+                    np, nn, ny = int(next_marker[0]), int(next_marker[1]), float(next_marker[2])
+                    # Include any full middle pages
+                    if np - page_start > 1:
+                        try:
+                            out_doc.insert_pdf(src, from_page=page_start, to_page=np - 2)
+                        except Exception:
+                            pass
+                    # Crop the end (next-marker) page from top until the marker using number
+                    try:
+                        end_crop_path = PDFOperations.extract_top_until_marker(pdf_path, np, nn)
+                    except Exception:
+                        end_crop_path = None
+                    if end_crop_path:
+                        try:
+                            with fitz.open(end_crop_path) as tmp:
+                                out_doc.insert_pdf(tmp)
+                        except Exception:
+                            pass
 
                 # Persist output
                 if output_path is None:
