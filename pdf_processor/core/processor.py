@@ -335,6 +335,16 @@ class PDFProcessor:
 
             # Define chunk operation for distribution
             def _op(task, api_client, model):
+                # Cooperative cancellation before any network I/O per chunk
+                try:
+                    from storage_manager import StorageManager
+                    from ..utils.exceptions import CancelledError as _CE
+                    if StorageManager().is_cancelled(self.session_id):
+                        raise _CE("cancelled")
+                except _CE:
+                    raise
+                except Exception:
+                    pass
                 lidx, lpath, cpath, start, end = task
                 fm = FileManager(api_client)
                 analyzer = JokboCentricAnalyzer(api_client, fm, self.session_id, self.debug_dir)
@@ -371,8 +381,14 @@ class PDFProcessor:
                     pass
 
             # Distribute all chunk tasks globally
+            def _cancelled():
+                try:
+                    from storage_manager import StorageManager
+                    return StorageManager().is_cancelled(self.session_id)
+                except Exception:
+                    return False
             raw_results = api_manager.distribute_tasks(
-                global_tasks, _op, parallel=True, max_workers=workers, on_progress=_on_progress
+                global_tasks, _op, parallel=True, max_workers=workers, on_progress=_on_progress, cancel_check=_cancelled
             )
 
             # Group results by lesson and merge per-lesson

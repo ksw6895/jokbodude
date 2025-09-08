@@ -61,11 +61,23 @@ class MultiAPIAnalyzer:
             Analysis results
         """
         def operation(api_client, model):
+            # Cooperative cancellation before heavy work
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
             # Create analyzer with specific API client and a file manager bound to it
             fm = FileManager(api_client)
             analyzer = LessonCentricAnalyzer(
                 api_client, fm, self.session_id, self.debug_dir
             )
+            # Under Multi-API, do a single model call per failover attempt
+            analyzer.prefer_single_attempt = True
             # Propagate threshold if configured
             try:
                 if self.min_relevance_score is not None:
@@ -88,11 +100,21 @@ class MultiAPIAnalyzer:
             Analysis results
         """
         def operation(api_client, model):
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
             # Create analyzer with specific API client and a file manager bound to it
             fm = FileManager(api_client)
             analyzer = JokboCentricAnalyzer(
                 api_client, fm, self.session_id, self.debug_dir
             )
+            analyzer.prefer_single_attempt = True
             return analyzer.analyze(lesson_path, jokbo_path)
 
         # Run once against the selected API key (with failover)
@@ -145,12 +167,22 @@ class MultiAPIAnalyzer:
                 return result
         else:  # jokbo-centric
             def task_operation(file_pair, api_client, model):
+                try:
+                    from storage_manager import StorageManager
+                    from ..utils.exceptions import CancelledError
+                    if StorageManager().is_cancelled(self.session_id):
+                        raise CancelledError("cancelled")
+                except CancelledError:
+                    raise
+                except Exception:
+                    pass
                 # file_pair ordering: (lesson_path, jokbo_path)
                 lesson_path, jokbo_path = file_pair
                 fm = FileManager(api_client)
                 analyzer = JokboCentricAnalyzer(
                     api_client, fm, self.session_id, self.debug_dir
                 )
+                analyzer.prefer_single_attempt = True
                 result = analyzer.analyze(lesson_path, jokbo_path)
                 # Normalize related slide filenames to the actual lesson filename
                 # to avoid tmp/prefixed names that break downstream PDF assembly.
@@ -184,12 +216,22 @@ class MultiAPIAnalyzer:
             except Exception:
                 pass
 
+        # Cooperative cancel check supplier
+        def _cancelled():
+            try:
+                from storage_manager import StorageManager
+                return StorageManager().is_cancelled(self.session_id)
+            except Exception:
+                return False
+
         results = self.api_manager.distribute_tasks(
             file_pairs,
             task_operation,
             parallel=parallel,
             max_workers=max_workers,
             on_progress=_on_progress,
+            max_failover_retries=3,
+            cancel_check=_cancelled,
         )
         
         return results
@@ -197,8 +239,18 @@ class MultiAPIAnalyzer:
     def analyze_partial_jokbo(self, jokbo_path: str, lesson_paths: List[str]) -> Dict[str, Any]:
         """Run partial-jokbo analysis with failover across API keys (one key per attempt)."""
         def operation(api_client, model):
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
             fm = FileManager(api_client)
             analyzer = PartialJokboAnalyzer(api_client, fm, self.session_id, self.debug_dir)
+            analyzer.prefer_single_attempt = True
             return analyzer.analyze(jokbo_path, lesson_paths or [])
         try:
             res = self.api_manager.execute_with_failover(operation, max_retries=max(1, len(self.api_manager.api_keys)))
@@ -225,8 +277,18 @@ class MultiAPIAnalyzer:
         except Exception:
             lesson_chunks = 1
         def task_operation(jp, api_client, model):
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
             fm = FileManager(api_client)
             analyzer = PartialJokboAnalyzer(api_client, fm, self.session_id, self.debug_dir)
+            analyzer.prefer_single_attempt = True
             return analyzer.analyze(jp, lesson_paths or [])
         # determine workers similar to other paths
         if max_workers is None:
@@ -249,8 +311,15 @@ class MultiAPIAnalyzer:
                     f"파일 완료: {name}" if name else None)
             except Exception:
                 pass
+        def _cancelled():
+            try:
+                from storage_manager import StorageManager
+                return StorageManager().is_cancelled(self.session_id)
+            except Exception:
+                return False
         return self.api_manager.distribute_tasks(
             tasks, task_operation, parallel=parallel, max_workers=max_workers, on_progress=_on_progress
+            , max_failover_retries=3, cancel_check=_cancelled
         )
     
     def analyze_with_chunk_retry(self, mode: str, file_path: str, 
@@ -279,6 +348,15 @@ class MultiAPIAnalyzer:
         
         # Define how to process a single chunk with a specific API client
         def operation(task, api_client, model):
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
             idx, (chunk_path, start_page, end_page) = task
             # Optional purge per chunk (disabled by default)
             try:
@@ -303,6 +381,7 @@ class MultiAPIAnalyzer:
                 analyzer = LessonCentricAnalyzer(
                     api_client, fm, self.session_id, self.debug_dir
                 )
+                analyzer.prefer_single_attempt = True
                 try:
                     if self.min_relevance_score is not None:
                         analyzer.set_relevance_threshold(self.min_relevance_score)
@@ -315,6 +394,7 @@ class MultiAPIAnalyzer:
                 analyzer = JokboCentricAnalyzer(
                     api_client, fm, self.session_id, self.debug_dir
                 )
+                analyzer.prefer_single_attempt = True
                 # Pass the original lesson file path so the analyzer can
                 # offset and clamp pages correctly across chunks
                 result = analyzer.analyze(
@@ -333,8 +413,15 @@ class MultiAPIAnalyzer:
             except Exception:
                 pass
 
+        def _cancelled():
+            try:
+                from storage_manager import StorageManager
+                return StorageManager().is_cancelled(self.session_id)
+            except Exception:
+                return False
         results_raw = self.api_manager.distribute_tasks(
             tasks, operation, parallel=True, max_workers=max_workers, on_progress=_on_progress
+            , max_failover_retries=3, cancel_check=_cancelled
         )
         
         # Collect results back into original order
@@ -402,69 +489,7 @@ class MultiAPIAnalyzer:
         for i in range(len(ordered_results)):
             if ordered_results[i] is None:
                 ordered_results[i] = {"error": "No result"}
-        
-        # Adaptive retry: split failed chunks once and try again cycling through all keys.
-        # This helps with token limits on larger spans. However, if failures are due to
-        # prompt blocking, splitting will not help. In that case, skip adaptive retry.
-        try:
-            from ..pdf.operations import PDFOperations as _PDFOps
-            from ..parsers.result_merger import ResultMerger as _RM
-            failed_indices = [i for i, r in enumerate(ordered_results) if isinstance(r, dict) and r.get("error")]
-            # If all failed errors indicate prompt blocking, skip adaptive retry entirely
-            try:
-                _all_blocked = False
-                if failed_indices:
-                    _all_blocked = all(
-                        isinstance(ordered_results[i], dict)
-                        and isinstance(ordered_results[i].get("error"), str)
-                        and ("prompt blocked" in ordered_results[i]["error"].lower())
-                        for i in failed_indices
-                    )
-                if _all_blocked:
-                    logger.info("All failed chunks were prompt-blocked; skipping adaptive split retries")
-                    raise StopIteration  # short-circuit adaptive retry block
-            except Exception:
-                # If detection fails, proceed with best-effort adaptive retry below
-                pass
-            for i in failed_indices:
-                try:
-                    chunk_path, start_page, end_page = chunks[i]
-                except Exception:
-                    continue
-                # Only split when there is more than one page
-                try:
-                    if int(end_page) <= int(start_page):
-                        continue
-                except Exception:
-                    continue
-                # Perform adaptive analyze on two halves and merge
-                try:
-                    mid = (int(start_page) + int(end_page)) // 2
-                    left_path = _PDFOps.extract_pages(file_path, int(start_page), int(mid))
-                    right_path = _PDFOps.extract_pages(file_path, int(mid) + 1, int(end_page))
-                    left_res = self._analyze_chunk_adaptive(mode, file_path, center_file_path, (left_path, int(start_page), int(mid)))
-                    right_res = self._analyze_chunk_adaptive(mode, file_path, center_file_path, (right_path, int(mid)+1, int(end_page)))
-                    merged = _RM.merge_chunk_results([left_res if isinstance(left_res, dict) else {}, right_res if isinstance(right_res, dict) else {}], mode)
-                    ordered_results[i] = merged if isinstance(merged, dict) else {"error": "merge_failed"}
-                except Exception:
-                    # keep original error if adaptive path also fails
-                    pass
-                finally:
-                    try:
-                        Path(left_path).unlink(missing_ok=True)
-                    except Exception:
-                        pass
-                    try:
-                        Path(right_path).unlink(missing_ok=True)
-                    except Exception:
-                        pass
-        except StopIteration:
-            # Intentional early exit from adaptive retry when all failures are prompt-blocked
-            pass
-        except Exception:
-            # Best-effort; ignore adaptive retry failures
-            pass
-        
+
         # Optional: attempt a deterministic merge from persisted files, if all
         # chunk files exist. Fallback to in-memory ordered_results if any missing.
         merged: Optional[Dict[str, Any]] = None
@@ -505,62 +530,7 @@ class MultiAPIAnalyzer:
         from ..parsers.result_merger import ResultMerger
         return merged if isinstance(merged, dict) and merged else ResultMerger.merge_chunk_results(ordered_results, mode)
 
-    def _analyze_chunk_adaptive(self, mode: str, file_path: str, center_file_path: str, chunk: tuple) -> Dict[str, Any]:
-        """Analyze a specific chunk with failover across all keys; if it fails and spans multiple pages,
-        split once more (recursively limited to two halves). Returns a (possibly empty) result dict.
-        """
-        (chunk_path, start_page, end_page) = chunk
-        def _op(api_client, model):
-            fm = FileManager(api_client)
-            if mode == "lesson-centric":
-                analyzer = LessonCentricAnalyzer(api_client, fm, self.session_id, self.debug_dir)
-                # propagate threshold
-                try:
-                    if self.min_relevance_score is not None:
-                        analyzer.set_relevance_threshold(self.min_relevance_score)
-                except Exception:
-                    pass
-                return analyzer.analyze(center_file_path, chunk_path, None, chunk_info=(start_page, end_page))
-            else:
-                analyzer = JokboCentricAnalyzer(api_client, fm, self.session_id, self.debug_dir)
-                res = analyzer.analyze(chunk_path, center_file_path, preloaded_jokbo_file=None, chunk_info=(start_page, end_page), original_lesson_path=file_path)
-                # Normalize filenames back to original lesson (avoid tmp)
-                try:
-                    orig = Path(file_path).name
-                    if isinstance(res, dict):
-                        for page in (res.get("jokbo_pages") or []):
-                            for q in (page.get("questions") or []):
-                                for slide in (q.get("related_lesson_slides") or []):
-                                    if isinstance(slide, dict):
-                                        slide["lesson_filename"] = orig
-                except Exception:
-                    pass
-                return res
-        # Try each key once by setting retries to number of keys
-        try:
-            res = self.api_manager.execute_with_failover(_op, max_retries=max(1, len(self.api_manager.api_keys)))
-            return res if isinstance(res, dict) else {}
-        except Exception:
-            # If still fails and multi-page, split into two halves and merge
-            try:
-                if int(end_page) > int(start_page):
-                    from ..pdf.operations import PDFOperations as _PDFOps
-                    from ..parsers.result_merger import ResultMerger as _RM
-                    mid = (int(start_page) + int(end_page)) // 2
-                    left_path = _PDFOps.extract_pages(file_path, int(start_page), int(mid))
-                    right_path = _PDFOps.extract_pages(file_path, int(mid) + 1, int(end_page))
-                    left_res = self._analyze_chunk_adaptive(mode, file_path, center_file_path, (left_path, int(start_page), int(mid)))
-                    right_res = self._analyze_chunk_adaptive(mode, file_path, center_file_path, (right_path, int(mid)+1, int(end_page)))
-                    merged = _RM.merge_chunk_results([left_res if isinstance(left_res, dict) else {}, right_res if isinstance(right_res, dict) else {}], mode)
-                    try:
-                        Path(left_path).unlink(missing_ok=True)
-                        Path(right_path).unlink(missing_ok=True)
-                    except Exception:
-                        pass
-                    return merged
-            except Exception:
-                pass
-            return {"error": "adaptive_failed"}
+    # Removed adaptive chunk split retry logic per policy: limit attempts and skip on failure.
     
     def get_api_status(self) -> Dict[str, Any]:
         """Get the status of all API keys."""

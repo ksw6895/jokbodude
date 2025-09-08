@@ -308,21 +308,24 @@ class StorageManager:
                 172800,  # 48 hours TTL
                 content
             )
-        # Persist to disk as well to avoid overusing Redis memory
-        try:
-            dest = self.results_dir / job_id / result_path.name
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_bytes(content)
-            # Index the on-disk path for lookup
-            if not self.use_local_only and self.redis_client:
-                self._with_retry(
-                    self.redis_client.setex,
-                    f"result_path:{job_id}:{result_path.name}",
-                    172800,
-                    str(dest)
-                )
-        except Exception as e:
-            logger.warning(f"Failed to persist result to disk: {e}")
+        # Optionally persist to disk to avoid overusing Redis memory
+        persist_env = os.getenv("PERSIST_RESULTS_ON_DISK", "true").strip().lower()
+        persist_to_disk = persist_env in ("1", "true", "yes", "on")
+        if persist_to_disk:
+            try:
+                dest = self.results_dir / job_id / result_path.name
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_bytes(content)
+                # Index the on-disk path for lookup
+                if not self.use_local_only and self.redis_client:
+                    self._with_retry(
+                        self.redis_client.setex,
+                        f"result_path:{job_id}:{result_path.name}",
+                        172800,
+                        str(dest)
+                    )
+            except Exception as e:
+                logger.warning(f"Failed to persist result to disk: {e}")
         return result_key
     
     def get_result(self, result_key: str) -> Optional[bytes]:
@@ -682,8 +685,8 @@ class StorageManager:
             remaining = max(0, total_chunks - completed_clamped)
             eta = avg * remaining if completed_clamped > 0 else -1
             progress = int((completed_clamped / total_chunks) * 100) if total_chunks > 0 else 0
-            # Avoid showing 100% until finalization elsewhere
-            progress = min(progress, 99 if remaining > 0 else 100)
+            # Always avoid showing 100% here; finalization will set it explicitly
+            progress = min(progress, 99)
             auto_msg = message or f"청크 진행: {completed_clamped}/{total_chunks} 완료"
 
             self._with_retry(

@@ -3,8 +3,11 @@ import os
 import tempfile
 from pathlib import Path
 from celery import Celery, current_task
+from celery.signals import worker_ready
 from celery.exceptions import Ignore, SoftTimeLimitExceeded
 from typing import Optional
+import threading
+import time
 from config import create_model, configure_api, API_KEYS
 import logging
 from pdf_processor.core.processor import PDFProcessor
@@ -128,6 +131,17 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
             try:
                 # chunking based on lessons regardless of mode
                 total_chunks = _compute_total_chunks(primary_paths, lesson_paths)
+                # Add a more descriptive preflight log for debugging
+                try:
+                    prim_count = len(primary_paths)
+                    lesson_chunks = 0
+                    for lp in lesson_paths:
+                        lesson_chunks += len(PDFOperations.split_pdf_for_chunks(lp))
+                    logging.getLogger(__name__).info(
+                        f"preflight: primaries={prim_count} × lesson_chunks={lesson_chunks} => total_chunks={total_chunks}"
+                    )
+                except Exception:
+                    pass
                 storage_manager.init_progress(job_id, total_chunks, f"총 청크: {total_chunks}")
             except Exception:
                 storage_manager.init_progress(job_id, 1, "진행률 초기화")
@@ -287,6 +301,107 @@ celery_app.config_from_object('celeryconfig')
 # Fix deprecated warnings for Celery 6.0
 celery_app.conf.broker_connection_retry_on_startup = True
 celery_app.conf.worker_cancel_long_running_tasks_on_connection_loss = True
+
+# --- Background cleanup on worker ---
+def _prune_path(base: Path, older_than_hours: int | None) -> None:
+    """Delete files older than threshold and remove empty dirs under base (best-effort)."""
+    if not base.exists():
+        return
+    now = time.time()
+    # Delete files
+    for p in base.rglob("*"):
+        try:
+            if p.is_file():
+                if older_than_hours is not None:
+                    age_hours = (now - p.stat().st_mtime) / 3600.0
+                    if age_hours < older_than_hours:
+                        continue
+                p.unlink(missing_ok=True)
+        except Exception:
+            continue
+    # Remove empty directories (deepest first)
+    for d in sorted(base.rglob("*"), key=lambda x: len(str(x)), reverse=True):
+        try:
+            if d.is_dir():
+                next(d.iterdir())
+        except StopIteration:
+            try:
+                d.rmdir()
+            except Exception:
+                pass
+
+
+def _cleanup_once() -> None:
+    """One-shot cleanup pass for worker-side storage paths."""
+    try:
+        # Retention windows
+        try:
+            debug_hours = int(os.getenv("DEBUG_RETENTION_HOURS", "168"))
+        except Exception:
+            debug_hours = 168
+        try:
+            results_hours = int(os.getenv("RESULT_RETENTION_HOURS", "720"))
+        except Exception:
+            results_hours = 720
+        try:
+            sessions_hours = int(os.getenv("SESSIONS_RETENTION_HOURS", "168"))
+        except Exception:
+            sessions_hours = 168
+
+        # Paths to clean
+        try:
+            sm = StorageManager()
+            results_root = getattr(sm, "results_dir", Path(os.getenv("RENDER_STORAGE_PATH", "output")) / "results")
+        except Exception:
+            results_root = Path(os.getenv("RENDER_STORAGE_PATH", "output")) / "results"
+        debug_dir = Path("output/debug")
+        sessions_dir = Path("output/temp/sessions")
+        tmpdir = Path(os.getenv("TMPDIR", tempfile.gettempdir()))
+
+        _prune_path(debug_dir, debug_hours)
+        _prune_path(sessions_dir, sessions_hours)
+        _prune_path(results_root, results_hours)
+        # Conservative temp pruning
+        try:
+            tmp_hours = int(os.getenv("TMP_RETENTION_HOURS", "24"))
+        except Exception:
+            tmp_hours = 24
+        _prune_path(tmpdir, tmp_hours)
+    except Exception:
+        # Never disrupt worker due to cleanup errors
+        pass
+
+
+def _cleanup_loop() -> None:
+    """Periodic cleanup loop running in a daemon thread."""
+    try:
+        try:
+            interval_min = max(5, int(os.getenv("WORKER_CLEANUP_INTERVAL_MINUTES", "60")))
+        except Exception:
+            interval_min = 60
+        while True:
+            _cleanup_once()
+            time.sleep(interval_min * 60)
+    except Exception:
+        return
+
+
+def _maybe_start_cleanup_thread() -> None:
+    enabled_env = os.getenv("ENABLE_WORKER_CLEANUP", "true").strip().lower()
+    if enabled_env not in ("1", "true", "yes", "on"):
+        return
+    t = threading.Thread(target=_cleanup_loop, name="worker-cleanup", daemon=True)
+    t.start()
+
+
+@worker_ready.connect
+def _on_worker_ready(sender=None, **kwargs):
+    # Perform an immediate pass and start periodic cleanup
+    try:
+        _cleanup_once()
+    except Exception:
+        pass
+    _maybe_start_cleanup_thread()
 
 # --- Analysis Tasks ---
 @celery_app.task(name="tasks.run_jokbo_analysis")

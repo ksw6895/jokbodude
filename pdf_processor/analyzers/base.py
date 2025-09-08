@@ -41,6 +41,9 @@ class BaseAnalyzer(ABC):
         self.debug_dir.mkdir(parents=True, exist_ok=True)
         # User-configurable minimum relevance score (0..110). Default 80.
         self.min_relevance_score: int = 80
+        # Multi-API paths should perform a single model call per failover attempt.
+        # Single-key paths may allow limited local retries.
+        self.prefer_single_attempt: bool = False
         
     @abstractmethod
     def get_mode(self) -> str:
@@ -159,10 +162,42 @@ class BaseAnalyzer(ABC):
         # (no center-file retention). Each call starts with a clean slate via
         # pre-upload purge at the analyzer-level.
         try:
+            # Cooperative cancel before any network I/O
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
+
             for file_path, display_name in files_to_upload:
+                # Check cancellation between uploads as well
+                try:
+                    from storage_manager import StorageManager
+                    from ..utils.exceptions import CancelledError
+                    if StorageManager().is_cancelled(self.session_id):
+                        raise CancelledError("cancelled")
+                except CancelledError:
+                    raise
+                except Exception:
+                    pass
                 uploaded_file = self.api_client.upload_file(file_path, display_name)
                 uploaded_files.append(uploaded_file)
                 self.file_manager.track_file(uploaded_file)
+
+            # Final cooperative cancel before generation
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
 
             content = [prompt] + uploaded_files
             return self._generate_with_quality_retry(content)
@@ -284,15 +319,27 @@ class BaseAnalyzer(ABC):
             # If anything is off, don't incorrectly treat as empty
             return False
 
-    def _generate_with_quality_retry(self, content: List[Any], retries: int = 1) -> str:
+    def _generate_with_quality_retry(self, content: List[Any], retries: int = 2) -> str:
         """
         Generate content and retry if output looks suspicious per parser heuristics.
         Retries are performed with the same API key and same uploaded files.
         """
         last_error: Exception | None = None
         mode = self.get_mode()
-        attempts = max(1, retries + 1)
+        # Limit attempts to a single call when Multi-API orchestrates failover,
+        # otherwise allow up to (retries+1) attempts (default 3 total) in single-key mode.
+        attempts = 1 if getattr(self, 'prefer_single_attempt', False) else max(1, retries + 1)
         for attempt in range(1, attempts + 1):
+            # Check cancellation before each attempt
+            try:
+                from storage_manager import StorageManager
+                from ..utils.exceptions import CancelledError
+                if StorageManager().is_cancelled(self.session_id):
+                    raise CancelledError("cancelled")
+            except CancelledError:
+                raise
+            except Exception:
+                pass
             try:
                 # Prefer fast-fail per key; multi-API manager will rotate keys when needed
                 response = self.api_client.generate_content(content, max_retries=1, backoff_factor=1)

@@ -13,7 +13,7 @@ from google import genai  # google-genai unified SDK
 
 from .client import GeminiAPIClient
 from ..utils.logging import get_logger
-from ..utils.exceptions import APIError, ContentGenerationError
+from ..utils.exceptions import APIError, ContentGenerationError, CancelledError
 
 logger = get_logger(__name__)
 
@@ -286,12 +286,9 @@ class MultiAPIManager:
             APIError: If all APIs fail
         """
         errors: list[str] = []
-        # Default: try each API key once per operation
+        # Default: clamp to at most 3 tries per operation unless caller overrides
         if max_retries is None:
-            try:
-                max_retries = max(1, len(self.api_keys))
-            except Exception:
-                max_retries = 3
+            max_retries = 3
 
         # Enforce at-most-once per key, regardless of max_retries value
         max_unique_tries = min(max_retries, len(self.api_keys))
@@ -342,6 +339,10 @@ class MultiAPIManager:
                 return result
                 
             except Exception as e:
+                # Immediate abort on cooperative cancellation
+                if isinstance(e, CancelledError):
+                    # Do not penalize key or rotate; propagate cancel
+                    raise
                 error_msg = str(e)
                 category = self._categorize_error(error_msg)
                 logger.error(f"API key {api_index} (***{key_suffix}) failed: {error_msg}")
@@ -425,7 +426,9 @@ class MultiAPIManager:
     
     def distribute_tasks(self, tasks: List[Any], operation: Callable,
                         parallel: bool = True, max_workers: Optional[int] = None,
-                        on_progress: Optional[Callable[[Any], None]] = None) -> List[Any]:
+                        on_progress: Optional[Callable[[Any], None]] = None,
+                        cancel_check: Optional[Callable[[], bool]] = None,
+                        max_failover_retries: Optional[int] = 3) -> List[Any]:
         """
         Distribute tasks across multiple API keys.
         
@@ -453,17 +456,35 @@ class MultiAPIManager:
                 future_to_task = {}
                 
                 for task in tasks:
+                    # Do not submit more tasks if cancelled
+                    try:
+                        if cancel_check and cancel_check():
+                            break
+                    except Exception:
+                        pass
                     # Submit task with failover
                     # IMPORTANT: bind current task as default arg to avoid late-binding bug
                     # that would make all lambdas capture the final loop value.
                     future = executor.submit(
                         self.execute_with_failover,
-                        (lambda api_client, model, _task=task: operation(_task, api_client, model))
+                        (lambda api_client, model, _task=task: operation(_task, api_client, model)),
+                        max_retries=max_failover_retries
                     )
                     future_to_task[future] = task
                 
                 # Collect results
                 for future in as_completed(future_to_task):
+                    # Early abort if cancellation requested; attempt to cancel pending futures
+                    try:
+                        if cancel_check and cancel_check():
+                            for f in list(future_to_task.keys()):
+                                try:
+                                    f.cancel()
+                                except Exception:
+                                    pass
+                            break
+                    except Exception:
+                        pass
                     task = future_to_task[future]
                     try:
                         result = future.result()
@@ -481,8 +502,14 @@ class MultiAPIManager:
             # Sequential processing
             for task in tasks:
                 try:
+                    if cancel_check and cancel_check():
+                        break
+                except Exception:
+                    pass
+                try:
                     result = self.execute_with_failover(
-                        lambda api_client, model: operation(task, api_client, model)
+                        lambda api_client, model: operation(task, api_client, model),
+                        max_retries=max_failover_retries
                     )
                     results.append(result)
                 except Exception as e:

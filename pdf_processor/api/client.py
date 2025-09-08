@@ -235,9 +235,8 @@ class GeminiAPIClient:
         Raises:
             ContentGenerationError: If content generation fails
         """
-        # Allow up to 2 extra tries specifically for prompt blocks (user request)
-        block_bonus_attempts = 2
-        total_attempts = max(1, int(max_retries)) + block_bonus_attempts
+        # Clamp to provided max_retries attempts in total.
+        total_attempts = max(1, int(max_retries))
         for attempt in range(total_attempts):
             try:
                 # Enforce JSON mode and allow optional schema/limits per-call
@@ -303,7 +302,7 @@ class GeminiAPIClient:
                 except Exception:
                     pf, block_reason = None, None
                 if block_reason:
-                    # Retry up to 2 more times on prompt blocks before surfacing error
+                    # Immediately surface as error; outer layers decide on further retries
                     reason_map = {
                         0: "UNSPECIFIED",
                         1: "SAFETY",
@@ -323,15 +322,6 @@ class GeminiAPIClient:
                     reason_name = reason_map.get(reason_val, str(block_reason))
                     msg = f"Prompt blocked: block_reason={block_reason} ({reason_name})"
                     logger.warning(f"{msg} [key={self._key_tag()}]")
-                    # If we still have bonus attempts left (specific to blocks), retry
-                    # Note: attempt is 0-based; treat last two iterations as bonus for block cases
-                    remaining_bonus = max(0, (total_attempts - max(1, int(max_retries))) - max(0, attempt - (max(1, int(max_retries)) - 1)))
-                    if attempt < (max(1, int(max_retries)) + block_bonus_attempts - 1):
-                        wait_time = 1  # short fixed wait for block retries
-                        logger.info(f"Retrying due to prompt block in {wait_time}s... [key={self._key_tag()}]")
-                        time.sleep(wait_time)
-                        continue
-                    # No more retries: surface as error so the manager can rotate keys/log
                     raise ContentGenerationError(msg)
 
                 # Guard against empty candidates before accessing response.text
