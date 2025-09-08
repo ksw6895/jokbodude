@@ -29,6 +29,16 @@ cp .env.example .env
   - `DEBUG_RETENTION_HOURS` (기본 168)
   - `RESULT_RETENTION_HOURS` (기본 720)
   - `SESSIONS_RETENTION_HOURS` (기본 168)
+  - `TMP_RETENTION_HOURS` (기본 24, 워커 임시 디렉토리 정리)
+
+- 워커 디스크 사용 제어(권장)
+  - `PERSIST_RESULTS_ON_DISK`
+    - 결과 PDF를 디스크에도 저장할지 여부. 기본 `true`.
+    - 워커에서 `false`로 두면 결과는 Redis(48h TTL)에만 저장되어 디스크 증가를 최소화합니다.
+  - `ENABLE_WORKER_CLEANUP`
+    - 워커 프로세스에 주기적 디스크 정리 스레드를 실행할지 여부. 기본 `true`.
+  - `WORKER_CLEANUP_INTERVAL_MINUTES`
+    - 워커 정리 주기(분). 기본 60.
 
 ## CBT(클로즈드 베타) 전용
 
@@ -60,6 +70,17 @@ cp .env.example .env
   - 동일 API 키에서의 동시 처리 한도(기본 1)
 - `GEMINI_PURGE_BEFORE_UPLOAD`
   - 업로드 전 전체 삭제 플래그(병렬 시 비권장)
+
+## API 안정성/타임아웃 (선택)
+
+- `GENAI_UPLOAD_TIMEOUT_SECS` (기본 120)
+  - Gemini 파일 업로드 RPC 하드 타임아웃. 단건 업로드 호출이 이 시간을 넘기면 실패 처리.
+- `GENAI_UPLOAD_ACTIVATION_TIMEOUT_SECS` (기본 250)
+  - 업로드 후 파일 상태가 `ACTIVE`가 될 때까지의 최대 대기 시간.
+- `GENAI_REQUEST_TIMEOUT_SECS` (기본 250)
+  - `models.generateContent` 호출 하드 타임아웃. 무응답/네트워크 hang 방지.
+- `API_TASK_HARD_TIMEOUT_SECS` (기본 600)
+  - Multi-API 분배기에서 개별 태스크(청크) 최대 대기 시간. 초과 시 해당 태스크는 타임아웃으로 실패 처리되어 전체 작업이 끝까지 진행됩니다.
 
 ## 체크리스트
 
