@@ -117,7 +117,8 @@ worker_hijack_root_logger = False
 worker_log_color = False
 
 # Memory and performance settings
-worker_max_memory_per_child = 200000  # 200MB
+# Increase per-child memory cap to reduce OOM-related worker loss while still reclaiming memory periodically
+worker_max_memory_per_child = 350000  # 350MB
 # Extend task time limits to support very long analyses (from settings)
 # 24 hours = 86400 seconds (set hard slightly above soft)
 task_time_limit = int(app_settings.CELERY_TIME_LIMIT)

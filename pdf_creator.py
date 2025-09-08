@@ -31,6 +31,33 @@ class PDFCreator:
         # Cache for question-number index per jokbo file: {abs_path: {qnum: [pages...]}}
         self._qindex_cache = {}
 
+    def _close_cached_pdfs(self, only_paths: Optional[List[str]] = None) -> None:
+        """Close and remove cached jokbo PDFs to prevent memory growth.
+
+        If only_paths is provided, only close entries whose cache key matches
+        one of the provided absolute path strings. Otherwise, close all cached PDFs.
+        """
+        try:
+            with self.pdf_lock:
+                keys = list(self.jokbo_pdfs.keys())
+                for k in keys:
+                    if only_paths is not None and k not in only_paths:
+                        continue
+                    try:
+                        pdf = self.jokbo_pdfs.get(k)
+                        if pdf is not None:
+                            pdf.close()
+                    except Exception:
+                        pass
+                    finally:
+                        try:
+                            self.jokbo_pdfs.pop(k, None)
+                        except Exception:
+                            pass
+        except Exception:
+            # Best-effort cleanup; do not disrupt callers
+            pass
+
     # ---------- Text / Filename utilities ----------
     @staticmethod
     def _normalize_korean(text: str) -> str:
@@ -781,6 +808,11 @@ class PDFCreator:
         lesson_pdf.close()
         
         print(f"Filtered PDF created: {output_path}")
+        # Important: close any cached jokbo PDFs opened during extraction to avoid memory leaks
+        try:
+            self._close_cached_pdfs()
+        except Exception:
+            pass
     
     # Backward-compatible alias used by tasks.py
     def create_lesson_centric_pdf(self, lesson_path: str, analysis_result: Dict[str, Any], output_path: str, jokbo_dir: str = "jokbo"):
@@ -1084,7 +1116,12 @@ class PDFCreator:
         
         doc.save(output_path)
         doc.close()
-        # Don't close jokbo_pdf since it's cached
+        # Close cached jokbo PDF for this path to prevent accumulation in long-running workers
+        try:
+            # The cache key matches the string value used when opening
+            self._close_cached_pdfs([str(jokbo_path)])
+        except Exception:
+            pass
 
         print(f"Filtered PDF created: {output_path}")
 

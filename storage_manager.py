@@ -640,11 +640,42 @@ class StorageManager:
                         "completed_chunks": str(safe_completed),
                         "eta_seconds": "-1",
                         "avg_chunk_seconds": "0",
+                        # Initialize token counters if not present
+                        "job_tokens_spent": (existing.get(b'job_tokens_spent') if existing else "0"),
                     }
                 )
                 self._with_retry(self.redis_client.expire, f"progress:{job_id}", 172800)
             except Exception as e:
                 logger.error(f"Failed to init progress: {e}")
+
+    def set_job_token_budget(self, job_id: str, budget_tokens: int, tokens_per_chunk: int | None = None) -> None:
+        """Set a per-job token budget and reset spent counter if missing.
+
+        Stored under progress:{job_id} as fields:
+        - job_token_budget
+        - job_tokens_spent
+        - tokens_per_chunk (optional)
+        """
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            key = f"progress:{job_id}"
+            mapping = {
+                "job_token_budget": str(max(0, int(budget_tokens))),
+            }
+            if tokens_per_chunk is not None:
+                try:
+                    mapping["tokens_per_chunk"] = str(max(0, int(tokens_per_chunk)))
+                except Exception:
+                    pass
+            # Preserve existing spent if present; otherwise initialize to 0
+            pipe = self.redis_client.pipeline()
+            pipe.hset(key, mapping=mapping)
+            pipe.hsetnx(key, "job_tokens_spent", "0")
+            self._with_retry(pipe.execute)
+            self._with_retry(self.redis_client.expire, key, 172800)
+        except Exception as e:
+            logger.error(f"Failed to set job token budget: {e}")
 
     def increment_chunk(self, job_id: str, inc: int = 1, message: Optional[str] = None) -> None:
         """Increment completed chunk count and update ETA and percent (atomically)."""
@@ -736,16 +767,52 @@ class StorageManager:
             to_consume = max(0, int(per_chunk) * max(1, int(inc)))
             if to_consume <= 0:
                 return
+
+            # Enforce per-job budget if present before charging user
+            pre_key = f"progress:{job_id}"
+            try:
+                pipe = self.redis_client.pipeline()
+                pipe.hget(pre_key, "job_token_budget")
+                pipe.hget(pre_key, "job_tokens_spent")
+                budget_val, spent_val = self._with_retry(pipe.execute)
+                budget = int(budget_val) if budget_val is not None else 0
+                spent = int(spent_val) if spent_val is not None else 0
+            except Exception:
+                budget = 0
+                spent = 0
+
+            if budget > 0:
+                remain = max(0, budget - spent)
+                if remain <= 0 or to_consume > remain:
+                    # Budget exhausted — request cancel and stop without charging user
+                    try:
+                        self.request_cancel(job_id)
+                        self.update_progress(job_id, (self.get_progress(job_id) or {}).get("progress", 0) or 0,
+                                             "예정된 토큰 한도를 사용하여 작업을 중지합니다")
+                        from pdf_processor.utils.exceptions import CancelledError as _CE
+                        raise _CE("Job token budget exhausted")
+                    except Exception:
+                        return
+
+            # Charge user tokens
             ok = self.consume_user_tokens(user_id, to_consume)
             if not ok:
-                # Request cooperative cancel and update message
+                # Request cooperative cancel and update message, then raise to halt current flow
                 try:
                     self.request_cancel(job_id)
-                    # best-effort message update
                     self.update_progress(job_id, (self.get_progress(job_id) or {}).get("progress", 0) or 0,
                                          "토큰 잔액 부족으로 작업이 중지되었습니다")
+                    from pdf_processor.utils.exceptions import CancelledError as _CE
+                    raise _CE("Insufficient tokens")
                 except Exception:
-                    pass
+                    return
+
+            # Record job-level spent counter (best-effort)
+            try:
+                self._with_retry(self.redis_client.hincrby, pre_key, "job_tokens_spent", int(to_consume))
+                self._with_retry(self.redis_client.expire, pre_key, 172800)
+            except Exception:
+                pass
         except Exception:
             # Do not disrupt normal flow
             return

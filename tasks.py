@@ -2,6 +2,7 @@
 import os
 import tempfile
 from pathlib import Path
+import pymupdf as fitz
 from celery import Celery, current_task
 from celery.signals import worker_ready
 from celery.exceptions import Ignore, SoftTimeLimitExceeded
@@ -150,6 +151,30 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
             configure_api()
             selected_model = model_type or MODEL_TYPE
             model = create_model(selected_model)
+
+            # Establish job-level token budget based on total_chunks × per-chunk cost
+            try:
+                try:
+                    flash_cost = max(0, int(os.getenv("FLASH_TOKENS_PER_CHUNK", "1")))
+                except Exception:
+                    flash_cost = 1
+                try:
+                    pro_cost = max(0, int(os.getenv("PRO_TOKENS_PER_CHUNK", "4")))
+                except Exception:
+                    pro_cost = 4
+                per_chunk_cost = pro_cost if str(selected_model).lower() == "pro" else flash_cost
+                # Guard against unknown total_chunks
+                try:
+                    budget_chunks = int(total_chunks)
+                except Exception:
+                    budget_chunks = 1
+                job_budget = int(max(0, per_chunk_cost) * max(1, budget_chunks))
+                try:
+                    storage_manager.set_job_token_budget(job_id, job_budget, per_chunk_cost)
+                except Exception:
+                    pass
+            except Exception:
+                pass
             processor = PDFProcessor(model, session_id=job_id)
             if min_relevance is not None:
                 try:
@@ -206,12 +231,44 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
                 except Exception:
                     pass
 
-                # Generate output
+                # Generate output (retry PDF creation locally, do NOT redo analysis)
                 output_filename = strategy.output_template.format(stem=prim_path.stem)
                 output_path = output_dir / output_filename
-                getattr(creator, strategy.create_pdf_name)(
-                    str(prim_path), analysis_result, str(output_path), str(lesson_dir if strategy.secondary_kind == "lesson" else jokbo_dir)
-                )
+                pdf_attempts = 3
+                last_err = None
+                for attempt in range(1, pdf_attempts + 1):
+                    try:
+                        getattr(creator, strategy.create_pdf_name)(
+                            str(prim_path), analysis_result, str(output_path), str(lesson_dir if strategy.secondary_kind == "lesson" else jokbo_dir)
+                        )
+                        last_err = None
+                        break
+                    except Exception as e:
+                        last_err = e
+                        # brief backoff then retry
+                        time.sleep(min(2, attempt))
+                if last_err is not None:
+                    # As a fail-safe, emit a minimal placeholder PDF so the job yields a file
+                    try:
+                        doc = fitz.open()
+                        page = doc.new_page()
+                        rect = fitz.Rect(72, 72, page.rect.width - 72, page.rect.height - 72)
+                        msg = (
+                            f"PDF 생성 실패로 대체 파일을 생성했습니다.\n\n"
+                            f"파일: {prim_path.name}\n"
+                            f"오류: {str(last_err)}\n\n"
+                            f"분석은 완료되었으며, 연결 정보는 추후 재생성으로 복구 가능합니다."
+                        )
+                        try:
+                            page.insert_textbox(rect, msg, fontsize=12, fontname="helv", align=fitz.TEXT_ALIGN_LEFT)
+                        except Exception:
+                            # If font insert fails, still try to save a blank page
+                            pass
+                        doc.save(str(output_path))
+                        doc.close()
+                    except Exception:
+                        # If even placeholder fails, re-raise to surface the error
+                        raise last_err
                 storage_manager.store_result(job_id, output_path)
 
             try:
@@ -407,21 +464,21 @@ def _on_worker_ready(sender=None, **kwargs):
 @celery_app.task(name="tasks.run_jokbo_analysis")
 def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[bool] = None):
     """Run jokbo-centric analysis"""
-    # Delegate to generic strategy implementation (new path)
-    try:
-        strategy = ModeStrategy(
-            mode="jokbo-centric",
-            primary_kind="jokbo",
-            secondary_kind="lesson",
-            analyze_name="analyze_jokbo_centric",
-            analyze_multi_name="analyze_jokbo_centric_multi_api",
-            create_pdf_name="create_jokbo_centric_pdf",
-            output_template="jokbo_centric_{stem}_all_lessons.pdf",
-        )
-        return run_analysis_task(job_id, model_type, multi_api, strategy)
-    except Exception:
-        pass
-    # Fallback to legacy flow below if delegation fails
+    # Use generic strategy implementation only. Avoid falling back to legacy
+    # flow on late exceptions, which can re-run the entire analysis.
+    strategy = ModeStrategy(
+        mode="jokbo-centric",
+        primary_kind="jokbo",
+        secondary_kind="lesson",
+        analyze_name="analyze_jokbo_centric",
+        analyze_multi_name="analyze_jokbo_centric_multi_api",
+        create_pdf_name="create_jokbo_centric_pdf",
+        output_template="jokbo_centric_{stem}_all_lessons.pdf",
+    )
+    return run_analysis_task(job_id, model_type, multi_api, strategy)
+
+    # Legacy flow retained below for reference but is now unreachable.
+    # If needed, restrict fallback to import/attr errors only.
     storage_manager = StorageManager()
     try:
         # Cooperative cancellation early check
@@ -649,21 +706,19 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
 @celery_app.task(name="tasks.run_lesson_analysis")
 def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional[bool] = None):
     """Run lesson-centric analysis"""
-    # Delegate to generic strategy implementation (new path)
-    try:
-        strategy = ModeStrategy(
-            mode="lesson-centric",
-            primary_kind="lesson",
-            secondary_kind="jokbo",
-            analyze_name="analyze_lesson_centric",
-            analyze_multi_name="analyze_lesson_centric_multi_api",
-            create_pdf_name="create_lesson_centric_pdf",
-            output_template="filtered_{stem}_all_jokbos.pdf",
-        )
-        return run_analysis_task(job_id, model_type, multi_api, strategy)
-    except Exception:
-        pass
-    # Fallback to legacy flow below if delegation fails
+    # Use generic strategy implementation to avoid re-running analysis on late exceptions.
+    strategy = ModeStrategy(
+        mode="lesson-centric",
+        primary_kind="lesson",
+        secondary_kind="jokbo",
+        analyze_name="analyze_lesson_centric",
+        analyze_multi_name="analyze_lesson_centric_multi_api",
+        create_pdf_name="create_lesson_centric_pdf",
+        output_template="filtered_{stem}_all_jokbos.pdf",
+    )
+    return run_analysis_task(job_id, model_type, multi_api, strategy)
+
+    # Legacy flow retained below for reference but is now unreachable.
     storage_manager = StorageManager()
     try:
         # Cooperative cancellation early check
