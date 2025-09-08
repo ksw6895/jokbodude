@@ -453,12 +453,6 @@ class MultiAPIManager:
             except Exception:
                 safe_workers = max_workers or 1
 
-            # Hard wall-clock per-task timeout (second-line safety). Defaults to 10 minutes.
-            try:
-                hard_timeout = max(30, int(os.getenv("API_TASK_HARD_TIMEOUT_SECS", "600")))
-            except Exception:
-                hard_timeout = 600
-
             executor = ThreadPoolExecutor(max_workers=safe_workers)
             try:
                 future_to_task: dict = {}
@@ -517,27 +511,7 @@ class MultiAPIManager:
                             except Exception:
                                 pass
 
-                    # Check for hard timeouts
-                    now = time.time()
-                    expired: list = []
-                    for f in list(pending):
-                        st = start_times.get(f) or now
-                        if (now - st) > hard_timeout:
-                            task = future_to_task.get(f)
-                            logger.error(f"Task timed out after {hard_timeout}s; marking as error and dropping: {task}")
-                            results.append({"error": f"timeout_after_{hard_timeout}s", "task": task})
-                            expired.append(f)
-                            try:
-                                if on_progress and task is not None:
-                                    on_progress(task)
-                            except Exception:
-                                pass
-                    for f in expired:
-                        pending.discard(f)
-                        try:
-                            f.cancel()
-                        except Exception:
-                            pass
+                    # Removed global hard wall-clock timeout. Chunk-level request timeouts apply per call.
             finally:
                 # Do not block on any remaining worker threads (if any); cancel queued tasks
                 try:
