@@ -8,6 +8,7 @@ from fastapi import APIRouter, File, Form, HTTPException, Query, Request, Upload
 
 from ..core import MAX_FILE_SIZE, celery_app
 from ..utils import save_uploaded_file
+from ._helpers import save_files_and_metadata, start_job
 from .auth import require_user
 
 router = APIRouter()
@@ -26,44 +27,7 @@ async def analyze_jokbo_centric(
     min_relevance_form: Optional[int] = Form(None, alias="min_relevance"),
     user: dict = Depends(require_user),
 ):
-    job_id = str(uuid.uuid4())
-    storage_manager = request.app.state.storage_manager
-
     try:
-
-        for f in jokbo_files + lesson_files:
-            if f.size and f.size > MAX_FILE_SIZE:
-                raise HTTPException(
-                    status_code=413,
-                    detail=f"File {f.filename} exceeds maximum size of 50MB",
-                )
-
-        jokbo_keys: list[str] = []
-        lesson_keys: list[str] = []
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            for f in jokbo_files:
-                file_path = temp_path / f.filename
-                content = await f.read()
-                file_path.write_bytes(content)
-                file_key = storage_manager.store_file(file_path, job_id, "jokbo")
-                jokbo_keys.append(file_key)
-                if not storage_manager.verify_file_available(file_key):
-                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
-            for f in lesson_files:
-                file_path = temp_path / f.filename
-                content = await f.read()
-                file_path.write_bytes(content)
-                file_key = storage_manager.store_file(file_path, job_id, "lesson")
-                lesson_keys.append(file_key)
-                if not storage_manager.verify_file_available(file_key):
-                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
-
-        try:
-            storage_manager.refresh_ttls(jokbo_keys + lesson_keys)
-        except Exception:
-            pass
-
         effective_multi = multi_api_form if multi_api_form is not None else multi_api
         effective_min_rel = None
         try:
@@ -73,39 +37,18 @@ async def analyze_jokbo_centric(
         except Exception:
             effective_min_rel = None
 
-        metadata = {
-            "jokbo_keys": jokbo_keys,
-            "lesson_keys": lesson_keys,
-            "model": model,
-            "multi_api": effective_multi,
-            "min_relevance": effective_min_rel,
-            "user_id": user.get("sub"),
-        }
-        storage_manager.store_job_metadata(job_id, metadata)
-        user_id = user.get("sub")
-        if user_id:
-            storage_manager.add_user_job(user_id, job_id)
-            # Optional preflight: require positive token balance
-            try:
-                bal = storage_manager.get_user_tokens(user_id)
-                if bal is not None and bal <= 0:
-                    raise HTTPException(status_code=402, detail="Insufficient tokens for analysis. Contact admin.")
-            except HTTPException:
-                raise
-            except Exception:
-                pass
-
-        task = celery_app.send_task(
-            "tasks.run_jokbo_analysis",
-            args=[job_id],
-            kwargs={"model_type": model, "multi_api": effective_multi},
-            queue="analysis",
+        job_id, _ = await save_files_and_metadata(
+            request,
+            jokbo_files,
+            lesson_files,
+            mode="jokbo-centric",
+            model=model,
+            multi_api=bool(effective_multi),
+            min_relevance=effective_min_rel,
+            user_id=user.get("sub"),
         )
-        try:
-            storage_manager.set_job_task(job_id, task.id)
-        except Exception:
-            pass
-        return {"job_id": job_id, "task_id": task.id}
+        task_id = start_job(request, job_id, mode="jokbo-centric", model=model, multi_api=bool(effective_multi))
+        return {"job_id": job_id, "task_id": task_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
 
@@ -122,46 +65,7 @@ async def analyze_lesson_centric(
     min_relevance_form: Optional[int] = Form(None, alias="min_relevance"),
     user: dict = Depends(require_user),
 ):
-    job_id = str(uuid.uuid4())
-    storage_manager = request.app.state.storage_manager
-
     try:
-
-        for f in jokbo_files + lesson_files:
-            if f.size and f.size > MAX_FILE_SIZE:
-                raise HTTPException(
-                    status_code=413,
-                    detail=f"File {f.filename} exceeds maximum size of 50MB",
-                )
-
-        jokbo_keys: list[str] = []
-        lesson_keys: list[str] = []
-        # Mirror the temp-directory usage of the jokbo-centric endpoint to avoid /tmp leaks
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            for f in jokbo_files:
-                file_path = temp_path / f.filename
-                content = await f.read()
-                file_path.write_bytes(content)
-                key = storage_manager.store_file(file_path, job_id, "jokbo")
-                jokbo_keys.append(key)
-                if not storage_manager.verify_file_available(key):
-                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
-
-            for f in lesson_files:
-                file_path = temp_path / f.filename
-                content = await f.read()
-                file_path.write_bytes(content)
-                key = storage_manager.store_file(file_path, job_id, "lesson")
-                lesson_keys.append(key)
-                if not storage_manager.verify_file_available(key):
-                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
-
-        try:
-            storage_manager.refresh_ttls(jokbo_keys + lesson_keys)
-        except Exception:
-            pass
-
         effective_multi = multi_api_form if multi_api_form is not None else multi_api
         effective_min_rel = None
         try:
@@ -171,38 +75,18 @@ async def analyze_lesson_centric(
         except Exception:
             effective_min_rel = None
 
-        metadata = {
-            "jokbo_keys": jokbo_keys,
-            "lesson_keys": lesson_keys,
-            "model": model,
-            "multi_api": effective_multi,
-            "min_relevance": effective_min_rel,
-            "user_id": user.get("sub"),
-        }
-        storage_manager.store_job_metadata(job_id, metadata)
-        user_id = user.get("sub")
-        if user_id:
-            storage_manager.add_user_job(user_id, job_id)
-            try:
-                bal = storage_manager.get_user_tokens(user_id)
-                if bal is not None and bal <= 0:
-                    raise HTTPException(status_code=402, detail="Insufficient tokens for analysis. Contact admin.")
-            except HTTPException:
-                raise
-            except Exception:
-                pass
-
-        task = celery_app.send_task(
-            "tasks.run_lesson_analysis",
-            args=[job_id],
-            kwargs={"model_type": model, "multi_api": effective_multi},
-            queue="analysis",
+        job_id, _ = await save_files_and_metadata(
+            request,
+            jokbo_files,
+            lesson_files,
+            mode="lesson-centric",
+            model=model,
+            multi_api=bool(effective_multi),
+            min_relevance=effective_min_rel,
+            user_id=user.get("sub"),
         )
-        try:
-            storage_manager.set_job_task(job_id, task.id)
-        except Exception:
-            pass
-        return {"job_id": job_id, "task_id": task.id}
+        task_id = start_job(request, job_id, mode="lesson-centric", model=model, multi_api=bool(effective_multi))
+        return {"job_id": job_id, "task_id": task_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
 
@@ -343,46 +227,7 @@ async def analyze_partial_jokbo(
       value may be used by downstream components in future iterations.
     """
 
-    job_id = str(uuid.uuid4())
-    storage_manager = request.app.state.storage_manager
-
     try:
-
-        for f in jokbo_files + lesson_files:
-            if f.size and f.size > MAX_FILE_SIZE:
-                raise HTTPException(
-                    status_code=413,
-                    detail=f"File {f.filename} exceeds maximum size of 50MB",
-                )
-
-        jokbo_keys: list[str] = []
-        lesson_keys: list[str] = []
-        with tempfile.TemporaryDirectory() as temp_dir:
-            tdir = Path(temp_dir)
-            for f in jokbo_files:
-                p = tdir / f.filename
-                content = await f.read()
-                p.write_bytes(content)
-                k = storage_manager.store_file(p, job_id, "jokbo")
-                jokbo_keys.append(k)
-                # Verify availability similar to other modes
-                if not storage_manager.verify_file_available(k):
-                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
-            for f in lesson_files:
-                p = tdir / f.filename
-                content = await f.read()
-                p.write_bytes(content)
-                k = storage_manager.store_file(p, job_id, "lesson")
-                lesson_keys.append(k)
-                if not storage_manager.verify_file_available(k):
-                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
-
-        # Best-effort TTL refresh to avoid expiry while queued
-        try:
-            storage_manager.refresh_ttls(jokbo_keys + lesson_keys)
-        except Exception:
-            pass
-
         # Resolve effective multi-API toggle (form overrides query if provided)
         effective_multi = multi_api_form if multi_api_form is not None else multi_api
         # Normalize min_relevance if provided (form overrides query)
@@ -394,39 +239,18 @@ async def analyze_partial_jokbo(
         except Exception:
             effective_min_rel = None
 
-        metadata = {
-            "jokbo_keys": jokbo_keys,
-            "lesson_keys": lesson_keys,
-            "model": model,
-            "multi_api": effective_multi,
-            # Store for parity with other modes; analyzer may opt to use later
-            "min_relevance": effective_min_rel,
-            "user_id": user.get("sub"),
-        }
-        storage_manager.store_job_metadata(job_id, metadata)
-        user_id = user.get("sub")
-        if user_id:
-            storage_manager.add_user_job(user_id, job_id)
-            try:
-                bal = storage_manager.get_user_tokens(user_id)
-                if bal is not None and bal <= 0:
-                    raise HTTPException(status_code=402, detail="Insufficient tokens for analysis. Contact admin.")
-            except HTTPException:
-                raise
-            except Exception:
-                pass
-
-        task = celery_app.send_task(
-            "tasks.generate_partial_jokbo",
-            args=[job_id],
-            kwargs={"model_type": model, "multi_api": effective_multi},
-            queue="analysis",
+        job_id, _ = await save_files_and_metadata(
+            request,
+            jokbo_files,
+            lesson_files,
+            mode="partial-jokbo",
+            model=model,
+            multi_api=bool(effective_multi),
+            min_relevance=effective_min_rel,
+            user_id=user.get("sub"),
         )
-        try:
-            storage_manager.set_job_task(job_id, task.id)
-        except Exception:
-            pass
-        return {"job_id": job_id, "task_id": task.id}
+        task_id = start_job(request, job_id, mode="partial-jokbo", model=model, multi_api=bool(effective_multi))
+        return {"job_id": job_id, "task_id": task_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
 @router.post("/analyze/exam-only", status_code=202)
@@ -440,56 +264,21 @@ async def analyze_exam_only(
     multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
     user: dict = Depends(require_user),
 ):
-    job_id = str(uuid.uuid4())
-    storage_manager = request.app.state.storage_manager
-
     try:
-        for f in jokbo_files:
-            if f.size and f.size > MAX_FILE_SIZE:
-                raise HTTPException(status_code=413, detail=f"File {f.filename} exceeds maximum size of 50MB")
-
-        jokbo_keys: list[str] = []
-        with tempfile.TemporaryDirectory() as temp_dir:
-            tdir = Path(temp_dir)
-            for f in jokbo_files:
-                p = tdir / f.filename
-                content = await f.read()
-                p.write_bytes(content)
-                k = storage_manager.store_file(p, job_id, "jokbo")
-                jokbo_keys.append(k)
-                if not storage_manager.verify_file_available(k):
-                    raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
-
-        try:
-            storage_manager.refresh_ttls(jokbo_keys)
-        except Exception:
-            pass
-
         effective_multi = multi_api_form if multi_api_form is not None else multi_api
-        metadata = {
-            "mode": "exam-only",
-            "jokbo_keys": jokbo_keys,
-            "lesson_keys": [],
-            "model": model,
-            "multi_api": effective_multi,
-            "user_id": user.get("sub"),
-        }
-        storage_manager.store_job_metadata(job_id, metadata)
-        user_id = user.get("sub")
-        if user_id:
-            storage_manager.add_user_job(user_id, job_id)
-
-        task = celery_app.send_task(
-            "tasks.run_exam_only",
-            args=[job_id],
-            kwargs={"model_type": model, "multi_api": effective_multi},
-            queue="analysis",
+        # exam-only has no lesson files
+        job_id, _ = await save_files_and_metadata(
+            request,
+            jokbo_files,
+            [],
+            mode="exam-only",
+            model=model,
+            multi_api=bool(effective_multi),
+            min_relevance=None,
+            user_id=user.get("sub"),
         )
-        try:
-            storage_manager.set_job_task(job_id, task.id)
-        except Exception:
-            pass
-        return {"job_id": job_id, "task_id": task.id}
+        task_id = start_job(request, job_id, mode="exam-only", model=model, multi_api=bool(effective_multi))
+        return {"job_id": job_id, "task_id": task_id}
     except HTTPException:
         raise
     except Exception as e:

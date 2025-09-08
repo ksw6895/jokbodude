@@ -13,6 +13,244 @@ from storage_manager import StorageManager
 from pdf_processor.pdf.operations import PDFOperations
 from celery import group, chord
 from pdf_processor.utils.exceptions import CancelledError
+from dataclasses import dataclass
+
+@dataclass
+class ModeStrategy:
+    mode: str                 # "jokbo-centric" | "lesson-centric"
+    primary_kind: str         # "jokbo" | "lesson"
+    secondary_kind: str       # "lesson" | "jokbo"
+    analyze_name: str         # method on PDFProcessor for single-key
+    analyze_multi_name: str   # method on PDFProcessor for multi-key
+    create_pdf_name: str      # method on PDFCreator
+    output_template: str      # e.g. "jokbo_centric_{stem}_all_lessons.pdf"
+
+
+def _compute_total_chunks(primary_paths: list[str], lesson_paths: list[str]) -> int:
+    """Compute total chunks as: number of primaries × sum(chunks across lessons).
+
+    Matches existing behavior in both jokbo- and lesson-centric modes where
+    chunking is based on lesson PDFs.
+    """
+    try:
+        prim_count = len(primary_paths)
+        lesson_chunks = 0
+        for lp in lesson_paths:
+            lesson_chunks += len(PDFOperations.split_pdf_for_chunks(lp))
+        return max(1, prim_count * max(1, lesson_chunks))
+    except Exception:
+        return 1
+
+
+def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optional[bool], strategy: ModeStrategy):
+    """Generic analysis routine for jokbo/lesson modes using a strategy configuration."""
+    storage_manager = StorageManager()
+    try:
+        # Early cooperative cancel
+        try:
+            if storage_manager.is_cancelled(job_id):
+                storage_manager.update_progress(job_id, 0, "사용자 취소됨")
+                current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+                raise Ignore()
+        except Exception:
+            pass
+
+        metadata = storage_manager.get_job_metadata(job_id)
+        if not metadata:
+            raise Exception(f"Job metadata not found for {job_id}")
+        min_relevance = None
+        try:
+            if isinstance(metadata, dict):
+                mr = metadata.get("min_relevance")
+                if mr is not None:
+                    min_relevance = int(mr)
+        except Exception:
+            min_relevance = None
+
+        jokbo_keys = metadata["jokbo_keys"]
+        lesson_keys = metadata["lesson_keys"]
+        primary_keys = jokbo_keys if strategy.primary_kind == "jokbo" else lesson_keys
+        secondary_keys = lesson_keys if strategy.secondary_kind == "lesson" else jokbo_keys
+
+        # Determine multi-API usage
+        meta_multi = None
+        if isinstance(metadata, dict):
+            meta_multi = metadata.get("multi_api")
+        use_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else USE_MULTI_API)
+        try:
+            logger.info(f"{strategy.mode}: use_multi={use_multi}, API_KEYS_count={len(API_KEYS) if isinstance(API_KEYS, list) else 0}")
+            if use_multi and (not isinstance(API_KEYS, list) or len(API_KEYS) < 2):
+                logger.warning(f"{strategy.mode}: requested multi_api but only 1 key available; falling back to single-key")
+        except Exception:
+            pass
+
+        # Refresh all TTLs once upfront
+        try:
+            storage_manager.refresh_ttls(list(jokbo_keys) + list(lesson_keys))
+        except Exception:
+            pass
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            jokbo_dir = temp_path / "jokbo"
+            lesson_dir = temp_path / "lesson"
+            output_dir = temp_path / "output"
+            jokbo_dir.mkdir(parents=True, exist_ok=True)
+            lesson_dir.mkdir(parents=True, exist_ok=True)
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+            # Download to local
+            jokbo_paths: list[str] = []
+            for key in jokbo_keys:
+                filename = key.split(":")[-2]
+                local_path = jokbo_dir / filename
+                try:
+                    storage_manager.refresh_ttl(key)
+                except Exception:
+                    pass
+                storage_manager.save_file_locally(key, local_path)
+                jokbo_paths.append(str(local_path))
+
+            lesson_paths: list[str] = []
+            for key in lesson_keys:
+                filename = key.split(":")[-2]
+                local_path = lesson_dir / filename
+                try:
+                    storage_manager.refresh_ttl(key)
+                except Exception:
+                    pass
+                storage_manager.save_file_locally(key, local_path)
+                lesson_paths.append(str(local_path))
+
+            primary_paths = jokbo_paths if strategy.primary_kind == "jokbo" else lesson_paths
+
+            # Init chunk-based progress
+            try:
+                # chunking based on lessons regardless of mode
+                total_chunks = _compute_total_chunks(primary_paths, lesson_paths)
+                storage_manager.init_progress(job_id, total_chunks, f"총 청크: {total_chunks}")
+            except Exception:
+                storage_manager.init_progress(job_id, 1, "진행률 초기화")
+
+            # Configure API/model
+            configure_api()
+            selected_model = model_type or MODEL_TYPE
+            model = create_model(selected_model)
+            processor = PDFProcessor(model, session_id=job_id)
+            if min_relevance is not None:
+                try:
+                    processor.set_relevance_threshold(min_relevance)
+                except Exception:
+                    pass
+            creator = PDFCreator()
+
+            aggregated_warnings = {"failed_files": [], "failed_chunks": 0}
+            for prim_path_str in primary_paths:
+                # Cancellation check between items
+                try:
+                    if storage_manager.is_cancelled(job_id):
+                        storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
+                        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+                        raise Ignore()
+                except Ignore:
+                    raise
+                except Exception:
+                    pass
+
+                prim_path = Path(prim_path_str)
+                # Update status message (driven by chunk ticks)
+                try:
+                    cur = storage_manager.get_progress(job_id) or {}
+                    storage_manager.update_progress(job_id, int(cur.get('progress', 0) or 0), f"분석 중: {prim_path.name}")
+                except Exception:
+                    pass
+
+                # Analyze
+                if use_multi and len(API_KEYS) > 1:
+                    analysis_result = getattr(processor, strategy.analyze_multi_name)(
+                        (lesson_paths if strategy.secondary_kind == "lesson" else jokbo_paths), prim_path_str, api_keys=API_KEYS
+                    )
+                else:
+                    analysis_result = getattr(processor, strategy.analyze_name)(
+                        (lesson_paths if strategy.secondary_kind == "lesson" else jokbo_paths), prim_path_str
+                    )
+                if "error" in analysis_result:
+                    raise Exception(f"Analysis error for {prim_path.name}: {analysis_result['error']}")
+                try:
+                    w = analysis_result.get("warnings") or {}
+                    if isinstance(w.get("failed_files"), list):
+                        aggregated_warnings["failed_files"].extend([str(x) for x in w.get("failed_files")])
+                    if isinstance(w.get("failed_chunks"), int):
+                        aggregated_warnings["failed_chunks"] += int(w.get("failed_chunks"))
+                except Exception:
+                    pass
+
+                # PDF generation message
+                try:
+                    cur = storage_manager.get_progress(job_id) or {}
+                    storage_manager.update_progress(job_id, int(cur.get('progress', 0) or 0), f"PDF 생성 중: {prim_path.name}")
+                except Exception:
+                    pass
+
+                # Generate output
+                output_filename = strategy.output_template.format(stem=prim_path.stem)
+                output_path = output_dir / output_filename
+                getattr(creator, strategy.create_pdf_name)(
+                    str(prim_path), analysis_result, str(output_path), str(lesson_dir if strategy.secondary_kind == "lesson" else jokbo_dir)
+                )
+                storage_manager.store_result(job_id, output_path)
+
+            try:
+                processor.cleanup_session()
+            except Exception:
+                pass
+
+            try:
+                storage_manager.finalize_progress(job_id, "완료")
+            except Exception:
+                pass
+
+            result_payload = {
+                "status": "Complete",
+                "job_id": job_id,
+                "files_generated": len(list(output_dir.glob("*.pdf")))
+            }
+            try:
+                if aggregated_warnings["failed_files"] or aggregated_warnings["failed_chunks"]:
+                    uniq = []
+                    seen = set()
+                    for f in aggregated_warnings["failed_files"]:
+                        name = Path(f).name
+                        if name not in seen:
+                            seen.add(name)
+                            uniq.append(name)
+                    result_payload["warnings"] = {
+                        "partial": True,
+                        "failed_files": uniq,
+                        "failed_chunks": int(aggregated_warnings["failed_chunks"]),
+                    }
+            except Exception:
+                pass
+            return result_payload
+
+    except CancelledError:
+        try:
+            storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
+            storage_manager.finalize_progress(job_id, "취소됨")
+        except Exception:
+            pass
+        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+        raise Ignore()
+    except SoftTimeLimitExceeded:
+        try:
+            storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "시간 제한으로 취소됨")
+            storage_manager.finalize_progress(job_id, "취소됨")
+        except Exception:
+            pass
+        current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "timeout"})
+        raise Ignore()
+    except Exception as e:
+        raise e
 
 # --- Configuration ---
 # Ensure temporary files use a persistent or project path instead of /tmp
@@ -54,8 +292,22 @@ celery_app.conf.worker_cancel_long_running_tasks_on_connection_loss = True
 @celery_app.task(name="tasks.run_jokbo_analysis")
 def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[bool] = None):
     """Run jokbo-centric analysis"""
+    # Delegate to generic strategy implementation (new path)
+    try:
+        strategy = ModeStrategy(
+            mode="jokbo-centric",
+            primary_kind="jokbo",
+            secondary_kind="lesson",
+            analyze_name="analyze_jokbo_centric",
+            analyze_multi_name="analyze_jokbo_centric_multi_api",
+            create_pdf_name="create_jokbo_centric_pdf",
+            output_template="jokbo_centric_{stem}_all_lessons.pdf",
+        )
+        return run_analysis_task(job_id, model_type, multi_api, strategy)
+    except Exception:
+        pass
+    # Fallback to legacy flow below if delegation fails
     storage_manager = StorageManager()
-    
     try:
         # Cooperative cancellation early check
         try:
@@ -282,8 +534,22 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
 @celery_app.task(name="tasks.run_lesson_analysis")
 def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional[bool] = None):
     """Run lesson-centric analysis"""
+    # Delegate to generic strategy implementation (new path)
+    try:
+        strategy = ModeStrategy(
+            mode="lesson-centric",
+            primary_kind="lesson",
+            secondary_kind="jokbo",
+            analyze_name="analyze_lesson_centric",
+            analyze_multi_name="analyze_lesson_centric_multi_api",
+            create_pdf_name="create_lesson_centric_pdf",
+            output_template="filtered_{stem}_all_jokbos.pdf",
+        )
+        return run_analysis_task(job_id, model_type, multi_api, strategy)
+    except Exception:
+        pass
+    # Fallback to legacy flow below if delegation fails
     storage_manager = StorageManager()
-    
     try:
         # Cooperative cancellation early check
         try:
@@ -719,6 +985,37 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
             except Exception:
                 analysis = processor.analyze_partial_jokbo(jokbo_paths, lesson_paths)
 
+            # Build a cache for question-number -> pages index per jokbo, to avoid
+            # trusting model-reported page_start for final cropping.
+            qindex_cache: dict[str, dict[int, list[int]]] = {}
+            def _qindex_for(path: str) -> dict[int, list[int]]:
+                key = str(Path(path).resolve()) if path else path
+                if key in qindex_cache:
+                    return qindex_cache[key]
+                try:
+                    pairs = PDFOperations.index_questions(path)
+                except Exception:
+                    pairs = []
+                m: dict[int, list[int]] = {}
+                for p, qv in pairs or []:
+                    try:
+                        qn = int(qv)
+                        pg = int(p)
+                    except Exception:
+                        continue
+                    if qn <= 0 or pg <= 0:
+                        continue
+                    m.setdefault(qn, [])
+                    if pg not in m[qn]:
+                        m[qn].append(pg)
+                for k in list(m.keys()):
+                    try:
+                        m[k].sort()
+                    except Exception:
+                        pass
+                qindex_cache[key] = m
+                return m
+
             # Crop questions
             questions: list[dict[str, str]] = []
             for idx, q in enumerate(analysis.get("questions", []), 1):
@@ -726,9 +1023,25 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
                     src_path = q.get("_jokbo_path") or (jokbo_paths[0] if jokbo_paths else None)
                     if not src_path:
                         continue
+                    # Resolve start page by scanning jokbo for the question number
+                    qn_int = 0
+                    try:
+                        qn_int = int(str(q.get("question_number") or "").strip().split()[0])
+                    except Exception:
+                        qn_int = 0
+                    reported_ps = int(q.get("page_start") or 1)
+                    sp = reported_ps
+                    if qn_int > 0:
+                        pages = _qindex_for(str(src_path)).get(qn_int) or []
+                        if pages:
+                            # Choose nearest to reported hint
+                            try:
+                                sp = min(pages, key=lambda p: abs(int(p) - int(reported_ps)))
+                            except Exception:
+                                sp = int(pages[0])
                     q_pdf = PDFOperations.extract_question_region(
                         src_path,
-                        int(q.get("page_start") or 1),
+                        int(sp or 1),
                         q.get("next_question_start"),
                         q.get("question_number"),
                     )

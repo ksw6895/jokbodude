@@ -5,9 +5,10 @@ Celery configuration with Redis connection stability improvements
 import os
 import socket
 from kombu import Queue
+from settings import settings as app_settings
 
 # Redis configuration
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+REDIS_URL = app_settings.REDIS_URL
 
 # Broker settings - Redis with connection stability
 broker_url = REDIS_URL
@@ -117,32 +118,32 @@ worker_log_color = False
 
 # Memory and performance settings
 worker_max_memory_per_child = 200000  # 200MB
-# Extend task time limits to support very long analyses
+# Extend task time limits to support very long analyses (from settings)
 # 24 hours = 86400 seconds (set hard slightly above soft)
-task_time_limit = 90000  # ~25 hours
-task_soft_time_limit = 86400  # 24 hours
+task_time_limit = int(app_settings.CELERY_TIME_LIMIT)
+task_soft_time_limit = int(app_settings.CELERY_SOFT_TIME_LIMIT)
 
 # Error handling
 task_annotations = {
     '*': {
         'rate_limit': '10/s',
-        'time_limit': 90000,
-        'soft_time_limit': 86400,
+        'time_limit': int(app_settings.CELERY_TIME_LIMIT),
+        'soft_time_limit': int(app_settings.CELERY_SOFT_TIME_LIMIT),
     },
     'tasks.run_jokbo_analysis': {
         'rate_limit': '5/s',
-        'time_limit': 90000,  # ~25 hours
-        'soft_time_limit': 86400,  # 24 hours
+        'time_limit': int(app_settings.CELERY_TIME_LIMIT),
+        'soft_time_limit': int(app_settings.CELERY_SOFT_TIME_LIMIT),
     },
     'tasks.run_lesson_analysis': {
-        'rate_limit': '5/s', 
-        'time_limit': 90000,  # ~25 hours
-        'soft_time_limit': 86400,  # 24 hours
+        'rate_limit': '5/s',
+        'time_limit': int(app_settings.CELERY_TIME_LIMIT),
+        'soft_time_limit': int(app_settings.CELERY_SOFT_TIME_LIMIT),
     },
     'tasks.batch_analyze_single': {
         'rate_limit': '10/s',
-        'time_limit': 90000,
-        'soft_time_limit': 86400,
+        'time_limit': int(app_settings.CELERY_TIME_LIMIT),
+        'soft_time_limit': int(app_settings.CELERY_SOFT_TIME_LIMIT),
     },
     'tasks.aggregate_batch': {
         'rate_limit': '10/s',

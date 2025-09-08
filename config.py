@@ -3,24 +3,33 @@ from google import genai  # google-genai unified SDK
 from dotenv import load_dotenv
 from typing import Optional, List, Dict, Any
 
+from settings import settings as app_settings
+
 load_dotenv()
 
-API_KEY = os.getenv('GEMINI_API_KEY')
-API_KEYS_STR = os.getenv('GEMINI_API_KEYS')
+# Prefer centralized settings, with env fallback kept for compatibility
+_keys_from_settings = app_settings.GEMINI_API_KEYS
+_single_from_settings = app_settings.GEMINI_API_KEY
 
-# Support both single key and multiple keys
-if API_KEYS_STR:
-    # Parse comma-separated API keys
-    API_KEYS = [key.strip() for key in API_KEYS_STR.split(',') if key.strip()]
-    if not API_KEYS:
-        raise ValueError("GEMINI_API_KEYS is empty or invalid")
-    # Use the first key as default
-    API_KEY = API_KEYS[0]
-elif API_KEY:
-    # Fallback to single key
-    API_KEYS = [API_KEY]
+if _keys_from_settings and len(_keys_from_settings) > 0:
+    API_KEYS: List[str] = [k for k in _keys_from_settings if k]
+    API_KEY: Optional[str] = API_KEYS[0] if API_KEYS else None
+elif _single_from_settings:
+    API_KEYS = [_single_from_settings]
+    API_KEY = _single_from_settings
 else:
-    raise ValueError("Please set either GEMINI_API_KEY or GEMINI_API_KEYS in .env file")
+    # Legacy env reading as fallback
+    API_KEY = os.getenv('GEMINI_API_KEY')
+    API_KEYS_STR = os.getenv('GEMINI_API_KEYS')
+    if API_KEYS_STR:
+        API_KEYS = [key.strip() for key in API_KEYS_STR.split(',') if key.strip()]
+        if not API_KEYS:
+            raise ValueError("GEMINI_API_KEYS is empty or invalid")
+        API_KEY = API_KEYS[0]
+    elif API_KEY:
+        API_KEYS = [API_KEY]
+    else:
+        raise ValueError("Please set either GEMINI_API_KEY or GEMINI_API_KEYS in .env file")
 
 # Note: google-genai prefers per-instance clients over global configure.
 # We avoid global state and create genai.Client(...) where needed.
@@ -41,7 +50,7 @@ def _truthy(val: Optional[str]) -> bool:
     return str(val).strip().lower() in ("1", "true", "t", "yes", "y", "on")
 
 # Default: disable safety filters unless explicitly overridden
-DISABLE_SAFETY_FILTERS = _truthy(os.getenv("DISABLE_SAFETY_FILTERS", "true"))
+DISABLE_SAFETY_FILTERS = bool(app_settings.DISABLE_SAFETY_FILTERS)
 
 SAFETY_SETTINGS: Optional[List[Dict[str, Any]]] = None  # computed on demand
 

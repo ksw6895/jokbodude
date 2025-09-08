@@ -15,6 +15,7 @@ uvicorn[standard]==0.29.0
 celery==5.3.6
 redis==5.0.4
 python-multipart==0.0.9
+pydantic-settings>=2.2.1
 
 # Database dependencies
 sqlalchemy==2.0.30

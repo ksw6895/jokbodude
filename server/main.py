@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from pdf_processor.pdf.cache import clear_global_cache, get_global_cache
 from storage_manager import StorageManager
+from .services.storage.registry import StorageRegistry
 
 from .core import REDIS_URL
 from .routes import analyze, jobs, misc, auth
@@ -18,6 +19,12 @@ from .routes import preflight
 async def lifespan(app: FastAPI):
     print("Application startup: Initializing resources...")
     app.state.storage_manager = StorageManager(REDIS_URL)
+    # New: service registry (wrappers around StorageManager)
+    try:
+        app.state.storage_services = StorageRegistry.from_storage_manager(app.state.storage_manager)
+    except Exception:
+        # Do not fail startup if service registry cannot be created
+        pass
     get_global_cache()
     try:
         _ret_hours = int(os.getenv("DEBUG_RETENTION_HOURS", "168"))

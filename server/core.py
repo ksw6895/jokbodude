@@ -1,10 +1,11 @@
 import os
 from pathlib import Path
 from celery import Celery
+from settings import settings as app_settings
 
 # Core configuration
-STORAGE_PATH = Path(os.getenv("RENDER_STORAGE_PATH", "persistent_storage"))
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+STORAGE_PATH = Path(app_settings.RENDER_STORAGE_PATH or os.getenv("RENDER_STORAGE_PATH", "persistent_storage"))
+REDIS_URL = app_settings.REDIS_URL
 
 # Celery application shared across routes
 celery_app = Celery("tasks")
