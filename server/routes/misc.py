@@ -104,6 +104,7 @@ def admin_cleanup(
     clear_cache: bool = Query(True),
     clear_debug: bool = Query(True),
     clear_temp_sessions: bool = Query(True),
+    clear_results: bool = Query(False),
     older_than_hours: int | None = Query(None, ge=1, description="Only delete files older than this many hours"),
     user=Depends(_get_current_user),
 ):
@@ -126,6 +127,13 @@ def admin_cleanup(
             summary["temp_sessions_deleted"] = delete_path_contents(Path("output/temp/sessions"), older_than_hours)
         except Exception as e:
             summary["temp_sessions_deleted"] = {"error": str(e)}
+    if clear_results:
+        try:
+            base_storage = Path(os.getenv("RENDER_STORAGE_PATH", "output"))
+            results_dir = (base_storage / "results").resolve()
+            summary["results_deleted"] = delete_path_contents(results_dir, older_than_hours)
+        except Exception as e:
+            summary["results_deleted"] = {"error": str(e)}
     return summary
 
 

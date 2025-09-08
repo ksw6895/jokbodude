@@ -26,6 +26,17 @@ services:
         sync: false # Set this in the Render dashboard (multi-API mode: key1,key2,key3)
       - key: GEMINI_MODEL
         value: flash
+      # Retention and storage behavior for web
+      - key: PERSIST_RESULTS_ON_DISK
+        value: "true"   # Web serves downloads; keep disk copies
+      - key: DEBUG_RETENTION_HOURS
+        value: "168"   # 7 days
+      - key: RESULT_RETENTION_HOURS
+        value: "720"   # 30 days
+      - key: SESSIONS_RETENTION_HOURS
+        value: "168"   # 7 days
+      - key: TMP_RETENTION_HOURS
+        value: "24"    # 1 day
       - key: PYTHONPATH
         value: /opt/render/project/src
     disk:
@@ -62,3 +73,18 @@ services:
         sync: false # Optional: allow >1 concurrent ops per API key (e.g., 2)
       - key: GEMINI_PURGE_BEFORE_UPLOAD
         value: "false" # Keep false to avoid cross-task deletions
+      # Keep worker disk usage minimal
+      - key: PERSIST_RESULTS_ON_DISK
+        value: "false"  # Results remain in Redis (48h)
+      - key: ENABLE_WORKER_CLEANUP
+        value: "true"
+      - key: WORKER_CLEANUP_INTERVAL_MINUTES
+        value: "60"
+      - key: DEBUG_RETENTION_HOURS
+        value: "168"
+      - key: RESULT_RETENTION_HOURS
+        value: "720"
+      - key: SESSIONS_RETENTION_HOURS
+        value: "168"
+      - key: TMP_RETENTION_HOURS
+        value: "24"
