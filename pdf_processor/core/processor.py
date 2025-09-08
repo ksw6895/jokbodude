@@ -76,6 +76,13 @@ class PDFProcessor:
         # PDF cache
         self.pdf_cache = get_global_cache()
         
+        # Shared StorageManager for this processor instance (progress/cancel hot paths)
+        try:
+            from storage_manager import StorageManager  # local import to avoid cycles
+            self._sm = StorageManager()
+        except Exception:
+            self._sm = None
+        
         logger.info(f"Initialized PDFProcessor with session ID: {self.session_id}")
 
     def set_relevance_threshold(self, score: int) -> None:
@@ -242,9 +249,10 @@ class PDFProcessor:
                     all_questions.append(qq)
                 # Progress: count this jokbo as 'lesson_chunks' units
                 try:
-                    from storage_manager import StorageManager
-                    StorageManager().increment_chunk(self.session_id, int(lesson_chunks),
-                        f"파일 완료: {Path(jp).name}")
+                    sm = self._sm
+                    if sm:
+                        sm.increment_chunk(self.session_id, int(lesson_chunks),
+                                           f"파일 완료: {Path(jp).name}")
                 except Exception:
                     pass
             except Exception as e:
@@ -337,9 +345,9 @@ class PDFProcessor:
             def _op(task, api_client, model):
                 # Cooperative cancellation before any network I/O per chunk
                 try:
-                    from storage_manager import StorageManager
                     from ..utils.exceptions import CancelledError as _CE
-                    if StorageManager().is_cancelled(self.session_id):
+                    sm = self._sm
+                    if sm and sm.is_cancelled(self.session_id):
                         raise _CE("cancelled")
                 except _CE:
                     raise
@@ -375,16 +383,17 @@ class PDFProcessor:
             # Progress callback per completed chunk
             def _on_progress(_task):
                 try:
-                    from storage_manager import StorageManager
-                    StorageManager().increment_chunk(self.session_id, 1)
+                    sm = self._sm
+                    if sm:
+                        sm.increment_chunk(self.session_id, 1)
                 except Exception:
                     pass
 
             # Distribute all chunk tasks globally
             def _cancelled():
                 try:
-                    from storage_manager import StorageManager
-                    return StorageManager().is_cancelled(self.session_id)
+                    sm = self._sm
+                    return sm.is_cancelled(self.session_id) if sm else False
                 except Exception:
                     return False
             raw_results = api_manager.distribute_tasks(
@@ -439,9 +448,10 @@ class PDFProcessor:
                 # Single file – analyze once and count as one unit of progress
                 result = multi_analyzer.analyze_jokbo_centric(lesson_path, jokbo_path)
                 try:
-                    from storage_manager import StorageManager
-                    StorageManager().increment_chunk(self.session_id, 1,
-                        f"파일 완료: {Path(lesson_path).name}")
+                    sm = self._sm
+                    if sm:
+                        sm.increment_chunk(self.session_id, 1,
+                                           f"파일 완료: {Path(lesson_path).name}")
                 except Exception:
                     pass
                 results.append(result)

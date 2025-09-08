@@ -44,6 +44,21 @@ class BaseAnalyzer(ABC):
         # Multi-API paths should perform a single model call per failover attempt.
         # Single-key paths may allow limited local retries.
         self.prefer_single_attempt: bool = False
+        # Lazily cached StorageManager for hot cancel/progress paths
+        self._sm = None
+
+    def _sm_cached(self):
+        """Lazily create and cache a StorageManager for this analyzer instance."""
+        try:
+            if self._sm is None:
+                from storage_manager import StorageManager  # local import to avoid cycles
+                try:
+                    self._sm = StorageManager()
+                except Exception:
+                    self._sm = None
+            return self._sm
+        except Exception:
+            return None
         
     @abstractmethod
     def get_mode(self) -> str:
@@ -119,9 +134,9 @@ class BaseAnalyzer(ABC):
         for i, (path, start_page, end_page) in enumerate(chunks):
             # Cooperative cancellation check between chunks
             try:
-                from storage_manager import StorageManager
                 from ..utils.exceptions import CancelledError
-                if StorageManager().is_cancelled(self.session_id):
+                sm = self._sm_cached()
+                if sm and sm.is_cancelled(self.session_id):
                     raise CancelledError("cancelled")
             except CancelledError:
                 raise
@@ -164,9 +179,9 @@ class BaseAnalyzer(ABC):
         try:
             # Cooperative cancel before any network I/O
             try:
-                from storage_manager import StorageManager
                 from ..utils.exceptions import CancelledError
-                if StorageManager().is_cancelled(self.session_id):
+                sm = self._sm_cached()
+                if sm and sm.is_cancelled(self.session_id):
                     raise CancelledError("cancelled")
             except CancelledError:
                 raise
@@ -176,9 +191,9 @@ class BaseAnalyzer(ABC):
             for file_path, display_name in files_to_upload:
                 # Check cancellation between uploads as well
                 try:
-                    from storage_manager import StorageManager
                     from ..utils.exceptions import CancelledError
-                    if StorageManager().is_cancelled(self.session_id):
+                    sm = self._sm_cached()
+                    if sm and sm.is_cancelled(self.session_id):
                         raise CancelledError("cancelled")
                 except CancelledError:
                     raise
@@ -190,9 +205,9 @@ class BaseAnalyzer(ABC):
 
             # Final cooperative cancel before generation
             try:
-                from storage_manager import StorageManager
                 from ..utils.exceptions import CancelledError
-                if StorageManager().is_cancelled(self.session_id):
+                sm = self._sm_cached()
+                if sm and sm.is_cancelled(self.session_id):
                     raise CancelledError("cancelled")
             except CancelledError:
                 raise
@@ -332,9 +347,9 @@ class BaseAnalyzer(ABC):
         for attempt in range(1, attempts + 1):
             # Check cancellation before each attempt
             try:
-                from storage_manager import StorageManager
                 from ..utils.exceptions import CancelledError
-                if StorageManager().is_cancelled(self.session_id):
+                sm = self._sm_cached()
+                if sm and sm.is_cancelled(self.session_id):
                     raise CancelledError("cancelled")
             except CancelledError:
                 raise

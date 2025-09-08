@@ -75,9 +75,9 @@ cp .env.example .env
 
 - `GENAI_UPLOAD_TIMEOUT_SECS` (기본 120)
   - Gemini 파일 업로드 RPC 하드 타임아웃. 단건 업로드 호출이 이 시간을 넘기면 실패 처리.
-- `GENAI_UPLOAD_ACTIVATION_TIMEOUT_SECS` (기본 250)
+- `GENAI_UPLOAD_ACTIVATION_TIMEOUT_SECS` (기본 300)
   - 업로드 후 파일 상태가 `ACTIVE`가 될 때까지의 최대 대기 시간.
-- `GENAI_REQUEST_TIMEOUT_SECS` (기본 250)
+- `GENAI_REQUEST_TIMEOUT_SECS` (기본 300)
   - `models.generateContent` 호출 하드 타임아웃. 무응답/네트워크 hang 방지.
 - `API_TASK_HARD_TIMEOUT_SECS` (기본 600)
   - Multi-API 분배기에서 개별 태스크(청크) 최대 대기 시간. 초과 시 해당 태스크는 타임아웃으로 실패 처리되어 전체 작업이 끝까지 진행됩니다.

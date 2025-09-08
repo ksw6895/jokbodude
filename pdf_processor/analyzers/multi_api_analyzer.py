@@ -39,6 +39,23 @@ class MultiAPIAnalyzer:
         # Optional: relevance threshold to propagate to created analyzers
         self.min_relevance_score: Optional[int] = None
 
+    def _get_sm_shared(self):
+        """Lazily create a shared StorageManager for this analyzer instance.
+        Reused across frequent cancel/progress checks to avoid connection spam.
+        """
+        try:
+            sm = getattr(self, "_sm_shared", None)
+            if sm is None:
+                from storage_manager import StorageManager
+                try:
+                    sm = StorageManager()
+                except Exception:
+                    sm = None
+                setattr(self, "_sm_shared", sm)
+            return sm
+        except Exception:
+            return None
+
     def set_relevance_threshold(self, score: Optional[int]) -> None:
         """Set a relevance threshold that will be applied to analyzers created by this wrapper."""
         try:
@@ -183,9 +200,9 @@ class MultiAPIAnalyzer:
         else:  # jokbo-centric
             def task_operation(file_pair, api_client, model):
                 try:
-                    from storage_manager import StorageManager
                     from ..utils.exceptions import CancelledError
-                    if StorageManager().is_cancelled(self.session_id):
+                    sm = self._get_sm_shared()
+                    if sm and sm.is_cancelled(self.session_id):
                         raise CancelledError("cancelled")
                 except CancelledError:
                     raise
@@ -264,9 +281,9 @@ class MultiAPIAnalyzer:
         """Run partial-jokbo analysis with failover across API keys (one key per attempt)."""
         def operation(api_client, model):
             try:
-                from storage_manager import StorageManager
                 from ..utils.exceptions import CancelledError
-                if StorageManager().is_cancelled(self.session_id):
+                sm = self._get_sm_shared()
+                if sm and sm.is_cancelled(self.session_id):
                     raise CancelledError("cancelled")
             except CancelledError:
                 raise
@@ -302,9 +319,9 @@ class MultiAPIAnalyzer:
             lesson_chunks = 1
         def task_operation(jp, api_client, model):
             try:
-                from storage_manager import StorageManager
                 from ..utils.exceptions import CancelledError
-                if StorageManager().is_cancelled(self.session_id):
+                sm = self._get_sm_shared()
+                if sm and sm.is_cancelled(self.session_id):
                     raise CancelledError("cancelled")
             except CancelledError:
                 raise

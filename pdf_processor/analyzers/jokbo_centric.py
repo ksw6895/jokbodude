@@ -132,9 +132,9 @@ class JokboCentricAnalyzer(BaseAnalyzer):
         for i, (path, start_page, end_page) in enumerate(chunks):
             # Cooperative cancellation check between chunks
             try:
-                from storage_manager import StorageManager
                 from ..utils.exceptions import CancelledError
-                if StorageManager().is_cancelled(self.session_id):
+                sm = self._sm_cached()
+                if sm and sm.is_cancelled(self.session_id):
                     raise CancelledError("cancelled")
             except CancelledError:
                 raise
@@ -164,9 +164,10 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                 chunk_results.append(result)
                 # Update chunk progress
                 try:
-                    from storage_manager import StorageManager
-                    StorageManager().increment_chunk(self.session_id, 1,
-                        f"청크 진행: {i+1}/{len(chunks)} ({Path(lesson_path).name})")
+                    sm = self._sm_cached()
+                    if sm:
+                        sm.increment_chunk(self.session_id, 1,
+                            f"청크 진행: {i+1}/{len(chunks)} ({Path(lesson_path).name})")
                 except Exception:
                     pass
             finally:
@@ -358,9 +359,9 @@ class JokboCentricAnalyzer(BaseAnalyzer):
             logger.info(f"Analyzing lesson {idx+1}/{len(lesson_paths)}: {Path(lesson_path).name}")
             # Cooperative cancellation check between lessons
             try:
-                from storage_manager import StorageManager
                 from ..utils.exceptions import CancelledError
-                if StorageManager().is_cancelled(self.session_id):
+                sm = self._sm_cached()
+                if sm and sm.is_cancelled(self.session_id):
                     raise CancelledError("cancelled")
             except CancelledError:
                 raise
@@ -375,9 +376,10 @@ class JokboCentricAnalyzer(BaseAnalyzer):
                     from ..pdf.operations import PDFOperations
                     chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
                     if len(chunks) <= 1:
-                        from storage_manager import StorageManager
-                        StorageManager().increment_chunk(self.session_id, 1,
-                            f"파일 완료: {Path(lesson_path).name}")
+                        sm2 = self._sm_cached()
+                        if sm2:
+                            sm2.increment_chunk(self.session_id, 1,
+                                f"파일 완료: {Path(lesson_path).name}")
                 except Exception:
                     pass
                 
@@ -415,12 +417,13 @@ class JokboCentricAnalyzer(BaseAnalyzer):
         logger.debug(f"Saved intermediate result to {filepath}")
         # Optionally mirror to Redis debug storage (best effort)
         try:
-            from storage_manager import StorageManager
-            StorageManager().store_debug_json(self.session_id, f"jokbo_chunk_{idx:03d}", {
-                'lesson_idx': idx,
-                'lesson_filename': Path(lesson_path).name,
-                'result': result,
-            })
+            sm = self._sm_cached()
+            if sm:
+                sm.store_debug_json(self.session_id, f"jokbo_chunk_{idx:03d}", {
+                    'lesson_idx': idx,
+                    'lesson_filename': Path(lesson_path).name,
+                    'result': result,
+                })
         except Exception:
             pass
     

@@ -96,8 +96,10 @@ class StorageManager:
                     health_check_interval=health_check_interval,
                     retry_on_timeout=True,
                 )
+                # Validate connection once per instance; avoid noisy logs
                 self.redis_client.ping()  # Test connection
-                logger.info("Redis connection established")
+                # Downgrade to debug to prevent per-second spam from hot paths
+                logger.debug("Redis connection established")
                 return
             except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError) as e:
                 if attempt == max_retries - 1:

@@ -167,7 +167,7 @@ class GeminiAPIClient:
 
             # Wait until file is ACTIVE per new SDK semantics with bounded wait
             try:
-                activation_timeout = max(10, int(os.getenv("GENAI_UPLOAD_ACTIVATION_TIMEOUT_SECS", "250")))
+                activation_timeout = max(10, int(os.getenv("GENAI_UPLOAD_ACTIVATION_TIMEOUT_SECS", "300")))
             except Exception:
                 activation_timeout = 250
             deadline = time.time() + activation_timeout
@@ -309,9 +309,9 @@ class GeminiAPIClient:
                 # Wrap the call with a hard timeout to avoid indefinite hangs
                 try:
                     try:
-                        req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "250")))
+                        req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "300")))
                     except Exception:
-                        req_timeout = 250
+                        req_timeout = 300
                     _executor = _fut.ThreadPoolExecutor(max_workers=1)
                     _timed_out = False
                     try:
@@ -335,9 +335,9 @@ class GeminiAPIClient:
                                 gen_kwargs["generation_config"] = final_gen_cfg
                             # Re-wrap with timeout for legacy path as well
                             try:
-                                req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "250")))
+                                req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "300")))
                             except Exception:
-                                req_timeout = 250
+                                req_timeout = 300
                             _executor = _fut.ThreadPoolExecutor(max_workers=1)
                             _timed_out2 = False
                             try:
@@ -357,10 +357,10 @@ class GeminiAPIClient:
                             if "unexpected keyword" in msg2 and "safety_settings" in msg2:
                                 gen_kwargs.pop("safety_settings", None)
                                 # Timeout-guarded call again
-                                try:
-                                    req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "250")))
-                                except Exception:
-                                    req_timeout = 250
+                            try:
+                                req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "300")))
+                            except Exception:
+                                req_timeout = 300
                                 _executor = _fut.ThreadPoolExecutor(max_workers=1)
                                 _timed_out3 = False
                                 try:
@@ -380,9 +380,9 @@ class GeminiAPIClient:
                     elif "unexpected keyword" in msg and "safety_settings" in msg:
                         gen_kwargs.pop("safety_settings", None)
                         try:
-                            req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "250")))
+                            req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "300")))
                         except Exception:
-                            req_timeout = 250
+                            req_timeout = 300
                         _executor = _fut.ThreadPoolExecutor(max_workers=1)
                         _timed_out4 = False
                         try:
