@@ -65,7 +65,15 @@ class MultiAPIAnalyzer:
             try:
                 from storage_manager import StorageManager
                 from ..utils.exceptions import CancelledError
-                if StorageManager().is_cancelled(self.session_id):
+                # Reuse a single StorageManager instance per analyzer call
+                sm = getattr(self, "_sm_for_call", None)
+                if sm is None:
+                    try:
+                        sm = StorageManager()
+                    except Exception:
+                        sm = None
+                    setattr(self, "_sm_for_call", sm)
+                if sm and sm.is_cancelled(self.session_id):
                     raise CancelledError("cancelled")
             except CancelledError:
                 raise
@@ -103,7 +111,14 @@ class MultiAPIAnalyzer:
             try:
                 from storage_manager import StorageManager
                 from ..utils.exceptions import CancelledError
-                if StorageManager().is_cancelled(self.session_id):
+                sm = getattr(self, "_sm_for_call", None)
+                if sm is None:
+                    try:
+                        sm = StorageManager()
+                    except Exception:
+                        sm = None
+                    setattr(self, "_sm_for_call", sm)
+                if sm and sm.is_cancelled(self.session_id):
                     raise CancelledError("cancelled")
             except CancelledError:
                 raise
@@ -209,18 +224,27 @@ class MultiAPIAnalyzer:
             except Exception:
                 max_workers = min(len(file_pairs), 3) or 1
         # Increment progress for each completed non-chunk task to keep totals consistent
+        # Prepare a shared StorageManager for frequent callbacks
+        _sm = None
+        try:
+            from storage_manager import StorageManager as _SM
+            _sm = _SM()
+        except Exception:
+            _sm = None
+
         def _on_progress(_task):
             try:
-                from storage_manager import StorageManager
-                StorageManager().increment_chunk(self.session_id, 1)
+                if _sm:
+                    _sm.increment_chunk(self.session_id, 1)
             except Exception:
                 pass
 
         # Cooperative cancel check supplier
         def _cancelled():
             try:
-                from storage_manager import StorageManager
-                return StorageManager().is_cancelled(self.session_id)
+                if _sm:
+                    return _sm.is_cancelled(self.session_id)
+                return False
             except Exception:
                 return False
 
@@ -298,23 +322,31 @@ class MultiAPIAnalyzer:
             except Exception:
                 max_workers = min(len(tasks), 3) or 1
         # Progress callback per completed jokbo
+        # Shared storage manager for progress/cancel polling
+        _sm3 = None
+        try:
+            from storage_manager import StorageManager as _SM3
+            _sm3 = _SM3()
+        except Exception:
+            _sm3 = None
         def _on_progress(jp):
             try:
-                from storage_manager import StorageManager
                 from pathlib import Path as _P
                 name = None
                 try:
                     name = _P(str(jp)).name
                 except Exception:
                     name = None
-                StorageManager().increment_chunk(self.session_id, int(lesson_chunks),
-                    f"파일 완료: {name}" if name else None)
+                if _sm3:
+                    _sm3.increment_chunk(self.session_id, int(lesson_chunks),
+                        f"파일 완료: {name}" if name else None)
             except Exception:
                 pass
         def _cancelled():
             try:
-                from storage_manager import StorageManager
-                return StorageManager().is_cancelled(self.session_id)
+                if _sm3:
+                    return _sm3.is_cancelled(self.session_id)
+                return False
             except Exception:
                 return False
         return self.api_manager.distribute_tasks(
@@ -351,7 +383,14 @@ class MultiAPIAnalyzer:
             try:
                 from storage_manager import StorageManager
                 from ..utils.exceptions import CancelledError
-                if StorageManager().is_cancelled(self.session_id):
+                sm = getattr(self, "_sm_for_call", None)
+                if sm is None:
+                    try:
+                        sm = StorageManager()
+                    except Exception:
+                        sm = None
+                    setattr(self, "_sm_for_call", sm)
+                if sm and sm.is_cancelled(self.session_id):
                     raise CancelledError("cancelled")
             except CancelledError:
                 raise
@@ -406,17 +445,26 @@ class MultiAPIAnalyzer:
         
         # Distribute chunk tasks across APIs in parallel with failover
         # Progress callback: increment chunk completion for this session/job
+        # Shared StorageManager for callbacks
+        _sm2 = None
+        try:
+            from storage_manager import StorageManager as _SM2
+            _sm2 = _SM2()
+        except Exception:
+            _sm2 = None
+
         def _on_progress(_task):
             try:
-                from storage_manager import StorageManager
-                StorageManager().increment_chunk(self.session_id, 1)
+                if _sm2:
+                    _sm2.increment_chunk(self.session_id, 1)
             except Exception:
                 pass
 
         def _cancelled():
             try:
-                from storage_manager import StorageManager
-                return StorageManager().is_cancelled(self.session_id)
+                if _sm2:
+                    return _sm2.is_cancelled(self.session_id)
+                return False
             except Exception:
                 return False
         results_raw = self.api_manager.distribute_tasks(
