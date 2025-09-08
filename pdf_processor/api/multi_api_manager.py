@@ -452,9 +452,17 @@ class MultiAPIManager:
                 safe_workers = max(1, min(desired, len(self.api_keys), len(tasks)))
             except Exception:
                 safe_workers = max_workers or 1
-            with ThreadPoolExecutor(max_workers=safe_workers) as executor:
-                future_to_task = {}
-                
+
+            # Hard wall-clock per-task timeout (second-line safety). Defaults to 10 minutes.
+            try:
+                hard_timeout = max(30, int(os.getenv("API_TASK_HARD_TIMEOUT_SECS", "600")))
+            except Exception:
+                hard_timeout = 600
+
+            executor = ThreadPoolExecutor(max_workers=safe_workers)
+            try:
+                future_to_task: dict = {}
+                start_times: dict = {}
                 for task in tasks:
                     # Do not submit more tasks if cancelled
                     try:
@@ -462,22 +470,21 @@ class MultiAPIManager:
                             break
                     except Exception:
                         pass
-                    # Submit task with failover
-                    # IMPORTANT: bind current task as default arg to avoid late-binding bug
-                    # that would make all lambdas capture the final loop value.
-                    future = executor.submit(
+                    # Submit task with failover (bind task in lambda default)
+                    fut = executor.submit(
                         self.execute_with_failover,
                         (lambda api_client, model, _task=task: operation(_task, api_client, model)),
                         max_retries=max_failover_retries
                     )
-                    future_to_task[future] = task
-                
-                # Collect results
-                for future in as_completed(future_to_task):
+                    future_to_task[fut] = task
+                    start_times[fut] = time.time()
+
+                pending = set(future_to_task.keys())
+                while pending:
                     # Early abort if cancellation requested; attempt to cancel pending futures
                     try:
                         if cancel_check and cancel_check():
-                            for f in list(future_to_task.keys()):
+                            for f in list(pending):
                                 try:
                                     f.cancel()
                                 except Exception:
@@ -485,19 +492,58 @@ class MultiAPIManager:
                             break
                     except Exception:
                         pass
-                    task = future_to_task[future]
+
+                    # Gather any completed futures with a short poll
+                    done_now = set()
                     try:
-                        result = future.result()
-                        results.append(result)
-                    except Exception as e:
-                        logger.error(f"Task failed: {str(e)}")
-                        results.append({"error": str(e), "task": task})
-                    finally:
+                        for f in as_completed(list(pending), timeout=1.0):
+                            done_now.add(f)
+                    except Exception:
+                        done_now = set()
+
+                    for f in done_now:
+                        pending.discard(f)
+                        task = future_to_task.get(f)
                         try:
-                            if on_progress:
-                                on_progress(task)
+                            result = f.result()
+                            results.append(result)
+                        except Exception as e:
+                            logger.error(f"Task failed: {str(e)}")
+                            results.append({"error": str(e), "task": task})
+                        finally:
+                            try:
+                                if on_progress and task is not None:
+                                    on_progress(task)
+                            except Exception:
+                                pass
+
+                    # Check for hard timeouts
+                    now = time.time()
+                    expired: list = []
+                    for f in list(pending):
+                        st = start_times.get(f) or now
+                        if (now - st) > hard_timeout:
+                            task = future_to_task.get(f)
+                            logger.error(f"Task timed out after {hard_timeout}s; marking as error and dropping: {task}")
+                            results.append({"error": f"timeout_after_{hard_timeout}s", "task": task})
+                            expired.append(f)
+                            try:
+                                if on_progress and task is not None:
+                                    on_progress(task)
+                            except Exception:
+                                pass
+                    for f in expired:
+                        pending.discard(f)
+                        try:
+                            f.cancel()
                         except Exception:
                             pass
+            finally:
+                # Do not block on any remaining worker threads (if any); cancel queued tasks
+                try:
+                    executor.shutdown(wait=False, cancel_futures=True)
+                except Exception:
+                    pass
         else:
             # Sequential processing
             for task in tasks:

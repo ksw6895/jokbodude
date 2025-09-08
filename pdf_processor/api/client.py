@@ -15,6 +15,8 @@ from datetime import datetime
 from google import genai  # google-genai unified SDK
 from google.genai import types as genai_types
 from pathlib import Path
+import concurrent.futures as _fut
+import os
 
 from ..utils.exceptions import APIError, FileUploadError, ContentGenerationError
 from ..utils.logging import get_logger
@@ -143,12 +145,32 @@ class GeminiAPIClient:
                 display_name=display_name,
                 mime_type=mime_type,
             )
-            uploaded_file = self._client.files.upload(
-                file=file_path,
-                config=upload_cfg,
-            )
-            
-            # Wait until file is ACTIVE per new SDK semantics
+            # Hard timeout for the initial upload call
+            try:
+                upload_timeout = max(10, int(os.getenv("GENAI_UPLOAD_TIMEOUT_SECS", "120")))
+            except Exception:
+                upload_timeout = 120
+            _executor = _fut.ThreadPoolExecutor(max_workers=1)
+            _timed_out = False
+            try:
+                fut = _executor.submit(self._client.files.upload, file=file_path, config=upload_cfg)
+                uploaded_file = fut.result(timeout=upload_timeout)
+            except _fut.TimeoutError:
+                _timed_out = True
+                raise FileUploadError(f"Upload timed out after {upload_timeout}s: {display_name}")
+            finally:
+                # If timed out, don't wait on the worker thread
+                try:
+                    _executor.shutdown(wait=(not _timed_out), cancel_futures=True)
+                except Exception:
+                    pass
+
+            # Wait until file is ACTIVE per new SDK semantics with bounded wait
+            try:
+                activation_timeout = max(10, int(os.getenv("GENAI_UPLOAD_ACTIVATION_TIMEOUT_SECS", "250")))
+            except Exception:
+                activation_timeout = 250
+            deadline = time.time() + activation_timeout
             while True:
                 try:
                     state = getattr(uploaded_file, "state", None)
@@ -159,10 +181,25 @@ class GeminiAPIClient:
                     break
                 if state_name == "FAILED":
                     raise FileUploadError(f"File processing failed: {display_name}")
+                if time.time() > deadline:
+                    raise FileUploadError(f"File activation timed out after {activation_timeout}s: {display_name}")
                 logger.debug(f"Processing {display_name} (state={state_name or 'UNKNOWN'})... [key={self._key_tag()}]")
                 time.sleep(2)
-                uploaded_file = self._client.files.get(name=uploaded_file.name)
-                
+                # Bound the get() call too
+                _executor2 = _fut.ThreadPoolExecutor(max_workers=1)
+                _t2_to = False
+                try:
+                    fut2 = _executor2.submit(self._client.files.get, name=uploaded_file.name)
+                    uploaded_file = fut2.result(timeout=15)
+                except _fut.TimeoutError:
+                    _t2_to = True
+                    # If a single poll blocks, retry next loop iteration
+                    continue
+                finally:
+                    try:
+                        _executor2.shutdown(wait=(not _t2_to), cancel_futures=True)
+                    except Exception:
+                        pass
             logger.info(f"Successfully uploaded: {display_name} [key={self._key_tag()}]")
             return uploaded_file
             
@@ -269,8 +306,25 @@ class GeminiAPIClient:
                 if self.safety_settings:
                     gen_kwargs["safety_settings"] = self.safety_settings
 
+                # Wrap the call with a hard timeout to avoid indefinite hangs
                 try:
-                    response = self._client.models.generate_content(**gen_kwargs)
+                    try:
+                        req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "250")))
+                    except Exception:
+                        req_timeout = 250
+                    _executor = _fut.ThreadPoolExecutor(max_workers=1)
+                    _timed_out = False
+                    try:
+                        fut = _executor.submit(self._client.models.generate_content, **gen_kwargs)
+                        response = fut.result(timeout=req_timeout)
+                    except _fut.TimeoutError:
+                        _timed_out = True
+                        raise ContentGenerationError(f"Generation timed out after {req_timeout}s")
+                    finally:
+                        try:
+                            _executor.shutdown(wait=(not _timed_out), cancel_futures=True)
+                        except Exception:
+                            pass
                 except TypeError as te:
                     msg = str(te).lower()
                     # If this SDK doesn't support `config`, try legacy `generation_config`
@@ -279,19 +333,69 @@ class GeminiAPIClient:
                             if final_gen_cfg:
                                 gen_kwargs.pop("config", None)
                                 gen_kwargs["generation_config"] = final_gen_cfg
-                            response = self._client.models.generate_content(**gen_kwargs)
+                            # Re-wrap with timeout for legacy path as well
+                            try:
+                                req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "250")))
+                            except Exception:
+                                req_timeout = 250
+                            _executor = _fut.ThreadPoolExecutor(max_workers=1)
+                            _timed_out2 = False
+                            try:
+                                fut = _executor.submit(self._client.models.generate_content, **gen_kwargs)
+                                response = fut.result(timeout=req_timeout)
+                            except _fut.TimeoutError:
+                                _timed_out2 = True
+                                raise ContentGenerationError(f"Generation timed out after {req_timeout}s")
+                            finally:
+                                try:
+                                    _executor.shutdown(wait=(not _timed_out2), cancel_futures=True)
+                                except Exception:
+                                    pass
                         except TypeError as te2:
                             # If `safety_settings` is also unsupported, drop it and retry once
                             msg2 = str(te2).lower()
                             if "unexpected keyword" in msg2 and "safety_settings" in msg2:
                                 gen_kwargs.pop("safety_settings", None)
-                                response = self._client.models.generate_content(**gen_kwargs)
+                                # Timeout-guarded call again
+                                try:
+                                    req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "250")))
+                                except Exception:
+                                    req_timeout = 250
+                                _executor = _fut.ThreadPoolExecutor(max_workers=1)
+                                _timed_out3 = False
+                                try:
+                                    fut = _executor.submit(self._client.models.generate_content, **gen_kwargs)
+                                    response = fut.result(timeout=req_timeout)
+                                except _fut.TimeoutError:
+                                    _timed_out3 = True
+                                    raise ContentGenerationError(f"Generation timed out after {req_timeout}s")
+                                finally:
+                                    try:
+                                        _executor.shutdown(wait=(not _timed_out3), cancel_futures=True)
+                                    except Exception:
+                                        pass
                             else:
                                 raise
                     # If `safety_settings` alone is unsupported, drop it and retry
                     elif "unexpected keyword" in msg and "safety_settings" in msg:
                         gen_kwargs.pop("safety_settings", None)
-                        response = self._client.models.generate_content(**gen_kwargs)
+                        try:
+                            req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "250")))
+                        except Exception:
+                            req_timeout = 250
+                        _executor = _fut.ThreadPoolExecutor(max_workers=1)
+                        _timed_out4 = False
+                        try:
+                            fut = _executor.submit(self._client.models.generate_content, **gen_kwargs)
+                            response = fut.result(timeout=req_timeout)
+                        except _fut.TimeoutError:
+                            _timed_out4 = True
+                            raise ContentGenerationError(f"Generation timed out after {req_timeout}s")
+                        finally:
+                            try:
+                                _executor.shutdown(wait=(not _timed_out4), cancel_futures=True)
+                            except Exception:
+                                pass
                     else:
                         raise
                 
