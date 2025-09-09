@@ -150,6 +150,18 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
             configure_api()
             selected_model = model_type or MODEL_TYPE
             model = create_model(selected_model)
+            try:
+                # Log model resolution for cost/debug visibility
+                _mn = None
+                try:
+                    _mn = (model.get("model_name") if isinstance(model, dict) else None) or "?"
+                except Exception:
+                    _mn = "?"
+                logger.info(
+                    f"model selection: input={model_type} env_default={MODEL_TYPE} resolved_type={selected_model} resolved_name={_mn}"
+                )
+            except Exception:
+                pass
 
             # Establish job-level token budget based on total_chunks × per-chunk cost
             try:
@@ -592,6 +604,17 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             configure_api()
             selected_model = model_type or MODEL_TYPE
             model = create_model(selected_model)
+            try:
+                _mn = None
+                try:
+                    _mn = (model.get("model_name") if isinstance(model, dict) else None) or "?"
+                except Exception:
+                    _mn = "?"
+                logger.info(
+                    f"batch model selection: input={model_type} env_default={MODEL_TYPE} resolved_type={selected_model} resolved_name={_mn}"
+                )
+            except Exception:
+                pass
             # PDFProcessor does not take a 'multi_api' arg; choose methods conditionally
             processor = PDFProcessor(model, session_id=job_id)
             if min_relevance is not None:
@@ -1368,6 +1391,17 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
             # Configure API + model
             configure_api()
             model = create_model(selected_model)
+            try:
+                _mn = None
+                try:
+                    _mn = (model.get("model_name") if isinstance(model, dict) else None) or "?"
+                except Exception:
+                    _mn = "?"
+                logger.info(
+                    f"exam-only model selection: input={selected_model} env_default={MODEL_TYPE} resolved_name={_mn}"
+                )
+            except Exception:
+                pass
 
             # Analyzer runner per chunk
             from pdf_processor.analyzers.exam_only import ExamOnlyAnalyzer
@@ -1385,8 +1419,8 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
                 tmp_paths.append(Path(cpath))
                 task_items.append((jp, cpath, (s, e), (qs, qe)))
 
-            # Distribute across keys
-            api_manager = MultiAPIManager(API_KEYS, {"model": selected_model})
+            # Distribute across keys (pass full model config, not shorthand)
+            api_manager = MultiAPIManager(API_KEYS, model)
 
             def op(task, api_client, _model):
                 orig_jp, chunk_path, (s, e), (qs, qe) = task
