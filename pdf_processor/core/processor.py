@@ -82,6 +82,17 @@ class PDFProcessor:
             self._sm = StorageManager()
         except Exception:
             self._sm = None
+        # Ensure all analyzers share the same StorageManager instance to keep
+        # progress and cancellation state consistent across the worker process.
+        try:
+            if self._sm is not None:
+                for a in (self.lesson_analyzer, self.jokbo_analyzer, self.partial_analyzer):
+                    try:
+                        setattr(a, "_sm", self._sm)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
         
         logger.info(f"Initialized PDFProcessor with session ID: {self.session_id}")
 
@@ -171,6 +182,13 @@ class PDFProcessor:
         
         # Create multi-API analyzer
         multi_analyzer = MultiAPIAnalyzer(api_manager, self.session_id, self.debug_dir)
+        # Share the same StorageManager for progress / cancel checks
+        try:
+            if self._sm is not None:
+                setattr(multi_analyzer, "_sm_shared", self._sm)
+                setattr(multi_analyzer, "_sm_for_call", self._sm)
+        except Exception:
+            pass
         # Propagate current lesson-centric threshold to multi-API analyzers
         try:
             thr = getattr(self.lesson_analyzer, 'min_relevance_score', None)
@@ -311,6 +329,13 @@ class PDFProcessor:
         
         # Create multi-API analyzer (kept for threshold propagation if needed)
         multi_analyzer = MultiAPIAnalyzer(api_manager, self.session_id, self.debug_dir)
+        # Share the same StorageManager instance for progress / cancel checks
+        try:
+            if self._sm is not None:
+                setattr(multi_analyzer, "_sm_shared", self._sm)
+                setattr(multi_analyzer, "_sm_for_call", self._sm)
+        except Exception:
+            pass
 
         # Build a global list of chunk tasks across all lessons to maximize key utilization
         from ..pdf.operations import PDFOperations
