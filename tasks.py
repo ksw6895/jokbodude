@@ -1380,48 +1380,48 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
             # Extract chunk PDFs first to enable distribution
             task_items: list[tuple[str, str, tuple[int, int], tuple[int, int, int, int]]] = []
             tmp_paths: list[Path] = []
-                for jp, (s, e, qs, qe) in all_chunks:
-                    cpath = _PDFOps.extract_pages(jp, s, e)
-                    tmp_paths.append(Path(cpath))
-                    task_items.append((jp, cpath, (s, e), (qs, qe)))
+            for jp, (s, e, qs, qe) in all_chunks:
+                cpath = _PDFOps.extract_pages(jp, s, e)
+                tmp_paths.append(Path(cpath))
+                task_items.append((jp, cpath, (s, e), (qs, qe)))
 
-                # Distribute across keys
-                api_manager = MultiAPIManager(API_KEYS, {"model": selected_model})
+            # Distribute across keys
+            api_manager = MultiAPIManager(API_KEYS, {"model": selected_model})
 
-                def op(task, api_client, _model):
-                    orig_jp, chunk_path, (s, e), (qs, qe) = task
-                    analyzer = ExamOnlyAnalyzer(api_client, FileManager(api_client), job_id, Path("output/debug"))
-                    res = analyzer.analyze_chunk(chunk_path, Path(orig_jp).name, (qs, qe), chunk_info=(s, e))
-                    # Tag each question with its source jokbo filename for reliable grouping later
-                    try:
-                        src_name = Path(orig_jp).name
-                        for q in (res.get("questions") or []):
-                            if isinstance(q, dict):
-                                q["source_filename"] = src_name
-                    except Exception:
-                        pass
-                    return res
+            def op(task, api_client, _model):
+                orig_jp, chunk_path, (s, e), (qs, qe) = task
+                analyzer = ExamOnlyAnalyzer(api_client, FileManager(api_client), job_id, Path("output/debug"))
+                res = analyzer.analyze_chunk(chunk_path, Path(orig_jp).name, (qs, qe), chunk_info=(s, e))
+                # Tag each question with its source jokbo filename for reliable grouping later
+                try:
+                    src_name = Path(orig_jp).name
+                    for q in (res.get("questions") or []):
+                        if isinstance(q, dict):
+                            q["source_filename"] = src_name
+                except Exception:
+                    pass
+                return res
 
-                def on_progress(_):
-                    try:
-                        sm.increment_chunk(job_id, 1)
-                    except Exception:
-                        pass
+            def on_progress(_):
+                try:
+                    sm.increment_chunk(job_id, 1)
+                except Exception:
+                    pass
 
-                results = api_manager.distribute_tasks(task_items, op, parallel=True, max_workers=None, on_progress=on_progress)
+            results = api_manager.distribute_tasks(task_items, op, parallel=True, max_workers=None, on_progress=on_progress)
 
-                for r in results or []:
-                    if isinstance(r, dict):
-                        for q in (r.get("questions") or []):
-                            qq = dict(q)
-                            questions_acc.append(qq)
+            for r in results or []:
+                if isinstance(r, dict):
+                    for q in (r.get("questions") or []):
+                        qq = dict(q)
+                        questions_acc.append(qq)
 
-                # Cleanup tmp chunk PDFs
-                for p in tmp_paths:
-                    try:
-                        p.unlink(missing_ok=True)
-                    except Exception:
-                        pass
+            # Cleanup tmp chunk PDFs
+            for p in tmp_paths:
+                try:
+                    p.unlink(missing_ok=True)
+                except Exception:
+                    pass
 
             # Crop and assemble final PDF per jokbo (questions are page-referenced to original)
             creator = PDFCreator()
