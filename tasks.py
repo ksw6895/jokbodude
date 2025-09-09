@@ -388,28 +388,27 @@ def _prune_path(base: Path, older_than_hours: int | None) -> None:
             continue
     # Remove empty directories (deepest first), only when old enough
     for d in sorted(base.rglob("*"), key=lambda x: len(str(x)), reverse=True):
+        if not d.is_dir():
+            continue
+        # Skip non-empty dirs
         try:
-            if not d.is_dir():
-                continue
-            # Skip non-empty dirs
+            next(d.iterdir())
+            continue
+        except StopIteration:
+            pass
+        # Age gate for directories too
+        if older_than_hours is not None:
             try:
-                next(d.iterdir())
-                continue
-            except StopIteration:
-                pass
-            # Age gate for directories too
-            if older_than_hours is not None:
-                try:
-                    age_hours = (now - d.stat().st_mtime) / 3600.0
-                    if age_hours < older_than_hours:
-                        continue
-                except Exception:
-                    # If we cannot determine age, err on the side of safety and skip
+                age_hours = (now - d.stat().st_mtime) / 3600.0
+                if age_hours < older_than_hours:
                     continue
-            try:
-                d.rmdir()
             except Exception:
-                pass
+                # If we cannot determine age, err on the side of safety and skip
+                continue
+        try:
+            d.rmdir()
+        except Exception:
+            pass
 
 
 def _cleanup_once() -> None:
