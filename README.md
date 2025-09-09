@@ -146,8 +146,8 @@ python main.py
 #### 🤖 AI 모델 선택
 | 옵션 | 설명 | 특징 | 추천 사용 케이스 |
 |------|------|------|-----------------|
-| `--model pro` (기본값) | Gemini 2.5 Pro 모델 사용 | 최고 품질, 정확한 분석 | 중요한 시험 준비 |
-| `--model flash` | Gemini 2.5 Flash 모델 사용 | 2배 빠른 속도, 50% 저렴 | 일반적인 사용 |
+| `--model pro` | Gemini 2.5 Pro 모델 사용 | 최고 품질, 정확한 분석 | 중요한 시험 준비 |
+| `--model flash` (기본값) | Gemini 2.5 Flash 모델 사용 | 2배 빠른 속도, 50% 저렴 | 일반적인 사용 |
 | `--model flash-lite` | Gemini 2.5 Flash-lite 모델 사용 | 4배 빠른 속도, 90% 저렴 | 대량 처리, 비용 절감 |
 | `--thinking-budget N` | Flash/Flash-lite 추론 깊이 조절 | 0=비활성화, -1=자동 | 속도/품질 조절 |
 

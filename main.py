@@ -463,8 +463,8 @@ def main():
     parser.add_argument("--multi-api", action="store_true", help="Multi-API 모드 사용 (여러 API 키로 분산 처리)")
     parser.add_argument("--mode", choices=["lesson-centric", "jokbo-centric"], default="lesson-centric", 
                        help="분석 모드 선택 (기본값: lesson-centric)")
-    parser.add_argument("--model", choices=["pro", "flash", "flash-lite"], default="pro",
-                       help="Gemini 모델 선택 (기본값: pro)")
+    parser.add_argument("--model", choices=["pro", "flash", "flash-lite"], default="flash",
+                       help="Gemini 모델 선택 (기본값: flash)")
     parser.add_argument("--thinking-budget", type=int, default=None,
                        help="Flash/Flash-lite 모델의 thinking budget (0-24576, -1은 자동)")
     # 청크 정리 옵션 추가

@@ -11,6 +11,7 @@ from typing import Dict, Any, List, Optional, Union
 import json
 import shutil
 
+import os
 from ..api.client import GeminiAPIClient
 from ..api.file_manager import FileManager
 from ..api.multi_api_manager import MultiAPIManager
@@ -267,14 +268,56 @@ class PDFProcessor:
         return results
     
     def _get_model_config(self) -> Dict[str, Any]:
-        """Get the model configuration from the current model."""
-        # Extract config from current model
-        # This is a simplified version - in reality, you'd want to properly extract the config
-        return {
-            "model_name": getattr(self.model, "_model_name", "gemini-1.5-pro"),
-            "generation_config": getattr(self.model, "_generation_config", None),
-            "safety_settings": getattr(self.model, "_safety_settings", None)
+        """Get the model configuration from the current model.
+
+        Robustly extracts the fields needed to reconstruct a GenerativeModel
+        for each API key in Multi-API mode, ensuring the originally selected
+        model (e.g., flash/flash-lite/pro) is preserved.
+        """
+        # Prefer public attribute names used by google-genai
+        name_candidates: List[Optional[str]] = [
+            getattr(self.model, "model_name", None),
+            getattr(self.model, "_model_name", None),
+            getattr(self.model, "_model", None),
+        ]
+
+        model_name = next((n for n in name_candidates if n), None)
+
+        # Fallback to environment-configured model if not discoverable from object
+        if not model_name:
+            try:
+                from config import MODEL_NAMES
+                env_choice = (os.getenv("GEMINI_MODEL") or "pro").strip().lower()
+                model_name = MODEL_NAMES.get(env_choice, MODEL_NAMES.get("pro", "gemini-2.5-pro"))
+            except Exception:
+                # Safe final fallback (prefer 2.5 generation over 1.5)
+                model_name = "gemini-2.5-pro"
+
+        # Generation and safety settings
+        gen_cfg = getattr(self.model, "generation_config", None) or getattr(self.model, "_generation_config", None)
+        safety = getattr(self.model, "safety_settings", None) or getattr(self.model, "_safety_settings", None)
+
+        # As a last resort, pull defaults from config
+        if gen_cfg is None or safety is None:
+            try:
+                from config import GENERATION_CONFIG, SAFETY_SETTINGS
+                gen_cfg = gen_cfg or GENERATION_CONFIG
+                safety = safety or SAFETY_SETTINGS
+            except Exception:
+                pass
+
+        cfg = {
+            "model_name": model_name,
+            "generation_config": gen_cfg,
+            "safety_settings": safety,
         }
+
+        try:
+            logger.info(f"Multi-API model config: model_name={cfg['model_name']}")
+        except Exception:
+            pass
+
+        return cfg
     
     # Utility methods
     def _merge_lesson_centric_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:

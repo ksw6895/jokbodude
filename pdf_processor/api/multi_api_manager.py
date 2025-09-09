@@ -94,6 +94,12 @@ class MultiAPIManager:
         self.api_clients = []
         self.models = []
         
+        # Log the model that will be used for Multi-API
+        try:
+            logger.info(f"Multi-API using model: {model_config.get('model_name')}")
+        except Exception:
+            pass
+
         for i, api_key in enumerate(api_keys):
             # Configure API for this key
             genai.configure(api_key=api_key)

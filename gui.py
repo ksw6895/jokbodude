@@ -39,7 +39,7 @@ class JokboDudeGUI:
         self.ui_font = self._init_fonts()
 
         self.mode_var = tk.StringVar(value="lesson-centric")
-        self.model_var = tk.StringVar(value="pro")
+        self.model_var = tk.StringVar(value="flash")
         self.multi_api_var = tk.BooleanVar(value=False)
         self.thinking_budget_var = tk.StringVar(value="")
 
@@ -532,5 +532,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
