@@ -98,6 +98,8 @@ class StorageManager:
                 )
                 # Validate connection once per instance; avoid noisy logs
                 self.redis_client.ping()  # Test connection
+                # Mark as connected
+                self.use_local_only = False
                 # Downgrade to debug to prevent per-second spam from hot paths
                 logger.debug("Redis connection established")
                 return
@@ -110,6 +112,29 @@ class StorageManager:
                     wait_time = 2 ** attempt
                     logger.warning(f"Redis connection attempt {attempt + 1} failed, retrying in {wait_time}s")
                     time.sleep(wait_time)
+
+    def _maybe_reconnect(self) -> None:
+        """Best-effort reconnection to Redis if previously unavailable.
+
+        This helps long-lived web processes recover when Redis wasn't
+        ready at startup. It is intentionally lightweight and only
+        attempts reconnection when we are in local-only mode or the
+        client appears unavailable.
+        """
+        # Fast path: already connected and usable
+        if not self.use_local_only and self.redis_client is not None:
+            try:
+                # Cheap health check; errors will fall through to re-init
+                self.redis_client.ping()
+                return
+            except Exception:
+                pass
+        # Slow path: try to establish a connection now
+        try:
+            self._init_redis_connection(max_retries=3)
+        except Exception:
+            # Swallow errors; callers will handle absence gracefully
+            pass
     
     def _with_retry(self, func, *args, max_retries: int = 3, **kwargs):
         """Execute a function with exponential backoff retry"""
@@ -478,6 +503,9 @@ class StorageManager:
     
     def get_progress(self, job_id: str) -> Optional[Dict]:
         """Get job progress from Redis"""
+        # Attempt lazy reconnect if Redis was unavailable at startup
+        if self.use_local_only or not self.redis_client:
+            self._maybe_reconnect()
         if not self.use_local_only and self.redis_client:
             try:
                 data = self._with_retry(self.redis_client.hgetall, f"progress:{job_id}")
