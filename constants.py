@@ -12,7 +12,7 @@ COMMON_PROMPT_INTRO = """당신은 해당 과목의 교수입니다. 다음 두 
 COMMON_WARNINGS = """**매우 중요한 주의사항**:
 - question_number는 반드시 족보 PDF에 표시된 실제 문제 번호를 사용하세요 (예: 21번, 42번 등)
 - 족보 페이지 내에서의 순서(1번째, 2번째)가 아닌, 실제 문제 번호를 확인하세요
-- 만약 문제 번호가 명확하지 않으면 "번호없음"이라고 표시하세요
+- 만약 문제 번호가 명확하지 않으면 \"번호없음\"이라고 표시하세요
 - jokbo_page는 반드시 **문제의 첫 부분이 나타나는** PDF 페이지 번호를 정확히 기입하세요
 
 **페이지 번호 작성 규칙**:
@@ -20,23 +20,15 @@ COMMON_WARNINGS = """**매우 중요한 주의사항**:
 - 당신이 받은 PDF 파일의 첫 페이지를 1페이지로 간주하세요
 - PDF 파일 내부에 인쇄된 페이지 번호(우측 하단 등)는 무시하세요
 - 현재 보고 있는 PDF의 물리적 순서대로 페이지를 세세요 (1부터 시작)
-- 예: 받은 PDF의 3번째 페이지는 lesson_page=3 (PDF에 "55페이지"라고 써있어도)
+- 예: 받은 PDF의 3번째 페이지는 lesson_page=3 (PDF에 \"55페이지\"라고 써있어도)
 - 청크로 나눈 PDF의 경우 각 청크의 첫 페이지가 1페이지입니다
 - jokbo_page도 동일한 규칙을 따릅니다
 
-**question_numbers_on_page 필드 작성 필수**:
-- 각 jokbo_page에 있는 모든 문제 번호를 question_numbers_on_page 배열에 순서대로 나열하세요
-- 예시: 한 페이지에 13번, 14번, 15번 문제가 있다면 → "question_numbers_on_page": ["13", "14", "15"]
-- 빈 배열 []을 반환하지 마세요. 반드시 해당 페이지의 모든 문제 번호를 포함해야 합니다
-- 페이지를 꼼꼼히 확인하여 모든 문제 번호를 찾아 배열에 포함시키세요
-
 **페이지 끝(마지막 문제) 및 쪽수 넘김 처리 규칙**:
 - 페이지 맨 아래에 '문제 번호만' 있고 실제 문제 본문/보기는 다음 페이지에 이어지는 경우에도,
-  해당 번호를 현재 페이지의 question_numbers_on_page에 반드시 포함하세요.
-- 이 때 jokbo_page는 문제 번호가 '처음으로 나타난' 현재 페이지 번호로 기록합니다. (본문이 다음 페이지에 있어도 시작 페이지 기준)
-- 다음 페이지에 있을 가능성이 있다는 '추정'으로 현재 페이지의 목록을 비워두거나, 다음 페이지의 문제 번호를 임의로 추가하지 마세요.
-- 즉, question_numbers_on_page는 "현재 페이지에 보이는 번호만" 포함하고, 빈 배열은 절대 허용되지 않습니다.
-- 문제가 여러 페이지에 걸치는 경우: lesson-centric 모드에서는 jokbo_end_page를 사용해 끝 페이지를 표기하세요. (jokbo-centric 출력 포맷에는 끝 페이지 필드가 없음)
+  jokbo_page는 그 번호가 '처음으로 나타난' 현재 페이지 번호로 기록합니다. (본문이 다음 페이지에 있어도 시작 페이지 기준)
+- 문제가 여러 페이지에 걸치는 경우: lesson-centric 모드에서는 jokbo_end_page를 사용해 끝 페이지를 표기하세요.
+- 가능하면 next_question_start(다음 문제 시작 페이지)도 보고하세요. 같은 페이지면 현재 페이지 번호를 넣어도 됩니다.
 
 **JSON 형식 주의사항**:
 - wrong_answer_explanations의 키는 반드시 큰따옴표로 묶어야 합니다
@@ -147,10 +139,9 @@ LESSON_CENTRIC_OUTPUT_FORMAT = """출력 형식 (반드시 순수 JSON만 응답
           "jokbo_filename": "{jokbo_filename}",
           "jokbo_page": 3,
           "jokbo_end_page": 4,
-          "next_question_start": 5,
-          "question_number": "15",
-          "question_numbers_on_page": ["13", "14", "15"],
-          "question_text": "문제 내용",
+      "next_question_start": 5,
+      "question_number": "15",
+      "question_text": "문제 내용",
           "answer": "정답",
           "explanation": "해설(모델이 작성한 요약 설명; 원문 복붙 금지)",
           "wrong_answer_explanations": {
@@ -220,7 +211,6 @@ JOKBO_CENTRIC_OUTPUT_FORMAT = """출력 형식 (반드시 순수 JSON만 응답�
       "questions": [
         {
           "question_number": "15",
-          "question_numbers_on_page": ["13", "14", "15"],
           "question_text": "문제 내용",
           "answer": "정답",
           "explanation": "해설(모델이 작성한 요약 설명; 원문 복붙 금지)",
