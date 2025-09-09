@@ -80,11 +80,10 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
         meta_multi = None
         if isinstance(metadata, dict):
             meta_multi = metadata.get("multi_api")
-        use_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else USE_MULTI_API)
+        # Force Multi-API mode universally (single-key mode removed)
+        use_multi = True
         try:
-            logger.info(f"{strategy.mode}: use_multi={use_multi}, API_KEYS_count={len(API_KEYS) if isinstance(API_KEYS, list) else 0}")
-            if use_multi and (not isinstance(API_KEYS, list) or len(API_KEYS) < 2):
-                logger.warning(f"{strategy.mode}: requested multi_api but only 1 key available; falling back to single-key")
+            logger.info(f"{strategy.mode}: multi_api=ON, API_KEYS_count={len(API_KEYS) if isinstance(API_KEYS, list) else 0}")
         except Exception:
             pass
 
@@ -205,14 +204,9 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
                     pass
 
                 # Analyze
-                if use_multi and len(API_KEYS) > 1:
-                    analysis_result = getattr(processor, strategy.analyze_multi_name)(
-                        (lesson_paths if strategy.secondary_kind == "lesson" else jokbo_paths), prim_path_str, api_keys=API_KEYS
-                    )
-                else:
-                    analysis_result = getattr(processor, strategy.analyze_name)(
-                        (lesson_paths if strategy.secondary_kind == "lesson" else jokbo_paths), prim_path_str
-                    )
+                analysis_result = getattr(processor, strategy.analyze_multi_name)(
+                    (lesson_paths if strategy.secondary_kind == "lesson" else jokbo_paths), prim_path_str, api_keys=API_KEYS
+                )
                 if "error" in analysis_result:
                     raise Exception(f"Analysis error for {prim_path.name}: {analysis_result['error']}")
                 try:
@@ -531,11 +525,9 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
         meta_multi = None
         if isinstance(metadata, dict):
             meta_multi = metadata.get("multi_api")
-        use_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else USE_MULTI_API)
+        use_multi = True
         try:
-            logger.info(f"run_jokbo_analysis: use_multi={use_multi}, API_KEYS_count={len(API_KEYS) if isinstance(API_KEYS, list) else 0}")
-            if use_multi and (not isinstance(API_KEYS, list) or len(API_KEYS) < 2):
-                logger.warning("run_jokbo_analysis: requested multi_api but only 1 key available; falling back to single-key")
+            logger.info(f"run_jokbo_analysis: multi_api=ON, API_KEYS_count={len(API_KEYS) if isinstance(API_KEYS, list) else 0}")
         except Exception:
             pass
 
@@ -633,12 +625,9 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
                     pass
                 
                 # Analyze jokbo against all lessons (use multi-API when enabled)
-                if use_multi and len(API_KEYS) > 1:
-                    analysis_result = processor.analyze_jokbo_centric_multi_api(
-                        lesson_paths, jokbo_path_str, api_keys=API_KEYS
-                    )
-                else:
-                    analysis_result = processor.analyze_jokbo_centric(lesson_paths, jokbo_path_str)
+                analysis_result = processor.analyze_jokbo_centric_multi_api(
+                    lesson_paths, jokbo_path_str, api_keys=API_KEYS
+                )
                 
                 if "error" in analysis_result:
                     raise Exception(f"Analysis error for {jokbo_path.name}: {analysis_result['error']}")
@@ -771,11 +760,9 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
         meta_multi = None
         if isinstance(metadata, dict):
             meta_multi = metadata.get("multi_api")
-        use_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else USE_MULTI_API)
+        use_multi = True
         try:
-            logger.info(f"run_lesson_analysis: use_multi={use_multi}, API_KEYS_count={len(API_KEYS) if isinstance(API_KEYS, list) else 0}")
-            if use_multi and (not isinstance(API_KEYS, list) or len(API_KEYS) < 2):
-                logger.warning("run_lesson_analysis: requested multi_api but only 1 key available; falling back to single-key")
+            logger.info(f"run_lesson_analysis: multi_api=ON, API_KEYS_count={len(API_KEYS) if isinstance(API_KEYS, list) else 0}")
         except Exception:
             pass
 
@@ -862,12 +849,9 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
                     pass
                 
                 # Analyze lesson against all jokbos (use multi-API when enabled)
-                if use_multi and len(API_KEYS) > 1:
-                    analysis_result = processor.analyze_lesson_centric_multi_api(
-                        jokbo_paths, lesson_path_str, api_keys=API_KEYS
-                    )
-                else:
-                    analysis_result = processor.analyze_lesson_centric(jokbo_paths, lesson_path_str)
+                analysis_result = processor.analyze_lesson_centric_multi_api(
+                    jokbo_paths, lesson_path_str, api_keys=API_KEYS
+                )
                 
                 if "error" in analysis_result:
                     raise Exception(f"Analysis error for {lesson_path.name}: {analysis_result['error']}")
@@ -1028,11 +1012,7 @@ def batch_analyze_single(
 
             # Do analysis isolated to this pair-set
             if mode == "jokbo-centric":
-                analysis_result = (
-                    processor.analyze_jokbo_centric_multi_api(b_paths, str(a_path), api_keys=API_KEYS)
-                    if (multi_api and len(API_KEYS) > 1)
-                    else processor.analyze_jokbo_centric(b_paths, str(a_path))
-                )
+                analysis_result = processor.analyze_jokbo_centric_multi_api(b_paths, str(a_path), api_keys=API_KEYS)
                 if "error" in analysis_result:
                     raise Exception(f"Analysis error for {a_path.name}: {analysis_result['error']}")
                 output_filename = f"jokbo_centric_{a_path.stem}_all_lessons.pdf"
@@ -1041,11 +1021,7 @@ def batch_analyze_single(
                     str(a_path), analysis_result, str(output_path), str(b_dir)
                 )
             else:
-                analysis_result = (
-                    processor.analyze_lesson_centric_multi_api(b_paths, str(a_path), api_keys=API_KEYS)
-                    if (multi_api and len(API_KEYS) > 1)
-                    else processor.analyze_lesson_centric(b_paths, str(a_path))
-                )
+                analysis_result = processor.analyze_lesson_centric_multi_api(b_paths, str(a_path), api_keys=API_KEYS)
                 if "error" in analysis_result:
                     raise Exception(f"Analysis error for {a_path.name}: {analysis_result['error']}")
                 output_filename = f"filtered_{a_path.stem}_all_jokbos.pdf"
@@ -1161,22 +1137,17 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
                 from config import API_KEYS as _API_KEYS  # type: ignore
             except Exception:
                 _API_KEYS = []
-            prefer_multi = meta_multi if meta_multi is not None else (multi_api if multi_api is not None else (len(_API_KEYS) > 1))
+            prefer_multi = True
             try:
-                logger.info(f"generate_partial_jokbo: prefer_multi={prefer_multi}, API_KEYS_count={len(_API_KEYS) if isinstance(_API_KEYS, list) else 0}")
-                if prefer_multi and (not isinstance(_API_KEYS, list) or len(_API_KEYS) < 2):
-                    logger.warning("generate_partial_jokbo: requested multi_api but only 1 key available; falling back to single-key")
+                logger.info(f"generate_partial_jokbo: multi_api=ON, API_KEYS_count={len(_API_KEYS) if isinstance(_API_KEYS, list) else 0}")
             except Exception:
                 pass
 
             # Ask Gemini for question spans (use multi when requested and keys available)
             try:
-                if prefer_multi and isinstance(_API_KEYS, list) and len(_API_KEYS) > 1:
-                    analysis = processor.analyze_partial_jokbo_multi_api(jokbo_paths, lesson_paths, api_keys=_API_KEYS)
-                else:
-                    analysis = processor.analyze_partial_jokbo(jokbo_paths, lesson_paths)
+                analysis = processor.analyze_partial_jokbo_multi_api(jokbo_paths, lesson_paths, api_keys=_API_KEYS)
             except Exception:
-                analysis = processor.analyze_partial_jokbo(jokbo_paths, lesson_paths)
+                analysis = processor.analyze_partial_jokbo_multi_api(jokbo_paths, lesson_paths, api_keys=_API_KEYS)
 
             # Build a cache for question-number -> pages index per jokbo, to avoid
             # trusting model-reported page_start for final cropping.
@@ -1343,7 +1314,8 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
         jokbo_keys = list(metadata.get("jokbo_keys", []) or [])
         # Resolve model + multi-api
         selected_model = model_type or metadata.get("model") or MODEL_TYPE
-        prefer_multi = metadata.get("multi_api") if metadata.get("multi_api") is not None else multi_api
+        # Single-key mode removed; always run Multi-API
+        prefer_multi = True
 
         # Prepare temp dirs
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1404,10 +1376,10 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
 
             questions_acc: list[dict] = []
 
-            if prefer_multi and isinstance(API_KEYS, list) and len(API_KEYS) > 1:
-                # Extract chunk PDFs first to enable distribution
-                task_items: list[tuple[str, str, tuple[int, int], tuple[int, int, int, int]]] = []
-                tmp_paths: list[Path] = []
+            # Always use Multi-API distribution (single-key mode removed)
+            # Extract chunk PDFs first to enable distribution
+            task_items: list[tuple[str, str, tuple[int, int], tuple[int, int, int, int]]] = []
+            tmp_paths: list[Path] = []
                 for jp, (s, e, qs, qe) in all_chunks:
                     cpath = _PDFOps.extract_pages(jp, s, e)
                     tmp_paths.append(Path(cpath))
@@ -1448,33 +1420,6 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
                 for p in tmp_paths:
                     try:
                         p.unlink(missing_ok=True)
-                    except Exception:
-                        pass
-            else:
-                # Single-key sequential processing
-                _pp = PDFProcessor(model, session_id=job_id)
-                analyzer = ExamOnlyAnalyzer(_pp.api_client, FileManager(_pp.api_client), job_id, Path("output/debug"))
-                for jp, (s, e, qs, qe) in all_chunks:
-                    try:
-                        cpath = _PDFOps.extract_pages(jp, s, e)
-                        res = analyzer.analyze_chunk(cpath, Path(jp).name, (qs, qe), chunk_info=(s, e))
-                        # Tag questions with source
-                        try:
-                            src_name = Path(jp).name
-                            for q in (res.get("questions") or []):
-                                qq = dict(q)
-                                qq["source_filename"] = src_name
-                                questions_acc.append(qq)
-                        except Exception:
-                            for q in (res.get("questions") or []):
-                                questions_acc.append(dict(q))
-                    finally:
-                        try:
-                            Path(cpath).unlink(missing_ok=True)
-                        except Exception:
-                            pass
-                    try:
-                        sm.increment_chunk(job_id, 1)
                     except Exception:
                         pass
 

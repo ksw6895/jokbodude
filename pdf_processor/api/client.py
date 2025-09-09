@@ -86,7 +86,12 @@ class GeminiAPIClient:
         self.key_index = key_index
         # Create a per-instance client bound to this API key for thread-safe ops
         try:
-            self._client = genai.Client(api_key=self.api_key)
+            # Prefer centralized builder to honor HTTP options/timeouts
+            try:
+                from config import build_client as _build_client  # local import to avoid cycles
+                self._client = _build_client(self.api_key)
+            except Exception:
+                self._client = genai.Client(api_key=self.api_key)
         except Exception as e:
             # Log precise failure reason for easier debugging and keep object usable
             logger.error(f"Failed to initialize genai.Client for key {self._key_tag()}: {e}")

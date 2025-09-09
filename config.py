@@ -2,6 +2,11 @@ import os
 from google import genai  # google-genai unified SDK
 from dotenv import load_dotenv
 from typing import Optional, List, Dict, Any
+try:
+    # Typed helpers are available in recent google-genai; optional at runtime
+    from google.genai import types as _genai_types  # type: ignore
+except Exception:  # pragma: no cover - optional import for older environments
+    _genai_types = None
 
 from settings import settings as app_settings
 
@@ -69,10 +74,10 @@ def _build_block_none_safety_settings() -> List[Dict[str, Any]] | list:
     ]
     # Try typed API
     try:
-        from google.genai import types as _types  # type: ignore
-        HC = getattr(_types, "HarmCategory", None)
-        BT = getattr(_types, "BlockThreshold", None)
-        SS = getattr(_types, "SafetySetting", None)
+        _types = _genai_types
+        HC = getattr(_types, "HarmCategory", None) if _types else None
+        BT = getattr(_types, "BlockThreshold", None) if _types else None
+        SS = getattr(_types, "SafetySetting", None) if _types else None
         if HC and BT and SS:
             out = []
             for name in categories:
@@ -106,6 +111,57 @@ MODEL_NAMES = {
     "pro": "gemini-2.5-pro",
 }
 
+def resolve_model_name(model_type: str = "flash") -> str:
+    """Return the concrete Gemini model name for a short model_type.
+
+    Accepts 'flash' or 'pro' (default 'flash'). Falls back to 'flash'.
+    """
+    return MODEL_NAMES.get(str(model_type or "flash").lower(), MODEL_NAMES["flash"])
+
+
+def build_generate_config(
+    *,
+    temperature: float = 0.3,
+    top_p: float = 0.95,
+    top_k: int = 40,
+    max_output_tokens: int = 100000,
+    response_mime_type: str = "application/json",
+) -> Dict[str, Any]:
+    """Build a base generation config compatible with google-genai.
+
+    Returns a dict; callers can pass as `config=` or `generation_config=`.
+    """
+    return {
+        "temperature": temperature,
+        "top_p": top_p,
+        "top_k": top_k,
+        "max_output_tokens": max_output_tokens,
+        "response_mime_type": response_mime_type,
+    }
+
+
+def build_client(api_key: Optional[str] = None) -> genai.Client:
+    """Create a scoped google-genai Client with HTTP timeouts from env.
+
+    Honors GENAI_REQUEST_TIMEOUT_SECS if present; otherwise defaults to 300s.
+    """
+    timeout_ms: int
+    try:
+        timeout_ms = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "300"))) * 1000
+    except Exception:
+        timeout_ms = 300_000
+    http_opts = None
+    try:
+        if _genai_types is not None:
+            http_opts = _genai_types.HttpOptions(timeout=timeout_ms)  # type: ignore[attr-defined]
+    except Exception:
+        http_opts = None
+    # Pass http_options only if constructed successfully to avoid TypeErrors on older SDKs
+    if http_opts is not None:
+        return genai.Client(api_key=api_key or API_KEY, http_options=http_opts)  # type: ignore[arg-type]
+    return genai.Client(api_key=api_key or API_KEY)
+
+
 def create_model(model_type: str = "flash", thinking_budget: Optional[int] = None):
     """
     Create a Gemini model with specified configuration.
@@ -115,9 +171,9 @@ def create_model(model_type: str = "flash", thinking_budget: Optional[int] = Non
         thinking_budget: Optional thinking budget for flash model (0-24576, -1 for auto)
     
     Returns:
-        Configured GenerativeModel instance
+        Model configuration dict for downstream client calls
     """
-    model_name = MODEL_NAMES.get(model_type, MODEL_NAMES["flash"])
+    model_name = resolve_model_name(model_type)
     
     # Copy base generation config
     config = GENERATION_CONFIG.copy()
@@ -152,5 +208,4 @@ def configure_api(api_key: Optional[str] = None):
     New SDK does not require global configuration. This helper returns a
     `genai.Client` for convenience and backward compatibility with callers.
     """
-    key_to_use = api_key or API_KEY
-    return genai.Client(api_key=key_to_use)
+    return build_client(api_key)

@@ -221,11 +221,20 @@ class PDFProcessor:
         else:
             # Distribute jokbos across APIs without chunking
             file_pairs = [(jokbo_path, lesson_path) for jokbo_path in jokbo_paths]
-            # Use all API keys up to number of pairs (or explicit max_workers)
+            # Use overall capacity (keys × per-key limit), optionally bounded by explicit max_workers
+            try:
+                import os as _os
+                _pkl = 1
+                try:
+                    _pkl = max(1, int(_os.getenv("GEMINI_PER_KEY_CONCURRENCY", "1")))
+                except Exception:
+                    _pkl = 1
+                _cap = max(1, (len(api_keys) or 1) * _pkl)
+            except Exception:
+                _cap = max(1, len(api_keys) or 1)
+            workers = min(len(file_pairs), _cap)
             if isinstance(max_workers, int) and max_workers > 0:
-                workers = min(max_workers, len(api_keys), len(file_pairs))
-            else:
-                workers = min(len(api_keys), len(file_pairs)) if api_keys else min(1, len(file_pairs))
+                workers = max(1, min(workers, max_workers))
             results = multi_analyzer.analyze_multiple_with_distribution(
                 "lesson-centric", file_pairs, parallel=True, max_workers=workers
             )

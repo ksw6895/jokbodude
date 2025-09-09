@@ -28,7 +28,8 @@ async def analyze_jokbo_centric(
     user: dict = Depends(require_user),
 ):
     try:
-        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        # Single-key mode removed: always run in Multi-API
+        effective_multi = True
         effective_min_rel = None
         try:
             eff = min_relevance_form if min_relevance_form is not None else min_relevance
@@ -66,7 +67,7 @@ async def analyze_lesson_centric(
     user: dict = Depends(require_user),
 ):
     try:
-        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        effective_multi = True
         effective_min_rel = None
         try:
             eff = min_relevance_form if min_relevance_form is not None else min_relevance
@@ -139,7 +140,7 @@ async def analyze_batch(
         except Exception:
             pass
 
-        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        effective_multi = True
         effective_min_rel = None
         try:
             eff = min_relevance_form if min_relevance_form is not None else min_relevance
@@ -229,7 +230,7 @@ async def analyze_partial_jokbo(
 
     try:
         # Resolve effective multi-API toggle (form overrides query if provided)
-        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        effective_multi = True
         # Normalize min_relevance if provided (form overrides query)
         effective_min_rel: Optional[int] = None
         try:
@@ -265,7 +266,7 @@ async def analyze_exam_only(
     user: dict = Depends(require_user),
 ):
     try:
-        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        effective_multi = True
         # exam-only has no lesson files
         job_id, _ = await save_files_and_metadata(
             request,

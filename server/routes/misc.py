@@ -61,14 +61,17 @@ def read_stylesheet():
 
 @router.get("/config")
 def get_config():
-    """Expose server capabilities for the frontend UI."""
+    """Expose server capabilities for the frontend UI.
+
+    Single-key mode has been removed; Multi-API is always on.
+    """
     try:
         from config import API_KEYS as _API_KEYS  # type: ignore
         keys_count = len(_API_KEYS) if isinstance(_API_KEYS, list) else (1 if _API_KEYS else 0)
     except Exception:
         keys_count = 0
     models = ["flash", "pro"]
-    return {"multi_api_available": keys_count > 1, "api_keys_count": keys_count, "models": models}
+    return {"multi_api_available": True, "api_keys_count": keys_count, "models": models}
 
 
 @router.get("/health")

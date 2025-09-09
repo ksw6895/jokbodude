@@ -50,7 +50,7 @@ async def preflight_exam_only(
     request: Request,
     jokbo_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
-    multi_api: bool = Query(False),
+    multi_api: bool = Query(True),
     multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
     user: dict = Depends(require_user),
 ):
@@ -62,7 +62,7 @@ async def preflight_exam_only(
     storage_manager = request.app.state.storage_manager
 
     try:
-        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        effective_multi = True
 
         def _builder(p: Path, kind: str) -> dict:
             # Base info
@@ -138,7 +138,7 @@ async def preflight_partial_jokbo(
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
-    multi_api: bool = Query(False),
+    multi_api: bool = Query(True),
     # Accept for parity (informational only for now)
     min_relevance: Optional[int] = Query(None, ge=0, le=110),
     multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
@@ -154,7 +154,7 @@ async def preflight_partial_jokbo(
 
     try:
         # Normalize options
-        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        effective_multi = True
         effective_min_rel: Optional[int] = None
         try:
             mr = min_relevance_form if min_relevance_form is not None else min_relevance
@@ -229,7 +229,7 @@ async def preflight_jokbo_centric(
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
-    multi_api: bool = Query(False),
+    multi_api: bool = Query(True),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     # Allow overrides when sent as multipart fields (frontend sends 'multi_api' and 'min_relevance')
     multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
@@ -243,7 +243,7 @@ async def preflight_jokbo_centric(
     storage_manager = request.app.state.storage_manager
 
     try:
-        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        effective_multi = True
         effective_min_rel: Optional[int] = None
         try:
             eff = min_relevance_form if min_relevance_form is not None else min_relevance
@@ -321,7 +321,7 @@ async def preflight_lesson_centric(
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
     model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
-    multi_api: bool = Query(False),
+    multi_api: bool = Query(True),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
     min_relevance_form: Optional[int] = Form(None, alias="min_relevance"),
@@ -331,7 +331,7 @@ async def preflight_lesson_centric(
     storage_manager = request.app.state.storage_manager
 
     try:
-        effective_multi = multi_api_form if multi_api_form is not None else multi_api
+        effective_multi = True
         effective_min_rel: Optional[int] = None
         try:
             eff = min_relevance_form if min_relevance_form is not None else min_relevance
@@ -424,11 +424,8 @@ def start_preflight_job(request: Request, job_id: str, user: dict = Depends(requ
     mode = (meta or {}).get("mode")
     model = (meta or {}).get("model") or "flash"
     # Robustly interpret the stored multi_api flag
-    _mval = (meta or {}).get("multi_api")
-    if isinstance(_mval, str):
-        use_multi = _mval.strip().lower() in {"1", "true", "yes", "on"}
-    else:
-        use_multi = bool(_mval)
+    # Force Multi-API on start regardless of stored meta
+    use_multi = True
 
     # Clear preflight flag; job is starting
     try:

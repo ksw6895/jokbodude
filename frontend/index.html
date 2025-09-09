@@ -140,7 +140,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-1">Processing Mode</label>
                                     <div class="flex items-center gap-2">
-                                        <div id="jokbo_multi_api_group" class="inline-flex rounded-md shadow-sm bg-gray-900 border border-gray-700">
+                                        <div id="jokbo_multi_api_group" class="inline-flex rounded-md shadow-sm bg-gray-900 border border-gray-700" style="display:none;">
                                             <button type="button" data-value="single" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-l-md text-xs font-medium text-gray-400 hover:bg-gray-800">Single API</button>
                                             <button type="button" data-value="multi" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-r-md text-xs font-medium text-gray-400 hover:bg-gray-800">Multi-API</button>
                                         </div>
@@ -216,7 +216,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-1">Processing Mode</label>
                                     <div class="flex items-center gap-2">
-                                        <div id="lesson_multi_api_group" class="inline-flex rounded-md shadow-sm bg-gray-900 border border-gray-700">
+                                        <div id="lesson_multi_api_group" class="inline-flex rounded-md shadow-sm bg-gray-900 border border-gray-700" style="display:none;">
                                             <button type="button" data-value="single" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-l-md text-xs font-medium text-gray-400 hover:bg-gray-800">Single API</button>
                                             <button type="button" data-value="multi" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-r-md text-xs font-medium text-gray-400 hover:bg-gray-800">Multi-API</button>
                                         </div>
@@ -290,7 +290,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-1">Processing Mode</label>
                                     <div class="flex items-center gap-2">
-                                        <div id="partial_multi_api_group" class="inline-flex rounded-md shadow-sm bg-gray-900 border border-gray-700">
+                                        <div id="partial_multi_api_group" class="inline-flex rounded-md shadow-sm bg-gray-900 border border-gray-700" style="display:none;">
                                             <button type="button" data-value="single" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-l-md text-xs font-medium text-gray-400 hover:bg-gray-800">Single API</button>
                                             <button type="button" data-value="multi" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-r-md text-xs font-medium text-gray-400 hover:bg-gray-800">Multi-API</button>
                                         </div>
@@ -357,7 +357,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-1">Processing Mode</label>
                                     <div class="flex items-center gap-2">
-                                        <div id="exam_multi_api_group" class="inline-flex rounded-md shadow-sm bg-gray-900 border border-gray-700">
+                                        <div id="exam_multi_api_group" class="inline-flex rounded-md shadow-sm bg-gray-900 border border-gray-700" style="display:none;">
                                             <button type="button" data-value="single" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-l-md text-xs font-medium text-gray-400 hover:bg-gray-800">Single API</button>
                                             <button type="button" data-value="multi" class="toggle-option relative inline-flex items-center px-4 py-2 rounded-r-md text-xs font-medium text-gray-400 hover:bg-gray-800">Multi-API</button>
                                         </div>
@@ -517,51 +517,10 @@
         function initProcessingToggle(groupId, noteId, storageKey, available, keysCount) {
             const group = document.getElementById(groupId);
             const note = document.getElementById(noteId);
-            const [singleBtn, multiBtn] = group.querySelectorAll('.toggle-option');
-
-            // Show availability note
-            if (available) {
-                note.textContent = `· ${keysCount} API keys available`;
-                multiBtn.classList.remove('disabled');
-            } else {
-                note.textContent = '· Multi-API unavailable (1 key)';
-                multiBtn.classList.add('disabled');
-            }
-
-            // Restore saved preference; default to available? true : false
-            const saved = localStorage.getItem(storageKey);
-            const preferMulti = saved !== null ? (saved === 'true') : !!available;
-            setToggleActive(singleBtn, multiBtn, preferMulti && available);
-
-            // Helper to trigger preflight estimate when toggles change
-            const triggerPreflight = () => {
-                try {
-                    if (!CURRENT_USER) return;
-                    if (groupId === 'jokbo_multi_api_group') {
-                        const model = document.getElementById('jokbo_model').value;
-                        maybePreflight('jokbo-centric', 'jokbo_files', 'jokbo_lesson_files', model);
-                    } else if (groupId === 'lesson_multi_api_group') {
-                        const model = document.getElementById('lesson_model').value;
-                        maybePreflight('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
-                    } else if (groupId === 'partial_multi_api_group') {
-                        const model = document.getElementById('partial_model').value;
-                        maybePreflight('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', model);
-                    }
-                } catch {}
-            };
-
-            // Wire up clicks
-            singleBtn.onclick = () => {
-                setToggleActive(singleBtn, multiBtn, false);
-                localStorage.setItem(storageKey, 'false');
-                triggerPreflight();
-            };
-            multiBtn.onclick = () => {
-                if (multiBtn.classList.contains('disabled')) return;
-                setToggleActive(singleBtn, multiBtn, true);
-                localStorage.setItem(storageKey, 'true');
-                triggerPreflight();
-            };
+            // Hide toggle UI (single-key mode removed); show a simple note instead
+            try { if (group) group.style.display = 'none'; } catch {}
+            if (note) note.textContent = `· Multi-API enabled (${keysCount} key${keysCount===1?'':'s'})`;
+            // No-op for storage/toggles; Multi-API is always on
         }
 
         function setToggleActive(singleBtn, multiBtn, useMulti) {
@@ -574,15 +533,7 @@
             }
         }
 
-        function getMultiApiState(mode) {
-            let groupId = 'jokbo_multi_api_group';
-            if (mode === 'lesson-centric') groupId = 'lesson_multi_api_group';
-            if (mode === 'partial-jokbo') groupId = 'partial_multi_api_group';
-            if (mode === 'exam-only') groupId = 'exam_multi_api_group';
-            const group = document.getElementById(groupId);
-            const [singleBtn, multiBtn] = group.querySelectorAll('.toggle-option');
-            return multiBtn.classList.contains('active') && !multiBtn.classList.contains('disabled');
-        }
+        function getMultiApiState(mode) { return true; }
 
         // Pro model is always available; /config determines only multi-api availability
         
@@ -781,14 +732,14 @@
             const lessonFiles = stagedFiles[lessonInputId] || [];
             for (const f of jokboFiles) fd.append('jokbo_files', f);
             for (const f of lessonFiles) fd.append('lesson_files', f);
-            fd.append('multi_api', opts.multiApi ? 'true' : 'false');
+            fd.append('multi_api', 'true');
             fd.append('min_relevance', String(opts.minRel));
             return fd;
         }
         function filesFingerprint(jokboInputId, lessonInputId, model, opts) {
             const jb = (stagedFiles[jokboInputId] || []).map(f => `${f.name}:${f.size}:${f.lastModified}`).join('|');
             const ls = (stagedFiles[lessonInputId] || []).map(f => `${f.name}:${f.size}:${f.lastModified}`).join('|');
-            return `${model}|${opts.multiApi?'m':'s'}|${opts.minRel}|${jb}||${ls}`;
+            return `${model}|m|${opts.minRel}|${jb}||${ls}`;
         }
         async function doPreflight(mode, jokboInputId, lessonInputId, model) {
             const opts = currentOptions(mode);
@@ -902,7 +853,7 @@
                     <div>
                         <div class="loader"></div>
                         <div class="status-message" style="margin-top: 1rem">
-                            ${getMultiApiState(mode) ? 'Multi-API' : 'Single API'} · ${model.toUpperCase()}<br>
+                            Multi-API · ${model.toUpperCase()}<br>
                             <small class="text-gray-500">Job ID: ${pf.job_id}</small>
                         </div>
                         <div class="progress-wrapper">
