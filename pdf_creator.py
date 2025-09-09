@@ -803,6 +803,11 @@ class PDFCreator:
                 align=fitz.TEXT_ALIGN_LEFT
             )
         
+        # Ensure output directory exists (mitigates temp cleanup races)
+        try:
+            Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
         doc.save(output_path)
         doc.close()
         lesson_pdf.close()
@@ -868,6 +873,10 @@ class PDFCreator:
             )
             rect = fitz.Rect(72, 72, page.rect.width - 72, page.rect.height - 72)
             page.insert_textbox(rect, msg, fontsize=14, fontname=fontname, align=fitz.TEXT_ALIGN_LEFT)
+            try:
+                Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
             doc.save(output_path)
             doc.close()
             print(f"Placeholder PDF created: {output_path}")
@@ -1114,6 +1123,10 @@ class PDFCreator:
                 align=fitz.TEXT_ALIGN_LEFT
             )
         
+        try:
+            Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
         doc.save(output_path)
         doc.close()
         # Close cached jokbo PDF for this path to prevent accumulation in long-running workers
@@ -1180,6 +1193,10 @@ class PDFCreator:
                     align=fitz.TEXT_ALIGN_LEFT,
                 )
 
+        try:
+            Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
         doc.save(output_path)
         doc.close()
 
@@ -1211,6 +1228,10 @@ class PDFCreator:
                 fontname=fontname,
                 align=fitz.TEXT_ALIGN_LEFT,
             )
+            try:
+                Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
             doc.save(output_path)
             doc.close()
             return
@@ -1263,5 +1284,9 @@ class PDFCreator:
             content = self._normalize_korean("\n".join(lines))
             page.insert_textbox(text_rect, content, fontsize=11, fontname=fontname, align=fitz.TEXT_ALIGN_LEFT)
 
+        try:
+            Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
         doc.save(output_path)
         doc.close()

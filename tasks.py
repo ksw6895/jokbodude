@@ -264,6 +264,10 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
                         except Exception:
                             # If font insert fails, still try to save a blank page
                             pass
+                        try:
+                            output_path.parent.mkdir(parents=True, exist_ok=True)
+                        except Exception:
+                            pass
                         doc.save(str(output_path))
                         doc.close()
                     except Exception:
@@ -361,11 +365,17 @@ celery_app.conf.worker_cancel_long_running_tasks_on_connection_loss = True
 
 # --- Background cleanup on worker ---
 def _prune_path(base: Path, older_than_hours: int | None) -> None:
-    """Delete files older than threshold and remove empty dirs under base (best-effort)."""
+    """Delete old files and old empty directories under base (best-effort).
+
+    Important safety: do NOT remove newly-created empty directories. We only
+    remove an empty directory if its mtime is older than the provided threshold.
+    This prevents races where a worker creates a temp subfolder (e.g., '/tmp/<tmp>/output')
+    which is empty until the first file is saved.
+    """
     if not base.exists():
         return
     now = time.time()
-    # Delete files
+    # Delete files older than threshold
     for p in base.rglob("*"):
         try:
             if p.is_file():
@@ -376,12 +386,26 @@ def _prune_path(base: Path, older_than_hours: int | None) -> None:
                 p.unlink(missing_ok=True)
         except Exception:
             continue
-    # Remove empty directories (deepest first)
+    # Remove empty directories (deepest first), only when old enough
     for d in sorted(base.rglob("*"), key=lambda x: len(str(x)), reverse=True):
         try:
-            if d.is_dir():
+            if not d.is_dir():
+                continue
+            # Skip non-empty dirs
+            try:
                 next(d.iterdir())
-        except StopIteration:
+                continue
+            except StopIteration:
+                pass
+            # Age gate for directories too
+            if older_than_hours is not None:
+                try:
+                    age_hours = (now - d.stat().st_mtime) / 3600.0
+                    if age_hours < older_than_hours:
+                        continue
+                except Exception:
+                    # If we cannot determine age, err on the side of safety and skip
+                    continue
             try:
                 d.rmdir()
             except Exception:
