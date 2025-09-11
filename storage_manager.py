@@ -15,6 +15,13 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import hashlib
 import socket
+from datetime import datetime
+
+try:
+    # Optional import; only required when OBJECT_STORE=s3
+    from server.services.storage.object_store import S3ObjectStore
+except Exception:  # pragma: no cover - keep optional
+    S3ObjectStore = None  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +31,34 @@ class StorageManager:
     def __init__(self, redis_url: str = None):
         self.redis_url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379/0")
         self.use_local_only = False
+        # Object storage configuration (S3-compatible e.g., Cloudflare R2)
+        self.object_store_mode = (os.getenv("OBJECT_STORE", "").strip().lower() or "")
+        self._s3: Optional[S3ObjectStore] = None
+        self._s3_bucket: Optional[str] = None
+        try:
+            if self.object_store_mode == "s3" and S3ObjectStore is not None:
+                endpoint = os.getenv("S3_ENDPOINT_URL", "").strip()
+                region = os.getenv("S3_REGION", "auto").strip() or "auto"
+                bucket = os.getenv("S3_BUCKET", "").strip()
+                key_id = os.getenv("S3_ACCESS_KEY_ID", "").strip()
+                secret = os.getenv("S3_SECRET_ACCESS_KEY", "").strip()
+                exp = int(os.getenv("SIGNED_URL_EXPIRES_SECONDS", "600") or "600")
+                if endpoint and bucket and key_id and secret:
+                    self._s3 = S3ObjectStore(
+                        bucket=bucket,
+                        endpoint_url=endpoint,
+                        access_key=key_id,
+                        secret_key=secret,
+                        region=region,
+                        presign_expires_seconds=exp,
+                    )
+                    self._s3_bucket = bucket
+                else:
+                    logging.warning("OBJECT_STORE=s3 but S3 env vars incomplete; falling back to Redis/disk.")
+            elif self.object_store_mode == "s3" and S3ObjectStore is None:
+                logging.warning("OBJECT_STORE=s3 set but boto3 wrapper unavailable; falling back to Redis/disk.")
+        except Exception as e:
+            logging.warning(f"Failed to initialize S3 object store: {e}")
         # Local storage for intermediate files (backups/fallbacks)
         try:
             self.local_storage = Path(os.getenv("RENDER_STORAGE_PATH", "/tmp/storage"))
@@ -159,13 +194,36 @@ class StorageManager:
         file_hash = hashlib.md5(content).hexdigest()[:8]
         file_key = f"file:{job_id}:{file_type}:{file_path.name}:{file_hash}"
         
-        # Try compression for large files
+        # If S3 is enabled, upload file and store a pointer in Redis
+        if self._s3 is not None:
+            try:
+                s3_key = f"uploads/{job_id}/{file_type}/{file_path.name}"
+                self._s3.upload_file(file_path, s3_key)
+                if not self.use_local_only and self.redis_client:
+                    self._with_retry(
+                        self.redis_client.hset,
+                        file_key,
+                        mapping={
+                            "storage": "s3",
+                            "bucket": self._s3_bucket or "",
+                            "key": s3_key,
+                            "original_size": str(len(content)),
+                        },
+                    )
+                    self._with_retry(self.redis_client.expire, file_key, self.file_ttl_seconds)
+                return file_key
+            except Exception as e:
+                logger.error(f"Failed to upload to S3; falling back to Redis storage: {e}")
+                # continue to Redis path below
+
+        # Try compression for large files (Redis path only)
         if len(content) > 1024 * 1024:  # > 1MB
             compressed = zlib.compress(content, level=6)
             compression_ratio = len(compressed) / len(content)
-            
             if compression_ratio < 0.9:  # 10% or better compression
-                logger.info(f"Compressed {file_path.name}: {len(content)} -> {len(compressed)} bytes ({compression_ratio:.1%})")
+                logger.info(
+                    f"Compressed {file_path.name}: {len(content)} -> {len(compressed)} bytes ({compression_ratio:.1%})"
+                )
                 content_to_store = compressed
                 is_compressed = True
             else:
@@ -174,7 +232,7 @@ class StorageManager:
         else:
             content_to_store = content
             is_compressed = False
-        
+
         # Store in Redis with retry if not in local-only mode
         if not self.use_local_only and self.redis_client:
             try:
@@ -185,8 +243,8 @@ class StorageManager:
                     mapping={
                         "data": content_to_store,
                         "compressed": str(is_compressed),
-                        "original_size": str(len(content))
-                    }
+                        "original_size": str(len(content)),
+                    },
                 )
                 # Set expiration using configured TTL
                 self._with_retry(self.redis_client.expire, file_key, self.file_ttl_seconds)
@@ -208,12 +266,18 @@ class StorageManager:
                 # Try to get from Redis
                 data = self._with_retry(self.redis_client.hgetall, file_key)
                 if data:
-                    content = data.get(b'data') or data.get('data')
-                    compressed = data.get(b'compressed') or data.get('compressed')
-                    
+                    # If S3 pointer exists, download from S3
+                    storage = data.get(b"storage") or data.get("storage")
+                    if storage and (storage.decode() if isinstance(storage, (bytes, bytearray)) else str(storage)) == "s3":
+                        keyv = data.get(b"key") or data.get("key")
+                        if keyv and self._s3 is not None:
+                            s3_key = keyv.decode() if isinstance(keyv, (bytes, bytearray)) else str(keyv)
+                            return self._s3.download_bytes(s3_key)
+                    content = data.get(b"data") or data.get("data")
+                    compressed = data.get(b"compressed") or data.get("compressed")
                     if content:
                         # Decompress if needed
-                        if compressed and (compressed == b'True' or compressed == 'True'):
+                        if compressed and (compressed == b"True" or compressed == "True"):
                             content = zlib.decompress(content)
                         return content
                 
@@ -238,6 +302,30 @@ class StorageManager:
     
     def save_file_locally(self, file_key: str, target_path: Path) -> Path:
         """Save a file from Redis to local filesystem"""
+        # If this file is an S3 pointer, stream directly to destination
+        if not self.use_local_only and self.redis_client:
+            try:
+                data = self._with_retry(self.redis_client.hgetall, file_key) or {}
+                storage = data.get(b"storage") or data.get("storage")
+                if storage and (storage.decode() if isinstance(storage, (bytes, bytearray)) else str(storage)) == "s3":
+                    keyv = data.get(b"key") or data.get("key")
+                    if keyv and self._s3 is not None:
+                        s3_key = keyv.decode() if isinstance(keyv, (bytes, bytearray)) else str(keyv)
+                        # Safety check for target path under temp dir
+                        tmp_root = Path(os.getenv("TMPDIR", tempfile.gettempdir())).resolve()
+                        resolved_target = target_path.resolve()
+                        try:
+                            resolved_target.relative_to(tmp_root)
+                        except ValueError:
+                            raise ValueError(
+                                f"Refusing to write outside temp dir: {resolved_target} not under {tmp_root}"
+                            )
+                        target_path.parent.mkdir(parents=True, exist_ok=True)
+                        self._s3.download_file(s3_key, resolved_target)
+                        return resolved_target
+            except Exception:
+                pass
+
         content = self.get_file(file_key)
         if not content:
             raise ValueError(f"File not found in Redis: {file_key}")
@@ -323,18 +411,40 @@ class StorageManager:
     
     def store_result(self, job_id: str, result_path: Path) -> str:
         """Store processing result"""
-        with open(result_path, 'rb') as f:
-            content = f.read()
-        
         result_key = f"result:{job_id}:{result_path.name}"
-        # Store with longer TTL for results
-        if not self.use_local_only and self.redis_client:
-            self._with_retry(
-                self.redis_client.setex,
-                result_key,
-                172800,  # 48 hours TTL
-                content
-            )
+        # Prefer object store when configured
+        if self._s3 is not None:
+            try:
+                s3_key = f"results/{job_id}/{result_path.name}"
+                self._s3.upload_file(result_path, s3_key)
+                # Store a small JSON pointer for indexing and downstream access
+                pointer = json.dumps(
+                    {
+                        "storage": "s3",
+                        "bucket": self._s3_bucket,
+                        "key": s3_key,
+                        "uploaded_at": datetime.utcnow().isoformat() + "Z",
+                    },
+                    ensure_ascii=False,
+                ).encode("utf-8")
+                if not self.use_local_only and self.redis_client:
+                    self._with_retry(self.redis_client.setex, result_key, 172800, pointer)
+            except Exception as e:
+                logger.warning(f"Failed to upload result to S3; falling back to Redis bytes: {e}")
+                # Fall through to Redis path below
+
+        # If no object store used/succeeded, store bytes in Redis
+        if self._s3 is None:
+            with open(result_path, "rb") as f:
+                content = f.read()
+            # Store with longer TTL for results
+            if not self.use_local_only and self.redis_client:
+                self._with_retry(
+                    self.redis_client.setex,
+                    result_key,
+                    172800,  # 48 hours TTL
+                    content,
+                )
         # Optionally persist to disk to avoid overusing Redis memory
         persist_env = os.getenv("PERSIST_RESULTS_ON_DISK", "true").strip().lower()
         persist_to_disk = persist_env in ("1", "true", "yes", "on")
@@ -342,7 +452,12 @@ class StorageManager:
             try:
                 dest = self.results_dir / job_id / result_path.name
                 dest.parent.mkdir(parents=True, exist_ok=True)
-                dest.write_bytes(content)
+                # Write from local path directly to avoid duplicate read for S3 path
+                if result_path.exists():
+                    dest.write_bytes(result_path.read_bytes())
+                else:
+                    # In rare cases where result_path isn't readable, skip disk persist
+                    pass
                 # Index the on-disk path for lookup
                 if not self.use_local_only and self.redis_client:
                     self._with_retry(
@@ -359,7 +474,17 @@ class StorageManager:
         """Retrieve result from Redis"""
         if self.redis_client is None or self.use_local_only:
             return None
-        return self._with_retry(self.redis_client.get, result_key)
+        v = self._with_retry(self.redis_client.get, result_key)
+        if not v:
+            return None
+        # If pointer JSON is stored (S3 mode), we do not return bytes here.
+        try:
+            s = v.decode() if isinstance(v, (bytes, bytearray)) else str(v)
+            if s.strip().startswith("{") and "\"storage\": \"s3\"" in s:
+                return None
+        except Exception:
+            pass
+        return v
 
     def get_result_path(self, job_id: str, filename: str) -> Optional[Path]:
         """Return on-disk path for a stored result if available."""
@@ -412,6 +537,19 @@ class StorageManager:
             try:
                 rk = f"result:{job_id}:{filename}"
                 rpk = f"result_path:{job_id}:{filename}"
+                # If value is an S3 pointer, remove the object too
+                try:
+                    pointer = self._with_retry(self.redis_client.get, rk)
+                    if pointer and self._s3 is not None:
+                        try:
+                            s = pointer.decode() if isinstance(pointer, (bytes, bytearray)) else str(pointer)
+                            meta = json.loads(s)
+                            if isinstance(meta, dict) and meta.get("storage") == "s3" and meta.get("key"):
+                                self._s3.delete_object(meta["key"])  # type: ignore[index]
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
                 self._with_retry(self.redis_client.delete, rk)
                 self._with_retry(self.redis_client.delete, rpk)
                 removed = True
@@ -440,6 +578,12 @@ class StorageManager:
                     self.redis_client.delete(key)
             except Exception:
                 pass
+        # Remove object store keys under results/{job_id}/
+        try:
+            if self._s3 is not None:
+                count += int(self._s3.delete_prefix(f"results/{job_id}/"))
+        except Exception:
+            pass
         # Remove disk directory
         job_results = self.results_dir / job_id
         if job_results.exists():
@@ -451,6 +595,35 @@ class StorageManager:
             except Exception:
                 pass
         return count
+
+    # --- Result URL helpers (S3 presign) ---
+    def get_result_presigned_url(self, job_id: str, filename: str, *, content_disposition: Optional[str] = None) -> Optional[str]:
+        """Return a presigned GET URL for a result stored in object storage.
+
+        Returns None when object store is not enabled or pointer missing.
+        """
+        if self._s3 is None or self.use_local_only or not self.redis_client:
+            return None
+        try:
+            rk = f"result:{job_id}:{filename}"
+            v = self._with_retry(self.redis_client.get, rk)
+            if not v:
+                return None
+            meta = None
+            try:
+                s = v.decode() if isinstance(v, (bytes, bytearray)) else str(v)
+                meta = json.loads(s)
+            except Exception:
+                return None
+            if not isinstance(meta, dict) or meta.get("storage") != "s3" or not meta.get("key"):
+                return None
+            return self._s3.generate_presigned_url(
+                meta["key"],  # type: ignore[index]
+                response_content_type="application/pdf",
+                response_content_disposition=content_disposition,
+            )
+        except Exception:
+            return None
     
     def update_progress(self, job_id: str, progress: int, message: str) -> None:
         """Update job progress in Redis (percent + message)."""
@@ -569,6 +742,14 @@ class StorageManager:
                 shutil.rmtree(results_dir)
             except Exception:
                 pass
+
+        # Clean up object store prefixes
+        try:
+            if self._s3 is not None:
+                self._s3.delete_prefix(f"uploads/{job_id}/")
+                self._s3.delete_prefix(f"results/{job_id}/")
+        except Exception:
+            pass
 
         # Finally, remove from the user's job list if known
         if owner_id:
@@ -871,8 +1052,8 @@ class StorageManager:
             return False
         try:
             amt = max(0, int(amount))
-            # long TTL (30d) auto-refresh on write
-            self._with_retry(self.redis_client.setex, self._token_key(user_id), 2592000, str(amt))
+            # Persist without TTL to avoid eviction of balances
+            self._with_retry(self.redis_client.set, self._token_key(user_id), str(amt))
             return True
         except Exception:
             return False
@@ -881,11 +1062,8 @@ class StorageManager:
         if self.use_local_only or not self.redis_client:
             return None
         try:
-            # Ensure key exists
-            pipe = self.redis_client.pipeline()
-            pipe.incrby(self._token_key(user_id), int(delta))
-            pipe.expire(self._token_key(user_id), 2592000)
-            new_val, _ = self._with_retry(pipe.execute)
+            # Atomic increment without TTL; Redis will create the key if missing
+            new_val = self._with_retry(self.redis_client.incrby, self._token_key(user_id), int(delta))
             try:
                 return int(new_val)
             except Exception:
@@ -917,11 +1095,7 @@ class StorageManager:
             except Exception:
                 return False
             if ival >= 0:
-                # extend TTL
-                try:
-                    self._with_retry(self.redis_client.expire, key, 2592000)
-                except Exception:
-                    pass
+                # No TTL management — keep balances persistent
                 return True
             return False
         except Exception:
@@ -1020,13 +1194,12 @@ class StorageManager:
                     pass
             else:
                 profile["created_at"] = profile["updated_at"]
-            self._with_retry(self.redis_client.setex, self._user_profile_key(user_id), 2592000, json.dumps(profile))
+            # Persist profile without TTL to avoid eviction of user registry
+            self._with_retry(self.redis_client.set, self._user_profile_key(user_id), json.dumps(profile))
             # Index user id and email mapping
             self._with_retry(self.redis_client.sadd, self._users_index_key(), user_id)
             self._with_retry(self.redis_client.sadd, self._email_index_key(email), user_id)
-            # Expire indices lazily
-            self._with_retry(self.redis_client.expire, self._users_index_key(), 2592000)
-            self._with_retry(self.redis_client.expire, self._email_index_key(email), 2592000)
+            # Do not set TTL on indices; keep persistent
             return True
         except Exception:
             return False

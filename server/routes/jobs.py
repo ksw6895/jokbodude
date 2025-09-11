@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request, Response, Depends
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 
 from ..core import celery_app
 from ..utils import build_content_disposition
@@ -42,6 +42,14 @@ def get_result_file(request: Request, job_id: str, user: dict = Depends(require_
     if path and path.exists():
         disposition = build_content_disposition(filename)
         return FileResponse(path, media_type="application/pdf", filename=filename, headers={"Content-Disposition": disposition})
+    # If stored in object storage, redirect to a presigned URL
+    try:
+        disposition = build_content_disposition(filename)
+        url = storage_manager.get_result_presigned_url(job_id, filename, content_disposition=disposition)
+        if url:
+            return RedirectResponse(url=url, status_code=302)
+    except Exception:
+        pass
     content = storage_manager.get_result(f"result:{job_id}:{filename}")
     if not content:
         raise HTTPException(status_code=404, detail="Generated PDF not found.")
@@ -67,6 +75,14 @@ def get_specific_result_file(request: Request, job_id: str, filename: str, user:
     if path and path.exists():
         disposition = build_content_disposition(filename)
         return FileResponse(path, media_type="application/pdf", filename=filename, headers={"Content-Disposition": disposition})
+    # If stored in object storage, redirect to a presigned URL
+    try:
+        disposition = build_content_disposition(filename)
+        url = storage_manager.get_result_presigned_url(job_id, filename, content_disposition=disposition)
+        if url:
+            return RedirectResponse(url=url, status_code=302)
+    except Exception:
+        pass
     result_key = f"result:{job_id}:{filename}"
     content = storage_manager.get_result(result_key)
     if not content:
