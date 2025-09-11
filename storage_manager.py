@@ -17,11 +17,14 @@ import hashlib
 import socket
 from datetime import datetime
 
-try:
-    # Optional import; only required when OBJECT_STORE=s3
-    from server.services.storage.object_store import S3ObjectStore
-except Exception:  # pragma: no cover - keep optional
-    S3ObjectStore = None  # type: ignore
+S3ObjectStore = None  # type: ignore
+_S3_IMPORT_ERROR: Optional[str] = None
+try:  # Optional import; only required when OBJECT_STORE=s3
+    from server.services.storage.object_store import S3ObjectStore as _S3Cls  # type: ignore
+    S3ObjectStore = _S3Cls  # type: ignore
+except Exception as e:  # pragma: no cover - keep optional
+    # Capture the import error for diagnostics in runtime logs
+    _S3_IMPORT_ERROR = f"{type(e).__name__}: {e}"
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +59,10 @@ class StorageManager:
                 else:
                     logging.warning("OBJECT_STORE=s3 but S3 env vars incomplete; falling back to Redis/disk.")
             elif self.object_store_mode == "s3" and S3ObjectStore is None:
-                logging.warning("OBJECT_STORE=s3 set but boto3 wrapper unavailable; falling back to Redis/disk.")
+                logging.warning(
+                    "OBJECT_STORE=s3 set but boto3 wrapper unavailable; falling back to Redis/disk. %s",
+                    f"(import_error={_S3_IMPORT_ERROR})" if _S3_IMPORT_ERROR else "",
+                )
         except Exception as e:
             logging.warning(f"Failed to initialize S3 object store: {e}")
         # Local storage for intermediate files (backups/fallbacks)
@@ -263,7 +269,7 @@ class StorageManager:
         """Retrieve file content from Redis or local storage"""
         if not self.use_local_only and self.redis_client:
             try:
-                # Try to get from Redis
+                # Try to get from Redis (hash form)
                 data = self._with_retry(self.redis_client.hgetall, file_key)
                 if data:
                     # If S3 pointer exists, download from S3
@@ -280,13 +286,22 @@ class StorageManager:
                         if compressed and (compressed == b"True" or compressed == "True"):
                             content = zlib.decompress(content)
                         return content
-                
-                # Fallback to simple get for backward compatibility
+            except Exception as e:
+                # If hash read failed (e.g., WRONGTYPE due to legacy string key), try simple GET
+                try:
+                    content = self._with_retry(self.redis_client.get, file_key)
+                    if content:
+                        return content
+                except Exception:
+                    pass
+                logger.error(f"Failed to get from Redis: {e}")
+            # If no exception or no content from hash path, attempt GET fallback
+            try:
                 content = self._with_retry(self.redis_client.get, file_key)
                 if content:
                     return content
-            except Exception as e:
-                logger.error(f"Failed to get from Redis: {e}")
+            except Exception:
+                pass
         
         # Fallback to local storage
         parts = file_key.split(":")
