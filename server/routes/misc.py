@@ -111,9 +111,16 @@ def admin_cleanup(
     older_than_hours: int | None = Query(None, ge=1, description="Only delete files older than this many hours"),
     user=Depends(_get_current_user),
 ):
-    """Administrative cleanup: clear cache and prune debug/temp files."""
+    """Administrative cleanup: clear cache, results, and debug/temp files."""
     _require_admin(password, user)
     summary: dict[str, dict | bool] = {}
+    if clear_results:
+        try:
+            base_storage = Path(os.getenv("RENDER_STORAGE_PATH", "output"))
+            results_dir = (base_storage / "results").resolve()
+            summary["results_deleted"] = delete_path_contents(results_dir, older_than_hours)
+        except Exception as e:
+            summary["results_deleted"] = {"error": str(e)}
     if clear_cache:
         try:
             clear_global_cache()
@@ -130,13 +137,6 @@ def admin_cleanup(
             summary["temp_sessions_deleted"] = delete_path_contents(Path("output/temp/sessions"), older_than_hours)
         except Exception as e:
             summary["temp_sessions_deleted"] = {"error": str(e)}
-    if clear_results:
-        try:
-            base_storage = Path(os.getenv("RENDER_STORAGE_PATH", "output"))
-            results_dir = (base_storage / "results").resolve()
-            summary["results_deleted"] = delete_path_contents(results_dir, older_than_hours)
-        except Exception as e:
-            summary["results_deleted"] = {"error": str(e)}
     return summary
 
 
