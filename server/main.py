@@ -27,8 +27,9 @@ async def lifespan(app: FastAPI):
         pass
     get_global_cache()
     try:
-        _ret_hours = int(os.getenv("DEBUG_RETENTION_HOURS", "168"))
-        _results_ret_hours = int(os.getenv("RESULT_RETENTION_HOURS", "720"))  # default 30 days
+        # Use shorter defaults here as well; ops can override via env
+        _ret_hours = int(os.getenv("DEBUG_RETENTION_HOURS", "72"))       # default 3 days
+        _results_ret_hours = int(os.getenv("RESULT_RETENTION_HOURS", "168"))  # default 7 days
         _prune_dirs = [Path("output/debug"), Path("output/temp/sessions")]
         now = time.time()
         for d in _prune_dirs:

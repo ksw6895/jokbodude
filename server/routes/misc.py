@@ -169,3 +169,19 @@ def storage_stats(password: Optional[str] = Query(None), user=Depends(_get_curre
         "tmp": dir_stats(tmpdir) if tmpdir else None,
         "timestamp": datetime.now().isoformat(),
     }
+
+
+@router.post("/admin/worker-cleanup")
+def trigger_worker_cleanup(password: Optional[str] = Query(None), user=Depends(_get_current_user)):
+    """Trigger a one-shot cleanup on workers (admin-only).
+
+    Enqueues a Celery task (`tasks.worker_cleanup_now`) that runs the same
+    pruning logic workers execute periodically, allowing immediate cleanup
+    of results/debug/sessions/tmp on worker disks.
+    """
+    _require_admin(password, user)
+    try:
+        task = celery_app.send_task("tasks.worker_cleanup_now", queue="default")
+        return {"status": "queued", "task_id": task.id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to enqueue worker cleanup: {e}")

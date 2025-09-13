@@ -58,8 +58,9 @@ class PDFProcessor:
         self.chunk_results_dir = self.session_dir / "chunk_results"
         self.chunk_results_dir.mkdir(parents=True, exist_ok=True)
         
-        # Debug directory
-        self.debug_dir = Path("output/debug")
+        # Debug outputs under the session directory so they are removed
+        # by cleanup_session(), preventing long-term disk growth.
+        self.debug_dir = self.session_dir / "debug"
         self.debug_dir.mkdir(parents=True, exist_ok=True)
         
         # Initialize analyzers

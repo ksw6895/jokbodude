@@ -421,18 +421,19 @@ def _cleanup_once() -> None:
     """One-shot cleanup pass for worker-side storage paths."""
     try:
         # Retention windows
+        # Shorter defaults to reduce disk growth; override via env in ops
         try:
-            debug_hours = int(os.getenv("DEBUG_RETENTION_HOURS", "168"))
+            debug_hours = int(os.getenv("DEBUG_RETENTION_HOURS", "72"))  # default 3 days
         except Exception:
-            debug_hours = 168
+            debug_hours = 72
         try:
-            results_hours = int(os.getenv("RESULT_RETENTION_HOURS", "720"))
+            results_hours = int(os.getenv("RESULT_RETENTION_HOURS", "168"))  # default 7 days
         except Exception:
-            results_hours = 720
+            results_hours = 168
         try:
-            sessions_hours = int(os.getenv("SESSIONS_RETENTION_HOURS", "168"))
+            sessions_hours = int(os.getenv("SESSIONS_RETENTION_HOURS", "72"))  # default 3 days
         except Exception:
-            sessions_hours = 168
+            sessions_hours = 72
 
         # Paths to clean
         try:
@@ -449,7 +450,7 @@ def _cleanup_once() -> None:
         _prune_path(results_root, results_hours)
         # Conservative temp pruning
         try:
-            tmp_hours = int(os.getenv("TMP_RETENTION_HOURS", "24"))
+            tmp_hours = int(os.getenv("TMP_RETENTION_HOURS", "24"))  # default 24 hours
         except Exception:
             tmp_hours = 24
         _prune_path(tmpdir, tmp_hours)
@@ -478,6 +479,20 @@ def _maybe_start_cleanup_thread() -> None:
         return
     t = threading.Thread(target=_cleanup_loop, name="worker-cleanup", daemon=True)
     t.start()
+
+
+# --- Admin-triggered cleanup task ---
+@celery_app.task(name="tasks.worker_cleanup_now")
+def worker_cleanup_now() -> dict:
+    """Run a one-shot cleanup pass on the worker and report summary.
+
+    This allows the web admin to trigger worker-side disk cleanup immediately.
+    """
+    try:
+        _cleanup_once()
+        return {"status": "ok"}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
 
 
 @worker_ready.connect

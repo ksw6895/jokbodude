@@ -461,7 +461,9 @@ class StorageManager:
                     content,
                 )
         # Optionally persist to disk to avoid overusing Redis memory
-        persist_env = os.getenv("PERSIST_RESULTS_ON_DISK", "true").strip().lower()
+        # Default to not persisting on worker disk to avoid disk growth.
+        # Operators can opt-in by setting PERSIST_RESULTS_ON_DISK=true
+        persist_env = os.getenv("PERSIST_RESULTS_ON_DISK", "false").strip().lower()
         persist_to_disk = persist_env in ("1", "true", "yes", "on")
         if persist_to_disk:
             try:
