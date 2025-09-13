@@ -455,7 +455,8 @@
                     <button id="run_cleanup_btn" class="tab">Run Cleanup</button>
                     <button id="run_full_cleanup_btn" class="tab">Run Cleanup + Results</button>
                     <button id="worker_cleanup_btn" class="tab" title="Trigger cleanup on workers">Worker Cleanup Now</button>
-                    <button id="show_stats_btn" class="tab">Show Storage Stats</button>
+                    <button id="show_stats_btn" class="tab">Show Web Storage Stats</button>
+                    <button id="show_worker_stats_btn" class="tab">Show Worker Storage Stats</button>
                 </div>
                 <pre id="admin_output" style="margin-top:1rem;background:rgba(0,0,0,0.25);padding:0.75rem;border-radius:8px;max-height:240px;overflow:auto;color:#ccc;"></pre>
             </div>
@@ -1224,6 +1225,24 @@
                 out.textContent = JSON.stringify(data, null, 2);
             } catch (e) {
                 out.textContent = 'Stats error: ' + e.message;
+            }
+        });
+
+        document.getElementById('show_worker_stats_btn').addEventListener('click', async () => {
+            const out = document.getElementById('admin_output');
+            try {
+                let url = '/admin/worker-storage-stats';
+                if (!CURRENT_USER || !CURRENT_USER.admin) {
+                    const pw = getAdminPassword();
+                    if (!pw) { alert('Enter Admin Password first.'); return; }
+                    url += `?password=${encodeURIComponent(pw)}`;
+                }
+                const res = await fetch(url, { method: 'GET', credentials: 'include' });
+                if (!res.ok) throw new Error('Worker stats request failed');
+                const data = await res.json();
+                out.textContent = JSON.stringify(data, null, 2) + '\nUse /status/{task_id} to fetch results when done.';
+            } catch (e) {
+                out.textContent = 'Worker stats error: ' + e.message;
             }
         });
 

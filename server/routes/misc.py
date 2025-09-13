@@ -194,3 +194,17 @@ def trigger_worker_cleanup(
         return {"status": "queued", "task_id": task.id, "older_than_hours": older_than_hours}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to enqueue worker cleanup: {e}")
+
+
+@router.get("/admin/worker-storage-stats")
+def get_worker_storage_stats(password: Optional[str] = Query(None), user=Depends(_get_current_user)):
+    """Queue a worker-side storage stats task (admin-only).
+
+    Returns a task_id which can be polled via GET /status/{task_id}.
+    """
+    _require_admin(password, user)
+    try:
+        task = celery_app.send_task("tasks.worker_storage_stats", queue="analysis")
+        return {"status": "queued", "task_id": task.id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to enqueue worker storage stats: {e}")

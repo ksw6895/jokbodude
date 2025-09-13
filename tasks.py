@@ -445,8 +445,10 @@ def _cleanup_once(*, debug_hours: int | None = None, results_hours: int | None =
         try:
             sm = StorageManager()
             results_root = getattr(sm, "results_dir", Path(os.getenv("RENDER_STORAGE_PATH", "output")) / "results")
+            local_storage = getattr(sm, "local_storage", Path("output") / "storage")
         except Exception:
             results_root = Path(os.getenv("RENDER_STORAGE_PATH", "output")) / "results"
+            local_storage = Path("output") / "storage"
         debug_dir = Path("output/debug")
         sessions_dir = Path("output/temp/sessions")
         tmpdir = Path(os.getenv("TMPDIR", tempfile.gettempdir()))
@@ -454,6 +456,8 @@ def _cleanup_once(*, debug_hours: int | None = None, results_hours: int | None =
         _prune_path(debug_dir, debug_hours)
         _prune_path(sessions_dir, sessions_hours)
         _prune_path(results_root, results_hours)
+        # Also prune legacy/local storage backups if any
+        _prune_path(local_storage, results_hours)
         # TMP pruning
         if tmp_hours is None:
             try:
@@ -464,6 +468,23 @@ def _cleanup_once(*, debug_hours: int | None = None, results_hours: int | None =
     except Exception:
         # Never disrupt worker due to cleanup errors
         pass
+
+
+def _dir_stats(base: Path) -> dict:
+    total = 0
+    files = 0
+    try:
+        if base.exists():
+            for p in base.rglob("*"):
+                try:
+                    if p.is_file():
+                        files += 1
+                        total += p.stat().st_size
+                except Exception:
+                    continue
+    except Exception:
+        pass
+    return {"path": str(base), "files": files, "bytes": int(total)}
 
 
 def _cleanup_loop() -> None:
@@ -509,6 +530,33 @@ def worker_cleanup_now(older_hours: int | None = None) -> dict:
         return {"status": "ok", "older_hours": oh}
     except Exception as e:
         return {"status": "error", "error": str(e)}
+
+
+@celery_app.task(name="tasks.worker_storage_stats")
+def worker_storage_stats() -> dict:
+    """Return size and file stats for worker-side storage paths."""
+    try:
+        try:
+            sm = StorageManager()
+            results_root = getattr(sm, "results_dir", Path(os.getenv("RENDER_STORAGE_PATH", "output")) / "results")
+            local_storage = getattr(sm, "local_storage", Path("output") / "storage")
+        except Exception:
+            results_root = Path(os.getenv("RENDER_STORAGE_PATH", "output")) / "results"
+            local_storage = Path("output") / "storage"
+        debug_dir = Path("output/debug")
+        sessions_dir = Path("output/temp/sessions")
+        tmpdir = Path(os.getenv("TMPDIR", tempfile.gettempdir()))
+        alt_results = Path("output") / "results"
+        return {
+            "results": _dir_stats(results_root),
+            "debug": _dir_stats(debug_dir),
+            "sessions": _dir_stats(sessions_dir),
+            "tmp": _dir_stats(tmpdir),
+            "local_storage": _dir_stats(local_storage),
+            "output_results": _dir_stats(alt_results),
+        }
+    except Exception as e:
+        return {"error": str(e)}
 
 
 @worker_ready.connect
