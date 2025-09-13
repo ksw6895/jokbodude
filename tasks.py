@@ -417,23 +417,29 @@ def _prune_path(base: Path, older_than_hours: int | None) -> None:
             pass
 
 
-def _cleanup_once() -> None:
-    """One-shot cleanup pass for worker-side storage paths."""
+def _cleanup_once(*, debug_hours: int | None = None, results_hours: int | None = None,
+                  sessions_hours: int | None = None, tmp_hours: int | None = None) -> None:
+    """One-shot cleanup pass for worker-side storage paths.
+
+    Optional args override env defaults. Use 0 for immediate deletion.
+    """
     try:
-        # Retention windows
-        # Shorter defaults to reduce disk growth; override via env in ops
-        try:
-            debug_hours = int(os.getenv("DEBUG_RETENTION_HOURS", "72"))  # default 3 days
-        except Exception:
-            debug_hours = 72
-        try:
-            results_hours = int(os.getenv("RESULT_RETENTION_HOURS", "168"))  # default 7 days
-        except Exception:
-            results_hours = 168
-        try:
-            sessions_hours = int(os.getenv("SESSIONS_RETENTION_HOURS", "72"))  # default 3 days
-        except Exception:
-            sessions_hours = 72
+        # Retention windows (shorter defaults; ops can override via env)
+        if debug_hours is None:
+            try:
+                debug_hours = int(os.getenv("DEBUG_RETENTION_HOURS", "72"))  # default 3 days
+            except Exception:
+                debug_hours = 72
+        if results_hours is None:
+            try:
+                results_hours = int(os.getenv("RESULT_RETENTION_HOURS", "168"))  # default 7 days
+            except Exception:
+                results_hours = 168
+        if sessions_hours is None:
+            try:
+                sessions_hours = int(os.getenv("SESSIONS_RETENTION_HOURS", "72"))  # default 3 days
+            except Exception:
+                sessions_hours = 72
 
         # Paths to clean
         try:
@@ -448,11 +454,12 @@ def _cleanup_once() -> None:
         _prune_path(debug_dir, debug_hours)
         _prune_path(sessions_dir, sessions_hours)
         _prune_path(results_root, results_hours)
-        # Conservative temp pruning
-        try:
-            tmp_hours = int(os.getenv("TMP_RETENTION_HOURS", "24"))  # default 24 hours
-        except Exception:
-            tmp_hours = 24
+        # TMP pruning
+        if tmp_hours is None:
+            try:
+                tmp_hours = int(os.getenv("TMP_RETENTION_HOURS", "24"))  # default 24 hours
+            except Exception:
+                tmp_hours = 24
         _prune_path(tmpdir, tmp_hours)
     except Exception:
         # Never disrupt worker due to cleanup errors
@@ -483,14 +490,23 @@ def _maybe_start_cleanup_thread() -> None:
 
 # --- Admin-triggered cleanup task ---
 @celery_app.task(name="tasks.worker_cleanup_now")
-def worker_cleanup_now() -> dict:
+def worker_cleanup_now(older_hours: int | None = None) -> dict:
     """Run a one-shot cleanup pass on the worker and report summary.
 
-    This allows the web admin to trigger worker-side disk cleanup immediately.
+    If older_hours is provided (>= 0), apply that cutoff to all categories for this run.
     """
     try:
-        _cleanup_once()
-        return {"status": "ok"}
+        oh: int | None = None
+        try:
+            if older_hours is not None:
+                oh = max(0, int(older_hours))
+        except Exception:
+            oh = None
+        if oh is None:
+            _cleanup_once()
+        else:
+            _cleanup_once(debug_hours=oh, results_hours=oh, sessions_hours=oh, tmp_hours=oh)
+        return {"status": "ok", "older_hours": oh}
     except Exception as e:
         return {"status": "error", "error": str(e)}
 

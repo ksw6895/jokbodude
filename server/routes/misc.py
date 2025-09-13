@@ -172,7 +172,11 @@ def storage_stats(password: Optional[str] = Query(None), user=Depends(_get_curre
 
 
 @router.post("/admin/worker-cleanup")
-def trigger_worker_cleanup(password: Optional[str] = Query(None), user=Depends(_get_current_user)):
+def trigger_worker_cleanup(
+    password: Optional[str] = Query(None),
+    older_than_hours: Optional[int] = Query(None, ge=0, description="Override retention just for this run (0 deletes all)"),
+    user=Depends(_get_current_user),
+):
     """Trigger a one-shot cleanup on workers (admin-only).
 
     Enqueues a Celery task (`tasks.worker_cleanup_now`) that runs the same
@@ -181,7 +185,12 @@ def trigger_worker_cleanup(password: Optional[str] = Query(None), user=Depends(_
     """
     _require_admin(password, user)
     try:
-        task = celery_app.send_task("tasks.worker_cleanup_now", queue="default")
-        return {"status": "queued", "task_id": task.id}
+        # Send to the analysis queue so it runs on workers that only consume 'analysis'
+        task = celery_app.send_task(
+            "tasks.worker_cleanup_now",
+            kwargs={"older_hours": older_than_hours} if older_than_hours is not None else {},
+            queue="analysis",
+        )
+        return {"status": "queued", "task_id": task.id, "older_than_hours": older_than_hours}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to enqueue worker cleanup: {e}")

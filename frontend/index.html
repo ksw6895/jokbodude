@@ -1185,10 +1185,17 @@
         document.getElementById('worker_cleanup_btn').addEventListener('click', async () => {
             try {
                 let url = '/admin/worker-cleanup';
+                const older = (document.getElementById('older_hours').value || '').trim();
+                if (older !== '') {
+                    const n = parseInt(older, 10);
+                    if (!isNaN(n) && n >= 0) {
+                        url += `?older_than_hours=${encodeURIComponent(String(n))}`;
+                    }
+                }
                 if (!CURRENT_USER || !CURRENT_USER.admin) {
                     const pw = getAdminPassword();
                     if (!pw) { alert('Enter Admin Password first.'); return; }
-                    url += `?password=${encodeURIComponent(pw)}`;
+                    url += (url.includes('?') ? '&' : '?') + `password=${encodeURIComponent(pw)}`;
                 }
                 const res = await fetch(url, { method: 'POST', credentials: 'include' });
                 if (!res.ok) throw new Error('Worker cleanup request failed');
