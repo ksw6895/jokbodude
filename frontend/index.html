@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,367 +9,45 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <style>
-      :root {
-        color-scheme: dark;
-        --color-bg: #0D1117;
-        --color-surface: rgba(22,27,34,0.72);
-        --color-surface-alt: rgba(17,24,39,0.68);
-        --color-surface-strong: #12151a;
-        --color-surface-contrast: #0b0f14;
-        --color-border: #30363D;
-        --color-text-primary: #C9D1D9;
-        --color-text-secondary: #8B949E;
-        --color-muted: #8B949E;
-        --color-accent: #58A6FF;
-        --color-accent-soft: rgba(88,166,255,0.18);
-        --color-on-accent: #0B1120;
-        --color-nav-bg: rgba(0,0,0,0.30);
-        --color-nav-border: #1f2937;
-        --color-badge-bg: rgba(0,0,0,0.30);
-        --color-progress: linear-gradient(90deg, #dcdcdc, #8d8d8d);
-        --card-shadow: 0 18px 40px rgba(0,0,0,0.35);
-        --control-surface: rgba(255,255,255,0.06);
-        --control-surface-strong: rgba(255,255,255,0.1);
-        --warning-surface: rgba(255,255,255,0.5);
-        --hero-gradient-start: #E1E8EF;
-        --hero-gradient-end: #A6C5E3;
-        --aurora-gradient: radial-gradient(circle at 10% 20%, rgba(58,122,255,.12), transparent 42%), radial-gradient(circle at 90% 80%, rgba(110,86,255,.12), transparent 42%), radial-gradient(circle at 50% 50%, rgba(30,190,255,.10), transparent 50%);
-        --border: #30363D;
-        --muted: #8B949E;
-        --gray-300: #3b4252;
-        --gray-500: #6b7280;
-        --glass-border: rgba(255,255,255,0.12);
-      }
-      body[data-theme="light"] {
-        color-scheme: light;
-        --color-bg: #f3f8ff;
-        --color-surface: rgba(255,255,255,0.88);
-        --color-surface-alt: rgba(236,243,255,0.9);
-        --color-surface-strong: #e6efff;
-        --color-surface-contrast: rgba(198,217,255,0.6);
-        --color-border: rgba(178,198,230,0.9);
-        --color-text-primary: #12325c;
-        --color-text-secondary: #4d678b;
-        --color-muted: #4d678b;
-        --color-accent: #3b82f6;
-        --color-accent-soft: rgba(59,130,246,0.25);
-        --color-on-accent: #f5f8ff;
-        --color-nav-bg: rgba(255,255,255,0.88);
-        --color-nav-border: rgba(172,198,235,0.7);
-        --color-badge-bg: rgba(255,255,255,0.72);
-        --color-progress: linear-gradient(90deg, #4f83ff, #7aa9ff);
-        --card-shadow: 0 18px 40px rgba(15,23,42,0.12);
-        --control-surface: rgba(59,130,246,0.12);
-        --control-surface-strong: rgba(59,130,246,0.18);
-        --warning-surface: rgba(59,130,246,0.15);
-        --hero-gradient-start: #1e3a8a;
-        --hero-gradient-end: #2563eb;
-        --aurora-gradient: radial-gradient(circle at 20% 18%, rgba(59,130,246,.16), transparent 48%), radial-gradient(circle at 80% 72%, rgba(37,99,235,.15), transparent 52%), radial-gradient(circle at 50% 50%, rgba(125,211,252,.18), transparent 54%);
-        --border: rgba(178,198,230,0.9);
-        --muted: #4d678b;
-        --gray-300: rgba(182,200,231,0.85);
-        --gray-500: #6f8db6;
-        --glass-border: rgba(59,130,246,0.22);
-      }
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: var(--color-bg);
-        color: var(--color-text-primary);
-        transition: background-color .35s ease, color .35s ease;
-      }
-      .aurora-background {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: -1;
-        background: var(--aurora-gradient);
-        filter: blur(80px);
-        transition: background .45s ease;
-      }
-      .glass-card {
-        background: var(--color-surface);
-        backdrop-filter: blur(16px) saturate(180%);
-        -webkit-backdrop-filter: blur(16px) saturate(180%);
-        border: 1px solid var(--color-border);
-        border-radius: 16px;
-        box-shadow: var(--card-shadow);
-        transition: background .35s ease, border-color .35s ease, box-shadow .35s ease, color .35s ease;
-      }
-      .hero-title-gradient {
-        background: linear-gradient(90deg, var(--hero-gradient-start), var(--hero-gradient-end));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-      .tab-content { display: none; }
-      .tab-content.active { display: block; animation: fadeIn .3s ease-in-out; }
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform: translateY(0); } }
-      .help-panel {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height .4s ease-out, padding .3s ease-out, margin .3s ease-out, opacity .3s ease-out;
-        padding-top:0;
-        padding-bottom:0;
-        margin-top:0;
-        opacity: 0;
-        border-radius: 12px;
-        border: 1px solid transparent;
-      }
-      .help-panel.show {
-        max-height: 260px;
-        margin-top: .5rem;
-        padding-top: .85rem;
-        padding-bottom: .85rem;
-        opacity: 1;
-        border-color: var(--color-border);
-        background: var(--color-surface-alt);
-      }
-      .analysis-tabs {
-        display: flex;
-        flex-wrap: wrap;
-        gap: .5rem;
-        padding: .35rem;
-        background: var(--color-surface-alt);
-        border: 1px solid var(--color-border);
-        border-radius: 18px;
-      }
-      .analysis-tab {
-        flex: 1 1 220px;
-        padding: .75rem .85rem;
-        border-radius: 12px;
-        border: 1px solid transparent;
-        background: transparent;
-        color: var(--color-text-secondary);
-        font-weight: 600;
-        transition: background .25s ease, color .25s ease, box-shadow .25s ease, border-color .25s ease;
-      }
-      .analysis-tab:hover {
-        background: var(--color-surface);
-        color: var(--color-text-primary);
-        border-color: rgba(255,255,255,0.08);
-      }
-      .analysis-tab.active {
-        background: var(--color-accent);
-        color: var(--color-on-accent);
-        box-shadow: 0 12px 28px var(--color-accent-soft);
-        border-color: transparent;
-      }
-      .tab {
-        background: var(--control-surface);
-        color: var(--color-text-secondary);
-        border: 1px solid transparent;
-        border-radius: 9999px;
-        padding: .4rem .85rem;
-        font-weight: 600;
-        transition: background .2s ease, color .2s ease, border-color .2s ease;
-      }
-      .tab:hover {
-        background: var(--control-surface-strong);
-        color: var(--color-text-primary);
-        border-color: transparent;
-      }
-      .file-upload-area {
-        border: 1px dashed var(--color-border);
-        background: var(--color-surface-alt);
-        border-radius: 16px;
-        padding: 1.5rem;
-        text-align: center;
-        transition: border-color .3s ease, background .3s ease, transform .3s ease, box-shadow .3s ease;
-        outline: none;
-      }
-      .file-upload-area:hover,
-      .file-upload-area:focus-visible {
-        border-color: var(--color-accent);
-        background: var(--color-surface);
-      }
-      .file-upload-area.active {
-        border-color: var(--color-accent);
-        background: var(--color-surface);
-      }
-      .file-upload-area.dragover {
-        border-color: var(--color-accent);
-        transform: scale(1.02);
-        box-shadow: 0 0 24px var(--color-accent-soft);
-      }
-      .file-item {
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:.75rem;
-        flex-wrap:wrap;
-        padding:.55rem .75rem;
-        border:1px solid var(--color-border);
-        border-radius:10px;
-        background: var(--color-surface-strong);
-        transition: background .3s ease, border-color .3s ease;
-      }
-      .file-remove {
-        padding:.3rem .6rem;
-        border:1px solid transparent;
-        background: var(--control-surface);
-        border-radius:8px;
-        cursor:pointer;
-        color:#ef6363;
-      }
-      .file-remove:hover {
-        background: var(--control-surface-strong);
-      }
-      .status-badge {
-        border: 1px solid var(--color-border);
-        background: var(--color-badge-bg);
-        color: var(--color-text-secondary);
-        padding: .25rem .6rem;
-        border-radius: 9999px;
-        font-weight: 700;
-        font-size: .8rem;
-        transition: background .3s ease, color .3s ease, border-color .3s ease;
-      }
-      .status-badge.processing { color: #e3b341; border-color: #3a3320; }
-      .status-badge.success { color: #42c386; border-color: #204732; }
-      .status-badge.error { color: #ef6363; border-color: #4a2222; }
-      .progress-bar {
-        border: 1px solid var(--color-border);
-        background: var(--color-surface-contrast);
-        border-radius: 9999px;
-        overflow: hidden;
-        transition: background .3s ease, border-color .3s ease;
-      }
-      .progress-fill {
-        background: var(--color-progress);
-        height: 8px;
-        width: 0%;
-        transition: width .3s ease;
-      }
-      .loader { display:inline-block; width: 20px; height: 20px; border: 3px solid var(--color-surface-contrast); border-top-color: var(--color-text-secondary); border-radius: 50%; animation: spin 1s linear infinite; }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      .theme-toggle {
-        width: 38px;
-        height: 38px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 9999px;
-        background: var(--control-surface);
-        color: var(--color-text-secondary);
-        border: 1px solid transparent;
-        transition: background .2s ease, color .2s ease;
-      }
-      .theme-toggle:hover { background: var(--control-surface-strong); color: var(--color-text-primary); }
-      .theme-toggle:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-      .status-surface, .theme-surface {
-        background: var(--color-surface-alt);
-        border: 1px solid var(--color-border);
-        transition: background .35s ease, border-color .35s ease;
-      }
-      .preflight-modal {
-        position: fixed;
-        inset: 0;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
-        background: rgba(8,11,19,0.6);
-        backdrop-filter: blur(12px);
-        z-index: 60;
-      }
-      body[data-theme="light"] .preflight-modal { background: rgba(12,24,48,0.35); }
-      .preflight-modal.show { display: flex; }
-      .preflight-dialog {
-        width: min(420px, 100%);
-        background: var(--color-surface);
-        border: 1px solid var(--color-border);
-        border-radius: 18px;
-        box-shadow: var(--card-shadow);
-        padding: 1.5rem;
-        color: var(--color-text-primary);
-      }
-      .preflight-dialog h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: .75rem; }
-      .preflight-meta { color: var(--color-text-secondary); font-size: .9rem; }
-      .preflight-stats { display: grid; gap: .75rem; margin: 1rem 0; }
-      .preflight-stat {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: .75rem 1rem;
-        background: var(--color-surface-alt);
-        border: 1px solid var(--color-border);
-        border-radius: 12px;
-      }
-      .preflight-actions { display: flex; justify-content: flex-end; gap: .75rem; }
-      .button-secondary {
-        background: var(--control-surface);
-        color: var(--color-text-secondary);
-        border-radius: 9999px;
-        border: 1px solid transparent;
-        padding: .55rem 1rem;
-        font-weight: 600;
-        transition: background .2s ease, color .2s ease;
-      }
-      .button-secondary:hover { background: var(--control-surface-strong); color: var(--color-text-primary); }
-      .button-primary {
-        background: var(--color-accent);
-        color: var(--color-on-accent);
-        border-radius: 9999px;
-        border: none;
-        padding: .6rem 1.2rem;
-        font-weight: 700;
-        box-shadow: 0 12px 28px var(--color-accent-soft);
-        transition: transform .2s ease, box-shadow .2s ease;
-      }
-      .button-primary:hover { transform: translateY(-1px); box-shadow: 0 18px 34px var(--color-accent-soft); }
-      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
-      @media (max-width: 1024px) {
-        .analysis-tab { flex: 1 1 45%; }
-      }
-      @media (max-width: 768px) {
-        nav .nav-actions { flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }
-        nav .nav-brand { gap: .5rem; }
-        .analysis-tab { flex: 1 1 48%; }
-      }
-      @media (max-width: 640px) {
-        .analysis-tab { flex: 1 1 100%; }
-        .file-upload-area { padding: 1.25rem; }
-      }
-      /* Light theme overrides for utility classes */
-      body[data-theme="light"] .bg-black\/30 { background-color: var(--color-nav-bg) !important; }
-      body[data-theme="light"] .bg-gray-900\/70 { background-color: rgba(236,243,255,0.92) !important; }
-      body[data-theme="light"] .bg-gray-900\/60 { background-color: rgba(236,243,255,0.88) !important; }
-      body[data-theme="light"] .bg-gray-800 { background-color: rgba(222,231,255,0.95) !important; color: var(--color-text-primary) !important; }
-      body[data-theme="light"] .hover\:bg-gray-800:hover { background-color: rgba(210,226,255,0.95) !important; }
-      body[data-theme="light"] .bg-gray-700 { background-color: rgba(206,219,255,0.88) !important; color: var(--color-text-primary) !important; }
-      body[data-theme="light"] .hover\:bg-gray-700:hover { background-color: rgba(192,210,255,0.9) !important; }
-      body[data-theme="light"] .border-gray-800, body[data-theme="light"] .border-gray-700 { border-color: var(--color-border) !important; }
-      body[data-theme="light"] .text-white { color: var(--color-text-primary) !important; }
-      body[data-theme="light"] .text-gray-400, body[data-theme="light"] .text-gray-500 { color: var(--color-text-secondary) !important; }
-      body[data-theme="light"] .text-gray-300 { color: var(--color-text-primary) !important; }
-      body[data-theme="light"] .text-gray-200 { color: var(--color-text-primary) !important; }
-    </style>
-    <!-- legacy stylesheet left temporarily during migration; will be removed -->
-    <link rel="stylesheet" href="styles.css?v=5">
+    <script>
+      (function () {
+        var theme = 'dark';
+        try {
+          var stored = localStorage.getItem('jd_theme');
+          if (stored === 'light' || stored === 'dark') {
+            theme = stored;
+          } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            theme = 'light';
+          }
+        } catch (err) {}
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.style.colorScheme = theme === 'light' ? 'light' : 'dark';
+      })();
+    </script>
+    <script src="theme.js"></script>
+    <link rel="stylesheet" href="styles.css?v=6">
 </head>
-<body data-theme="dark">
-    <nav class="sticky top-0 z-50 bg-black/30 backdrop-blur-lg border-b border-gray-800">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-20">
-          <a href="/" class="flex items-center gap-3 nav-brand">
-            <div class="w-10 h-10 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center text-xl">🎓</div>
-            <span class="text-white text-2xl font-bold">JokboDude</span>
-          </a>
-          <div class="flex items-center gap-2 md:gap-4 nav-actions">
-            <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" id="my_jobs_link" href="/profile" style="display:none;">My Jobs</a>
-            <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" href="/guide">Guide</a>
-            <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" id="feedback_link" href="#" style="display:none;">Feedback</a>
-            <button id="theme_toggle" type="button" class="theme-toggle" aria-label="Toggle color theme">
-              <span aria-hidden="true">🌙</span>
-            </button>
-            <div id="auth_area" class="flex items-center gap-2">
-              <span id="user_badge" style="display:none;" class="px-3 py-1.5 border border-gray-700 rounded-full bg-gray-800/50 text-xs text-gray-300"></span>
-              <span id="token_badge" style="display:none;" class="px-3 py-1.5 border border-gray-700 rounded-full bg-gray-800/50 text-xs text-gray-300">Tokens: -</span>
-              <button id="login_btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">Sign in</button>
-              <div id="gsi_btn" style="display:none;"></div>
-              <button id="logout_btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-colors" style="display:none;">Logout</button>
-              <button id="clear_cache_btn" class="bg-gray-800 hover:bg-gray-700 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-colors" style="display:none;" title="Clear cache and debug files">Clear Cache</button>
-            </div>
+<body>
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a href="/" class="nav-brand">
+          <span class="logo-icon">🎓</span>
+          <span>JokboDude</span>
+        </a>
+        <div class="nav-actions">
+          <a class="nav-link" id="my_jobs_link" href="/profile" style="display:none;">My Jobs</a>
+          <a class="nav-link" href="/guide">Guide</a>
+          <a class="nav-link" id="feedback_link" href="#" style="display:none;">Feedback</a>
+          <button id="theme_toggle" type="button" class="theme-toggle" aria-label="Toggle color theme">
+            <span aria-hidden="true">🌙</span>
+          </button>
+          <div id="auth_area" class="nav-auth">
+            <span id="user_badge" class="chip" style="display:none;"></span>
+            <span id="token_badge" class="chip" style="display:none;">Tokens: -</span>
+            <button id="login_btn" class="accent-button">Sign in</button>
+            <div id="gsi_btn" style="display:none;"></div>
+            <button id="logout_btn" class="ghost-button" style="display:none;">Logout</button>
+            <button id="clear_cache_btn" class="ghost-button" style="display:none;" title="Clear cache and debug files">Clear Cache</button>
           </div>
         </div>
       </div>
@@ -379,7 +57,7 @@
         <div class="text-center py-12 md:py-20">
             <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight hero-title-gradient">AI-Powered PDF Analysis</h1>
             <p class="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-gray-400">Transform your study materials with intelligent document analysis using Google Gemini AI</p>
-            <a href="#start" class="mt-8 inline-block bg-blue-600 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg shadow-blue-500/20 hover:bg-blue-500 transform hover:-translate-y-1 transition-all duration-300">Start Analysis →</a>
+            <a href="#start" class="mt-8 accent-button text-lg">Start Analysis →</a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-16">
@@ -818,7 +496,6 @@
             'exam-only': 'Exam Only'
         };
         const MODEL_LABELS = { flash: 'Gemini 2.5 Flash', pro: 'Gemini 2.5 Pro' };
-        const THEME_STORAGE_KEY = 'jd_theme';
 
         // Initialize processing mode toggles with server capabilities
         async function initConfigAndToggles() {
@@ -879,38 +556,6 @@
         }
 
         function getMultiApiState(mode) { return true; }
-
-        function updateThemeToggle(theme) {
-            const toggle = document.getElementById('theme_toggle');
-            if (!toggle) return;
-            const icon = theme === 'light' ? '🌙' : '🌞';
-            toggle.innerHTML = `<span aria-hidden="true">${icon}</span>`;
-            toggle.setAttribute('aria-label', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
-        }
-
-        function applyTheme(theme) {
-            const normalized = theme === 'light' ? 'light' : 'dark';
-            document.body.setAttribute('data-theme', normalized);
-            try { localStorage.setItem(THEME_STORAGE_KEY, normalized); } catch {}
-            updateThemeToggle(normalized);
-        }
-
-        function initTheme() {
-            let storedTheme = null;
-            try { storedTheme = localStorage.getItem(THEME_STORAGE_KEY); } catch {}
-            if (!storedTheme) {
-                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                storedTheme = prefersDark ? 'dark' : 'light';
-            }
-            applyTheme(storedTheme);
-            const toggle = document.getElementById('theme_toggle');
-            if (toggle) {
-                toggle.addEventListener('click', () => {
-                    const current = document.body.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-                    applyTheme(current === 'light' ? 'dark' : 'light');
-                });
-            }
-        }
 
         // Pro model is always available; /config determines only multi-api availability
 
@@ -2094,7 +1739,6 @@
 
         // Initial boot
         (async () => {
-            try { initTheme(); } catch {}
             try { await fetchAuthConfig(); } catch {}
             try { await initConfigAndToggles(); } catch {}
             try { await refreshAuthUI(); } catch {}
