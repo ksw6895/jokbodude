@@ -56,7 +56,7 @@
           <button id="langBtn" type="button" class="ghost-button">🇰🇷 한국어</button>
         </div>
       </div>
-      <div class="guide-reminders" id="heroNote"></div>
+      <div class="guide-hero-note" id="heroNote"></div>
     </section>
 
     <div class="guide-layout">
@@ -117,9 +117,10 @@
         heroHighlights: [
           'Exam-Centric pairs every question with lecture evidence.',
           'Lecture-Centric produces a teaching handout with linked questions.',
-          'Partial Jokbo creates a sharp cram sheet with cropped questions.'
+          'Partial Jokbo creates a sharp cram sheet with cropped questions.',
+          'Exam Only exports a polished jokbo without lecture matches.'
         ],
-        heroNote: 'All modes share the same upload limits (50 MB per file) and token rules. Multi-API runs automatically when admins configure multiple Gemini keys.',
+        heroNote: 'Every mode shares the same 50 MB upload limit and token billing. Multi-API still works when multiple Gemini keys are configured.',
         heroCta: 'Skip to quick start',
         tocTitle: 'Contents',
         tocNote: 'Tip: the language toggle keeps your scroll position while translating every section.',
@@ -165,6 +166,17 @@
                 '<strong>Extras:</strong> merge these results with lecture-centric outputs to build complete study sets.'
               ],
               output: 'Output: compact PDF containing cropped questions, optional follow-up page, and bullet-style AI explanations.'
+            },
+            {
+              badge: 'Exam Only',
+              title: 'Archive raw exam PDFs',
+              description: 'Combine multiple jokbo into a single cleaned document. The system trims blank margins, preserves order, and re-labels sections for faster browsing.',
+              bullets: [
+                '<strong>Best when:</strong> you only need the exam content without lecture cross-links.',
+                '<strong>Input tips:</strong> upload jokbo in chronological order to keep the merged output predictable.',
+                '<strong>Good to know:</strong> lecture files are optional and ignored for this mode.'
+              ],
+              output: 'Output: consolidated jokbo PDF with consistent formatting and trimmed margins.'
             }
           ]
         },
@@ -174,7 +186,7 @@
           steps: [
             {
               title: 'Select a mode',
-              description: 'Choose Exam-Centric, Lecture-Centric, Partial Jokbo, or Batch from the top tabs on the home page.'
+              description: 'Choose Exam-Centric, Lecture-Centric, Partial Jokbo, or Exam Only at the top of the home page.'
             },
             {
               title: 'Add PDFs',
@@ -221,11 +233,11 @@
               ]
             },
             {
-              title: 'Collaboration',
+              title: 'Operations',
               items: [
-                'Share download links via My Jobs → Results instead of emailing PDFs manually.',
-                'Use the Feedback button on the home page to report mismatches; include the job id for faster support.',
-                'Admins can run /admin/cleanup to recycle storage when the output shelf gets full.'
+                'Use My Jobs to re-download completed outputs or clean up files you no longer need.',
+                'Cancel jobs from the status card or profile page to stop remaining chunks without burning extra tokens.',
+                'Admins can monitor quota with /admin/storage-stats and trigger /admin/cleanup when needed.'
               ]
             }
           ]
@@ -261,9 +273,10 @@
         heroHighlights: [
           '시험 중심 모드는 모든 문제에 대응되는 강의 자료를 찾아줍니다.',
           '강의 중심 모드는 슬라이드마다 연결된 문항으로 수업용 자료를 완성합니다.',
-          'Partial Jokbo 모드는 잘린 문제 요약으로 벼락치기용 요약본을 만듭니다.'
+          'Partial Jokbo 모드는 잘린 문제 요약으로 벼락치기용 요약본을 만듭니다.',
+          'Exam Only 모드는 강의 매칭 없이 깔끔한 족보만 출력합니다.'
         ],
-        heroNote: '모든 모드는 PDF 당 50MB 업로드 제한과 동일한 토큰 규칙을 따릅니다. 관리자 계정이 여러 Gemini 키를 설정해 두면 Multi-API는 자동으로 동작합니다.',
+        heroNote: '모든 모드는 PDF 당 50MB 업로드 제한과 동일한 토큰 규칙을 따릅니다. 여러 Gemini 키가 설정된 경우 Multi-API도 계속 병렬로 동작합니다.',
         heroCta: '바로 시작 가이드 보기',
         tocTitle: '목차',
         tocNote: 'Tip: 언어를 바꿔도 현재 스크롤 위치는 유지됩니다.',
@@ -309,6 +322,17 @@
                 '<strong>확장:</strong> 강의 중심 모드 결과와 합쳐서 완성도 높은 학습 세트를 만들 수 있습니다.'
               ],
               output: '결과물: 잘린 문제와 필요시 다음 페이지, 그리고 불릿 형태의 AI 설명을 담은 콤팩트한 PDF.'
+            },
+            {
+              badge: 'Exam Only',
+              title: '원본 족보만 정리하고 싶을 때',
+              description: '여러 족보 PDF를 하나로 합쳐 깔끔하게 정리합니다. 여백을 다듬고, 순서를 유지하며, 섹션을 다시 표시해 빠르게 찾아볼 수 있게 돕습니다.',
+              bullets: [
+                '<strong>추천 상황:</strong> 강의 매칭 없이 순수 족보만 빠르게 검토하려는 경우.',
+                '<strong>업로드 팁:</strong> 정리하고 싶은 순서대로 족보를 올리면 결과물도 그대로 정렬됩니다.',
+                '<strong>참고:</strong> 강의 자료는 선택 사항이며 이 모드에서는 무시됩니다.'
+              ],
+              output: '결과물: 여백이 정리되고 서식이 통일된 통합 족보 PDF.' 
             }
           ]
         },
@@ -318,7 +342,7 @@
           steps: [
             {
               title: '1. 모드 선택',
-              description: '홈 화면 상단 탭에서 Exam-Centric, Lecture-Centric, Partial Jokbo 또는 Batch를 선택하세요.'
+              description: '홈 화면 상단 탭에서 Exam-Centric, Lecture-Centric, Partial Jokbo 또는 Exam Only를 선택하세요.'
             },
             {
               title: '2. PDF 업로드',
@@ -365,11 +389,11 @@
               ]
             },
             {
-              title: '협업',
+              title: '운영',
               items: [
-                '메일 대신 My Jobs → Results에서 다운로드 링크를 공유하면 버전 관리가 쉽습니다.',
-                '홈 화면의 Feedback 버튼으로 매칭 오류를 신고하세요. Job ID를 함께 주시면 더 빨리 대응할 수 있습니다.',
-                '저장 용량이 꽉 찼다면 관리자에게 /admin/cleanup 실행을 요청해 공간을 확보하세요.'
+                'My Jobs 페이지에서 완료된 파일을 다시 내려받거나 필요 없는 결과를 삭제하세요.',
+                '상태 카드나 프로필에서 Cancel 버튼을 누르면 남은 청크가 중단되어 토큰을 아낄 수 있습니다.',
+                '관리자는 /admin/storage-stats로 여유 공간을 확인하고 필요 시 /admin/cleanup을 실행할 수 있습니다.'
               ]
             }
           ]

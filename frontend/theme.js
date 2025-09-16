@@ -29,6 +29,9 @@
   function setColorScheme(theme) {
     doc.setAttribute('data-theme', theme);
     doc.style.colorScheme = theme === 'light' ? 'light' : 'dark';
+    if (document.body) {
+      document.body.setAttribute('data-theme', theme);
+    }
   }
 
   function apply(theme) {
@@ -69,6 +72,7 @@
   function boot() {
     const initial = preferredTheme();
     setColorScheme(initial);
+    document.addEventListener('DOMContentLoaded', () => setColorScheme(initial));
   }
 
   boot();
