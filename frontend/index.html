@@ -10,47 +10,358 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-      :root { --bg: #0D1117; --bg-elevated: #161B22; --border-color: #30363D; --text-primary: #C9D1D9; --text-secondary: #8B949E; }
-      body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-primary); }
-      .aurora-background { position: fixed; inset: 0; pointer-events: none; z-index: -1; background: radial-gradient(circle at 10% 20%, rgba(58,122,255,.10), transparent 40%), radial-gradient(circle at 90% 80%, rgba(110,86,255,.10), transparent 40%), radial-gradient(circle at 50% 50%, rgba(30,190,255,.08), transparent 50%); filter: blur(80px); }
-      .glass-card { background: rgba(22,27,34,.70); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%); border: 1px solid var(--border-color); border-radius: 16px; }
-      .hero-title-gradient { background: linear-gradient(90deg, #E1E8EF, #A6C5E3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-      .tab.active { background-color: #58A6FF; color: #0D1117; font-weight: 600; }
-      .file-upload-area { transition: all .3s ease; }
-      .file-upload-area.dragover { border-color: #58A6FF; transform: scale(1.02); box-shadow: 0 0 20px rgba(88,166,255,.2); }
+      :root {
+        color-scheme: dark;
+        --color-bg: #0D1117;
+        --color-surface: rgba(22,27,34,0.72);
+        --color-surface-alt: rgba(17,24,39,0.68);
+        --color-surface-strong: #12151a;
+        --color-surface-contrast: #0b0f14;
+        --color-border: #30363D;
+        --color-text-primary: #C9D1D9;
+        --color-text-secondary: #8B949E;
+        --color-muted: #8B949E;
+        --color-accent: #58A6FF;
+        --color-accent-soft: rgba(88,166,255,0.18);
+        --color-on-accent: #0B1120;
+        --color-nav-bg: rgba(0,0,0,0.30);
+        --color-nav-border: #1f2937;
+        --color-badge-bg: rgba(0,0,0,0.30);
+        --color-progress: linear-gradient(90deg, #dcdcdc, #8d8d8d);
+        --card-shadow: 0 18px 40px rgba(0,0,0,0.35);
+        --control-surface: rgba(255,255,255,0.06);
+        --control-surface-strong: rgba(255,255,255,0.1);
+        --warning-surface: rgba(255,255,255,0.5);
+        --hero-gradient-start: #E1E8EF;
+        --hero-gradient-end: #A6C5E3;
+        --aurora-gradient: radial-gradient(circle at 10% 20%, rgba(58,122,255,.12), transparent 42%), radial-gradient(circle at 90% 80%, rgba(110,86,255,.12), transparent 42%), radial-gradient(circle at 50% 50%, rgba(30,190,255,.10), transparent 50%);
+        --border: #30363D;
+        --muted: #8B949E;
+        --gray-300: #3b4252;
+        --gray-500: #6b7280;
+        --glass-border: rgba(255,255,255,0.12);
+      }
+      body[data-theme="light"] {
+        color-scheme: light;
+        --color-bg: #f3f8ff;
+        --color-surface: rgba(255,255,255,0.88);
+        --color-surface-alt: rgba(236,243,255,0.9);
+        --color-surface-strong: #e6efff;
+        --color-surface-contrast: rgba(198,217,255,0.6);
+        --color-border: rgba(178,198,230,0.9);
+        --color-text-primary: #12325c;
+        --color-text-secondary: #4d678b;
+        --color-muted: #4d678b;
+        --color-accent: #3b82f6;
+        --color-accent-soft: rgba(59,130,246,0.25);
+        --color-on-accent: #f5f8ff;
+        --color-nav-bg: rgba(255,255,255,0.88);
+        --color-nav-border: rgba(172,198,235,0.7);
+        --color-badge-bg: rgba(255,255,255,0.72);
+        --color-progress: linear-gradient(90deg, #4f83ff, #7aa9ff);
+        --card-shadow: 0 18px 40px rgba(15,23,42,0.12);
+        --control-surface: rgba(59,130,246,0.12);
+        --control-surface-strong: rgba(59,130,246,0.18);
+        --warning-surface: rgba(59,130,246,0.15);
+        --hero-gradient-start: #1e3a8a;
+        --hero-gradient-end: #2563eb;
+        --aurora-gradient: radial-gradient(circle at 20% 18%, rgba(59,130,246,.16), transparent 48%), radial-gradient(circle at 80% 72%, rgba(37,99,235,.15), transparent 52%), radial-gradient(circle at 50% 50%, rgba(125,211,252,.18), transparent 54%);
+        --border: rgba(178,198,230,0.9);
+        --muted: #4d678b;
+        --gray-300: rgba(182,200,231,0.85);
+        --gray-500: #6f8db6;
+        --glass-border: rgba(59,130,246,0.22);
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--color-bg);
+        color: var(--color-text-primary);
+        transition: background-color .35s ease, color .35s ease;
+      }
+      .aurora-background {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1;
+        background: var(--aurora-gradient);
+        filter: blur(80px);
+        transition: background .45s ease;
+      }
+      .glass-card {
+        background: var(--color-surface);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        transition: background .35s ease, border-color .35s ease, box-shadow .35s ease, color .35s ease;
+      }
+      .hero-title-gradient {
+        background: linear-gradient(90deg, var(--hero-gradient-start), var(--hero-gradient-end));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
       .tab-content { display: none; }
       .tab-content.active { display: block; animation: fadeIn .3s ease-in-out; }
       @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform: translateY(0); } }
-      .help-panel { max-height: 0; overflow: hidden; transition: max-height .4s ease-out, padding .4s ease-out, margin .4s ease-out; padding-top:0; padding-bottom:0; margin-top:0; }
-      .help-panel.show { max-height: 220px; margin-top: .5rem; padding-top: .75rem; padding-bottom: .75rem; }
-      /* JS-targeted elements */
-      .status-badge { border: 1px solid #30363D; background: rgba(0,0,0,0.3); color: #9aa4af; padding: .25rem .6rem; border-radius: 9999px; font-weight: 800; font-size: .8rem; }
-      .status-badge.idle { color: #9aa4af; }
+      .help-panel {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height .4s ease-out, padding .3s ease-out, margin .3s ease-out, opacity .3s ease-out;
+        padding-top:0;
+        padding-bottom:0;
+        margin-top:0;
+        opacity: 0;
+        border-radius: 12px;
+        border: 1px solid transparent;
+      }
+      .help-panel.show {
+        max-height: 260px;
+        margin-top: .5rem;
+        padding-top: .85rem;
+        padding-bottom: .85rem;
+        opacity: 1;
+        border-color: var(--color-border);
+        background: var(--color-surface-alt);
+      }
+      .analysis-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+        padding: .35rem;
+        background: var(--color-surface-alt);
+        border: 1px solid var(--color-border);
+        border-radius: 18px;
+      }
+      .analysis-tab {
+        flex: 1 1 220px;
+        padding: .75rem .85rem;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--color-text-secondary);
+        font-weight: 600;
+        transition: background .25s ease, color .25s ease, box-shadow .25s ease, border-color .25s ease;
+      }
+      .analysis-tab:hover {
+        background: var(--color-surface);
+        color: var(--color-text-primary);
+        border-color: rgba(255,255,255,0.08);
+      }
+      .analysis-tab.active {
+        background: var(--color-accent);
+        color: var(--color-on-accent);
+        box-shadow: 0 12px 28px var(--color-accent-soft);
+        border-color: transparent;
+      }
+      .tab {
+        background: var(--control-surface);
+        color: var(--color-text-secondary);
+        border: 1px solid transparent;
+        border-radius: 9999px;
+        padding: .4rem .85rem;
+        font-weight: 600;
+        transition: background .2s ease, color .2s ease, border-color .2s ease;
+      }
+      .tab:hover {
+        background: var(--control-surface-strong);
+        color: var(--color-text-primary);
+        border-color: transparent;
+      }
+      .file-upload-area {
+        border: 1px dashed var(--color-border);
+        background: var(--color-surface-alt);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: border-color .3s ease, background .3s ease, transform .3s ease, box-shadow .3s ease;
+        outline: none;
+      }
+      .file-upload-area:hover,
+      .file-upload-area:focus-visible {
+        border-color: var(--color-accent);
+        background: var(--color-surface);
+      }
+      .file-upload-area.active {
+        border-color: var(--color-accent);
+        background: var(--color-surface);
+      }
+      .file-upload-area.dragover {
+        border-color: var(--color-accent);
+        transform: scale(1.02);
+        box-shadow: 0 0 24px var(--color-accent-soft);
+      }
+      .file-item {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:.75rem;
+        flex-wrap:wrap;
+        padding:.55rem .75rem;
+        border:1px solid var(--color-border);
+        border-radius:10px;
+        background: var(--color-surface-strong);
+        transition: background .3s ease, border-color .3s ease;
+      }
+      .file-remove {
+        padding:.3rem .6rem;
+        border:1px solid transparent;
+        background: var(--control-surface);
+        border-radius:8px;
+        cursor:pointer;
+        color:#ef6363;
+      }
+      .file-remove:hover {
+        background: var(--control-surface-strong);
+      }
+      .status-badge {
+        border: 1px solid var(--color-border);
+        background: var(--color-badge-bg);
+        color: var(--color-text-secondary);
+        padding: .25rem .6rem;
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: .8rem;
+        transition: background .3s ease, color .3s ease, border-color .3s ease;
+      }
       .status-badge.processing { color: #e3b341; border-color: #3a3320; }
       .status-badge.success { color: #42c386; border-color: #204732; }
       .status-badge.error { color: #ef6363; border-color: #4a2222; }
-      .progress-bar { border: 1px solid #30363D; background: #0b0f14; border-radius: 9999px; overflow: hidden; }
-      .progress-fill { background: linear-gradient(90deg, #dcdcdc, #8d8d8d); height: 8px; width: 0%; transition: width .3s ease; }
-      .loader { display:inline-block; width: 20px; height: 20px; border: 3px solid #1c1f24; border-top-color: #bbb; border-radius: 50%; animation: spin 1s linear infinite; }
+      .progress-bar {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-contrast);
+        border-radius: 9999px;
+        overflow: hidden;
+        transition: background .3s ease, border-color .3s ease;
+      }
+      .progress-fill {
+        background: var(--color-progress);
+        height: 8px;
+        width: 0%;
+        transition: width .3s ease;
+      }
+      .loader { display:inline-block; width: 20px; height: 20px; border: 3px solid var(--color-surface-contrast); border-top-color: var(--color-text-secondary); border-radius: 50%; animation: spin 1s linear infinite; }
       @keyframes spin { to { transform: rotate(360deg); } }
-      .file-item { display:flex; align-items:center; justify-content:space-between; gap:.75rem; flex-wrap:wrap; padding:.5rem .6rem; border:1px solid #30363D; border-radius:8px; background:#12151a; }
-      .file-remove { padding:.25rem .5rem; border:1px solid #30363D; background: rgba(255,255,255,0.06); border-radius:6px; cursor:pointer; color:#ef6363; }
+      .theme-toggle {
+        width: 38px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        background: var(--control-surface);
+        color: var(--color-text-secondary);
+        border: 1px solid transparent;
+        transition: background .2s ease, color .2s ease;
+      }
+      .theme-toggle:hover { background: var(--control-surface-strong); color: var(--color-text-primary); }
+      .theme-toggle:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+      .status-surface, .theme-surface {
+        background: var(--color-surface-alt);
+        border: 1px solid var(--color-border);
+        transition: background .35s ease, border-color .35s ease;
+      }
+      .preflight-modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        background: rgba(8,11,19,0.6);
+        backdrop-filter: blur(12px);
+        z-index: 60;
+      }
+      body[data-theme="light"] .preflight-modal { background: rgba(12,24,48,0.35); }
+      .preflight-modal.show { display: flex; }
+      .preflight-dialog {
+        width: min(420px, 100%);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 18px;
+        box-shadow: var(--card-shadow);
+        padding: 1.5rem;
+        color: var(--color-text-primary);
+      }
+      .preflight-dialog h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: .75rem; }
+      .preflight-meta { color: var(--color-text-secondary); font-size: .9rem; }
+      .preflight-stats { display: grid; gap: .75rem; margin: 1rem 0; }
+      .preflight-stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: .75rem 1rem;
+        background: var(--color-surface-alt);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+      }
+      .preflight-actions { display: flex; justify-content: flex-end; gap: .75rem; }
+      .button-secondary {
+        background: var(--control-surface);
+        color: var(--color-text-secondary);
+        border-radius: 9999px;
+        border: 1px solid transparent;
+        padding: .55rem 1rem;
+        font-weight: 600;
+        transition: background .2s ease, color .2s ease;
+      }
+      .button-secondary:hover { background: var(--control-surface-strong); color: var(--color-text-primary); }
+      .button-primary {
+        background: var(--color-accent);
+        color: var(--color-on-accent);
+        border-radius: 9999px;
+        border: none;
+        padding: .6rem 1.2rem;
+        font-weight: 700;
+        box-shadow: 0 12px 28px var(--color-accent-soft);
+        transition: transform .2s ease, box-shadow .2s ease;
+      }
+      .button-primary:hover { transform: translateY(-1px); box-shadow: 0 18px 34px var(--color-accent-soft); }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+      @media (max-width: 1024px) {
+        .analysis-tab { flex: 1 1 45%; }
+      }
+      @media (max-width: 768px) {
+        nav .nav-actions { flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }
+        nav .nav-brand { gap: .5rem; }
+        .analysis-tab { flex: 1 1 48%; }
+      }
+      @media (max-width: 640px) {
+        .analysis-tab { flex: 1 1 100%; }
+        .file-upload-area { padding: 1.25rem; }
+      }
+      /* Light theme overrides for utility classes */
+      body[data-theme="light"] .bg-black\/30 { background-color: var(--color-nav-bg) !important; }
+      body[data-theme="light"] .bg-gray-900\/70 { background-color: rgba(236,243,255,0.92) !important; }
+      body[data-theme="light"] .bg-gray-900\/60 { background-color: rgba(236,243,255,0.88) !important; }
+      body[data-theme="light"] .bg-gray-800 { background-color: rgba(222,231,255,0.95) !important; color: var(--color-text-primary) !important; }
+      body[data-theme="light"] .hover\:bg-gray-800:hover { background-color: rgba(210,226,255,0.95) !important; }
+      body[data-theme="light"] .bg-gray-700 { background-color: rgba(206,219,255,0.88) !important; color: var(--color-text-primary) !important; }
+      body[data-theme="light"] .hover\:bg-gray-700:hover { background-color: rgba(192,210,255,0.9) !important; }
+      body[data-theme="light"] .border-gray-800, body[data-theme="light"] .border-gray-700 { border-color: var(--color-border) !important; }
+      body[data-theme="light"] .text-white { color: var(--color-text-primary) !important; }
+      body[data-theme="light"] .text-gray-400, body[data-theme="light"] .text-gray-500 { color: var(--color-text-secondary) !important; }
+      body[data-theme="light"] .text-gray-300 { color: var(--color-text-primary) !important; }
+      body[data-theme="light"] .text-gray-200 { color: var(--color-text-primary) !important; }
     </style>
     <!-- legacy stylesheet left temporarily during migration; will be removed -->
     <link rel="stylesheet" href="styles.css?v=5">
 </head>
-<body>
+<body data-theme="dark">
     <nav class="sticky top-0 z-50 bg-black/30 backdrop-blur-lg border-b border-gray-800">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
-          <a href="/" class="flex items-center gap-3">
+          <a href="/" class="flex items-center gap-3 nav-brand">
             <div class="w-10 h-10 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center text-xl">🎓</div>
             <span class="text-white text-2xl font-bold">JokboDude</span>
           </a>
-          <div class="flex items-center gap-2 md:gap-4">
+          <div class="flex items-center gap-2 md:gap-4 nav-actions">
             <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" id="my_jobs_link" href="/profile" style="display:none;">My Jobs</a>
             <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" href="/guide">Guide</a>
             <a class="text-gray-400 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" id="feedback_link" href="#" style="display:none;">Feedback</a>
+            <button id="theme_toggle" type="button" class="theme-toggle" aria-label="Toggle color theme">
+              <span aria-hidden="true">🌙</span>
+            </button>
             <div id="auth_area" class="flex items-center gap-2">
               <span id="user_badge" style="display:none;" class="px-3 py-1.5 border border-gray-700 rounded-full bg-gray-800/50 text-xs text-gray-300"></span>
               <span id="token_badge" style="display:none;" class="px-3 py-1.5 border border-gray-700 rounded-full bg-gray-800/50 text-xs text-gray-300">Tokens: -</span>
@@ -103,11 +414,11 @@
             
             <div class="p-6">
                 <!-- Model password removed; Pro access is token-based -->
-                <div class="flex p-1 bg-gray-900/70 border border-gray-700 rounded-xl mb-6">
-                    <button class="tab w-1/4 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800 active" onclick="switchTab('jokbo', event)">Exam-Centric Analysis</button>
-                    <button class="tab w-1/4 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('lesson', event)">Lecture-Centric Analysis</button>
-                    <button class="tab w-1/4 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('partial', event)">Partial Jokbo Analysis</button>
-                    <button class="tab w-1/4 py-2 px-3 text-sm rounded-lg text-gray-300 hover:bg-gray-800" onclick="switchTab('exam', event)">Exam Only</button>
+                <div class="analysis-tabs mb-6">
+                    <button type="button" class="analysis-tab text-sm active" data-tab="jokbo" onclick="switchTab('jokbo', event)">Exam-Centric Analysis</button>
+                    <button type="button" class="analysis-tab text-sm" data-tab="lesson" onclick="switchTab('lesson', event)">Lecture-Centric Analysis</button>
+                    <button type="button" class="analysis-tab text-sm" data-tab="partial" onclick="switchTab('partial', event)">Partial Jokbo Analysis</button>
+                    <button type="button" class="analysis-tab text-sm" data-tab="exam" onclick="switchTab('exam', event)">Exam Only</button>
                 </div>
                 
                 <!-- Jokbo-Centric Tab (Tailwind) -->
@@ -116,7 +427,7 @@
                         <div>
                             <div class="flex items-center justify-between">
                                 <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Configuration</h3>
-                                <button type="button" class="tab px-2 py-1 rounded-md text-sm" aria-expanded="false" data-help-target="jokbo_help">모드 설명</button>
+                                <button type="button" class="tab px-2 py-1 rounded-md text-sm" aria-expanded="false" aria-controls="jokbo_help" data-help-target="jokbo_help">모드 설명</button>
                             </div>
                             <div id="jokbo_help" class="help-panel">
                                 <div class="text-white font-semibold">Exam-Centric Analysis</div>
@@ -156,7 +467,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Exam PDFs</label>
                                     <input type="file" id="jokbo_files" multiple accept=".pdf" class="hidden">
-                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('jokbo_files').click()">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('jokbo_files').click()" role="button" tabindex="0" aria-label="Upload exam PDFs" data-input="jokbo_files" data-list="jokbo_file_list" data-error="jokbo_error" data-mode="jokbo-centric" data-partner="jokbo_lesson_files" data-model="jokbo_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
                                         <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
@@ -167,7 +478,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Lecture PDFs</label>
                                     <input type="file" id="jokbo_lesson_files" multiple accept=".pdf" class="hidden">
-                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('jokbo_lesson_files').click()">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('jokbo_lesson_files').click()" role="button" tabindex="0" aria-label="Upload lecture PDFs" data-input="jokbo_lesson_files" data-list="jokbo_lesson_file_list" data-error="jokbo_lesson_error" data-mode="jokbo-centric" data-partner="jokbo_files" data-model="jokbo_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📚</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
                                         <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
@@ -192,7 +503,7 @@
                         <div>
                             <div class="flex items-center justify-between">
                                 <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Configuration</h3>
-                                <button type="button" class="tab px-2 py-1 rounded-md text-sm" aria-expanded="false" data-help-target="lesson_help">모드 설명</button>
+                                <button type="button" class="tab px-2 py-1 rounded-md text-sm" aria-expanded="false" aria-controls="lesson_help" data-help-target="lesson_help">모드 설명</button>
                             </div>
                             <div id="lesson_help" class="help-panel">
                                 <div class="text-white font-semibold">Lecture-Centric Analysis</div>
@@ -231,7 +542,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Lecture PDFs</label>
                                     <input type="file" id="lesson_lesson_files" multiple accept=".pdf" class="hidden">
-                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('lesson_lesson_files').click()">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('lesson_lesson_files').click()" role="button" tabindex="0" aria-label="Upload lecture PDFs" data-input="lesson_lesson_files" data-list="lesson_lesson_file_list" data-error="lesson_lesson_error" data-mode="lesson-centric" data-partner="lesson_jokbo_files" data-model="lesson_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📚</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
                                     </div>
@@ -241,7 +552,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Exam PDFs</label>
                                     <input type="file" id="lesson_jokbo_files" multiple accept=".pdf" class="hidden">
-                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('lesson_jokbo_files').click()">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('lesson_jokbo_files').click()" role="button" tabindex="0" aria-label="Upload exam PDFs" data-input="lesson_jokbo_files" data-list="lesson_jokbo_file_list" data-error="lesson_jokbo_error" data-mode="lesson-centric" data-partner="lesson_lesson_files" data-model="lesson_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
                                         <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
@@ -266,7 +577,7 @@
                         <div>
                             <div class="flex items-center justify-between">
                                 <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Configuration</h3>
-                                <button type="button" class="tab px-2 py-1 rounded-md text-sm" aria-expanded="false" data-help-target="partial_help">모드 설명</button>
+                                <button type="button" class="tab px-2 py-1 rounded-md text-sm" aria-expanded="false" aria-controls="partial_help" data-help-target="partial_help">모드 설명</button>
                             </div>
                             <div id="partial_help" class="help-panel">
                                 <div class="text-white font-semibold">Partial Jokbo Analysis</div>
@@ -305,7 +616,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Exam PDFs</label>
                                     <input type="file" id="partial_jokbo_files" multiple accept=".pdf" class="hidden">
-                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('partial_jokbo_files').click()">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('partial_jokbo_files').click()" role="button" tabindex="0" aria-label="Upload exam PDFs" data-input="partial_jokbo_files" data-list="partial_jokbo_file_list" data-error="partial_jokbo_error" data-mode="partial-jokbo" data-partner="partial_lesson_files" data-model="partial_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
                                         <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
@@ -316,7 +627,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Lecture PDFs</label>
                                     <input type="file" id="partial_lesson_files" multiple accept=".pdf" class="hidden">
-                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('partial_lesson_files').click()">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('partial_lesson_files').click()" role="button" tabindex="0" aria-label="Upload lecture PDFs" data-input="partial_lesson_files" data-list="partial_lesson_file_list" data-error="partial_lesson_error" data-mode="partial-jokbo" data-partner="partial_jokbo_files" data-model="partial_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📚</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
                                         <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
@@ -340,7 +651,7 @@
                         <div>
                             <div class="flex items-center justify-between">
                                 <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Configuration</h3>
-                                <button type="button" class="tab px-2 py-1 rounded-md text-sm" aria-expanded="false" data-help-target="exam_help">모드 설명</button>
+                                <button type="button" class="tab px-2 py-1 rounded-md text-sm" aria-expanded="false" aria-controls="exam_help" data-help-target="exam_help">모드 설명</button>
                             </div>
                             <div id="exam_help" class="help-panel">
                                 <div class="text-white font-semibold">Exam Only (해설 중심)</div>
@@ -373,7 +684,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Exam PDFs</label>
                                     <input type="file" id="exam_jokbo_files" multiple accept=".pdf" class="hidden">
-                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('exam_jokbo_files').click()">
+                                    <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('exam_jokbo_files').click()" role="button" tabindex="0" aria-label="Upload exam PDFs" data-input="exam_jokbo_files" data-list="exam_jokbo_file_list" data-error="exam_jokbo_error" data-mode="exam-only" data-partner="" data-model="exam_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
                                         <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
@@ -458,11 +769,23 @@
                     <button id="show_stats_btn" class="tab">Show Web Storage Stats</button>
                     <button id="show_worker_stats_btn" class="tab">Show Worker Storage Stats</button>
                 </div>
-                <pre id="admin_output" style="margin-top:1rem;background:rgba(0,0,0,0.25);padding:0.75rem;border-radius:8px;max-height:240px;overflow:auto;color:#ccc;"></pre>
+                <pre id="admin_output" style="margin-top:1rem;background:var(--color-surface-alt);border:1px solid var(--color-border);padding:0.75rem;border-radius:8px;max-height:240px;overflow:auto;color:var(--color-text-secondary);"></pre>
             </div>
         </div>
     </div>
-    
+
+    <div id="preflight_modal" class="preflight-modal" aria-hidden="true">
+      <div class="preflight-dialog" role="dialog" aria-modal="true" aria-labelledby="preflight_title">
+        <h3 id="preflight_title">Ready to start the analysis?</h3>
+        <p id="preflight_meta" class="preflight-meta"></p>
+        <div id="preflight_details" class="preflight-stats"></div>
+        <div class="preflight-actions">
+          <button type="button" class="button-secondary" data-action="cancel">취소</button>
+          <button type="button" class="button-primary" data-action="confirm">분석 시작</button>
+        </div>
+      </div>
+    </div>
+
     <script>
         const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
         let JD_CONFIG = { multi_api_available: false, api_keys_count: 0 };
@@ -477,6 +800,25 @@
             'partial_lesson_files': [],
             'exam_jokbo_files': []
         };
+
+        const BUCKET_CONFIG = {
+            'jokbo_files': { listId: 'jokbo_file_list', errorId: 'jokbo_error', mode: 'jokbo-centric', jokboId: 'jokbo_files', lessonId: 'jokbo_lesson_files', modelId: 'jokbo_model' },
+            'jokbo_lesson_files': { listId: 'jokbo_lesson_file_list', errorId: 'jokbo_lesson_error', mode: 'jokbo-centric', jokboId: 'jokbo_files', lessonId: 'jokbo_lesson_files', modelId: 'jokbo_model' },
+            'lesson_lesson_files': { listId: 'lesson_lesson_file_list', errorId: 'lesson_lesson_error', mode: 'lesson-centric', jokboId: 'lesson_jokbo_files', lessonId: 'lesson_lesson_files', modelId: 'lesson_model' },
+            'lesson_jokbo_files': { listId: 'lesson_jokbo_file_list', errorId: 'lesson_jokbo_error', mode: 'lesson-centric', jokboId: 'lesson_jokbo_files', lessonId: 'lesson_lesson_files', modelId: 'lesson_model' },
+            'partial_jokbo_files': { listId: 'partial_jokbo_file_list', errorId: 'partial_jokbo_error', mode: 'partial-jokbo', jokboId: 'partial_jokbo_files', lessonId: 'partial_lesson_files', modelId: 'partial_model' },
+            'partial_lesson_files': { listId: 'partial_lesson_file_list', errorId: 'partial_lesson_error', mode: 'partial-jokbo', jokboId: 'partial_jokbo_files', lessonId: 'partial_lesson_files', modelId: 'partial_model' },
+            'exam_jokbo_files': { listId: 'exam_jokbo_file_list', errorId: 'exam_jokbo_error', mode: 'exam-only', jokboId: 'exam_jokbo_files', lessonId: 'unused', modelId: 'exam_model' }
+        };
+
+        const MODE_LABELS = {
+            'jokbo-centric': 'Exam-Centric Analysis',
+            'lesson-centric': 'Lecture-Centric Analysis',
+            'partial-jokbo': 'Partial Jokbo Analysis',
+            'exam-only': 'Exam Only'
+        };
+        const MODEL_LABELS = { flash: 'Gemini 2.5 Flash', pro: 'Gemini 2.5 Pro' };
+        const THEME_STORAGE_KEY = 'jd_theme';
 
         // Initialize processing mode toggles with server capabilities
         async function initConfigAndToggles() {
@@ -538,20 +880,53 @@
 
         function getMultiApiState(mode) { return true; }
 
+        function updateThemeToggle(theme) {
+            const toggle = document.getElementById('theme_toggle');
+            if (!toggle) return;
+            const icon = theme === 'light' ? '🌙' : '🌞';
+            toggle.innerHTML = `<span aria-hidden="true">${icon}</span>`;
+            toggle.setAttribute('aria-label', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+        }
+
+        function applyTheme(theme) {
+            const normalized = theme === 'light' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', normalized);
+            try { localStorage.setItem(THEME_STORAGE_KEY, normalized); } catch {}
+            updateThemeToggle(normalized);
+        }
+
+        function initTheme() {
+            let storedTheme = null;
+            try { storedTheme = localStorage.getItem(THEME_STORAGE_KEY); } catch {}
+            if (!storedTheme) {
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                storedTheme = prefersDark ? 'dark' : 'light';
+            }
+            applyTheme(storedTheme);
+            const toggle = document.getElementById('theme_toggle');
+            if (toggle) {
+                toggle.addEventListener('click', () => {
+                    const current = document.body.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+                    applyTheme(current === 'light' ? 'dark' : 'light');
+                });
+            }
+        }
+
         // Pro model is always available; /config determines only multi-api availability
-        
+
         // Tab switching
         function switchTab(tabName, evt) {
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            const e = evt || window.event;
-            if (e && e.target) e.target.classList.add('active');
-            
+            document.querySelectorAll('.analysis-tab').forEach(tab => tab.classList.remove('active'));
+            const button = (evt && (evt.currentTarget || evt.target)) || document.querySelector(`.analysis-tab[data-tab="${tabName}"]`);
+            if (button && button.classList) {
+                button.classList.add('active');
+            }
+
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
-            document.getElementById(`${tabName}-tab`).classList.add('active');
+            const next = document.getElementById(`${tabName}-tab`);
+            if (next) next.classList.add('active');
         }
         
         // File handling
@@ -561,6 +936,96 @@
             const sizes = ['Bytes', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function formatNumber(value) {
+            if (typeof value !== 'number' || !isFinite(value)) return '0';
+            return value.toLocaleString();
+        }
+
+        function describeModel(model) {
+            return MODEL_LABELS[model] || MODEL_LABELS.flash;
+        }
+
+        function openPreflightModal(pf, context) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('preflight_modal');
+                if (!modal) {
+                    const chunks = pf?.total_chunks || 0;
+                    const tokens = pf?.estimated_tokens || 0;
+                    const perChunk = pf?.tokens_per_chunk || 0;
+                    const fallback = `총 청크: ${chunks}\n예상 토큰: ${tokens} (청크당 ${perChunk})\n\n이대로 분석을 시작할까요?`;
+                    resolve(window.confirm(fallback));
+                    return;
+                }
+
+                const details = modal.querySelector('#preflight_details');
+                const meta = modal.querySelector('#preflight_meta');
+                const title = modal.querySelector('#preflight_title');
+                const confirmBtn = modal.querySelector('[data-action="confirm"]');
+                const cancelBtn = modal.querySelector('[data-action="cancel"]');
+                const previousActive = document.activeElement;
+
+                const modeLabel = MODE_LABELS[context.mode] || 'Analysis';
+                meta.textContent = `${modeLabel} · ${describeModel(context.model)}`;
+
+                const jokboCount = (pf?.files?.jokbo || []).length;
+                const lessonCount = (pf?.files?.lesson || []).length;
+                const fileSummary = context.mode === 'exam-only'
+                    ? `${formatNumber(jokboCount)} exam file${jokboCount === 1 ? '' : 's'}`
+                    : `${formatNumber(jokboCount)} exam · ${formatNumber(lessonCount)} lecture`;
+                const chunkCount = formatNumber(pf?.total_chunks || 0);
+                const tokenCount = formatNumber(pf?.estimated_tokens || 0);
+                const perChunk = formatNumber(pf?.tokens_per_chunk || 0);
+
+                details.innerHTML = `
+                    <div class="preflight-stat"><span>Files</span><span>${fileSummary}</span></div>
+                    <div class="preflight-stat"><span>Chunks</span><span>${chunkCount}</span></div>
+                    <div class="preflight-stat"><span>Estimated tokens</span><span>${tokenCount} (${perChunk} / chunk)</span></div>
+                `;
+
+                title.textContent = 'Ready to start the analysis?';
+                modal.classList.add('show');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+
+                const cleanup = () => {
+                    modal.classList.remove('show');
+                    modal.setAttribute('aria-hidden', 'true');
+                    document.body.style.overflow = '';
+                    confirmBtn.removeEventListener('click', onConfirm);
+                    cancelBtn.removeEventListener('click', onCancel);
+                    modal.removeEventListener('click', onBackdrop);
+                    document.removeEventListener('keydown', onKeydown);
+                    if (previousActive && typeof previousActive.focus === 'function') {
+                        try { previousActive.focus({ preventScroll: true }); } catch {}
+                    }
+                };
+
+                const onConfirm = () => { cleanup(); resolve(true); };
+                const onCancel = () => { cleanup(); resolve(false); };
+                const onBackdrop = (event) => {
+                    if (event.target === modal) {
+                        cleanup();
+                        resolve(false);
+                    }
+                };
+                const onKeydown = (event) => {
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        cleanup();
+                        resolve(false);
+                    }
+                };
+
+                confirmBtn.addEventListener('click', onConfirm);
+                cancelBtn.addEventListener('click', onCancel);
+                modal.addEventListener('click', onBackdrop);
+                document.addEventListener('keydown', onKeydown);
+                setTimeout(() => {
+                    try { confirmBtn.focus({ preventScroll: true }); } catch {}
+                }, 50);
+            });
         }
         
         function handleFileSelect(inputId, listId, errorId) {
@@ -603,30 +1068,33 @@
             }
         }
         
-        // Kick off config fetch and toggle init
-        initConfigAndToggles();
-
         // Staged file selection helpers (allow multi-step add/remove)
         function addFilesToBucket(inputId, files, errorId) {
             const bucket = stagedFiles[inputId];
-            const errorElement = document.getElementById(errorId);
+            const errorElement = errorId ? document.getElementById(errorId) : null;
             let hasError = false;
             for (const f of files) {
                 if (f.size > MAX_FILE_SIZE) { hasError = true; continue; }
                 const exists = bucket.some(b => b.name === f.name && b.size === f.size && b.lastModified === f.lastModified);
                 if (!exists) bucket.push(f);
             }
-            if (hasError) {
-                errorElement.textContent = '⚠️ Some files exceeded 50MB and were skipped';
-                errorElement.classList.add('show');
-            } else {
-                errorElement.classList.remove('show');
+            if (errorElement) {
+                if (hasError) {
+                    errorElement.textContent = '⚠️ Some files exceeded 50MB and were skipped';
+                    errorElement.classList.add('show');
+                } else {
+                    errorElement.classList.remove('show');
+                }
             }
         }
-        function renderBucket(inputId, listId) {
+        function renderBucket(inputId) {
+            const cfg = BUCKET_CONFIG[inputId];
+            if (!cfg) return;
             const input = document.getElementById(inputId);
+            if (!input) return;
             const uploadArea = input.nextElementSibling;
-            const fileList = document.getElementById(listId);
+            const fileList = document.getElementById(cfg.listId);
+            if (!fileList || !uploadArea) return;
             const bucket = stagedFiles[inputId] || [];
             fileList.innerHTML = '';
             if (bucket.length === 0) {
@@ -647,73 +1115,106 @@
                 fileList.appendChild(fileItem);
             });
         }
-        function handleFileSelectStaged(inputId, listId, errorId) {
+        function triggerMaybePreflightForBucket(bucketId) {
+            const cfg = BUCKET_CONFIG[bucketId];
+            if (!cfg || !cfg.mode) return;
+            const modelSelect = cfg.modelId ? document.getElementById(cfg.modelId) : null;
+            const model = modelSelect ? modelSelect.value : 'flash';
+            const lessonId = cfg.lessonId || 'unused';
+            maybePreflight(cfg.mode, cfg.jokboId, lessonId, model);
+        }
+        function handleFileSelectStaged(inputId) {
+            const cfg = BUCKET_CONFIG[inputId];
+            if (!cfg) return;
             const input = document.getElementById(inputId);
-            if (input.files && input.files.length > 0) {
-                addFilesToBucket(inputId, Array.from(input.files), errorId);
+            if (input && input.files && input.files.length > 0) {
+                addFilesToBucket(inputId, Array.from(input.files), cfg.errorId);
                 input.value = '';
             }
-            renderBucket(inputId, listId);
+            renderBucket(inputId);
+            triggerMaybePreflightForBucket(inputId);
         }
-        function removeFileFromBucket(bucketId, index, listId) {
+        function removeFileFromBucket(bucketId, index) {
             const arr = stagedFiles[bucketId] || [];
             if (index >= 0 && index < arr.length) {
                 arr.splice(index, 1);
-                renderBucket(bucketId, listId);
+                renderBucket(bucketId);
+                triggerMaybePreflightForBucket(bucketId);
             }
         }
 
-        // Attach file handlers (use staged logic)
-        document.getElementById('jokbo_files').addEventListener('change', () => 
-            handleFileSelectStaged('jokbo_files', 'jokbo_file_list', 'jokbo_error'));
-        document.getElementById('jokbo_lesson_files').addEventListener('change', () => 
-            handleFileSelectStaged('jokbo_lesson_files', 'jokbo_lesson_file_list', 'jokbo_lesson_error'));
-        document.getElementById('lesson_lesson_files').addEventListener('change', () => 
-            handleFileSelectStaged('lesson_lesson_files', 'lesson_lesson_file_list', 'lesson_lesson_error'));
-        document.getElementById('lesson_jokbo_files').addEventListener('change', () =>
-            handleFileSelectStaged('lesson_jokbo_files', 'lesson_jokbo_file_list', 'lesson_jokbo_error'));
-        document.getElementById('partial_jokbo_files').addEventListener('change', () =>
-            handleFileSelectStaged('partial_jokbo_files', 'partial_jokbo_file_list', 'partial_jokbo_error'));
-        document.getElementById('partial_lesson_files').addEventListener('change', () =>
-            handleFileSelectStaged('partial_lesson_files', 'partial_lesson_file_list', 'partial_lesson_error'));
-        document.getElementById('exam_jokbo_files').addEventListener('change', () =>
-            handleFileSelectStaged('exam_jokbo_files', 'exam_jokbo_file_list', 'exam_jokbo_error'));
-        // Removal handlers via event delegation
-        document.getElementById('jokbo_file_list').addEventListener('click', (e) => {
-            if (e.target && e.target.classList.contains('file-remove')) {
-                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'jokbo_file_list');
-            }
+        Object.keys(BUCKET_CONFIG).forEach((bucketId) => {
+            const input = document.getElementById(bucketId);
+            if (!input) return;
+            input.addEventListener('change', () => handleFileSelectStaged(bucketId));
         });
-        document.getElementById('jokbo_lesson_file_list').addEventListener('click', (e) => {
-            if (e.target && e.target.classList.contains('file-remove')) {
-                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'jokbo_lesson_file_list');
-            }
+
+        const wiredLists = new Set();
+        Object.entries(BUCKET_CONFIG).forEach(([bucketId, cfg]) => {
+            if (!cfg.listId || wiredLists.has(cfg.listId)) return;
+            const list = document.getElementById(cfg.listId);
+            if (!list) return;
+            wiredLists.add(cfg.listId);
+            list.addEventListener('click', (e) => {
+                const target = e.target;
+                if (target && target.classList.contains('file-remove')) {
+                    const bucket = target.dataset.bucket;
+                    const index = parseInt(target.dataset.index, 10);
+                    if (!isNaN(index)) removeFileFromBucket(bucket, index);
+                }
+            });
         });
-        document.getElementById('lesson_lesson_file_list').addEventListener('click', (e) => {
-            if (e.target && e.target.classList.contains('file-remove')) {
-                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'lesson_lesson_file_list');
-            }
-        });
-        document.getElementById('lesson_jokbo_file_list').addEventListener('click', (e) => {
-            if (e.target && e.target.classList.contains('file-remove')) {
-                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'lesson_jokbo_file_list');
-            }
-        });
-        document.getElementById('partial_jokbo_file_list').addEventListener('click', (e) => {
-            if (e.target && e.target.classList.contains('file-remove')) {
-                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'partial_jokbo_file_list');
-            }
-        });
-        document.getElementById('partial_lesson_file_list').addEventListener('click', (e) => {
-            if (e.target && e.target.classList.contains('file-remove')) {
-                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'partial_lesson_file_list');
-            }
-        });
-        document.getElementById('exam_jokbo_file_list').addEventListener('click', (e) => {
-            if (e.target && e.target.classList.contains('file-remove')) {
-                removeFileFromBucket(e.target.dataset.bucket, parseInt(e.target.dataset.index, 10), 'exam_jokbo_file_list');
-            }
-        });
+
+        function initDragAndDrop() {
+            ['dragenter', 'dragover', 'drop'].forEach(eventName => {
+                document.addEventListener(eventName, (event) => {
+                    const dt = event.dataTransfer;
+                    if (!dt) return;
+                    const hasFiles = Array.from(dt.types || []).includes('Files');
+                    if (hasFiles) {
+                        event.preventDefault();
+                    }
+                });
+            });
+
+            document.querySelectorAll('.file-upload-area').forEach(area => {
+                const bucketId = area.dataset.input;
+                if (!bucketId) return;
+                const cfg = BUCKET_CONFIG[bucketId] || {};
+                const errorId = area.dataset.error || cfg.errorId;
+                area.addEventListener('dragenter', (e) => {
+                    if (e.dataTransfer) area.classList.add('dragover');
+                });
+                area.addEventListener('dragover', (e) => {
+                    if (!e.dataTransfer) return;
+                    e.preventDefault();
+                    area.classList.add('dragover');
+                });
+                area.addEventListener('dragleave', (e) => {
+                    if (!area.contains(e.relatedTarget)) {
+                        area.classList.remove('dragover');
+                    }
+                });
+                area.addEventListener('drop', (e) => {
+                    const dt = e.dataTransfer;
+                    if (!dt) return;
+                    e.preventDefault();
+                    area.classList.remove('dragover');
+                    const files = Array.from(dt.files || []);
+                    if (!files.length) return;
+                    addFilesToBucket(bucketId, files, errorId);
+                    renderBucket(bucketId);
+                    triggerMaybePreflightForBucket(bucketId);
+                });
+                area.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const input = document.getElementById(bucketId);
+                        if (input) input.click();
+                    }
+                });
+            });
+        }
         
         // Preflight cache keyed by mode
         const LATEST_PREFLIGHT = { 'jokbo-centric': null, 'lesson-centric': null, 'partial-jokbo': null, 'exam-only': null };
@@ -776,13 +1277,13 @@
             const tpc = pf.tokens_per_chunk || 0;
             const et = pf.estimated_tokens || 0;
             const filesLine = (mode === 'exam-only')
-              ? `Files: ${jbCnt} exam`
-              : `Files: ${jbCnt} exam · ${lsCnt} lecture`;
+              ? `Files: ${formatNumber(jbCnt)} exam`
+              : `Files: ${formatNumber(jbCnt)} exam · ${formatNumber(lsCnt)} lecture`;
             el.innerHTML = tc > 0 ? `
-              <div class="mt-2 p-2 bg-gray-900/60 border border-gray-800 rounded">
+              <div class="mt-2 p-2 theme-surface rounded text-sm space-y-1">
                 <div>${filesLine}</div>
-                <div>Chunks: <strong>${tc}</strong> (approx.)</div>
-                <div>Tokens: ~ <strong>${et}</strong> (${tpc} / chunk)</div>
+                <div>Chunks: <strong>${formatNumber(tc)}</strong></div>
+                <div>Tokens: ~ <strong>${formatNumber(et)}</strong> (${formatNumber(tpc)} / chunk)</div>
               </div>` : '';
         }
 
@@ -839,10 +1340,7 @@
 
                 const pf = await doPreflight(mode, jokboInputId, lessonInputId, model);
 
-                const tpc = pf.tokens_per_chunk || 0;
-                const et = pf.estimated_tokens || 0;
-                const tc = pf.total_chunks || 0;
-                const proceed = window.confirm(`총 청크: ${tc}\n예상 토큰: ${et} (청크당 ${tpc})\n\n이대로 분석을 시작할까요?`);
+                const proceed = await openPreflightModal(pf, { mode, model });
                 if (!proceed) {
                     statusBadge.className = 'status-badge idle';
                     statusBadge.textContent = 'IDLE';
@@ -912,7 +1410,7 @@
                                     <div class="progress-bar">
                                         <div class="progress-fill" style="width: ${pct}%"></div>
                                     </div>
-                                    <div style="margin-top: 0.25rem; font-size: 0.875rem; color: #666;">
+                                    <div style="margin-top: 0.25rem; font-size: 0.875rem; color: var(--color-text-secondary);">
                                         ${pct}% 완료${chunks}${etaText}
                                     </div>
                                     ${(() => {
@@ -976,7 +1474,7 @@
                             if (warn.partial === true) {
                               parts.push(`<div><em>완전한 분석이 아닙니다. 실패한 항목을 제외하고 결과를 생성했습니다.</em></div>`);
                             }
-                            return parts.length ? `<div style="margin:.75rem 0; padding:.75rem; border:1px dashed var(--glass-border); background: rgba(255,255,255,0.5)">${parts.join('')}</div>` : '';
+                            return parts.length ? `<div style="margin:.75rem 0; padding:.75rem; border:1px dashed var(--glass-border); background: var(--warning-surface)">${parts.join('')}</div>` : '';
                           } catch { return ''; }
                         })();
 
@@ -1056,31 +1554,6 @@
             }
             try { await doPreflight(mode, jokboId, lessonId, model); } catch (e) { /* ignore */ }
         }
-        // Wire preflight on file selection changes
-        document.getElementById('jokbo_files').addEventListener('change', () => {
-            const model = document.getElementById('jokbo_model').value;
-            maybePreflight('jokbo-centric', 'jokbo_files', 'jokbo_lesson_files', model);
-        });
-        document.getElementById('jokbo_lesson_files').addEventListener('change', () => {
-            const model = document.getElementById('jokbo_model').value;
-            maybePreflight('jokbo-centric', 'jokbo_files', 'jokbo_lesson_files', model);
-        });
-        document.getElementById('lesson_lesson_files').addEventListener('change', () => {
-            const model = document.getElementById('lesson_model').value;
-            maybePreflight('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
-        });
-        document.getElementById('lesson_jokbo_files').addEventListener('change', () => {
-            const model = document.getElementById('lesson_model').value;
-            maybePreflight('lesson-centric', 'lesson_jokbo_files', 'lesson_lesson_files', model);
-        });
-        document.getElementById('partial_jokbo_files').addEventListener('change', () => {
-            const model = document.getElementById('partial_model').value;
-            maybePreflight('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', model);
-        });
-        document.getElementById('partial_lesson_files').addEventListener('change', () => {
-            const model = document.getElementById('partial_model').value;
-            maybePreflight('partial-jokbo', 'partial_jokbo_files', 'partial_lesson_files', model);
-        });
         // Wire preflight when options change (model / min relevance / multi-api)
         document.getElementById('jokbo_model').addEventListener('change', () => {
             const model = document.getElementById('jokbo_model').value;
@@ -1106,11 +1579,6 @@
         });
 
         // Exam-only preflight triggers
-        document.getElementById('exam_jokbo_files').addEventListener('change', () => {
-            const model = document.getElementById('exam_model').value;
-            // lesson bucket unused for this mode
-            maybePreflight('exam-only', 'exam_jokbo_files', 'unused', model);
-        });
         document.getElementById('exam_model').addEventListener('change', () => {
             const model = document.getElementById('exam_model').value;
             maybePreflight('exam-only', 'exam_jokbo_files', 'unused', model);
@@ -1249,6 +1717,7 @@
         // Auth + config init
         let AUTH_CONFIG = { enabled: false, client_id: '', allow_dev_login: false, feedback_form_url: '' };
         let CURRENT_USER = null;
+        let LAST_LOADED_JOBS_FOR = null;
         async function fetchAuthConfig() {
             try {
                 const r = await fetch('/auth/config', { credentials: 'include' });
@@ -1342,6 +1811,9 @@
                     clearBtn.style.display = 'none';
                     adminSections.style.display = 'none';
                 }
+                if (CURRENT_USER.user_id && LAST_LOADED_JOBS_FOR !== CURRENT_USER.user_id) {
+                    loadJobs(true);
+                }
             } else {
                 userBadge.style.display = 'none';
                 tokenBadge.style.display = 'none';
@@ -1350,6 +1822,9 @@
                 if (myJobsLink) myJobsLink.style.display = 'none';
                 clearBtn.style.display = 'none';
                 adminSections.style.display = 'none';
+                const jobsList = document.getElementById('jobs_list');
+                if (jobsList) jobsList.innerHTML = '<div class="status-message">Please sign in to view your jobs.</div>';
+                LAST_LOADED_JOBS_FOR = null;
             }
         }
         document.getElementById('login_btn').addEventListener('click', async () => {
@@ -1511,9 +1986,9 @@
         const listUsersBtn = document.getElementById('list_users_btn');
         if (listUsersBtn) listUsersBtn.addEventListener('click', () => fetchUsers(null));
 
-        // Load My Jobs
-        document.getElementById('load_jobs_btn').addEventListener('click', async () => {
+        async function loadJobs(auto = false) {
             const list = document.getElementById('jobs_list');
+            if (!list) return;
             if (!CURRENT_USER || !CURRENT_USER.user_id) {
                 list.innerHTML = '<div class="status-message">Please sign in to view your jobs.</div>';
                 return;
@@ -1524,6 +1999,7 @@
                 const data = await res.json();
                 if (!data.jobs || data.jobs.length === 0) {
                     list.innerHTML = '<div class="status-message">No jobs found.</div>';
+                    LAST_LOADED_JOBS_FOR = CURRENT_USER.user_id;
                     return;
                 }
                 let html = '';
@@ -1536,7 +2012,7 @@
                         const ef = encodeURIComponent(f);
                         files += `<div style="display:flex;gap:0.4rem;align-items:center;">`+
                                  `<a class="download-btn" style="margin-top:0.5rem;" href="/result/${j.job_id}/${ef}" target="_blank">📥 ${f}</a>`+
-                                 `<button style="margin-top:0.5rem;padding:0.4rem 0.6rem;border:1px solid var(--border);background:rgba(255,255,255,0.06);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="deleteResult('${j.job_id}','${ef}')">🗑️ Delete</button>`+
+                                 `<button style="margin-top:0.5rem;padding:0.4rem 0.6rem;border:1px solid var(--border);background:var(--control-surface);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="deleteResult('${j.job_id}','${ef}')">🗑️ Delete</button>`+
                                  `</div>`;
                     }
                     const canCancel = (j.status === 'PENDING' || j.status === 'STARTED' || j.status === 'RETRY');
@@ -1547,25 +2023,27 @@
                                 <div class="progress-bar" style="margin:0.4rem 0;">
                                     <div class="progress-fill" style="width:${pct}%"></div>
                                 </div>
-                                <div style="font-size:0.875rem;color:#666;">${pct}% ${chunks}</div>
+                                <div style="font-size:0.875rem;color:var(--color-text-secondary);">${pct}% ${chunks}</div>
                                 <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;">${files}</div>
                                 <div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
-                                    ${canCancel ? `<button style="padding:0.5rem 0.8rem;border:1px solid var(--border);background:rgba(255,255,255,0.06);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="cancelJob('${j.job_id}')">⏹️ Cancel</button>` : ''}
-                                    <button style="padding:0.5rem 0.8rem;border:1px solid var(--border);background:rgba(255,255,255,0.06);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="deleteJob('${j.job_id}')">🧹 Delete Job</button>
+                                    ${canCancel ? `<button style="padding:0.5rem 0.8rem;border:1px solid var(--border);background:var(--control-surface);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="cancelJob('${j.job_id}')">⏹️ Cancel</button>` : ''}
+                                    <button style="padding:0.5rem 0.8rem;border:1px solid var(--border);background:var(--control-surface);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="deleteJob('${j.job_id}')">🧹 Delete Job</button>
                                 </div>
                             </div>
                         </div>
                     `;
                 }
                 list.innerHTML = html;
+                LAST_LOADED_JOBS_FOR = CURRENT_USER.user_id;
             } catch (e) {
                 list.innerHTML = `<div class="status-message">Failed to load jobs: ${e.message}</div>`;
             }
-        });
+        }
+        document.getElementById('load_jobs_btn').addEventListener('click', () => loadJobs(false));
         async function cancelJob(jobId) {
             try {
                 await fetch(`/jobs/${jobId}/cancel`, { method: 'POST', credentials: 'include' });
-                document.getElementById('load_jobs_btn').click();
+                loadJobs(true);
             } catch (e) {
                 alert('Failed to cancel: ' + e.message);
             }
@@ -1574,7 +2052,7 @@
             if (!confirm('Delete this job and its results?')) return;
             try {
                 await fetch(`/jobs/${jobId}`, { method: 'DELETE', credentials: 'include' });
-                document.getElementById('load_jobs_btn').click();
+                loadJobs(true);
             } catch (e) {
                 alert('Failed to delete: ' + e.message);
             }
@@ -1583,7 +2061,7 @@
             if (!confirm('Delete this result file?')) return;
             try {
                 await fetch(`/result/${jobId}/${filename}`, { method: 'DELETE', credentials: 'include' });
-                document.getElementById('load_jobs_btn').click();
+                loadJobs(true);
             } catch (e) {
                 alert('Failed to delete file: ' + e.message);
             }
@@ -1592,13 +2070,16 @@
         // Helpers: help panel toggles and range outputs
         function initHelpToggles() {
             document.querySelectorAll('[data-help-target]').forEach(btn => {
+                const id = btn.getAttribute('data-help-target');
+                const panel = document.getElementById(id);
+                if (!panel) return;
+                panel.classList.remove('show');
+                panel.setAttribute('aria-hidden', 'true');
+                btn.setAttribute('aria-expanded', 'false');
                 btn.addEventListener('click', () => {
-                    const id = btn.getAttribute('data-help-target');
-                    const el = document.getElementById(id);
-                    if (!el) return;
-                    const showing = el.style.display !== 'none';
-                    el.style.display = showing ? 'none' : 'block';
-                    btn.setAttribute('aria-expanded', String(!showing));
+                    const isOpen = panel.classList.toggle('show');
+                    panel.setAttribute('aria-hidden', String(!isOpen));
+                    btn.setAttribute('aria-expanded', String(isOpen));
                 });
             });
         }
@@ -1613,10 +2094,12 @@
 
         // Initial boot
         (async () => {
+            try { initTheme(); } catch {}
             try { await fetchAuthConfig(); } catch {}
             try { await initConfigAndToggles(); } catch {}
             try { await refreshAuthUI(); } catch {}
             try { initHelpToggles(); } catch {}
+            try { initDragAndDrop(); } catch {}
             bindRange('jokbo_min_rel','jokbo_min_rel_out');
             bindRange('lesson_min_rel','lesson_min_rel_out');
             bindRange('partial_min_rel','partial_min_rel_out');
