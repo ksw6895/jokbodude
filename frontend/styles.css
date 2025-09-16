@@ -76,6 +76,138 @@ html[data-theme="light"] {
   --gray-500: #6f8db6;
 }
 
+/* Tailwind utility overrides so light/dark themes remain in sync */
+html[data-theme] .text-white,
+html[data-theme] .text-gray-100,
+html[data-theme] .text-gray-200,
+html[data-theme] .text-gray-300 {
+  color: var(--color-text-primary) !important;
+}
+html[data-theme] .text-gray-400 {
+  color: var(--color-text-secondary) !important;
+}
+html[data-theme] .text-gray-500 {
+  color: var(--gray-500) !important;
+}
+html[data-theme] .text-gray-600,
+html[data-theme] .text-gray-700 {
+  color: var(--color-muted) !important;
+}
+html[data-theme] .bg-gray-900 {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text-primary);
+}
+html[data-theme] .bg-gray-800,
+html[data-theme] .bg-gray-700 {
+  background-color: var(--color-surface-alt) !important;
+  color: var(--color-text-primary);
+}
+html[data-theme] .bg-gray-900\/70 {
+  background-color: var(--color-surface) !important;
+  background-color: color-mix(in srgb, var(--color-surface) 78%, transparent) !important;
+  color: var(--color-text-primary);
+}
+html[data-theme] .border-gray-700,
+html[data-theme] .border-gray-800 {
+  border-color: var(--color-border) !important;
+}
+html[data-theme] .hover\:bg-gray-700:hover,
+html[data-theme] .hover\:bg-gray-800:hover {
+  background-color: var(--control-surface-strong) !important;
+}
+
+select,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  color: var(--color-text-primary);
+  padding: 0.65rem 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+select:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-soft);
+  outline: none;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-surface-contrast);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: 2px solid var(--color-bg);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.05);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: 2px solid var(--color-bg);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.05);
+}
+
+input[type="range"]::-moz-range-track {
+  background: var(--color-surface-contrast);
+  height: 8px;
+  border-radius: 999px;
+}
+
+input[type="range"]::-ms-track {
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+
+input[type="range"]::-ms-fill-lower,
+input[type="range"]::-ms-fill-upper {
+  background: var(--color-surface-contrast);
+  border-radius: 999px;
+}
+
+input[type="range"]::-ms-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: 2px solid var(--color-bg);
+  cursor: pointer;
+}
+
 * { box-sizing: border-box; }
 html, body { min-height: 100%; }
 body {
