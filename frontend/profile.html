@@ -25,7 +25,7 @@
     })();
   </script>
   <script src="theme.js"></script>
-  <link rel="stylesheet" href="styles.css?v=6">
+    <link rel="stylesheet" href="styles.css?v=7">
   </head>
 <body>
   <div class="aurora-background"></div>
@@ -210,21 +210,38 @@
 
     document.getElementById('logout_btn').addEventListener('click', async () => { try { await fetch('/auth/logout', { method: 'POST', credentials: 'include' }); } catch {} location.href='/' });
     document.getElementById('login_btn').addEventListener('click', async () => {
-      try {
-        if (!AUTH_CONFIG.client_id) { alert('Sign-in not configured.'); return; }
-        setupGoogleSignIn();
-        /* global google */
-        google.accounts.id.prompt((notification) => {
-          const notShown = (typeof notification.isNotDisplayed === 'function' && notification.isNotDisplayed()) ||
-                           (typeof notification.isSkippedMoment === 'function' && notification.isSkippedMoment());
-          if (notShown) {
-            const btn = document.getElementById('gsi_btn');
-            if (btn) btn.style.display = 'inline-block';
-          }
-        });
-      } catch (e) {
-        const btn = document.getElementById('gsi_btn');
-        if (btn) btn.style.display = 'inline-block';
+      try { await fetchAuthConfig(); } catch {}
+      if (AUTH_CONFIG.client_id) {
+        try {
+          setupGoogleSignIn();
+          /* global google */
+          google.accounts.id.prompt((notification) => {
+            const notShown = (typeof notification.isNotDisplayed === 'function' && notification.isNotDisplayed()) ||
+                             (typeof notification.isSkippedMoment === 'function' && notification.isSkippedMoment());
+            if (notShown) {
+              const btn = document.getElementById('gsi_btn');
+              if (btn) btn.style.display = 'inline-block';
+            }
+          });
+        } catch (e) {
+          const btn = document.getElementById('gsi_btn');
+          if (btn) btn.style.display = 'inline-block';
+        }
+      } else if (AUTH_CONFIG.allow_dev_login) {
+        const email = prompt('Dev login email:');
+        if (!email) return;
+        const pw = prompt('Admin password for dev login:');
+        if (!pw) return;
+        try {
+          const r = await fetch('/auth/dev-login', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ email, password: pw }) });
+          if (!r.ok) throw new Error('Dev login failed');
+          location.reload();
+        } catch (e) {
+          alert('Dev login error: ' + e.message);
+        }
+      } else {
+        const msg = (AUTH_CONFIG && AUTH_CONFIG.login_message) ? AUTH_CONFIG.login_message : 'Sign-in not configured.';
+        alert(msg);
       }
     });
 

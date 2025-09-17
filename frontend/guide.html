@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/pretendard@1.3.8/dist/web/static/pretendard.css" rel="stylesheet">
   <script>
     (function () {
       var theme = 'dark';
@@ -24,9 +25,9 @@
     })();
   </script>
   <script src="theme.js"></script>
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
-<body>
+<body class="guide-body">
   <div class="aurora-background"></div>
   <nav class="navbar">
     <div class="nav-inner">
@@ -47,37 +48,34 @@
 
   <main class="guide-container">
     <section class="guide-hero glass-card">
-      <div>
-        <h1 class="hero-title-gradient" id="heroTitle">JokboDude Guide</h1>
-        <p id="heroSubtitle">Understand each analysis path and finish your first run in minutes.</p>
+      <div class="guide-hero-copy">
+        <p class="guide-hero-kicker" id="heroKicker"></p>
+        <h1 class="hero-title-gradient" id="heroTitle"></h1>
+        <p class="guide-hero-subtitle" id="heroSubtitle"></p>
         <ul class="guide-hero-list" id="heroList"></ul>
         <div class="guide-hero-actions">
-          <a id="heroCta" href="#workflow" class="accent-button">Skip to quick start</a>
-          <button id="langBtn" type="button" class="ghost-button">🇰🇷 한국어</button>
+          <button id="heroCta" type="button" class="accent-button"></button>
+          <button id="langBtn" type="button" class="ghost-button"></button>
         </div>
       </div>
-      <div class="guide-hero-note" id="heroNote"></div>
+      <p class="guide-hero-note" id="heroNote"></p>
     </section>
 
-    <div class="guide-layout">
-      <aside class="guide-toc glass-card">
-        <h3 id="tocTitle">Contents</h3>
-        <nav id="tocLinks"></nav>
-        <p class="guide-note" id="tocNote"></p>
-      </aside>
-
-      <section class="guide-content">
-        <article class="guide-section glass-card" id="modes">
+    <div class="guide-shell">
+      <div class="guide-tabs glass-card" id="guideTabs" role="tablist" aria-label="Guide sections"></div>
+      <p class="guide-tab-note" id="tabNote"></p>
+      <section class="guide-panels" id="guidePanels">
+        <article class="guide-panel glass-card active" data-panel="modes" id="panel-modes" role="tabpanel" aria-labelledby="tab-modes" aria-hidden="false">
           <header>
-            <h2 id="modesTitle">Choose a mode</h2>
+            <h2 id="modesTitle"></h2>
             <p class="section-lead" id="modesIntro"></p>
           </header>
           <div class="guide-mode-grid" id="modesGrid"></div>
         </article>
 
-        <article class="guide-section glass-card" id="workflow">
+        <article class="guide-panel glass-card" data-panel="workflow" id="panel-workflow" role="tabpanel" aria-labelledby="tab-workflow" aria-hidden="true">
           <header>
-            <h2 id="workflowTitle">Run an analysis in five steps</h2>
+            <h2 id="workflowTitle"></h2>
             <p class="section-lead" id="workflowIntro"></p>
           </header>
           <ol class="guide-step-list" id="workflowSteps"></ol>
@@ -87,17 +85,17 @@
           </div>
         </article>
 
-        <article class="guide-section glass-card" id="tips">
+        <article class="guide-panel glass-card" data-panel="tips" id="panel-tips" role="tabpanel" aria-labelledby="tab-tips" aria-hidden="true">
           <header>
-            <h2 id="tipsTitle">Best practices</h2>
+            <h2 id="tipsTitle"></h2>
             <p class="section-lead" id="tipsIntro"></p>
           </header>
           <div class="guide-best-grid" id="tipsGrid"></div>
         </article>
 
-        <article class="guide-section glass-card" id="faq">
+        <article class="guide-panel glass-card" data-panel="faq" id="panel-faq" role="tabpanel" aria-labelledby="tab-faq" aria-hidden="true">
           <header>
-            <h2 id="faqTitle">FAQ &amp; storage</h2>
+            <h2 id="faqTitle"></h2>
             <p class="section-lead" id="faqIntro"></p>
           </header>
           <div class="guide-faq" id="faqList"></div>
@@ -109,8 +107,14 @@
 
   <script>
     const GUIDE_LANG_KEY = 'jd_guide_lang';
+    const GUIDE_PANEL_KEY = 'jd_guide_panel';
+    const PANEL_IDS = ['modes', 'workflow', 'tips', 'faq'];
+    const PANEL_SET = new Set(PANEL_IDS);
+    let activePanel = 'modes';
+
     const I18N = {
       en: {
+        heroKicker: 'Playbook',
         toggleLabel: '🇰🇷 한국어',
         heroTitle: 'JokboDude Guide',
         heroSubtitle: 'Understand each analysis path and finish your first run in minutes.',
@@ -121,12 +125,12 @@
           'Exam Only exports a polished jokbo without lecture matches.'
         ],
         heroNote: 'Every mode shares the same 50 MB upload limit and token billing. Multi-API still works when multiple Gemini keys are configured.',
-        heroCta: 'Skip to quick start',
-        tocTitle: 'Contents',
-        tocNote: 'Tip: the language toggle keeps your scroll position while translating every section.',
+        heroCta: 'Open quick start',
+        tabLabel: 'Guide sections',
+        tabHint: 'Tip: switch tabs or language without losing your place.',
         tocLinks: [
-          { id: 'modes', label: 'Choose a mode' },
-          { id: 'workflow', label: 'Run an analysis' },
+          { id: 'modes', label: 'Modes overview' },
+          { id: 'workflow', label: 'Quick start' },
           { id: 'tips', label: 'Best practices' },
           { id: 'faq', label: 'FAQ & storage' }
         ],
@@ -152,7 +156,7 @@
               bullets: [
                 '<strong>Best when:</strong> you need a teaching deck that highlights questions for every slide.',
                 '<strong>Input tips:</strong> keep slide order clean; extra exam PDFs help the model fetch stronger matches.',
-                '<strong>Automation:</strong> slides stay in order with inserted question cards and highlight colors.'
+                '<strong>Automation:</strong> slides stay in order with inserted question cards and highlight colours.'
               ],
               output: 'Output: lecture-first PDF with embedded questions, slide tags, and explanation snippets for handouts.'
             },
@@ -228,7 +232,7 @@
               title: 'Speed',
               items: [
                 'Break extremely long jokbo (70+ pages) into chapters to shorten chunk queues.',
-                'When multiple Gemini API keys are configured, Multi-API parallelizes automatically—watch the completed/total chunks counter.',
+                'When multiple Gemini API keys are configured, Multi-API parallelises automatically—watch the completed/total chunks counter.',
                 'Partial Jokbo results can be recycled with lecture-centric mode so you do not re-process the same PDFs.'
               ]
             },
@@ -267,22 +271,23 @@
         footerNote: 'Need a workflow we do not cover yet? Reach out via the Feedback button so we can extend JokboDude for your team.'
       },
       ko: {
+        heroKicker: '사용자 가이드',
         toggleLabel: '🇺🇸 English',
         heroTitle: 'JokboDude 이용 가이드',
         heroSubtitle: '각 분석 모드를 이해하고 몇 분 만에 첫 작업을 끝내보세요.',
         heroHighlights: [
           '시험 중심 모드는 모든 문제에 대응되는 강의 자료를 찾아줍니다.',
           '강의 중심 모드는 슬라이드마다 연결된 문항으로 수업용 자료를 완성합니다.',
-          'Partial Jokbo 모드는 잘린 문제 요약으로 벼락치기용 요약본을 만듭니다.',
+          'Partial Jokbo 모드는 잘린 문제 요약으로 벼락치기용 요약을 만듭니다.',
           'Exam Only 모드는 강의 매칭 없이 깔끔한 족보만 출력합니다.'
         ],
         heroNote: '모든 모드는 PDF 당 50MB 업로드 제한과 동일한 토큰 규칙을 따릅니다. 여러 Gemini 키가 설정된 경우 Multi-API도 계속 병렬로 동작합니다.',
-        heroCta: '바로 시작 가이드 보기',
-        tocTitle: '목차',
-        tocNote: 'Tip: 언어를 바꿔도 현재 스크롤 위치는 유지됩니다.',
+        heroCta: '빠른 시작 열기',
+        tabLabel: '가이드 섹션',
+        tabHint: 'Tip: 언어를 바꿔도 현재 탭과 위치는 유지됩니다.',
         tocLinks: [
-          { id: 'modes', label: '모드 선택하기' },
-          { id: 'workflow', label: '분석 절차' },
+          { id: 'modes', label: '모드 안내' },
+          { id: 'workflow', label: '빠른 시작' },
           { id: 'tips', label: '활용 팁' },
           { id: 'faq', label: 'FAQ & 저장' }
         ],
@@ -332,7 +337,7 @@
                 '<strong>업로드 팁:</strong> 정리하고 싶은 순서대로 족보를 올리면 결과물도 그대로 정렬됩니다.',
                 '<strong>참고:</strong> 강의 자료는 선택 사항이며 이 모드에서는 무시됩니다.'
               ],
-              output: '결과물: 여백이 정리되고 서식이 통일된 통합 족보 PDF.' 
+              output: '결과물: 여백이 정리되고 서식이 통일된 통합 족보 PDF.'
             }
           ]
         },
@@ -470,8 +475,65 @@
       `).join('');
     }
 
-    function tocMarkup(links) {
-      return links.map(link => `<a href="#${link.id}">${link.label}</a>`).join('');
+    function renderTabs(links, label, note) {
+      const tabs = document.getElementById('guideTabs');
+      if (!tabs) return;
+      const ariaLabel = label || 'Guide sections';
+      tabs.setAttribute('aria-label', ariaLabel);
+      tabs.innerHTML = links.map((link, index) => {
+        const isActive = link.id === activePanel;
+        const indexLabel = String(index + 1).padStart(2, '0');
+        return `
+          <button type="button" class="guide-tab${isActive ? ' active' : ''}" id="tab-${link.id}" data-panel="${link.id}" role="tab" aria-selected="${isActive}" aria-controls="panel-${link.id}">
+            <span class="guide-tab-index">${indexLabel}</span>
+            <span>${link.label}</span>
+          </button>
+        `;
+      }).join('');
+      const tabNote = document.getElementById('tabNote');
+      if (tabNote) {
+        tabNote.textContent = note || '';
+        tabNote.style.display = note ? 'block' : 'none';
+      }
+      tabs.querySelectorAll('.guide-tab').forEach(button => {
+        button.addEventListener('click', () => {
+          const target = button.dataset.panel;
+          if (target) {
+            setActivePanel(target, { scroll: false });
+          }
+        });
+      });
+      syncPanelState();
+    }
+
+    function syncPanelState() {
+      const tabButtons = document.querySelectorAll('.guide-tab');
+      tabButtons.forEach(button => {
+        const isActive = button.dataset.panel === activePanel;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      const panels = document.querySelectorAll('.guide-panel');
+      panels.forEach(panel => {
+        const isActive = panel.dataset.panel === activePanel;
+        panel.classList.toggle('active', isActive);
+        panel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+      });
+    }
+
+    function setActivePanel(panelId, options = {}) {
+      if (!PANEL_SET.has(panelId)) {
+        return;
+      }
+      activePanel = panelId;
+      syncPanelState();
+      try { localStorage.setItem(GUIDE_PANEL_KEY, panelId); } catch (err) {}
+      if (options.scroll) {
+        const panelEl = document.getElementById(`panel-${panelId}`);
+        if (panelEl) {
+          panelEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
     }
 
     function renderGuide(lang) {
@@ -479,21 +541,21 @@
       const nextLang = lang === 'en' ? 'ko' : 'en';
       document.documentElement.lang = lang === 'ko' ? 'ko' : 'en';
 
+      const heroKicker = document.getElementById('heroKicker');
+      if (heroKicker) heroKicker.textContent = t.heroKicker || '';
       document.getElementById('heroTitle').textContent = t.heroTitle;
       document.getElementById('heroSubtitle').textContent = t.heroSubtitle;
       document.getElementById('heroList').innerHTML = listMarkup(t.heroHighlights);
       document.getElementById('heroNote').textContent = t.heroNote;
       const heroCta = document.getElementById('heroCta');
       heroCta.textContent = t.heroCta;
-      heroCta.href = '#workflow';
+      heroCta.setAttribute('aria-label', t.heroCta);
 
       const langBtn = document.getElementById('langBtn');
       langBtn.textContent = t.toggleLabel;
       langBtn.dataset.nextLang = nextLang;
 
-      document.getElementById('tocTitle').textContent = t.tocTitle;
-      document.getElementById('tocLinks').innerHTML = tocMarkup(t.tocLinks);
-      document.getElementById('tocNote').textContent = t.tocNote;
+      renderTabs(t.tocLinks || PANEL_IDS.map(id => ({ id, label: id })), t.tabLabel || t.tocTitle, t.tabHint || t.tocNote);
 
       document.getElementById('modesTitle').textContent = t.modes.title;
       document.getElementById('modesIntro').textContent = t.modes.intro;
@@ -515,30 +577,39 @@
       document.getElementById('footerNote').textContent = t.footerNote;
 
       try { localStorage.setItem(GUIDE_LANG_KEY, lang); } catch (err) {}
+      syncPanelState();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const saved = (() => {
-        try { return localStorage.getItem(GUIDE_LANG_KEY) || 'ko'; }
-        catch (err) { return 'ko'; }
+      const savedPanel = (() => {
+        try {
+          const stored = localStorage.getItem(GUIDE_PANEL_KEY);
+          return PANEL_SET.has(stored) ? stored : 'modes';
+        } catch (err) {
+          return 'modes';
+        }
       })();
-      renderGuide(saved);
+      activePanel = savedPanel;
+
+      const savedLang = (() => {
+        try {
+          return localStorage.getItem(GUIDE_LANG_KEY) || 'ko';
+        } catch (err) {
+          return 'ko';
+        }
+      })();
+
+      renderGuide(savedLang);
+      syncPanelState();
+
       document.getElementById('langBtn').addEventListener('click', () => {
         const next = document.getElementById('langBtn').dataset.nextLang || 'en';
         renderGuide(next);
       });
-    });
-  </script>
-  <script>
-    document.addEventListener('click', (e) => {
-      const anchor = e.target.closest('a[href^="#"]');
-      if (!anchor) return;
-      const targetId = anchor.getAttribute('href').slice(1);
-      if (!targetId) return;
-      const target = document.getElementById(targetId);
-      if (!target) return;
-      e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      document.getElementById('heroCta').addEventListener('click', () => {
+        setActivePanel('workflow', { scroll: true });
+      });
     });
   </script>
 </body>

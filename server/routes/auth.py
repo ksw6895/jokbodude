@@ -89,15 +89,22 @@ def auth_config():
         initial_tokens = max(0, int(os.getenv("CBT_TOKENS_INITIAL", "200")))
     except Exception:
         initial_tokens = 200
+    client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "").strip()
+    allow_dev = os.getenv("ALLOW_DEV_LOGIN", "false").lower() in ("1", "true", "yes")
+    enabled = bool(client_id or allow_dev)
+    login_message = ""
+    if not enabled:
+        login_message = "Sign-in is not configured. Set GOOGLE_OAUTH_CLIENT_ID or enable dev login."
     return {
-        "enabled": True,
-        "client_id": os.getenv("GOOGLE_OAUTH_CLIENT_ID", ""),
-        "allow_dev_login": os.getenv("ALLOW_DEV_LOGIN", "false").lower() in ("1", "true", "yes"),
+        "enabled": enabled,
+        "client_id": client_id,
+        "allow_dev_login": allow_dev,
         "feedback_form_url": os.getenv("FEEDBACK_FORM_URL", ""),
         "tokens_enabled": True,
         "token_costs": {"flash": flash_cost, "pro": pro_cost},
         "initial_tokens": initial_tokens,
         "admin_login_via_google": bool(_admin_emails()),
+        "login_message": login_message,
     }
 
 
