@@ -207,6 +207,7 @@ class ProblemSnipper:
                 primary_page = 0
             segment.metadata.setdefault("page", primary_page + 1)
             segment.metadata.setdefault("question_number", segment.display_number)
+            segment.metadata.setdefault("jokbo_filename", source.name)
         return segments
 
     @staticmethod

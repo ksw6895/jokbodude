@@ -6,12 +6,13 @@ import pymupdf as fitz
 from celery import Celery, current_task
 from celery.signals import worker_ready
 from celery.exceptions import Ignore, SoftTimeLimitExceeded
-from typing import Optional
+from typing import Optional, List, Dict, Any
 import threading
 import time
 from config import create_model, configure_api, API_KEYS
 import logging
 from pdf_processor.core.processor import PDFProcessor
+from pdf_processor.core.problem_snipper import ProblemSnipper
 from pdf_creator import PDFCreator
 from storage_manager import StorageManager
 from pdf_processor.pdf.operations import PDFOperations
@@ -193,6 +194,26 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
                 except Exception:
                     pass
             creator = PDFCreator()
+            # Pre-extract problem segments for all jokbo files so PDF merge has coordinates
+            problem_snipper = ProblemSnipper()
+            all_segment_objects: List[Any] = []
+            all_segment_payload: List[Dict[str, Any]] = []
+            for jokbo_path in jokbo_paths:
+                try:
+                    segments = problem_snipper.extract(jokbo_path)
+                    all_segment_objects.extend(segments)
+                    all_segment_payload.extend(ProblemSnipper.serialize_segments(segments))
+                except Exception as e:
+                    logger.warning(f"ProblemSnipper extract failed for {jokbo_path}: {e}")
+            try:
+                if all_segment_objects:
+                    try:
+                        problem_snipper.store_segments(storage_manager, job_id, all_segment_objects)
+                    except Exception:
+                        pass
+                    creator.register_problem_segments(all_segment_payload)
+            except Exception as e:
+                logger.warning(f"register_problem_segments failed: {e}")
 
             aggregated_warnings = {"failed_files": [], "failed_chunks": 0}
             for prim_path_str in primary_paths:

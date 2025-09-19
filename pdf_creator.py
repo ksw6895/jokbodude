@@ -32,6 +32,10 @@ class PDFCreator:
         self._qindex_cache = {}
         # Optional Gemini annotations keyed by QID
         self._gemini_annotations: Dict[str, Dict[str, Any]] = {}
+        # Problem segment lookup maps populated via register_problem_segments()
+        self._segments_by_qid: Dict[str, Dict[str, Any]] = {}
+        self._segments_by_page: Dict[tuple, Dict[str, Any]] = {}
+        self._segments_by_page_str: Dict[tuple, Dict[str, Any]] = {}
 
     def _close_cached_pdfs(self, only_paths: Optional[List[str]] = None) -> None:
         """Close and remove cached jokbo PDFs to prevent memory growth.
@@ -103,22 +107,134 @@ class PDFCreator:
         return self._insert_soft_breaks(normalized)
 
     # ---------- Gemini helpers ----------
-    def register_gemini_annotations(self, segments: List[Dict[str, Any]]) -> None:
-        """Store Gemini answer metadata for later use during PDF composition."""
+    def register_problem_segments(self, segments: List[Dict[str, Any]]) -> None:
+        """Register problem segments (coordinates + metadata) for later lookup."""
 
-        annotations: Dict[str, Dict[str, Any]] = {}
+        self._segments_by_qid.clear()
+        self._segments_by_page.clear()
+        self._segments_by_page_str.clear()
+        self._gemini_annotations = {}
+
         for segment in segments or []:
-            metadata = segment.get("metadata") or {}
+            if not isinstance(segment, dict):
+                continue
+            metadata = dict(segment.get("metadata") or {})
+            segment["metadata"] = metadata
             qid = metadata.get("qid") or segment.get("qid")
+            if qid:
+                self._segments_by_qid[str(qid).strip()] = segment
+            filename = self._normalize_filename(str(metadata.get("jokbo_filename") or segment.get("jokbo_filename") or ""))
+            try:
+                page_num = int(str(metadata.get("page") or metadata.get("jokbo_page") or 0))
+            except Exception:
+                page_num = 0
+            question_raw = metadata.get("question_number") or segment.get("display_number")
+            question_key = str(question_raw).strip() if question_raw is not None else ""
+            question_int = self._safe_int(question_raw, 0)
+            if filename and page_num > 0:
+                if question_int > 0:
+                    self._segments_by_page[(filename, page_num, question_int)] = segment
+                if question_key:
+                    self._segments_by_page_str[(filename, page_num, question_key)] = segment
             gemini_blob = segment.get("gemini")
             if qid and isinstance(gemini_blob, dict):
-                annotations[str(qid)] = gemini_blob
-        self._gemini_annotations = annotations
+                self._gemini_annotations[str(qid).strip()] = gemini_blob
+
+    def register_gemini_annotations(self, segments: List[Dict[str, Any]]) -> None:
+        """Backward-compatible shim: also registers problem segments."""
+
+        self.register_problem_segments(segments)
 
     def _get_gemini_annotation(self, qid: Optional[str]) -> Optional[Dict[str, Any]]:
         if not qid:
             return None
         return self._gemini_annotations.get(str(qid))
+
+    # ---------- Problem segment helpers ----------
+    def _normalize_filename(self, name: str) -> str:
+        try:
+            return self._normalize_korean(name).strip().lower()
+        except Exception:
+            return (name or "").strip().lower()
+
+    def _lookup_segment(self, jokbo_filename: str, page: int, question_number: Any, qid: Optional[str]) -> Optional[Dict[str, Any]]:
+        if qid:
+            qid_key = str(qid).strip()
+            seg = self._segments_by_qid.get(qid_key)
+            if seg:
+                return seg
+        filename_key = self._normalize_filename(jokbo_filename)
+        if not filename_key or page <= 0:
+            return None
+        q_int = self._safe_int(question_number, 0)
+        if q_int > 0:
+            seg = self._segments_by_page.get((filename_key, page, q_int))
+            if seg:
+                return seg
+        q_str = str(question_number).strip() if question_number is not None else ""
+        if q_str:
+            seg = self._segments_by_page_str.get((filename_key, page, q_str))
+            if seg:
+                return seg
+        return None
+
+    def _extract_segment_document(self, segment: Dict[str, Any], jokbo_dir: str) -> Optional[fitz.Document]:
+        metadata = segment.get("metadata") or {}
+        filename = metadata.get("jokbo_filename") or segment.get("jokbo_filename") or ""
+        filename = str(filename)
+        if not filename:
+            return None
+        jokbo_path = self._resolve_jokbo_path(jokbo_dir, filename)
+        if not jokbo_path.exists():
+            self.log_debug(f"  WARN: segment jokbo file missing: {jokbo_path}")
+            return None
+
+        spans = segment.get("page_spans") or {}
+        if not isinstance(spans, dict) or not spans:
+            return None
+
+        try:
+            src_doc = self.get_jokbo_pdf(str(jokbo_path))
+        except Exception as e:
+            self.log_debug(f"  WARN: could not open jokbo for segment extraction: {e}")
+            return None
+
+        result = fitz.open()
+        pages = sorted(spans.items(), key=lambda x: int(x[0]))
+        for page_idx, rects in pages:
+            try:
+                src_index = int(page_idx)
+            except Exception:
+                continue
+            if src_index < 0 or src_index >= len(src_doc):
+                continue
+            try:
+                clip_rect = None
+                if isinstance(rects, list) and rects:
+                    rect_objs = [fitz.Rect(r) for r in rects]
+                    # Union of all rectangles with a small margin
+                    union = rect_objs[0]
+                    for r in rect_objs[1:]:
+                        union |= r
+                    margin = 6.0
+                    page_rect = src_doc[src_index].rect
+                    clip_rect = fitz.Rect(
+                        max(page_rect.x0, union.x0 - margin),
+                        max(page_rect.y0, union.y0 - margin),
+                        min(page_rect.x1, union.x1 + margin),
+                        min(page_rect.y1, union.y1 + margin),
+                    )
+                result.insert_pdf(src_doc, from_page=src_index, to_page=src_index, clip=clip_rect)
+            except Exception as e:
+                self.log_debug(f"  WARN: clip insert failed, falling back to full page: {e}")
+                try:
+                    result.insert_pdf(src_doc, from_page=src_index, to_page=src_index)
+                except Exception as inner:
+                    self.log_debug(f"  ERROR: fallback insert failed: {inner}")
+        if len(result) == 0:
+            result.close()
+            return None
+        return result
 
     @staticmethod
     def _safe_int(value, default: int = 0) -> int:
@@ -729,41 +845,46 @@ class PDFCreator:
 
             # If there are related questions, append them after the slide
             for question in related_by_page.get(page_num, []):
-                # Determine if this is the last question on the page (numeric compare)
-                is_last_question = False
-                question_numbers = question.get("question_numbers_on_page", [])
-                try:
-                    qnum_int = self._safe_int(question.get("question_number"))
-                    page_qnums = [self._safe_int(x) for x in (question_numbers or []) if self._safe_int(x) > 0]
-                    last_q = max(page_qnums) if page_qnums else None
-                    if last_q is not None and qnum_int > 0 and qnum_int == last_q:
-                        is_last_question = True
-                except Exception:
-                    pass
-
-                # Extract and insert the question from jokbo (handles next-page inclusion)
                 fn = str(question.get("jokbo_filename") or "")
                 reported_sp = int(question.get("jokbo_page", 0))
                 qn_norm = self._safe_int(question.get("question_number"), 0)
-                # Resolve start page by scanning jokbo for the question number
-                sp = self._resolve_question_start_page(fn, reported_sp, qn_norm, jokbo_dir)
-                # Prefer next-boundary computed with resolved start page; fallback to reported
-                ns, nq = (
-                    next_map.get((fn, sp, qn_norm),
-                        next_map.get((fn, reported_sp, qn_norm), (None, None)))
-                )
-                question_doc = self.extract_jokbo_question(
-                    fn,
-                    sp,
-                    question.get("question_number"),
-                    question.get("question_text", ""),
-                    jokbo_dir,
-                    question.get("jokbo_end_page"),
-                    is_last_question,
-                    question_numbers,
-                    computed_next_start_page=ns,
-                    computed_next_question_number=nq,
-                )
+                qid = question.get("qid")
+                segment = self._lookup_segment(fn, reported_sp, question.get("question_number"), qid)
+                question_doc = None
+                if segment:
+                    question_doc = self._extract_segment_document(segment, jokbo_dir)
+                if question_doc is None:
+                    # Determine if this is the last question on the page (numeric compare)
+                    is_last_question = False
+                    question_numbers = question.get("question_numbers_on_page", [])
+                    try:
+                        qnum_int = self._safe_int(question.get("question_number"))
+                        page_qnums = [self._safe_int(x) for x in (question_numbers or []) if self._safe_int(x) > 0]
+                        last_q = max(page_qnums) if page_qnums else None
+                        if last_q is not None and qnum_int > 0 and qnum_int == last_q:
+                            is_last_question = True
+                    except Exception:
+                        pass
+
+                    # Resolve start page by scanning jokbo for the question number
+                    sp = self._resolve_question_start_page(fn, reported_sp, qn_norm, jokbo_dir)
+                    # Prefer next-boundary computed with resolved start page; fallback to reported
+                    ns, nq = (
+                        next_map.get((fn, sp, qn_norm),
+                            next_map.get((fn, reported_sp, qn_norm), (None, None)))
+                    )
+                    question_doc = self.extract_jokbo_question(
+                        fn,
+                        sp,
+                        question.get("question_number"),
+                        question.get("question_text", ""),
+                        jokbo_dir,
+                        question.get("jokbo_end_page"),
+                        is_last_question,
+                        question_numbers,
+                        computed_next_start_page=ns,
+                        computed_next_question_number=nq,
+                    )
                 if question_doc:
                     doc.insert_pdf(question_doc)
                     question_doc.close()
@@ -961,60 +1082,67 @@ class PDFCreator:
             # Only process questions that haven't been processed
             if question_num not in processed_questions:
                 processed_questions.add(question_num)
-                
-                # Determine if this is the last question on the page (numeric compare)
-                is_last_question = False
-                question_numbers = question.get("question_numbers_on_page", [])
-                self.log_debug(f"Processing Q{question_num}: question_numbers = {question_numbers}")
-                try:
-                    qnum_int = self._safe_int(question_num)
-                    page_qnums = [self._safe_int(x) for x in (question_numbers or []) if self._safe_int(x) > 0]
-                    last_q = max(page_qnums) if page_qnums else None
-                    if last_q is not None and qnum_int > 0 and qnum_int == last_q:
-                        is_last_question = True
-                        print(f"DEBUG: Question {question_num} is last on page {jokbo_page_num}, questions: {page_qnums}")
-                        self.log_debug(f"  Q{question_num} is LAST on page {jokbo_page_num}")
-                    else:
-                        self.log_debug(f"  Q{question_num} is NOT last on page {jokbo_page_num}")
-                except Exception:
-                    self.log_debug(f"  WARN: could not compute last-on-page for Q{question_num}")
-                
-                # Extract the question pages (handles multi-page questions)
+
+                qid = question.get("qid")
+                segment = self._lookup_segment(jokbo_filename, int(jokbo_page_num), question_num, qid)
+                question_doc = None
                 before_pages = len(doc)
-                # Resolve start page by scanning jokbo for the question number
-                sp_resolved = self._resolve_question_start_page(
-                    jokbo_filename, int(jokbo_page_num), question_num, str(Path(jokbo_path).parent)
-                )
-                qn_norm = self._safe_int(question_num, 0)
-                # Prefer next-boundary computed with resolved start page; fallback to reported
-                key_resolved = (jokbo_filename, int(sp_resolved), qn_norm)
-                key_reported = (jokbo_filename, int(jokbo_page_num), qn_norm)
-                key_single_resolved = ("__single__", int(sp_resolved), qn_norm)
-                key_single_reported = ("__single__", int(jokbo_page_num), qn_norm)
-                ns, nq = (
-                    next_map.get(key_resolved,
-                        next_map.get(key_reported,
-                            next_map.get(key_single_resolved,
-                                next_map.get(key_single_reported, (None, None)))))
-                )
-                question_doc = self.extract_jokbo_question(
-                    jokbo_filename,
-                    sp_resolved,
-                    question_num,
-                    question.get("question_text", ""),
-                    str(Path(jokbo_path).parent),
-                    # Respect jokbo_end_page if present (multi-page questions)
-                    question.get("jokbo_end_page"),
-                    is_last_question,
-                    question_numbers,
-                    computed_next_start_page=ns,
-                    computed_next_question_number=nq,
-                )
+                if segment:
+                    question_doc = self._extract_segment_document(segment, str(Path(jokbo_path).parent))
+                if question_doc is None:
+                    # Determine if this is the last question on the page (numeric compare)
+                    is_last_question = False
+                    question_numbers = question.get("question_numbers_on_page", [])
+                    self.log_debug(f"Processing Q{question_num}: question_numbers = {question_numbers}")
+                    try:
+                        qnum_int = self._safe_int(question_num)
+                        page_qnums = [self._safe_int(x) for x in (question_numbers or []) if self._safe_int(x) > 0]
+                        last_q = max(page_qnums) if page_qnums else None
+                        if last_q is not None and qnum_int > 0 and qnum_int == last_q:
+                            is_last_question = True
+                            print(f"DEBUG: Question {question_num} is last on page {jokbo_page_num}, questions: {page_qnums}")
+                            self.log_debug(f"  Q{question_num} is LAST on page {jokbo_page_num}")
+                        else:
+                            self.log_debug(f"  Q{question_num} is NOT last on page {jokbo_page_num}")
+                    except Exception:
+                        self.log_debug(f"  WARN: could not compute last-on-page for Q{question_num}")
+
+                    # Extract the question pages (handles multi-page questions)
+                    before_pages = len(doc)
+                    # Resolve start page by scanning jokbo for the question number
+                    sp_resolved = self._resolve_question_start_page(
+                        jokbo_filename, int(jokbo_page_num), question_num, str(Path(jokbo_path).parent)
+                    )
+                    qn_norm = self._safe_int(question_num, 0)
+                    # Prefer next-boundary computed with resolved start page; fallback to reported
+                    key_resolved = (jokbo_filename, int(sp_resolved), qn_norm)
+                    key_reported = (jokbo_filename, int(jokbo_page_num), qn_norm)
+                    key_single_resolved = ("__single__", int(sp_resolved), qn_norm)
+                    key_single_reported = ("__single__", int(jokbo_page_num), qn_norm)
+                    ns, nq = (
+                        next_map.get(key_resolved,
+                            next_map.get(key_reported,
+                                next_map.get(key_single_resolved,
+                                    next_map.get(key_single_reported, (None, None)))))
+                    )
+                    question_doc = self.extract_jokbo_question(
+                        jokbo_filename,
+                        sp_resolved,
+                        question_num,
+                        question.get("question_text", ""),
+                        str(Path(jokbo_path).parent),
+                        # Respect jokbo_end_page if present (multi-page questions)
+                        question.get("jokbo_end_page"),
+                        is_last_question,
+                        question_numbers,
+                        computed_next_start_page=ns,
+                        computed_next_question_number=nq,
+                    )
                 if question_doc:
                     try:
                         self.log_debug(
                             f"insert_question: Q={question_num}, src_page={jokbo_page_num},"
-                            f" doc_pages_before={before_pages}, insert_pages={len(question_doc)}"
+                            f" doc_pages_before={before_pages if 'before_pages' in locals() else len(doc)}, insert_pages={len(question_doc)}"
                         )
                     except Exception:
                         pass
