@@ -264,6 +264,75 @@ class StorageManager:
         # local_path.write_bytes(content)
         
         return file_key
+
+    # ------------------------------------------------------------------
+    # Problem Segment Storage Helpers
+    # ------------------------------------------------------------------
+    def _problem_segments_key(self, job_id: str) -> str:
+        return f"job:{job_id}:problem_segments"
+
+    def _problem_segments_local_path(self, job_id: str) -> Path:
+        return self.local_storage / f"{job_id}_problem_segments.json"
+
+    def store_problem_segments(self, job_id: str, segments: List[Dict]) -> str:
+        """Persist extracted problem segments for downstream processing."""
+
+        payload = json.dumps(segments, ensure_ascii=False).encode("utf-8")
+        key = self._problem_segments_key(job_id)
+        if self.use_local_only or self.redis_client is None:
+            target = self._problem_segments_local_path(job_id)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(payload)
+            return str(target)
+
+        compressed = zlib.compress(payload)
+        self._with_retry(
+            self.redis_client.setex,
+            key,
+            self.file_ttl_seconds,
+            compressed,
+        )
+        return key
+
+    def load_problem_segments(self, job_id: str) -> Optional[List[Dict]]:
+        """Load previously stored problem segments for ``job_id``."""
+
+        key = self._problem_segments_key(job_id)
+        data: Optional[bytes] = None
+        if not self.use_local_only and self.redis_client is not None:
+            data = self._with_retry(self.redis_client.get, key)
+            if data:
+                try:
+                    data = zlib.decompress(data)
+                except zlib.error:
+                    pass
+        if data is None:
+            local_path = self._problem_segments_local_path(job_id)
+            if local_path.exists():
+                data = local_path.read_bytes()
+        if not data:
+            return None
+        try:
+            return json.loads(data.decode("utf-8"))
+        except Exception:
+            logger.warning("Failed to decode problem segments for job %s", job_id)
+            return None
+
+    def clear_problem_segments(self, job_id: str) -> None:
+        """Remove persisted problem segment blobs for ``job_id``."""
+
+        key = self._problem_segments_key(job_id)
+        if not self.use_local_only and self.redis_client is not None:
+            try:
+                self._with_retry(self.redis_client.delete, key)
+            except Exception:
+                logger.warning("Failed to delete Redis problem segments key %s", key)
+        local_path = self._problem_segments_local_path(job_id)
+        if local_path.exists():
+            try:
+                local_path.unlink()
+            except Exception:
+                logger.warning("Failed to remove local problem segments file %s", local_path)
     
     def get_file(self, file_key: str) -> Optional[bytes]:
         """Retrieve file content from Redis or local storage"""

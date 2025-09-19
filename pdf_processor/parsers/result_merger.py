@@ -210,6 +210,102 @@ class ResultMerger:
             unique_slides.sort(key=lambda x: int(str(x.get("lesson_page", 0)) or 0))
             
             return {"related_slides": unique_slides}
+
+    # ------------------------------------------------------------------
+    # Gemini Integration Helpers
+    # ------------------------------------------------------------------
+    @staticmethod
+    def attach_gemini_answers(
+        segments: List[Dict[str, Any]],
+        gemini_results: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        """Attach Gemini answers/rationales to extracted segments.
+
+        Priority order for matching:
+            1. Explicit QID match (if 모델이 qid를 되돌려줌)
+            2. (page, question_number) 조합으로 보정
+        """
+
+        enriched: List[Dict[str, Any]] = []
+        if not segments:
+            return enriched
+
+        # Prepare mutable copies and lookup tables
+        by_qid: Dict[str, int] = {}
+        by_page_question: Dict[tuple, int] = {}
+        for idx, segment in enumerate(segments):
+            seg_copy = dict(segment)
+            metadata = dict(seg_copy.get("metadata") or {})
+            qid = metadata.get("qid") or seg_copy.get("qid")
+            if qid:
+                by_qid[str(qid).strip()] = idx
+            page = metadata.get("page") or metadata.get("jokbo_page")
+            try:
+                page_int = int(str(page)) if page is not None else None
+            except Exception:
+                page_int = None
+            display = metadata.get("question_number") or seg_copy.get("display_number")
+            display_key = str(display).strip() if display is not None else None
+            if page_int is not None and display_key:
+                by_page_question[(page_int, display_key)] = idx
+            seg_copy["metadata"] = metadata
+            enriched.append(seg_copy)
+
+        # Helper to update a segment entry
+        def _apply(idx: int, response: Dict[str, Any], qid: Optional[str] = None) -> None:
+            seg = enriched[idx]
+            metadata = seg.get("metadata", {})
+            if qid:
+                metadata.setdefault("qid", qid)
+            seg["gemini"] = {
+                "answer": response.get("answer"),
+                "rationale": response.get("rationale"),
+                "page": response.get("page") or response.get("jokbo_page"),
+                "problem_number": response.get("problem_number") or response.get("question_number"),
+                "raw": response,
+            }
+            seg["metadata"] = metadata
+
+        matched_qids = set()
+        matched_pairs = set()
+        for response in gemini_results or []:
+            qid_value = str(response.get("qid") or "").strip()
+            page_value = response.get("page") or response.get("jokbo_page")
+            question_value = response.get("problem_number") or response.get("question_number")
+            idx: Optional[int] = None
+
+            if qid_value and qid_value in by_qid:
+                idx = by_qid[qid_value]
+                matched_qids.add(qid_value)
+            else:
+                try:
+                    page_int = int(str(page_value)) if page_value is not None else None
+                except Exception:
+                    page_int = None
+                question_key = str(question_value).strip() if question_value is not None else None
+                if page_int is not None and question_key:
+                    key = (page_int, question_key)
+                    idx = by_page_question.get(key)
+                    if idx is not None:
+                        matched_pairs.add(key)
+
+            if idx is not None:
+                _apply(idx, response, qid=qid_value if qid_value else None)
+            else:
+                logger.warning(
+                    "Gemini response could not be matched (qid=%s, page=%s, question=%s)",
+                    qid_value or "", page_value, question_value,
+                )
+
+        # Warn about unmatched expectations
+        missing_qids = sorted(set(by_qid.keys()) - matched_qids)
+        if missing_qids:
+            logger.debug("Segments with QID but no Gemini match: %s", missing_qids)
+        missing_pairs = sorted(set(by_page_question.keys()) - matched_pairs)
+        if missing_pairs:
+            logger.debug("Segments missing Gemini match by page/question: %s", missing_pairs)
+
+        return enriched
     
     @staticmethod
     def save_chunk_result(result: Dict[str, Any], chunk_file: Path) -> None:

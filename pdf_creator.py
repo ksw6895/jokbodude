@@ -30,6 +30,8 @@ class PDFCreator:
         self._jokbo_dir_cache = {}
         # Cache for question-number index per jokbo file: {abs_path: {qnum: [pages...]}}
         self._qindex_cache = {}
+        # Optional Gemini annotations keyed by QID
+        self._gemini_annotations: Dict[str, Dict[str, Any]] = {}
 
     def _close_cached_pdfs(self, only_paths: Optional[List[str]] = None) -> None:
         """Close and remove cached jokbo PDFs to prevent memory growth.
@@ -99,6 +101,24 @@ class PDFCreator:
         """Normalize Hangul and make long filenames wrap-friendly for PDF text boxes."""
         normalized = self._normalize_korean(name)
         return self._insert_soft_breaks(normalized)
+
+    # ---------- Gemini helpers ----------
+    def register_gemini_annotations(self, segments: List[Dict[str, Any]]) -> None:
+        """Store Gemini answer metadata for later use during PDF composition."""
+
+        annotations: Dict[str, Dict[str, Any]] = {}
+        for segment in segments or []:
+            metadata = segment.get("metadata") or {}
+            qid = metadata.get("qid") or segment.get("qid")
+            gemini_blob = segment.get("gemini")
+            if qid and isinstance(gemini_blob, dict):
+                annotations[str(qid)] = gemini_blob
+        self._gemini_annotations = annotations
+
+    def _get_gemini_annotation(self, qid: Optional[str]) -> Optional[Dict[str, Any]]:
+        if not qid:
+            return None
+        return self._gemini_annotations.get(str(qid))
 
     @staticmethod
     def _safe_int(value, default: int = 0) -> int:
