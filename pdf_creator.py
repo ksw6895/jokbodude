@@ -14,6 +14,7 @@ import tempfile
 import os
 from datetime import datetime
 import threading
+from collections import defaultdict
 from validators import PDFValidator
 import unicodedata
 import re
@@ -114,10 +115,12 @@ class PDFCreator:
         self._segments_by_page.clear()
         self._segments_by_page_str.clear()
         self._gemini_annotations = {}
+        page_entries: Dict[Tuple[str, int], List[Tuple[Dict[str, Any], float]]] = defaultdict(list)
 
         for segment in segments or []:
             if not isinstance(segment, dict):
                 continue
+            self._normalise_segment_layout(segment)
             metadata = dict(segment.get("metadata") or {})
             segment["metadata"] = metadata
             qid = metadata.get("qid") or segment.get("qid")
@@ -140,6 +143,28 @@ class PDFCreator:
             if qid and isinstance(gemini_blob, dict):
                 self._gemini_annotations[str(qid).strip()] = gemini_blob
 
+            page_indices = set(segment.get("page_spans", {}).keys()) | set(
+                segment.get("page_block_rects", {}).keys()
+            )
+            for page_index in page_indices:
+                try:
+                    page_idx_int = int(page_index)
+                except Exception:
+                    continue
+                top = self._segment_page_top(segment, page_idx_int)
+                if top is None:
+                    continue
+                page_entries[(filename, page_idx_int)].append((segment, top))
+
+        for (filename_key, page_idx), entries in page_entries.items():
+            ordered = sorted(entries, key=lambda item: item[1])
+            for idx, (segment, top) in enumerate(ordered):
+                next_top = ordered[idx + 1][1] if idx + 1 < len(ordered) else None
+                segment.setdefault("_page_bounds", {})[page_idx] = {
+                    "top": top,
+                    "next_top": next_top,
+                }
+
     def register_gemini_annotations(self, segments: List[Dict[str, Any]]) -> None:
         """Backward-compatible shim: also registers problem segments."""
 
@@ -156,6 +181,111 @@ class PDFCreator:
             return self._normalize_korean(name).strip().lower()
         except Exception:
             return (name or "").strip().lower()
+
+    def _coerce_rect_tuple(self, rect: Any) -> Optional[Tuple[float, float, float, float]]:
+        """Return a float tuple for ``rect`` if possible."""
+
+        if rect is None:
+            return None
+        candidate = rect
+        if isinstance(candidate, dict):
+            candidate = (
+                candidate.get("rect")
+                or candidate.get("bbox")
+                or candidate.get("bounds")
+                or []
+            )
+        try:
+            x0, y0, x1, y1 = candidate
+            return float(x0), float(y0), float(x1), float(y1)
+        except Exception:
+            return None
+
+    def _normalise_segment_layout(self, segment: Dict[str, Any]) -> None:
+        """Normalize page span / block data for downstream consumers."""
+
+        spans_raw = segment.get("page_spans") or {}
+        normalised_spans: Dict[int, List[Tuple[float, float, float, float]]] = {}
+        if isinstance(spans_raw, dict):
+            for page_key, rects in spans_raw.items():
+                try:
+                    page_index = int(page_key)
+                except Exception:
+                    continue
+                page_rects: List[Tuple[float, float, float, float]] = []
+                if isinstance(rects, dict):
+                    rect_iter = rects.values()
+                else:
+                    rect_iter = rects or []
+                for rect in rect_iter:
+                    rect_tuple = self._coerce_rect_tuple(rect)
+                    if rect_tuple is not None:
+                        page_rects.append(rect_tuple)
+                if page_rects:
+                    normalised_spans[page_index] = page_rects
+        segment["page_spans"] = normalised_spans
+
+        blocks_raw = segment.get("page_block_rects") or {}
+        normalised_blocks: Dict[int, Dict[int, Tuple[float, float, float, float]]] = {}
+        if isinstance(blocks_raw, dict):
+            for page_key, block_map in blocks_raw.items():
+                try:
+                    page_index = int(page_key)
+                except Exception:
+                    continue
+                page_blocks: Dict[int, Tuple[float, float, float, float]] = {}
+                if isinstance(block_map, dict):
+                    for block_key, rect in block_map.items():
+                        try:
+                            block_index = int(block_key)
+                        except Exception:
+                            try:
+                                block_index = int(re.findall(r"\d+", str(block_key))[0])
+                            except Exception:
+                                continue
+                        rect_tuple = self._coerce_rect_tuple(rect)
+                        if rect_tuple is not None:
+                            page_blocks[block_index] = rect_tuple
+                if page_blocks:
+                    normalised_blocks[page_index] = page_blocks
+        segment["page_block_rects"] = normalised_blocks
+
+        metadata = segment.get("metadata") or {}
+        segment["metadata"] = metadata
+        if normalised_blocks and not metadata.get("column_count"):
+            try:
+                primary_page = min(normalised_blocks.keys())
+            except ValueError:
+                primary_page = None
+            if primary_page is not None:
+                metadata["column_count"] = str(len(normalised_blocks.get(primary_page, {})))
+
+    def _segment_margin(self, block_count: int) -> float:
+        """Provide a small safety margin for cropped regions."""
+
+        base_margin = 6.0
+        if block_count <= 1:
+            return base_margin
+        # Add a little extra horizontal room when multiple columns are present.
+        return min(14.0, base_margin + 2.5 * (block_count - 1))
+
+    def _next_segment_gap(self) -> float:
+        return 4.0
+
+    def _segment_page_top(self, segment: Dict[str, Any], page_index: int) -> Optional[float]:
+        blocks = segment.get("page_block_rects", {}).get(page_index)
+        spans = segment.get("page_spans", {}).get(page_index)
+        rects: List[Tuple[float, float, float, float]] = []
+        if isinstance(blocks, dict):
+            rects.extend(blocks.values())
+        if isinstance(spans, list):
+            rects.extend(spans)
+        if not rects:
+            return None
+        try:
+            return min(float(rect[1]) for rect in rects)
+        except Exception:
+            return None
 
     def _lookup_segment(self, jokbo_filename: str, page: int, question_number: Any, qid: Optional[str]) -> Optional[Dict[str, Any]]:
         if qid:
@@ -189,8 +319,18 @@ class PDFCreator:
             self.log_debug(f"  WARN: segment jokbo file missing: {jokbo_path}")
             return None
 
+        try:
+            self._normalise_segment_layout(segment)
+        except Exception:
+            pass
+
         spans = segment.get("page_spans") or {}
-        if not isinstance(spans, dict) or not spans:
+        blocks = segment.get("page_block_rects") or {}
+        if not spans and not blocks:
+            return None
+
+        page_indices = sorted(set(spans.keys()) | set(blocks.keys()))
+        if not page_indices:
             return None
 
         try:
@@ -200,8 +340,7 @@ class PDFCreator:
             return None
 
         result = fitz.open()
-        pages = sorted(spans.items(), key=lambda x: int(x[0]))
-        for page_idx, rects in pages:
+        for page_idx in page_indices:
             try:
                 src_index = int(page_idx)
             except Exception:
@@ -209,21 +348,45 @@ class PDFCreator:
             if src_index < 0 or src_index >= len(src_doc):
                 continue
             try:
-                clip_rect = None
-                if isinstance(rects, list) and rects:
-                    rect_objs = [fitz.Rect(r) for r in rects]
-                    # Union of all rectangles with a small margin
-                    union = rect_objs[0]
-                    for r in rect_objs[1:]:
-                        union |= r
-                    margin = 6.0
-                    page_rect = src_doc[src_index].rect
-                    clip_rect = fitz.Rect(
-                        max(page_rect.x0, union.x0 - margin),
-                        max(page_rect.y0, union.y0 - margin),
-                        min(page_rect.x1, union.x1 + margin),
-                        min(page_rect.y1, union.y1 + margin),
-                    )
+                page_rects = []
+                block_map = blocks.get(src_index) if isinstance(blocks, dict) else {}
+                if isinstance(block_map, dict) and block_map:
+                    page_rects.extend(fitz.Rect(rect) for rect in block_map.values())
+                span_rects = spans.get(src_index) if isinstance(spans, dict) else []
+                if isinstance(span_rects, list) and span_rects:
+                    if not page_rects:
+                        page_rects.extend(fitz.Rect(rect) for rect in span_rects)
+                if not page_rects:
+                    # Nothing to clip on this page
+                    continue
+                union = page_rects[0]
+                for rect in page_rects[1:]:
+                    union |= rect
+                page_rect = src_doc[src_index].rect
+                margin = self._segment_margin(len(block_map) if isinstance(block_map, dict) and block_map else 1)
+                expanded = fitz.Rect(
+                    max(page_rect.x0, union.x0 - margin),
+                    max(page_rect.y0, union.y0 - margin),
+                    min(page_rect.x1, union.x1 + margin),
+                    min(page_rect.y1, union.y1 + margin),
+                )
+
+                bounds = segment.get("_page_bounds", {}).get(src_index, {}) if isinstance(segment, dict) else {}
+                next_top = bounds.get("next_top")
+                if next_top is None:
+                    bottom_limit = page_rect.y1
+                else:
+                    bottom_candidate = next_top - self._next_segment_gap()
+                    bottom_limit = min(page_rect.y1, max(expanded.y1, bottom_candidate))
+                if bottom_limit <= expanded.y0:
+                    bottom_limit = min(page_rect.y1, max(expanded.y1, expanded.y0 + 4.0))
+
+                clip_rect = fitz.Rect(
+                    expanded.x0,
+                    expanded.y0,
+                    expanded.x1,
+                    bottom_limit,
+                )
                 result.insert_pdf(src_doc, from_page=src_index, to_page=src_index, clip=clip_rect)
             except Exception as e:
                 self.log_debug(f"  WARN: clip insert failed, falling back to full page: {e}")

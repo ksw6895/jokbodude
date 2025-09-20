@@ -43,6 +43,7 @@ Each `ProblemSegment` currently contains:
 - `display_number`: textual problem number (e.g., `"47"`).
 - `options`: list of answer choice strings.
 - `page_spans`: mapping of page index → list of `RectTuple` bounding boxes.
+- `page_block_rects`: page → block → bounding box (used for multi-column crops).
 - `metadata`: dictionary with fields such as `exam_year` and `author` when
   present.
 
@@ -71,6 +72,7 @@ segments while a job is running. Suggested structure:
             "display_number": "47",
             "page_index": 12,
             "page_spans": [...],
+            "page_block_rects": {...},
             "metadata": {...},
             "text": "...",
             "options": [...],

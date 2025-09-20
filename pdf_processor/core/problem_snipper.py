@@ -19,11 +19,23 @@ import itertools
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Sequence, Tuple, TYPE_CHECKING
 
 import fitz  # PyMuPDF
 
 RectTuple = Tuple[float, float, float, float]
+
+
+def _merge_rectangles(rects: Sequence[RectTuple]) -> RectTuple:
+    """Return the bounding rectangle that covers all ``rects``."""
+
+    if not rects:
+        raise ValueError("Cannot merge empty rectangle sequence")
+    x0 = min(rect[0] for rect in rects)
+    y0 = min(rect[1] for rect in rects)
+    x1 = max(rect[2] for rect in rects)
+    y1 = max(rect[3] for rect in rects)
+    return (x0, y0, x1, y1)
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from storage_manager import StorageManager
@@ -41,13 +53,19 @@ class TextLine:
 
 @dataclass
 class ProblemSegment:
-    """Detected problem/question segment with metadata useful for marking."""
+    """Detected problem/question segment with metadata useful for marking.
+
+    ``page_block_rects`` stores per-page bounding boxes grouped by text block
+    (e.g., columns) so downstream consumers can crop multi-column layouts
+    without resorting to heuristics.
+    """
 
     index: int
     display_number: str
     text: str
     options: List[str]
     page_spans: Dict[int, List[RectTuple]]
+    page_block_rects: Dict[int, Dict[int, RectTuple]]
     anchor_pattern: str
     metadata: Dict[str, str] = field(default_factory=dict)
 
@@ -105,14 +123,35 @@ class _ProblemBuilder:
     def to_segment(self) -> ProblemSegment:
         text = "\n".join(line.text for line in self.lines)
         page_spans: Dict[int, List[RectTuple]] = {}
+        block_rects: Dict[int, Dict[int, List[RectTuple]]] = {}
         for line in self.lines:
             page_spans.setdefault(line.page_index, []).append(line.bbox)
+            block_rects.setdefault(line.page_index, {}).setdefault(line.block_id, []).append(line.bbox)
+
+        page_block_rects: Dict[int, Dict[int, RectTuple]] = {}
+        for page_index, blocks in block_rects.items():
+            page_block_rects[page_index] = {
+                block_id: _merge_rectangles(rect_list)
+                for block_id, rect_list in blocks.items()
+                if rect_list
+            }
+
+        if page_block_rects:
+            try:
+                primary_page = min(page_spans.keys())
+            except ValueError:
+                primary_page = None
+            if primary_page is not None:
+                column_count = len(page_block_rects.get(primary_page, {}))
+                if column_count:
+                    self.metadata.setdefault("column_count", str(column_count))
         return ProblemSegment(
             index=self.index,
             display_number=self.display_number,
             text=text,
             options=list(self.options),
             page_spans=page_spans,
+            page_block_rects=page_block_rects,
             anchor_pattern=self.anchor_pattern,
             metadata=dict(self.metadata),
         )
@@ -222,6 +261,13 @@ class ProblemSnipper:
             "page_spans": {
                 int(page): [list(rect) for rect in rects]
                 for page, rects in segment.page_spans.items()
+            },
+            "page_block_rects": {
+                int(page): {
+                    int(block): list(rect)
+                    for block, rect in blocks.items()
+                }
+                for page, blocks in segment.page_block_rects.items()
             },
             "anchor_pattern": segment.anchor_pattern,
             "metadata": dict(segment.metadata),
@@ -551,6 +597,10 @@ class ProblemSnipper:
                     text=segment.text,
                     options=list(segment.options),
                     page_spans={k: list(v) for k, v in segment.page_spans.items()},
+                    page_block_rects={
+                        page: {block: tuple(rect) for block, rect in blocks.items()}
+                        for page, blocks in segment.page_block_rects.items()
+                    },
                     anchor_pattern=segment.anchor_pattern,
                     metadata=dict(segment.metadata),
                 )
@@ -595,12 +645,25 @@ class ProblemSnipper:
         for page_index, rects in addition.page_spans.items():
             merged_page_spans.setdefault(page_index, []).extend(rects)
 
+        merged_page_block_rects: Dict[int, Dict[int, RectTuple]] = {
+            page: {block: tuple(rect) for block, rect in blocks.items()}
+            for page, blocks in base.page_block_rects.items()
+        }
+        for page_index, blocks in addition.page_block_rects.items():
+            dest = merged_page_block_rects.setdefault(page_index, {})
+            for block_id, rect in blocks.items():
+                if block_id in dest:
+                    dest[block_id] = _merge_rectangles([dest[block_id], rect])
+                else:
+                    dest[block_id] = tuple(rect)
+
         return ProblemSegment(
             index=base.index,
             display_number=base.display_number,
             text=merged_text,
             options=merged_options,
             page_spans=merged_page_spans,
+            page_block_rects=merged_page_block_rects,
             anchor_pattern=base.anchor_pattern,
             metadata=dict(base.metadata),
         )
@@ -672,7 +735,17 @@ class ProblemSnipper:
         payload = []
         for segment in segments:
             pages = [
-                {"page_index": page_index, "rects": rects}
+                {
+                    "page_index": page_index,
+                    "rects": rects,
+                    "blocks": [
+                        {
+                            "block_id": block_id,
+                            "rect": list(block_rect),
+                        }
+                        for block_id, block_rect in segment.page_block_rects.get(page_index, {}).items()
+                    ],
+                }
                 for page_index, rects in segment.page_spans.items()
             ]
             payload.append(
