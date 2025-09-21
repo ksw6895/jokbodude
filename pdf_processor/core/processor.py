@@ -365,102 +365,102 @@ class PDFProcessor:
         if isinstance(max_workers, int) and max_workers > 0:
             workers = max(1, min(workers, max_workers))
 
-            # Define chunk operation for distribution
-            def _op(task, api_client, model):
-                # Cooperative cancellation before any network I/O per chunk
+        # Define chunk operation for distribution
+        def _op(task, api_client, model):
+            # Cooperative cancellation before any network I/O per chunk
+            try:
+                from ..utils.exceptions import CancelledError as _CE
+                sm = self._sm
+                if sm and sm.is_cancelled(self.session_id):
+                    raise _CE("cancelled")
+            except _CE:
+                raise
+            except Exception:
+                pass
+            lidx, lpath, cpath_hint, start, end = task
+            cleanup_path: Optional[str] = None
+            chunk_path = None
+            if cpath_hint and Path(cpath_hint).exists():
+                chunk_path = cpath_hint
+            else:
                 try:
-                    from ..utils.exceptions import CancelledError as _CE
-                    sm = self._sm
-                    if sm and sm.is_cancelled(self.session_id):
-                        raise _CE("cancelled")
-                except _CE:
+                    from ..pdf.operations import PDFOperations as _PDFOps  # local import to avoid cycles
+                    chunk_path = _PDFOps.extract_pages(lpath, int(start), int(end))
+                    cleanup_path = chunk_path
+                except Exception as extract_exc:
+                    logger.error(
+                        f"Failed to build chunk for {Path(lpath).name} pages {start}-{end}: {extract_exc}"
+                    )
                     raise
-                except Exception:
-                    pass
-                lidx, lpath, cpath_hint, start, end = task
-                cleanup_path: Optional[str] = None
-                chunk_path = None
-                if cpath_hint and Path(cpath_hint).exists():
-                    chunk_path = cpath_hint
-                else:
-                    try:
-                        from ..pdf.operations import PDFOperations as _PDFOps  # local import to avoid cycles
-                        chunk_path = _PDFOps.extract_pages(lpath, int(start), int(end))
-                        cleanup_path = chunk_path
-                    except Exception as extract_exc:
-                        logger.error(
-                            f"Failed to build chunk for {Path(lpath).name} pages {start}-{end}: {extract_exc}"
-                        )
-                        raise
-                fm = FileManager(api_client)
-                analyzer = JokboCentricAnalyzer(api_client, fm, self.session_id, self.debug_dir)
-                # Propagate jokbo-centric threshold if configured
-                try:
-                    thr = getattr(self.jokbo_analyzer, 'min_relevance_score', None)
-                    if thr is not None:
-                        analyzer.set_relevance_threshold(thr)
-                except Exception:
-                    pass
-                res = analyzer.analyze(
-                    chunk_path, jokbo_path, preloaded_jokbo_file=None,
-                    chunk_info=(start, end), original_lesson_path=lpath
-                )
-                # Normalize slide filenames to original lesson
-                try:
-                    orig = Path(lpath).name
-                    if isinstance(res, dict):
-                        for page in (res.get("jokbo_pages") or []):
-                            for q in (page.get("questions") or []):
-                                for slide in (q.get("related_lesson_slides") or []):
-                                    if isinstance(slide, dict):
-                                        slide["lesson_filename"] = orig
-                except Exception:
-                    pass
-                try:
-                    return (lidx, res)
-                finally:
-                    if cleanup_path:
-                        try:
-                            Path(cleanup_path).unlink(missing_ok=True)
-                        except Exception:
-                            pass
-
-            # Progress callback per completed chunk
-            def _on_progress(_task):
-                try:
-                    sm = self._sm
-                    if sm:
-                        sm.increment_chunk(self.session_id, 1)
-                except Exception:
-                    pass
-
-            # Distribute all chunk tasks globally
-            def _cancelled():
-                try:
-                    sm = self._sm
-                    return sm.is_cancelled(self.session_id) if sm else False
-                except Exception:
-                    return False
-            raw_results = api_manager.distribute_tasks(
-                global_tasks, _op, parallel=True, max_workers=workers, on_progress=_on_progress, cancel_check=_cancelled
+            fm = FileManager(api_client)
+            analyzer = JokboCentricAnalyzer(api_client, fm, self.session_id, self.debug_dir)
+            # Propagate jokbo-centric threshold if configured
+            try:
+                thr = getattr(self.jokbo_analyzer, 'min_relevance_score', None)
+                if thr is not None:
+                    analyzer.set_relevance_threshold(thr)
+            except Exception:
+                pass
+            res = analyzer.analyze(
+                chunk_path, jokbo_path, preloaded_jokbo_file=None,
+                chunk_info=(start, end), original_lesson_path=lpath
             )
+            # Normalize slide filenames to original lesson
+            try:
+                orig = Path(lpath).name
+                if isinstance(res, dict):
+                    for page in (res.get("jokbo_pages") or []):
+                        for q in (page.get("questions") or []):
+                            for slide in (q.get("related_lesson_slides") or []):
+                                if isinstance(slide, dict):
+                                    slide["lesson_filename"] = orig
+            except Exception:
+                pass
+            try:
+                return (lidx, res)
+            finally:
+                if cleanup_path:
+                    try:
+                        Path(cleanup_path).unlink(missing_ok=True)
+                    except Exception:
+                        pass
 
-            # Group results by lesson and merge per-lesson
-            per_lesson: Dict[int, List[Dict[str, Any]]] = {}
-            for entry in raw_results:
-                if isinstance(entry, tuple) and len(entry) == 2:
-                    lidx, res = entry
-                    if isinstance(res, dict):
-                        per_lesson.setdefault(lidx, []).append(res)
-                # Errors are logged inside distribute_tasks; skip here
+        # Progress callback per completed chunk
+        def _on_progress(_task):
+            try:
+                sm = self._sm
+                if sm:
+                    sm.increment_chunk(self.session_id, 1)
+            except Exception:
+                pass
 
-            from ..parsers.result_merger import ResultMerger as _RM
-            for lidx in range(len(lesson_paths)):
-                cresults = per_lesson.get(lidx, [])
-                if not cresults:
-                    results.append({"jokbo_pages": []})
-                else:
-                    results.append(_RM.merge_chunk_results(cresults, "jokbo-centric"))
+        # Distribute all chunk tasks globally
+        def _cancelled():
+            try:
+                sm = self._sm
+                return sm.is_cancelled(self.session_id) if sm else False
+            except Exception:
+                return False
+        raw_results = api_manager.distribute_tasks(
+            global_tasks, _op, parallel=True, max_workers=workers, on_progress=_on_progress, cancel_check=_cancelled
+        )
+
+        # Group results by lesson and merge per-lesson
+        per_lesson: Dict[int, List[Dict[str, Any]]] = {}
+        for entry in raw_results:
+            if isinstance(entry, tuple) and len(entry) == 2:
+                lidx, res = entry
+                if isinstance(res, dict):
+                    per_lesson.setdefault(lidx, []).append(res)
+            # Errors are logged inside distribute_tasks; skip here
+
+        from ..parsers.result_merger import ResultMerger as _RM
+        for lidx in range(len(lesson_paths)):
+            cresults = per_lesson.get(lidx, [])
+            if not cresults:
+                results.append({"jokbo_pages": []})
+            else:
+                results.append(_RM.merge_chunk_results(cresults, "jokbo-centric"))
 
         # Log API status
         status = api_manager.get_status_report()
