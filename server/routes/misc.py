@@ -50,15 +50,6 @@ def read_profile():
     return FileResponse("frontend/profile.html")
 
 
-@router.get("/styles.css")
-def read_stylesheet():
-    """Serve the main frontend stylesheet for the homepage.
-
-    The homepage references `/styles.css?v=...`, which maps here regardless of query params.
-    """
-    return FileResponse("frontend/styles.css")
-
-
 @router.get("/config")
 def get_config():
     """Expose server capabilities for the frontend UI.

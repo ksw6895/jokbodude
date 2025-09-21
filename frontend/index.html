@@ -24,8 +24,8 @@
         document.documentElement.style.colorScheme = theme === 'light' ? 'light' : 'dark';
       })();
     </script>
-    <script src="theme.js"></script>
-    <link rel="stylesheet" href="styles.css?v=7">
+    <script src="/static/theme.js"></script>
+    <link rel="stylesheet" href="/static/styles.css?v=7">
 </head>
 <body>
     <nav class="navbar">
@@ -148,7 +148,7 @@
                                     <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('jokbo_files').click()" role="button" tabindex="0" aria-label="Upload exam PDFs" data-input="jokbo_files" data-list="jokbo_file_list" data-error="jokbo_error" data-mode="jokbo-centric" data-partner="jokbo_lesson_files" data-model="jokbo_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
-                                        <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
+                                        <p class="text-xs text-gray-500">PDF, up to 100MB each</p>
                                     </div>
                                     <div class="text-red-400 text-xs mt-2" id="jokbo_error"></div>
                                     <div class="mt-4 space-y-2" id="jokbo_file_list"></div>
@@ -159,7 +159,7 @@
                                     <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('jokbo_lesson_files').click()" role="button" tabindex="0" aria-label="Upload lecture PDFs" data-input="jokbo_lesson_files" data-list="jokbo_lesson_file_list" data-error="jokbo_lesson_error" data-mode="jokbo-centric" data-partner="jokbo_files" data-model="jokbo_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📚</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
-                                        <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
+                                        <p class="text-xs text-gray-500">PDF, up to 100MB each</p>
                                     </div>
                                     <div class="text-red-400 text-xs mt-2" id="jokbo_lesson_error"></div>
                                     <div class="mt-4 space-y-2" id="jokbo_lesson_file_list"></div>
@@ -233,7 +233,7 @@
                                     <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('lesson_jokbo_files').click()" role="button" tabindex="0" aria-label="Upload exam PDFs" data-input="lesson_jokbo_files" data-list="lesson_jokbo_file_list" data-error="lesson_jokbo_error" data-mode="lesson-centric" data-partner="lesson_lesson_files" data-model="lesson_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
-                                        <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
+                                        <p class="text-xs text-gray-500">PDF, up to 100MB each</p>
                                     </div>
                                     <div class="text-red-400 text-xs mt-2" id="lesson_jokbo_error"></div>
                                     <div class="mt-4 space-y-2" id="lesson_jokbo_file_list"></div>
@@ -297,7 +297,7 @@
                                     <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('partial_jokbo_files').click()" role="button" tabindex="0" aria-label="Upload exam PDFs" data-input="partial_jokbo_files" data-list="partial_jokbo_file_list" data-error="partial_jokbo_error" data-mode="partial-jokbo" data-partner="partial_lesson_files" data-model="partial_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
-                                        <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
+                                        <p class="text-xs text-gray-500">PDF, up to 100MB each</p>
                                     </div>
                                     <div class="text-red-400 text-xs mt-2" id="partial_jokbo_error"></div>
                                     <div class="mt-4 space-y-2" id="partial_jokbo_file_list"></div>
@@ -308,7 +308,7 @@
                                     <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('partial_lesson_files').click()" role="button" tabindex="0" aria-label="Upload lecture PDFs" data-input="partial_lesson_files" data-list="partial_lesson_file_list" data-error="partial_lesson_error" data-mode="partial-jokbo" data-partner="partial_jokbo_files" data-model="partial_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📚</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
-                                        <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
+                                        <p class="text-xs text-gray-500">PDF, up to 100MB each</p>
                                     </div>
                                     <div class="text-red-400 text-xs mt-2" id="partial_lesson_error"></div>
                                     <div class="mt-4 space-y-2" id="partial_lesson_file_list"></div>
@@ -365,7 +365,7 @@
                                     <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('exam_jokbo_files').click()" role="button" tabindex="0" aria-label="Upload exam PDFs" data-input="exam_jokbo_files" data-list="exam_jokbo_file_list" data-error="exam_jokbo_error" data-mode="exam-only" data-partner="" data-model="exam_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
-                                        <p class="text-xs text-gray-500">PDF, up to 50MB each</p>
+                                        <p class="text-xs text-gray-500">PDF, up to 100MB each</p>
                                     </div>
                                     <div class="text-red-400 text-xs mt-2" id="exam_jokbo_error"></div>
                                     <div class="mt-4 space-y-2" id="exam_jokbo_file_list"></div>
@@ -478,7 +478,7 @@
     </div>
 
     <script>
-        const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
         let JD_CONFIG = { multi_api_available: false, api_keys_count: 0 };
         // Pro model no longer requires a password; token-based
         // Staged file buckets to allow incremental adds and removals per input
@@ -721,7 +721,7 @@
             });
             
             if (hasError) {
-                errorElement.textContent = '⚠️ Some files exceed the 50MB limit';
+                errorElement.textContent = '⚠️ Some files exceed the 100MB limit';
                 errorElement.classList.add('show');
             }
         }
@@ -738,7 +738,7 @@
             }
             if (errorElement) {
                 if (hasError) {
-                    errorElement.textContent = '⚠️ Some files exceeded 50MB and were skipped';
+                    errorElement.textContent = '⚠️ Some files exceeded 100MB and were skipped';
                     errorElement.classList.add('show');
                 } else {
                     errorElement.classList.remove('show');
@@ -968,7 +968,7 @@
                 if (file.size > MAX_FILE_SIZE) {
                     statusBadge.className = 'status-badge error';
                     statusBadge.textContent = 'ERROR';
-                    statusMessage.textContent = 'Please remove files larger than 50MB';
+                    statusMessage.textContent = 'Please remove files larger than 100MB';
                     return;
                 }
             }

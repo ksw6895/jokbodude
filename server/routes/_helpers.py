@@ -14,7 +14,7 @@ from ..core import MAX_FILE_SIZE, celery_app
 def _ensure_size_limit(files: list[UploadFile]) -> None:
     for f in files:
         if f.size and f.size > MAX_FILE_SIZE:
-            raise HTTPException(status_code=413, detail=f"File {f.filename} exceeds maximum size of 50MB")
+            raise HTTPException(status_code=413, detail=f"File {f.filename} exceeds maximum size of 100MB")
 
 
 async def save_files_and_metadata(

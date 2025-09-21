@@ -11,5 +11,5 @@ REDIS_URL = app_settings.REDIS_URL
 celery_app = Celery("tasks")
 celery_app.config_from_object("celeryconfig")
 
-# File size limit: 50MB
-MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB in bytes
+# File size limit: 100MB
+MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB in bytes

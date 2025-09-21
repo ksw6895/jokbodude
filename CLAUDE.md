@@ -42,7 +42,7 @@ Runbook
 
 Frontend Notes
 - The Tailwind UI uses `fetch` extensively. Always include `credentials: 'include'` so the session cookie is sent.
-- File upload fields must be named `jokbo_files` and `lesson_files`. Per-file size limit is 50MB (enforced server-side).
+- File upload fields must be named `jokbo_files` and `lesson_files`. Per-file size limit is 100MB (enforced server-side).
 - Common endpoints used by the UI: `/config`, `/auth/config`, `/auth/google`, `/me`, `/analyze/*`, `/status/*`, `/progress/*`, `/results/*`, `/result/*`, `/jobs/*`, `/user/{id}/jobs`, `/admin/*`.
 
 Backend Contracts
@@ -64,5 +64,5 @@ Development Practices
 Troubleshooting
 - Frontend “Failed to fetch”: ensure `credentials: 'include'` on fetch, verify cookie flags (`COOKIE_SECURE`, `COOKIE_SAMESITE`) and CORS settings.
 - 401 on analyze/status/results: user not authenticated; sign in first.
-- 413 on upload: a file exceeded 50MB.
+- 413 on upload: a file exceeded 100MB.
 

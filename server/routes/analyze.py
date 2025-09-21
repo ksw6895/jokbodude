@@ -112,7 +112,7 @@ async def analyze_batch(
 
         for f in jokbo_files + lesson_files:
             if f.size and f.size > MAX_FILE_SIZE:
-                raise HTTPException(status_code=413, detail=f"File {f.filename} exceeds maximum size of 50MB")
+                raise HTTPException(status_code=413, detail=f"File {f.filename} exceeds maximum size of 100MB")
 
         jokbo_keys: list[str] = []
         lesson_keys: list[str] = []

@@ -5,6 +5,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from pdf_processor.pdf.cache import clear_global_cache, get_global_cache
 from storage_manager import StorageManager
@@ -102,6 +103,12 @@ def create_app() -> FastAPI:
     app.include_router(preflight.router)
     app.include_router(analyze.router)
     app.include_router(jobs.router)
+    # Serve remaining frontend assets (e.g., theme.js) via StaticFiles.
+    app.mount(
+        "/static",
+        StaticFiles(directory="frontend", html=False),
+        name="frontend-static",
+    )
     return app
 """Bootstrap a safe TMPDIR so temp files avoid /tmp exhaustion."""
 try:
