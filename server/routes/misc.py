@@ -208,3 +208,39 @@ def get_worker_storage_stats(password: Optional[str] = Query(None), user=Depends
         return {"status": "queued", "task_id": task.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to enqueue worker storage stats: {e}")
+
+
+@router.get("/admin/job-storage/{job_id}")
+def get_job_storage(
+    request: Request,
+    job_id: str,
+    include_objects: bool = Query(False, description="Include individual object metadata"),
+    password: Optional[str] = Query(None),
+    user=Depends(_get_current_user),
+):
+    """Return storage footprint for a job (admin-only)."""
+    _require_admin(password, user)
+    storage_manager = request.app.state.storage_manager
+    summary = storage_manager.job_storage_summary(job_id, include_objects=include_objects)
+    try:
+        status = storage_manager.get_job_status(job_id)
+        if status:
+            summary["status"] = status
+    except Exception:
+        pass
+    return summary
+
+
+@router.delete("/admin/job-storage/{job_id}/uploads")
+def delete_job_uploads(
+    request: Request,
+    job_id: str,
+    password: Optional[str] = Query(None),
+    user=Depends(_get_current_user),
+):
+    """Remove persisted uploads for a job (admin-only)."""
+    _require_admin(password, user)
+    storage_manager = request.app.state.storage_manager
+    result = storage_manager.purge_job_uploads(job_id)
+    result.update({"job_id": job_id})
+    return result

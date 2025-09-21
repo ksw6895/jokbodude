@@ -133,7 +133,7 @@ def get_user_jobs(
     job_ids = storage_manager.get_user_jobs(user_id, limit=limit) or []
     results = []
     for job_id in job_ids:
-        entry = {"job_id": job_id}
+        entry = {"job_id": job_id, "status": "UNKNOWN"}
         # Determine draft/preflight status
         is_draft = False
         try:
@@ -145,22 +145,36 @@ def get_user_jobs(
             continue
         try:
             task_id = storage_manager.get_job_task(job_id)
-            if task_id:
+            status_entry = None
+            try:
+                status_entry = storage_manager.get_job_status(job_id)
+            except Exception:
+                status_entry = None
+            if status_entry:
+                entry["status"] = status_entry.get("status") or "UNKNOWN"
+                if status_entry.get("detail"):
+                    entry["status_detail"] = status_entry.get("detail")
+                if status_entry.get("updated_at"):
+                    entry["status_updated_at"] = status_entry.get("updated_at")
+            if task_id and not entry.get("status"):
                 tr = celery_app.AsyncResult(task_id)
                 entry["status"] = tr.status
             else:
-                # No task bound yet. Classify as DRAFT or derive from files if any
-                if is_draft:
-                    entry["status"] = "DRAFT"
+                if entry.get("status") and entry["status"] != "UNKNOWN":
+                    pass
                 else:
-                    # If results already exist, mark success
-                    try:
-                        if storage_manager.list_result_files(job_id):
-                            entry["status"] = "SUCCESS"
-                        else:
+                    # No task bound yet. Classify as DRAFT or derive from files if any
+                    if is_draft:
+                        entry["status"] = "DRAFT"
+                    else:
+                        # If results already exist, mark success
+                        try:
+                            if storage_manager.list_result_files(job_id):
+                                entry["status"] = "SUCCESS"
+                            else:
+                                entry["status"] = "UNKNOWN"
+                        except Exception:
                             entry["status"] = "UNKNOWN"
-                    except Exception:
-                        entry["status"] = "UNKNOWN"
         except Exception:
             entry["status"] = "UNKNOWN"
         # If a cancel flag is present, surface as CANCELLED
@@ -202,6 +216,10 @@ def cancel_job(request: Request, job_id: str, user: dict = Depends(require_user)
             storage_manager.cleanup_job(job_id)
         except Exception:
             pass
+        try:
+            storage_manager.set_job_status(job_id, "CANCELLED", detail="사용자 취소")
+        except Exception:
+            pass
         return {"job_id": job_id, "task_id": None, "revoked": False, "draft_deleted": True}
     revoked = False
     try:
@@ -212,6 +230,10 @@ def cancel_job(request: Request, job_id: str, user: dict = Depends(require_user)
     # Best-effort: mark progress as cancelled for UI
     try:
         storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "취소 요청됨")
+    except Exception:
+        pass
+    try:
+        storage_manager.set_job_status(job_id, "CANCELLED", detail="사용자 취소")
     except Exception:
         pass
     return {"job_id": job_id, "task_id": task_id, "revoked": revoked}

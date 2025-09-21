@@ -13,6 +13,7 @@ from .services.storage.registry import StorageRegistry
 from .core import REDIS_URL
 from .routes import analyze, jobs, misc, auth
 from .routes import preflight
+from tmpdir import configure_tmpdir
 
 
 @asynccontextmanager
@@ -102,13 +103,8 @@ def create_app() -> FastAPI:
     app.include_router(analyze.router)
     app.include_router(jobs.router)
     return app
-"""Bootstrap a safe TMPDIR so temp files avoid /tmp exhaustion.
-We set TMPDIR early (before any tempfile usage) to a path under the
-configured persistent storage if available, or under project output/.
-"""
+"""Bootstrap a safe TMPDIR so temp files avoid /tmp exhaustion."""
 try:
-    _TMP_BASE = Path(os.getenv("RENDER_STORAGE_PATH", str(Path("output") / "temp" / "tmp")))
-    os.environ.setdefault("TMPDIR", str(_TMP_BASE))
-    _TMP_BASE.mkdir(parents=True, exist_ok=True)
+    _TMP_BASE = configure_tmpdir("tmp")
 except Exception:
-    pass
+    _TMP_BASE = Path(os.getenv("TMPDIR", str(Path("output") / "temp" / "tmp")))

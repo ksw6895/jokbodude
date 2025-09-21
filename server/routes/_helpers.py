@@ -77,6 +77,10 @@ async def save_files_and_metadata(
         "user_id": user_id,
     }
     sm.store_job_metadata(job_id, metadata)
+    try:
+        sm.set_job_status(job_id, "QUEUED", detail="대기 중")
+    except Exception:
+        pass
 
     if user_id:
         sm.add_user_job(user_id, job_id)
@@ -169,6 +173,10 @@ async def save_files_metadata_with_info(
         metadata["preflight_files"] = {"jokbo": jokbo_info, "lesson": lesson_info}
 
     sm.store_job_metadata(job_id, metadata)
+    try:
+        sm.set_job_status(job_id, "QUEUED", detail="대기 중")
+    except Exception:
+        pass
 
     if user_id:
         sm.add_user_job(user_id, job_id)
