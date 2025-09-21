@@ -208,3 +208,87 @@ def get_worker_storage_stats(password: Optional[str] = Query(None), user=Depends
         return {"status": "queued", "task_id": task.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to enqueue worker storage stats: {e}")
+
+
+@router.get("/admin/job-storage/{job_id}")
+def get_job_storage(
+    request: Request,
+    job_id: str,
+    include_objects: bool = Query(False, description="Include individual object metadata"),
+    password: Optional[str] = Query(None),
+    user=Depends(_get_current_user),
+):
+    """Return storage footprint for a job (admin-only)."""
+    _require_admin(password, user)
+    storage_manager = request.app.state.storage_manager
+    summary = storage_manager.job_storage_summary(job_id, include_objects=include_objects)
+    try:
+        status = storage_manager.get_job_status(job_id)
+        if status:
+            summary["status"] = status
+    except Exception:
+        pass
+    return summary
+
+
+@router.delete("/admin/job-storage/{job_id}/uploads")
+def delete_job_uploads(
+    request: Request,
+    job_id: str,
+    password: Optional[str] = Query(None),
+    user=Depends(_get_current_user),
+):
+    """Remove persisted uploads for a job (admin-only)."""
+    _require_admin(password, user)
+    storage_manager = request.app.state.storage_manager
+    result = storage_manager.purge_job_uploads(job_id)
+    result.update({"job_id": job_id})
+    return result
+
+
+@router.get("/admin/uploads")
+def list_upload_backlog(
+    request: Request,
+    older_than_hours: Optional[int] = Query(None, ge=0),
+    limit: Optional[int] = Query(None, ge=1),
+    password: Optional[str] = Query(None),
+    user=Depends(_get_current_user),
+):
+    """List aggregated upload prefixes that remain in object storage (admin-only)."""
+
+    _require_admin(password, user)
+    storage_manager = request.app.state.storage_manager
+    try:
+        uploads = storage_manager.list_upload_jobs(older_than_hours=older_than_hours, limit=limit)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to list uploads: {exc}")
+    return {
+        "older_than_hours": older_than_hours,
+        "limit": limit,
+        "count": len(uploads),
+        "uploads": uploads,
+    }
+
+
+@router.delete("/admin/uploads")
+def purge_upload_backlog(
+    request: Request,
+    older_than_hours: Optional[int] = Query(None, ge=0),
+    limit: Optional[int] = Query(None, ge=1),
+    dry_run: bool = Query(False, description="Only preview deletions"),
+    password: Optional[str] = Query(None),
+    user=Depends(_get_current_user),
+):
+    """Bulk-delete upload prefixes without specifying individual job IDs (admin-only)."""
+
+    _require_admin(password, user)
+    storage_manager = request.app.state.storage_manager
+    try:
+        summary = storage_manager.purge_upload_backlog(
+            older_than_hours=older_than_hours,
+            limit=limit,
+            dry_run=dry_run,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to purge uploads: {exc}")
+    return summary

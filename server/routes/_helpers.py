@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import tempfile
 import uuid
 from pathlib import Path
@@ -9,6 +10,12 @@ from fastapi import HTTPException, Request, UploadFile
 from typing import Callable, Dict
 
 from ..core import MAX_FILE_SIZE, celery_app
+
+_SAFE_TMP_ROOT = Path(os.getenv("TMPDIR", tempfile.gettempdir()))
+try:
+    _SAFE_TMP_ROOT.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
 
 
 def _ensure_size_limit(files: list[UploadFile]) -> None:
@@ -43,7 +50,7 @@ async def save_files_and_metadata(
 
     jokbo_keys: list[str] = []
     lesson_keys: list[str] = []
-    with tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory(dir=str(_SAFE_TMP_ROOT)) as temp_dir:
         tdir = Path(temp_dir)
         for f in jokbo_files:
             p = tdir / f.filename
@@ -77,6 +84,10 @@ async def save_files_and_metadata(
         "user_id": user_id,
     }
     sm.store_job_metadata(job_id, metadata)
+    try:
+        sm.set_job_status(job_id, "QUEUED", detail="대기 중")
+    except Exception:
+        pass
 
     if user_id:
         sm.add_user_job(user_id, job_id)
@@ -120,7 +131,7 @@ async def save_files_metadata_with_info(
     lesson_keys: list[str] = []
     jokbo_info: list[Dict] = []
     lesson_info: list[Dict] = []
-    with tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory(dir=str(_SAFE_TMP_ROOT)) as temp_dir:
         tdir = Path(temp_dir)
         for f in jokbo_files:
             p = tdir / f.filename
@@ -169,6 +180,10 @@ async def save_files_metadata_with_info(
         metadata["preflight_files"] = {"jokbo": jokbo_info, "lesson": lesson_info}
 
     sm.store_job_metadata(job_id, metadata)
+    try:
+        sm.set_job_status(job_id, "QUEUED", detail="대기 중")
+    except Exception:
+        pass
 
     if user_id:
         sm.add_user_job(user_id, job_id)

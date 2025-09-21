@@ -420,16 +420,28 @@
                         </div>
                         <div id="testers_list" class="status-content" style="display:block;align-items:stretch;justify-content:flex-start;margin-top:.75rem;padding:.75rem;min-height:auto;"></div>
                     </div>
-                    <div class="form-section">
-                        <h3 class="form-section-title">User Tokens</h3>
-                        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
-                            <input type="email" id="user_search_email" placeholder="Search by email (exact)" style="min-width:260px;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;"/>
-                            <button id="search_users_btn" class="tab">Search</button>
-                            <button id="list_users_btn" class="tab">List Recent</button>
-                        </div>
-                        <div id="users_list" class="status-content" style="display:block;align-items:stretch;justify-content:flex-start;margin-top:.75rem;padding:.75rem;min-height:auto;"></div>
-                    </div>
-                </div>
+                      <div class="form-section">
+                          <h3 class="form-section-title">User Tokens</h3>
+                          <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+                              <input type="email" id="user_search_email" placeholder="Search by email (exact)" style="min-width:260px;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;"/>
+                              <button id="search_users_btn" class="tab">Search</button>
+                              <button id="list_users_btn" class="tab">List Recent</button>
+                          </div>
+                          <div id="users_list" class="status-content" style="display:block;align-items:stretch;justify-content:flex-start;margin-top:.75rem;padding:.75rem;min-height:auto;"></div>
+                      </div>
+                      <div class="form-section" style="border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem;">
+                          <h3 class="form-section-title">Job Storage</h3>
+                          <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+                              <input type="text" id="job_storage_job_id" placeholder="Job ID" style="min-width:260px;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;"/>
+                              <label style="display:flex;gap:.3rem;align-items:center;color:var(--muted);">
+                                  <input type="checkbox" id="job_storage_include_objects" /> Include objects
+                              </label>
+                              <button id="job_storage_inspect_btn" class="tab">Inspect</button>
+                              <button id="job_storage_delete_btn" class="tab">Delete Uploads</button>
+                          </div>
+                          <pre id="job_storage_output" class="status-content" style="display:block;align-items:stretch;justify-content:flex-start;margin-top:.75rem;padding:.75rem;min-height:120px;max-height:260px;overflow:auto;"></pre>
+                      </div>
+                  </div>
                 <div class="form-section" style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
                     <div class="form-group" style="min-width:260px;">
                         <label for="admin_password">Admin Password</label>
@@ -441,11 +453,18 @@
                 <div class="form-section" style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;margin-top:0.75rem;">
                     <label for="older_hours">Delete only files older than (hours)</label>
                     <input id="older_hours" type="number" min="1" placeholder="e.g. 168" style="width:140px;padding:0.5rem 0.75rem;border:1px solid var(--gray-300);border-radius:8px;" />
+                    <label for="uploads_limit">Limit upload jobs</label>
+                    <input id="uploads_limit" type="number" min="1" placeholder="e.g. 50" style="width:120px;padding:0.5rem 0.75rem;border:1px solid var(--gray-300);border-radius:8px;" />
+                    <label style="display:flex;gap:.3rem;align-items:center;color:var(--muted);">
+                        <input type="checkbox" id="uploads_dry_run" checked /> Dry run uploads purge
+                    </label>
                     <button id="run_cleanup_btn" class="tab">Run Cleanup</button>
                     <button id="run_full_cleanup_btn" class="tab">Run Cleanup + Results</button>
                     <button id="worker_cleanup_btn" class="tab" title="Trigger cleanup on workers">Worker Cleanup Now</button>
                     <button id="show_stats_btn" class="tab">Show Web Storage Stats</button>
                     <button id="show_worker_stats_btn" class="tab">Show Worker Storage Stats</button>
+                    <button id="list_uploads_btn" class="tab" title="Preview lingering uploads">List Upload Prefixes</button>
+                    <button id="purge_uploads_btn" class="tab" title="Delete lingering uploads">Purge Upload Prefixes</button>
                 </div>
                 <pre id="admin_output" style="margin-top:1rem;background:var(--color-surface-alt);border:1px solid var(--color-border);padding:0.75rem;border-radius:8px;max-height:240px;overflow:auto;color:var(--color-text-secondary);"></pre>
             </div>
@@ -1266,6 +1285,68 @@
                 else alert('Cleanup error: ' + e.message);
             }
         }
+
+        async function listLingeringUploads() {
+            const out = document.getElementById('admin_output');
+            try {
+                const params = new URLSearchParams();
+                const older = (document.getElementById('older_hours').value || '').trim();
+                if (older !== '') {
+                    const n = parseInt(older, 10);
+                    if (!isNaN(n) && n >= 0) params.set('older_than_hours', String(n));
+                }
+                const limit = (document.getElementById('uploads_limit').value || '').trim();
+                if (limit !== '') {
+                    const l = parseInt(limit, 10);
+                    if (!isNaN(l) && l > 0) params.set('limit', String(l));
+                }
+                if (!CURRENT_USER || !CURRENT_USER.admin) {
+                    const pw = getAdminPassword();
+                    if (!pw) { alert('Enter Admin Password first.'); return; }
+                    params.set('password', pw);
+                }
+                const res = await fetch(`/admin/uploads?${params.toString()}`, { credentials: 'include' });
+                if (!res.ok) throw new Error('Upload listing failed');
+                const data = await res.json();
+                if (out) out.textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                if (out) out.textContent = 'Upload list error: ' + e.message;
+                else alert('Upload list error: ' + e.message);
+            }
+        }
+
+        async function purgeLingeringUploads() {
+            const out = document.getElementById('admin_output');
+            try {
+                const params = new URLSearchParams();
+                const older = (document.getElementById('older_hours').value || '').trim();
+                if (older !== '') {
+                    const n = parseInt(older, 10);
+                    if (!isNaN(n) && n >= 0) params.set('older_than_hours', String(n));
+                }
+                const limit = (document.getElementById('uploads_limit').value || '').trim();
+                if (limit !== '') {
+                    const l = parseInt(limit, 10);
+                    if (!isNaN(l) && l > 0) params.set('limit', String(l));
+                }
+                const dryBox = document.getElementById('uploads_dry_run');
+                if (dryBox && dryBox.checked) {
+                    params.set('dry_run', 'true');
+                }
+                if (!CURRENT_USER || !CURRENT_USER.admin) {
+                    const pw = getAdminPassword();
+                    if (!pw) { alert('Enter Admin Password first.'); return; }
+                    params.set('password', pw);
+                }
+                const res = await fetch(`/admin/uploads?${params.toString()}`, { method: 'DELETE', credentials: 'include' });
+                if (!res.ok) throw new Error('Upload purge failed');
+                const data = await res.json();
+                if (out) out.textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                if (out) out.textContent = 'Upload purge error: ' + e.message;
+                else alert('Upload purge error: ' + e.message);
+            }
+        }
         document.getElementById('clear_cache_btn').addEventListener('click', (e) => {
             e.preventDefault();
             const older = prompt('Delete only files older than N hours? (Leave empty for all)', '');
@@ -1358,6 +1439,69 @@
                 out.textContent = 'Worker stats error: ' + e.message;
             }
         });
+
+        const listUploadsBtn = document.getElementById('list_uploads_btn');
+        if (listUploadsBtn) {
+            listUploadsBtn.addEventListener('click', (e) => { e.preventDefault(); listLingeringUploads(); });
+        }
+        const purgeUploadsBtn = document.getElementById('purge_uploads_btn');
+        if (purgeUploadsBtn) {
+            purgeUploadsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const dryBox = document.getElementById('uploads_dry_run');
+                if (!dryBox || !dryBox.checked) {
+                    if (!confirm('Delete uploads immediately? This removes raw files from R2.')) return;
+                }
+                purgeLingeringUploads();
+            });
+        }
+
+        async function jobStorageInspect() {
+            const jobId = (document.getElementById('job_storage_job_id').value || '').trim();
+            if (!jobId) { alert('Enter a job ID first.'); return; }
+            const includeObjects = !!document.getElementById('job_storage_include_objects').checked;
+            const out = document.getElementById('job_storage_output');
+            try {
+                let url = `/admin/job-storage/${encodeURIComponent(jobId)}?include_objects=${includeObjects ? 'true' : 'false'}`;
+                if (!CURRENT_USER || !CURRENT_USER.admin) {
+                    const pw = getAdminPassword();
+                    if (!pw) { alert('Enter Admin Password first.'); return; }
+                    url += `&password=${encodeURIComponent(pw)}`;
+                }
+                const res = await fetch(url, { credentials: 'include' });
+                if (!res.ok) throw new Error('Inspect request failed');
+                const data = await res.json();
+                out.textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                out.textContent = 'Inspect error: ' + e.message;
+            }
+        }
+
+        async function jobStorageDelete() {
+            const jobId = (document.getElementById('job_storage_job_id').value || '').trim();
+            if (!jobId) { alert('Enter a job ID first.'); return; }
+            if (!confirm('Delete uploads for this job?')) return;
+            const out = document.getElementById('job_storage_output');
+            try {
+                let url = `/admin/job-storage/${encodeURIComponent(jobId)}/uploads`;
+                if (!CURRENT_USER || !CURRENT_USER.admin) {
+                    const pw = getAdminPassword();
+                    if (!pw) { alert('Enter Admin Password first.'); return; }
+                    url += `?password=${encodeURIComponent(pw)}`;
+                }
+                const res = await fetch(url, { method: 'DELETE', credentials: 'include' });
+                if (!res.ok) throw new Error('Delete request failed');
+                const data = await res.json();
+                out.textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                out.textContent = 'Delete error: ' + e.message;
+            }
+        }
+
+        const inspectBtn = document.getElementById('job_storage_inspect_btn');
+        if (inspectBtn) inspectBtn.addEventListener('click', jobStorageInspect);
+        const deleteBtn = document.getElementById('job_storage_delete_btn');
+        if (deleteBtn) deleteBtn.addEventListener('click', jobStorageDelete);
 
         // Auth + config init
         let AUTH_CONFIG = { enabled: false, client_id: '', allow_dev_login: false, feedback_form_url: '' };
@@ -1662,11 +1806,12 @@
                                  `<button style="margin-top:0.5rem;padding:0.4rem 0.6rem;border:1px solid var(--border);background:var(--control-surface);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="deleteResult('${j.job_id}','${ef}')">🗑️ Delete</button>`+
                                  `</div>`;
                     }
-                    const canCancel = (j.status === 'PENDING' || j.status === 'STARTED' || j.status === 'RETRY');
+                    const canCancel = ['PENDING','STARTED','RETRY','QUEUED','RUNNING'].includes(j.status);
                     html += `
                         <div style="padding:1rem;border-bottom:1px solid var(--border);">
                             <div class="status-message" style="text-align:left;">
-                                <div><b>Job:</b> ${j.job_id} · <b>Status:</b> ${j.status}</div>
+                        <div><b>Job:</b> ${j.job_id} · <b>Status:</b> ${j.status}${j.status_detail ? ` <span style="color:var(--muted);">(${j.status_detail})</span>` : ''}</div>
+                        ${j.status_updated_at ? `<div style="font-size:0.8rem;color:var(--color-text-secondary);">업데이트: ${new Date(j.status_updated_at).toLocaleString()}</div>` : ''}
                                 <div class="progress-bar" style="margin:0.4rem 0;">
                                     <div class="progress-fill" style="width:${pct}%"></div>
                                 </div>

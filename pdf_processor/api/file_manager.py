@@ -3,10 +3,24 @@ File management module for handling uploaded files in Gemini API.
 Provides centralized file operations with proper cleanup and tracking.
 """
 
+import importlib.util
 import time
-from typing import List, Optional, Set, Any
 from datetime import datetime
-from google import genai  # google-genai unified SDK
+from types import SimpleNamespace
+from typing import Any, List, Optional, Set
+
+_GENAI_SPEC = importlib.util.find_spec("google.genai")
+if _GENAI_SPEC is not None:
+    from google import genai  # google-genai unified SDK
+else:  # pragma: no cover - executed only when dependency is missing
+    class _MissingClient:
+        def __init__(self, *args, **kwargs) -> None:
+            raise ModuleNotFoundError(
+                "google-genai is required to manage remote Gemini files. "
+                "Install the 'google-genai' package to enable API access."
+            )
+
+    genai = SimpleNamespace(Client=_MissingClient)
 
 from ..utils.logging import get_logger
 

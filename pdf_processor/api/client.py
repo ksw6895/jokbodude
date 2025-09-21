@@ -9,15 +9,38 @@ Concurrency note:
   when `GEMINI_PER_KEY_CONCURRENCY` > 1.
 """
 
-import time
-from typing import Any, Optional, List, Dict
-from datetime import datetime
-from google import genai  # google-genai unified SDK
-from google.genai import types as genai_types
-from pathlib import Path
 import concurrent.futures as _fut
+import importlib.util
 import os
+import time
+from datetime import datetime
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any, Dict, List, Optional
 
+_GENAI_SPEC = importlib.util.find_spec("google.genai")
+if _GENAI_SPEC is not None:
+    from google import genai  # google-genai unified SDK
+    from google.genai import types as genai_types
+else:  # pragma: no cover - executed only when dependency is missing
+    class _MissingClient:
+        """Placeholder that raises a helpful error when instantiated."""
+
+        def __init__(self, *args, **kwargs):
+            raise ModuleNotFoundError(
+                "google-genai is required to use Gemini features. "
+                "Install the 'google-genai' package to enable API access."
+            )
+
+    class _UploadFileConfig:
+        """Lightweight stand-in for UploadFileConfig used in tests."""
+
+        def __init__(self, *args, **kwargs):
+            self.display_name = kwargs.get("display_name")
+            self.mime_type = kwargs.get("mime_type")
+
+    genai = SimpleNamespace(Client=_MissingClient)
+    genai_types = SimpleNamespace(UploadFileConfig=_UploadFileConfig)
 from ..utils.exceptions import APIError, FileUploadError, ContentGenerationError
 from ..utils.logging import get_logger
 

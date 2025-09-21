@@ -1,3 +1,4 @@
+import os
 import tempfile
 import uuid
 from pathlib import Path
@@ -9,6 +10,12 @@ from fastapi import APIRouter, File, Form, HTTPException, Query, Request, Upload
 from ..core import MAX_FILE_SIZE, celery_app
 from ..utils import save_uploaded_file
 from ._helpers import save_files_and_metadata, start_job
+
+_SAFE_TMP_ROOT = Path(os.getenv("TMPDIR", tempfile.gettempdir()))
+try:
+    _SAFE_TMP_ROOT.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
 from .auth import require_user
 
 router = APIRouter()
@@ -116,7 +123,7 @@ async def analyze_batch(
 
         jokbo_keys: list[str] = []
         lesson_keys: list[str] = []
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with tempfile.TemporaryDirectory(dir=str(_SAFE_TMP_ROOT)) as temp_dir:
             tdir = Path(temp_dir)
             for f in jokbo_files:
                 p = tdir / f.filename
@@ -160,6 +167,10 @@ async def analyze_batch(
             "batch": True,
         }
         storage_manager.store_job_metadata(job_id, metadata)
+        try:
+            storage_manager.set_job_status(job_id, "QUEUED", detail="대기 중")
+        except Exception:
+            pass
         user_id = user.get("sub")
         if user_id:
             storage_manager.add_user_job(user_id, job_id)

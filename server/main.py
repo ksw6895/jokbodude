@@ -8,7 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from pdf_processor.pdf.cache import clear_global_cache, get_global_cache
 from storage_manager import StorageManager
+from tmpdir import configure_tmpdir
 from .services.storage.registry import StorageRegistry
+
+# Force temp files onto the persistent disk before any request handlers run.
+TMP_ROOT = configure_tmpdir("web")
 
 from .core import REDIS_URL
 from .routes import analyze, jobs, misc, auth
@@ -102,13 +106,8 @@ def create_app() -> FastAPI:
     app.include_router(analyze.router)
     app.include_router(jobs.router)
     return app
-"""Bootstrap a safe TMPDIR so temp files avoid /tmp exhaustion.
-We set TMPDIR early (before any tempfile usage) to a path under the
-configured persistent storage if available, or under project output/.
-"""
+# Ensure TMPDIR exists for local development environments.
 try:
-    _TMP_BASE = Path(os.getenv("RENDER_STORAGE_PATH", str(Path("output") / "temp" / "tmp")))
-    os.environ.setdefault("TMPDIR", str(_TMP_BASE))
-    _TMP_BASE.mkdir(parents=True, exist_ok=True)
+    TMP_ROOT.mkdir(parents=True, exist_ok=True)
 except Exception:
-    pass
+    TMP_ROOT = Path(os.getenv("TMPDIR", str(Path("output") / "temp" / "tmp")))

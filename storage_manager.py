@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import hashlib
 import socket
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 S3ObjectStore = None  # type: ignore
 _S3_IMPORT_ERROR: Optional[str] = None
@@ -95,6 +95,10 @@ class StorageManager:
             self.file_ttl_seconds = max(60, int(os.getenv("FILE_TTL_SECONDS", "86400")))
         except Exception:
             self.file_ttl_seconds = 86400
+        try:
+            self.job_status_ttl = max(3600, int(os.getenv("JOB_STATUS_TTL_SECONDS", "604800")))
+        except Exception:
+            self.job_status_ttl = 604800
         
         # Try to connect to Redis with retry
         self._init_redis_connection()
@@ -400,7 +404,63 @@ class StorageManager:
             return ttl >= max(0, int(min_ttl_seconds))
         except Exception:
             return False
-    
+
+    def set_job_status(self, job_id: str, status: str, detail: Optional[str] = None, ttl_seconds: Optional[int] = None) -> None:
+        """Persist the latest known status for a job independent of Celery backend."""
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            key = f"job:{job_id}:status"
+            payload = {
+                "status": str(status),
+                "updated_at": datetime.utcnow().isoformat() + "Z",
+            }
+            if detail:
+                payload["detail"] = str(detail)[:500]
+            self._with_retry(self.redis_client.hset, key, mapping=payload)
+            ttl = int(ttl_seconds) if ttl_seconds is not None else int(self.job_status_ttl)
+            if ttl > 0:
+                self._with_retry(self.redis_client.expire, key, ttl)
+        except Exception as e:
+            logger.warning(f"Failed to set job status for {job_id}: {e}")
+
+    def get_job_status(self, job_id: str) -> Optional[Dict[str, str]]:
+        """Retrieve the persisted status for a job."""
+        if self.use_local_only or not self.redis_client:
+            return None
+        try:
+            key = f"job:{job_id}:status"
+            data = self._with_retry(self.redis_client.hgetall, key)
+            if not data:
+                return None
+
+            def _decode(value):
+                return value.decode() if isinstance(value, (bytes, bytearray)) else value
+
+            status = _decode(data.get(b"status") or data.get("status"))
+            if not status:
+                return None
+            detail = _decode(data.get(b"detail") or data.get("detail"))
+            updated_at = _decode(data.get(b"updated_at") or data.get("updated_at"))
+            result: Dict[str, str] = {"status": str(status)}
+            if detail:
+                result["detail"] = str(detail)
+            if updated_at:
+                result["updated_at"] = str(updated_at)
+            return result
+        except Exception as e:
+            logger.warning(f"Failed to get job status for {job_id}: {e}")
+            return None
+
+    def clear_job_status(self, job_id: str) -> None:
+        """Remove any persisted status entry for the given job."""
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            self._with_retry(self.redis_client.delete, f"job:{job_id}:status")
+        except Exception:
+            pass
+
     def store_job_metadata(self, job_id: str, metadata: Dict) -> None:
         """Store job metadata in Redis"""
         key = f"job:{job_id}:metadata"
@@ -727,7 +787,241 @@ class StorageManager:
             except Exception as e:
                 logger.error(f"Failed to get progress: {e}")
         return None
-    
+
+    def _parse_iso_datetime(self, value: Optional[str]) -> Optional[datetime]:
+        if not value:
+            return None
+        try:
+            dt = datetime.fromisoformat(value)
+        except Exception:
+            return None
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+
+    def purge_job_uploads(self, job_id: str) -> Dict[str, object]:
+        """Delete stored uploads for a job across Redis, local disk, and object store."""
+        summary: Dict[str, object] = {
+            "redis_deleted": 0,
+            "s3_deleted": 0,
+            "local_deleted": False,
+        }
+        if not self.use_local_only and self.redis_client:
+            try:
+                pattern = f"file:{job_id}:*"
+                deleted = 0
+                keys = list(self.redis_client.scan_iter(match=pattern))
+                for key in keys:
+                    self._with_retry(self.redis_client.delete, key)
+                    deleted += 1
+                summary["redis_deleted"] = int(deleted)
+            except Exception as e:
+                summary["redis_error"] = str(e)
+        else:
+            summary["redis_note"] = "redis unavailable"
+
+        if self._s3 is not None:
+            try:
+                summary["s3_deleted"] = int(self._s3.delete_prefix(f"uploads/{job_id}/"))
+            except Exception as e:
+                summary["s3_error"] = str(e)
+        else:
+            summary["s3_note"] = "object store disabled"
+
+        local_dir = self.local_storage / job_id
+        if local_dir.exists():
+            try:
+                import shutil
+                shutil.rmtree(local_dir)
+                summary["local_deleted"] = True
+            except Exception as e:
+                summary["local_error"] = str(e)
+        return summary
+
+    def list_upload_jobs(
+        self,
+        *,
+        older_than_hours: Optional[int] = None,
+        limit: Optional[int] = None,
+    ) -> List[Dict[str, object]]:
+        """Return aggregated metadata for persisted uploads grouped by job_id."""
+
+        if self._s3 is None:
+            return []
+
+        objects = self._s3.list_objects("uploads/")
+        jobs: Dict[str, Dict[str, object]] = {}
+        for obj in objects:
+            key = obj.get("key") or ""
+            parts = key.split("/")
+            if len(parts) < 2:
+                continue
+            job_id = parts[1]
+            entry = jobs.setdefault(
+                job_id,
+                {
+                    "job_id": job_id,
+                    "objects": 0,
+                    "bytes": 0,
+                    "oldest_dt": None,
+                    "newest_dt": None,
+                },
+            )
+            entry["objects"] = int(entry.get("objects", 0)) + 1
+            try:
+                entry["bytes"] = int(entry.get("bytes", 0)) + int(obj.get("size") or 0)
+            except Exception:
+                entry["bytes"] = int(entry.get("bytes", 0))
+            last_modified = self._parse_iso_datetime(obj.get("last_modified"))
+            if last_modified is not None:
+                oldest_dt = entry.get("oldest_dt")
+                newest_dt = entry.get("newest_dt")
+                if oldest_dt is None or last_modified < oldest_dt:
+                    entry["oldest_dt"] = last_modified
+                if newest_dt is None or last_modified > newest_dt:
+                    entry["newest_dt"] = last_modified
+
+        now = datetime.now(timezone.utc)
+        cutoff: Optional[datetime] = None
+        if older_than_hours is not None:
+            try:
+                cutoff = now - timedelta(hours=max(0, int(older_than_hours)))
+            except Exception:
+                cutoff = None
+
+        entries: List[Dict[str, object]] = []
+        for data in jobs.values():
+            oldest_dt = data.pop("oldest_dt", None)
+            newest_dt = data.pop("newest_dt", None)
+            if oldest_dt is not None:
+                data["oldest"] = oldest_dt.isoformat()
+                data["oldest_age_hours"] = round((now - oldest_dt).total_seconds() / 3600.0, 2)
+            else:
+                data["oldest"] = None
+            if newest_dt is not None:
+                data["newest"] = newest_dt.isoformat()
+                data["newest_age_hours"] = round((now - newest_dt).total_seconds() / 3600.0, 2)
+            else:
+                data["newest"] = None
+
+            if cutoff is not None and oldest_dt is not None and oldest_dt > cutoff:
+                continue
+            entries.append(data)
+
+        def _sort_key(entry: Dict[str, object]) -> datetime:
+            dt = self._parse_iso_datetime(entry.get("oldest"))
+            if dt is None:
+                return datetime.max.replace(tzinfo=timezone.utc)
+            return dt
+
+        entries.sort(key=_sort_key)
+
+        if limit is not None:
+            try:
+                limit_val = max(1, int(limit))
+                entries = entries[:limit_val]
+            except Exception:
+                pass
+        return entries
+
+    def purge_upload_backlog(
+        self,
+        *,
+        older_than_hours: Optional[int] = None,
+        limit: Optional[int] = None,
+        dry_run: bool = False,
+    ) -> Dict[str, object]:
+        """Bulk-delete job upload prefixes based on age filters."""
+
+        summary: Dict[str, object] = {
+            "dry_run": bool(dry_run),
+            "older_than_hours": older_than_hours,
+            "limit": limit,
+            "jobs_considered": 0,
+            "jobs_deleted": 0,
+            "results": [],
+        }
+
+        targets = self.list_upload_jobs(older_than_hours=older_than_hours, limit=limit)
+        summary["jobs_considered"] = len(targets)
+        if dry_run:
+            summary["results"] = targets
+            return summary
+
+        for entry in targets:
+            job_id = entry.get("job_id")
+            if not job_id:
+                continue
+            result = self.purge_job_uploads(job_id)
+            summary_entry = {
+                "job_id": job_id,
+                "purge": result,
+            }
+            summary["results"].append(summary_entry)
+            if any(result.get(k) for k in ("redis_deleted", "s3_deleted", "local_deleted")):
+                summary["jobs_deleted"] += 1
+        return summary
+
+    def job_storage_summary(self, job_id: str, include_objects: bool = False) -> Dict[str, object]:
+        """Return counts and sizes for uploads/results tied to a job."""
+        summary: Dict[str, object] = {
+            "job_id": job_id,
+            "uploads": {"count": 0, "bytes": 0},
+            "results": {"count": 0, "bytes": 0},
+            "redis_files": {"count": 0},
+        }
+        if include_objects:
+            summary["uploads"]["objects"] = []
+            summary["results"]["objects"] = []
+
+        if self._s3 is not None:
+            try:
+                upload_objs = self._s3.list_objects(f"uploads/{job_id}/")
+                summary["uploads"]["count"] = len(upload_objs)
+                summary["uploads"]["bytes"] = sum(int(obj.get("size") or 0) for obj in upload_objs)
+                if include_objects:
+                    summary["uploads"]["objects"] = upload_objs
+            except Exception as e:
+                summary["uploads"]["error"] = str(e)
+            try:
+                result_objs = self._s3.list_objects(f"results/{job_id}/")
+                summary["results"]["count"] = len(result_objs)
+                summary["results"]["bytes"] = sum(int(obj.get("size") or 0) for obj in result_objs)
+                if include_objects:
+                    summary["results"]["objects"] = result_objs
+            except Exception as e:
+                summary["results"]["error"] = str(e)
+        else:
+            summary["uploads"]["note"] = "object store disabled"
+            summary["results"]["note"] = "object store disabled"
+
+        if not self.use_local_only and self.redis_client:
+            try:
+                pattern = f"file:{job_id}:*"
+                summary["redis_files"]["count"] = int(sum(1 for _ in self.redis_client.scan_iter(match=pattern)))
+            except Exception as e:
+                summary["redis_files"]["error"] = str(e)
+        else:
+            summary["redis_files"]["note"] = "redis unavailable"
+
+        local_dir = self.local_storage / job_id
+        total_bytes = 0
+        total_files = 0
+        if local_dir.exists():
+            for path in local_dir.rglob("*"):
+                try:
+                    if path.is_file():
+                        total_files += 1
+                        total_bytes += path.stat().st_size
+                except Exception:
+                    continue
+        summary["local"] = {
+            "path": str(local_dir),
+            "files": int(total_files),
+            "bytes": int(total_bytes),
+        }
+        return summary
+
     def cleanup_job(self, job_id: str) -> None:
         """Clean up all data related to a job, including user mappings."""
         # Capture owner before deleting job-scoped keys
@@ -736,6 +1030,11 @@ class StorageManager:
             owner_id = self.get_job_owner(job_id)
         except Exception:
             owner_id = None
+
+        try:
+            self.purge_job_uploads(job_id)
+        except Exception:
+            pass
 
         if not self.use_local_only and self.redis_client:
             try:
@@ -763,8 +1062,12 @@ class StorageManager:
         # Clean up object store prefixes
         try:
             if self._s3 is not None:
-                self._s3.delete_prefix(f"uploads/{job_id}/")
                 self._s3.delete_prefix(f"results/{job_id}/")
+        except Exception:
+            pass
+
+        try:
+            self.clear_job_status(job_id)
         except Exception:
             pass
 

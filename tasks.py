@@ -1,23 +1,31 @@
 # tasks.py
+import logging
 import os
 import tempfile
-from pathlib import Path
-import pymupdf as fitz
-from celery import Celery, current_task
-from celery.signals import worker_ready
-from celery.exceptions import Ignore, SoftTimeLimitExceeded
-from typing import Optional
 import threading
 import time
-from config import create_model, configure_api, API_KEYS
-import logging
-from pdf_processor.core.processor import PDFProcessor
-from pdf_creator import PDFCreator
-from storage_manager import StorageManager
-from pdf_processor.pdf.operations import PDFOperations
-from celery import group, chord
-from pdf_processor.utils.exceptions import CancelledError
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
+
+from tmpdir import configure_tmpdir
+
+# Configure TMPDIR as early as possible so every subsequent tempfile usage
+# lands on the persistent volume instead of Render's 2GB /tmp.
+TMP_ROOT = configure_tmpdir("worker")
+
+import pymupdf as fitz
+from celery import Celery, current_task
+from celery import group, chord
+from celery.exceptions import Ignore, SoftTimeLimitExceeded
+from celery.signals import worker_ready
+
+from config import API_KEYS, configure_api, create_model
+from pdf_creator import PDFCreator
+from pdf_processor.core.processor import PDFProcessor
+from pdf_processor.pdf.operations import PDFOperations
+from pdf_processor.utils.exceptions import CancelledError
+from storage_manager import StorageManager
 
 @dataclass
 class ModeStrategy:
@@ -76,6 +84,11 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
         primary_keys = jokbo_keys if strategy.primary_kind == "jokbo" else lesson_keys
         secondary_keys = lesson_keys if strategy.secondary_kind == "lesson" else jokbo_keys
 
+        try:
+            storage_manager.set_job_status(job_id, "RUNNING", detail="자료 준비 중")
+        except Exception:
+            pass
+
         # Determine multi-API usage
         meta_multi = None
         if isinstance(metadata, dict):
@@ -93,7 +106,7 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
         except Exception:
             pass
 
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with tempfile.TemporaryDirectory(dir=str(TMP_ROOT)) as temp_dir:
             temp_path = Path(temp_dir)
             jokbo_dir = temp_path / "jokbo"
             lesson_dir = temp_path / "lesson"
@@ -102,30 +115,42 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
             lesson_dir.mkdir(parents=True, exist_ok=True)
             output_dir.mkdir(parents=True, exist_ok=True)
 
-            # Download to local
-            jokbo_paths: list[str] = []
-            for key in jokbo_keys:
-                filename = key.split(":")[-2]
-                local_path = jokbo_dir / filename
-                try:
-                    storage_manager.refresh_ttl(key)
-                except Exception:
-                    pass
-                storage_manager.save_file_locally(key, local_path)
-                jokbo_paths.append(str(local_path))
+            def _plan_downloads(keys: list[str], base_dir: Path) -> list[dict]:
+                plan: list[dict] = []
+                for idx, key in enumerate(keys):
+                    parts = key.split(":")
+                    filename = parts[-2] if len(parts) >= 2 else f"file_{idx}"
+                    local_path = base_dir / filename
+                    plan.append({"key": key, "path": local_path, "name": filename})
+                return plan
 
+            def _ensure_local(entry: dict) -> Path:
+                path = entry["path"]
+                if not path.exists():
+                    try:
+                        storage_manager.refresh_ttl(entry["key"])
+                    except Exception:
+                        pass
+                    storage_manager.save_file_locally(entry["key"], path)
+                return path
+
+            jokbo_plan = _plan_downloads(list(jokbo_keys), jokbo_dir)
+            lesson_plan = _plan_downloads(list(lesson_keys), lesson_dir)
+
+            # Lessons are needed for chunk estimation regardless of mode.
             lesson_paths: list[str] = []
-            for key in lesson_keys:
-                filename = key.split(":")[-2]
-                local_path = lesson_dir / filename
-                try:
-                    storage_manager.refresh_ttl(key)
-                except Exception:
-                    pass
-                storage_manager.save_file_locally(key, local_path)
-                lesson_paths.append(str(local_path))
+            for entry in lesson_plan:
+                lesson_paths.append(str(_ensure_local(entry)))
 
-            primary_paths = jokbo_paths if strategy.primary_kind == "jokbo" else lesson_paths
+            jokbo_paths: list[str]
+            if strategy.secondary_kind == "jokbo":
+                jokbo_paths = [str(_ensure_local(entry)) for entry in jokbo_plan]
+            else:
+                jokbo_paths = [str(entry["path"]) for entry in jokbo_plan]
+
+            primary_plan = jokbo_plan if strategy.primary_kind == "jokbo" else lesson_plan
+            primary_paths = [str(entry["path"]) for entry in primary_plan]
+            secondary_paths = lesson_paths if strategy.secondary_kind == "lesson" else jokbo_paths
 
             # Init chunk-based progress
             try:
@@ -195,7 +220,7 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
             creator = PDFCreator()
 
             aggregated_warnings = {"failed_files": [], "failed_chunks": 0}
-            for prim_path_str in primary_paths:
+            for entry in primary_plan:
                 # Cancellation check between items
                 try:
                     if storage_manager.is_cancelled(job_id):
@@ -207,7 +232,12 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
                 except Exception:
                     pass
 
-                prim_path = Path(prim_path_str)
+                prim_path = _ensure_local(entry)
+                prim_path_str = str(prim_path)
+                try:
+                    storage_manager.set_job_status(job_id, "RUNNING", detail=f"분석 중: {prim_path.name}")
+                except Exception:
+                    pass
                 # Update status message (driven by chunk ticks)
                 try:
                     cur = storage_manager.get_progress(job_id) or {}
@@ -216,9 +246,7 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
                     pass
 
                 # Analyze
-                analysis_result = getattr(processor, strategy.analyze_multi_name)(
-                    (lesson_paths if strategy.secondary_kind == "lesson" else jokbo_paths), prim_path_str, api_keys=API_KEYS
-                )
+                analysis_result = getattr(processor, strategy.analyze_multi_name)(secondary_paths, prim_path_str, api_keys=API_KEYS)
                 if "error" in analysis_result:
                     raise Exception(f"Analysis error for {prim_path.name}: {analysis_result['error']}")
                 try:
@@ -231,6 +259,10 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
                     pass
 
                 # PDF generation message
+                try:
+                    storage_manager.set_job_status(job_id, "RUNNING", detail=f"PDF 생성 중: {prim_path.name}")
+                except Exception:
+                    pass
                 try:
                     cur = storage_manager.get_progress(job_id) or {}
                     storage_manager.update_progress(job_id, int(cur.get('progress', 0) or 0), f"PDF 생성 중: {prim_path.name}")
@@ -280,6 +312,10 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
                         # If even placeholder fails, re-raise to surface the error
                         raise last_err
                 storage_manager.store_result(job_id, output_path)
+                try:
+                    prim_path.unlink(missing_ok=True)
+                except Exception:
+                    pass
 
             try:
                 processor.cleanup_session()
@@ -288,6 +324,11 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
 
             try:
                 storage_manager.finalize_progress(job_id, "완료")
+            except Exception:
+                pass
+
+            try:
+                storage_manager.set_job_status(job_id, "SUCCESS", detail="완료")
             except Exception:
                 pass
 
@@ -316,6 +357,10 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
 
     except CancelledError:
         try:
+            storage_manager.set_job_status(job_id, "CANCELLED", detail="사용자 취소")
+        except Exception:
+            pass
+        try:
             storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
             storage_manager.finalize_progress(job_id, "취소됨")
         except Exception:
@@ -324,6 +369,10 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
         raise Ignore()
     except SoftTimeLimitExceeded:
         try:
+            storage_manager.set_job_status(job_id, "TIMED_OUT", detail="시간 제한 초과")
+        except Exception:
+            pass
+        try:
             storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "시간 제한으로 취소됨")
             storage_manager.finalize_progress(job_id, "취소됨")
         except Exception:
@@ -331,30 +380,27 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
         current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "timeout"})
         raise Ignore()
     except Exception as e:
+        try:
+            storage_manager.set_job_status(job_id, "FAILED", detail=str(e))
+        except Exception:
+            pass
         raise e
+    finally:
+        try:
+            storage_manager.purge_job_uploads(job_id)
+        except Exception:
+            pass
 
 # --- Configuration ---
-# Ensure temporary files use a persistent or project path instead of /tmp
-# Prefer RENDER_STORAGE_PATH when provided (e.g., on Render disks), else project output
+# Use a storage path colocated with TMPDIR for any ad-hoc persistence needs
+STORAGE_PATH = Path(os.getenv("RENDER_STORAGE_PATH", str(Path("output") / "storage")))
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
 try:
-    _TMP_BASE = Path(os.getenv("RENDER_STORAGE_PATH", str(Path("output") / "temp" / "tmp")))
-    os.environ.setdefault("TMPDIR", str(_TMP_BASE))
-
-    # Use a storage path colocated with TMPDIR for any ad-hoc persistence needs
-    STORAGE_PATH = Path(os.getenv("RENDER_STORAGE_PATH", str(Path("output") / "storage")))
-    REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-
-    # Ensure storage paths exist
     STORAGE_PATH.mkdir(parents=True, exist_ok=True)
-    _TMP_BASE.mkdir(parents=True, exist_ok=True)
+    TMP_ROOT.mkdir(parents=True, exist_ok=True)
 except Exception:
-    # Fallback to project-local directories if absolute paths are not writable
-    _TMP_BASE = Path("output") / "temp" / "tmp"
-    os.environ["TMPDIR"] = str(_TMP_BASE)
-    STORAGE_PATH = Path("output") / "storage"
-    REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-    STORAGE_PATH.mkdir(parents=True, exist_ok=True)
-    _TMP_BASE.mkdir(parents=True, exist_ok=True)
+    pass
 
 # Check if multi-API mode is available
 USE_MULTI_API = len(API_KEYS) > 1 if 'API_KEYS' in globals() else False
@@ -635,7 +681,7 @@ def run_jokbo_analysis(job_id: str, model_type: str = None, multi_api: Optional[
             pass
 
         # Create temporary directory for processing
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with tempfile.TemporaryDirectory(dir=str(TMP_ROOT)) as temp_dir:
             temp_path = Path(temp_dir)
             jokbo_dir = temp_path / "jokbo"
             lesson_dir = temp_path / "lesson"
@@ -869,7 +915,7 @@ def run_lesson_analysis(job_id: str, model_type: str = None, multi_api: Optional
             pass
 
         # Create temporary directory for processing
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with tempfile.TemporaryDirectory(dir=str(TMP_ROOT)) as temp_dir:
             temp_path = Path(temp_dir)
             jokbo_dir = temp_path / "jokbo"
             lesson_dir = temp_path / "lesson"
@@ -1066,9 +1112,18 @@ def batch_analyze_single(
             if storage_manager.is_cancelled(job_id):
                 storage_manager.update_progress(job_id, int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
                 current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "cancelled"})
+                try:
+                    storage_manager.set_job_status(job_id, "CANCELLED", detail="사용자 취소")
+                except Exception:
+                    pass
                 raise Ignore()
         except Ignore:
             raise
+        except Exception:
+            pass
+
+        try:
+            storage_manager.set_job_status(job_id, "RUNNING", detail=f"서브작업 {sub_index + 1} 진행 중")
         except Exception:
             pass
 
@@ -1090,7 +1145,7 @@ def batch_analyze_single(
                 pass
         creator = PDFCreator()
 
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with tempfile.TemporaryDirectory(dir=str(TMP_ROOT)) as temp_dir:
             temp_path = Path(temp_dir)
             a_dir = temp_path / ("jokbo" if mode == "jokbo-centric" else "lesson")
             b_dir = temp_path / ("lesson" if mode == "jokbo-centric" else "jokbo")
@@ -1155,6 +1210,10 @@ def batch_analyze_single(
                 "output": output_filename,
             }
     except Exception as e:
+        try:
+            storage_manager.set_job_status(job_id, "FAILED", detail=str(e))
+        except Exception:
+            pass
         raise e
 
 
@@ -1173,11 +1232,20 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
         metadata = sm.get_job_metadata(job_id)
         if not metadata:
             raise Exception(f"Job metadata not found for {job_id}")
+        try:
+            sm.set_job_status(job_id, "RUNNING", detail="Exam Only 준비 중")
+        except Exception:
+            pass
+
+        try:
+            sm.set_job_status(job_id, "RUNNING", detail="부분 족보 준비 중")
+        except Exception:
+            pass
 
         jokbo_keys = metadata.get("jokbo_keys", [])
         lesson_keys = metadata.get("lesson_keys", [])
 
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with tempfile.TemporaryDirectory(dir=str(TMP_ROOT)) as temp_dir:
             temp_path = Path(temp_dir)
             jokbo_dir = temp_path / "jokbo"
             lesson_dir = temp_path / "lesson"
@@ -1343,8 +1411,16 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
             result = {"status": "OK", "job_id": job_id, "output": output_path.name}
             if isinstance(analysis, dict) and analysis.get("warnings"):
                 result["warnings"] = analysis["warnings"]
+            try:
+                sm.set_job_status(job_id, "SUCCESS", detail="완료")
+            except Exception:
+                pass
             return result
     except CancelledError:
+        try:
+            sm.set_job_status(job_id, "CANCELLED", detail="사용자 취소")
+        except Exception:
+            pass
         try:
             sm.update_progress(job_id, int((sm.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
             sm.finalize_progress(job_id, "취소됨")
@@ -1354,6 +1430,10 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
         raise Ignore()
     except SoftTimeLimitExceeded:
         try:
+            sm.set_job_status(job_id, "TIMED_OUT", detail="시간 제한 초과")
+        except Exception:
+            pass
+        try:
             sm.update_progress(job_id, int((sm.get_progress(job_id) or {}).get('progress', 0) or 0), "시간 제한으로 취소됨")
             sm.finalize_progress(job_id, "취소됨")
         except Exception:
@@ -1361,7 +1441,16 @@ def generate_partial_jokbo(job_id: str, model_type: Optional[str] = None, multi_
         current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "timeout"})
         raise Ignore()
     except Exception as exc:
+        try:
+            sm.set_job_status(job_id, "FAILED", detail=str(exc))
+        except Exception:
+            pass
         raise exc
+    finally:
+        try:
+            sm.purge_job_uploads(job_id)
+        except Exception:
+            pass
 
 
 @celery_app.task(name="tasks.aggregate_batch")
@@ -1393,8 +1482,20 @@ def aggregate_batch(results: list, job_id: str):
             (dest_dir / "manifest.json").write_text(_json.dumps(manifest, ensure_ascii=False, indent=2))
         except Exception:
             pass
+        try:
+            sm.set_job_status(job_id, "SUCCESS", detail="완료")
+        except Exception:
+            pass
+        try:
+            sm.purge_job_uploads(job_id)
+        except Exception:
+            pass
         return {"job_id": job_id, "subtask_results": results}
     except Exception as e:
+        try:
+            sm.set_job_status(job_id, "FAILED", detail=str(e))
+        except Exception:
+            pass
         raise e
 
 
@@ -1420,7 +1521,7 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
         prefer_multi = True
 
         # Prepare temp dirs
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with tempfile.TemporaryDirectory(dir=str(TMP_ROOT)) as temp_dir:
             base = Path(temp_dir)
             jokbo_dir = base / "jokbo"
             out_dir = base / "output"
@@ -1611,8 +1712,16 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
                 sm.finalize_progress(job_id, "완료")
             except Exception:
                 pass
+            try:
+                sm.set_job_status(job_id, "SUCCESS", detail="완료")
+            except Exception:
+                pass
             return {"status": "OK", "job_id": job_id, "files_generated": len(list(out_dir.glob('*.pdf')))}
     except CancelledError:
+        try:
+            sm.set_job_status(job_id, "CANCELLED", detail="사용자 취소")
+        except Exception:
+            pass
         try:
             sm.update_progress(job_id, int((sm.get_progress(job_id) or {}).get('progress', 0) or 0), "사용자 취소됨")
             sm.finalize_progress(job_id, "취소됨")
@@ -1622,6 +1731,10 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
         raise Ignore()
     except SoftTimeLimitExceeded:
         try:
+            sm.set_job_status(job_id, "TIMED_OUT", detail="시간 제한 초과")
+        except Exception:
+            pass
+        try:
             sm.update_progress(job_id, int((sm.get_progress(job_id) or {}).get('progress', 0) or 0), "시간 제한으로 취소됨")
             sm.finalize_progress(job_id, "취소됨")
         except Exception:
@@ -1629,4 +1742,13 @@ def run_exam_only(job_id: str, model_type: Optional[str] = None, multi_api: Opti
         current_task.update_state(state='REVOKED', meta={"job_id": job_id, "status": "timeout"})
         raise Ignore()
     except Exception as exc:
+        try:
+            sm.set_job_status(job_id, "FAILED", detail=str(exc))
+        except Exception:
+            pass
         raise exc
+    finally:
+        try:
+            sm.purge_job_uploads(job_id)
+        except Exception:
+            pass

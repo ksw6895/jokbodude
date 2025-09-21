@@ -1,11 +1,27 @@
+import importlib.util
 import os
-from google import genai  # google-genai unified SDK
+from types import SimpleNamespace
+from typing import Any, Dict, List, Optional
+
 from dotenv import load_dotenv
-from typing import Optional, List, Dict, Any
-try:
-    # Typed helpers are available in recent google-genai; optional at runtime
-    from google.genai import types as _genai_types  # type: ignore
-except Exception:  # pragma: no cover - optional import for older environments
+
+_GENAI_SPEC = importlib.util.find_spec("google.genai")
+if _GENAI_SPEC is not None:
+    from google import genai  # google-genai unified SDK
+    try:
+        # Typed helpers are available in recent google-genai; optional at runtime
+        from google.genai import types as _genai_types  # type: ignore
+    except Exception:  # pragma: no cover - optional import for older environments
+        _genai_types = None
+else:  # pragma: no cover - executed when dependency missing
+    class _MissingClient:
+        def __init__(self, *args, **kwargs) -> None:
+            raise ModuleNotFoundError(
+                "google-genai is required to use Gemini integration. "
+                "Install the 'google-genai' package to enable API access."
+            )
+
+    genai = SimpleNamespace(Client=_MissingClient)
     _genai_types = None
 
 from settings import settings as app_settings

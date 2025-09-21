@@ -3,6 +3,7 @@ PDF manipulation operations module.
 Handles PDF reading, splitting, page extraction, and other PDF-related operations.
 """
 
+import os
 import tempfile
 from pathlib import Path
 from typing import List, Tuple, Optional, Dict, Any
@@ -499,7 +500,9 @@ class PDFOperations:
                 
                 # Determine output path
                 if output_path is None:
-                    temp_file = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False)
+                    temp_file = tempfile.NamedTemporaryFile(
+                        suffix='.pdf', delete=False, dir=os.getenv("TMPDIR", tempfile.gettempdir())
+                    )
                     output_path = temp_file.name
                 
                 # Save the extracted pages
@@ -617,7 +620,9 @@ class PDFOperations:
 
                 # Persist output
                 if output_path is None:
-                    temp_file = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+                    temp_file = tempfile.NamedTemporaryFile(
+                        suffix=".pdf", delete=False, dir=os.getenv("TMPDIR", tempfile.gettempdir())
+                    )
                     output_path = temp_file.name
                 out_doc.save(output_path)
                 out_doc.close()
@@ -681,7 +686,9 @@ class PDFOperations:
                     fitz.Rect(0, 0, rect.width, y1), src, page_num - 1, clip=fitz.Rect(0, 0, rect.width, y1)
                 )
                 if output_path is None:
-                    temp_file = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+                    temp_file = tempfile.NamedTemporaryFile(
+                        suffix=".pdf", delete=False, dir=os.getenv("TMPDIR", tempfile.gettempdir())
+                    )
                     output_path = temp_file.name
                 out_doc.save(output_path)
                 out_doc.close()
