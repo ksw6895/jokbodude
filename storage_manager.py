@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import hashlib
 import socket
-from datetime import datetime
+from datetime import datetime, timezone
 
 S3ObjectStore = None  # type: ignore
 _S3_IMPORT_ERROR: Optional[str] = None
@@ -825,6 +825,231 @@ class StorageManager:
                 summary["local_deleted"] = True
             except Exception as e:
                 summary["local_error"] = str(e)
+        return summary
+
+    def purge_stale_uploads(
+        self,
+        older_than_hours: Optional[int] = None,
+        *,
+        delete_all: bool = False,
+    ) -> Dict[str, object]:
+        """Best-effort purge of uploads that no longer belong to active jobs.
+
+        This scans Redis, local storage, and the optional object store for
+        uploads grouped by job id. Jobs whose most recent upload is older than
+        ``older_than_hours`` (or all jobs when ``delete_all`` is True) are
+        removed. Active jobs (status RUNNING/QUEUED) are skipped to avoid
+        interfering with in-flight work.
+        """
+
+        summary: Dict[str, object] = {
+            "threshold_hours": None,
+            "delete_all": bool(delete_all),
+            "jobs_considered": 0,
+            "jobs_purged": [],
+            "jobs_skipped": [],
+            "redis_keys_deleted": 0,
+            "local_dirs_deleted": 0,
+            "s3_prefixes_deleted": 0,
+            "s3_objects_deleted": 0,
+        }
+
+        threshold_hours: Optional[int]
+        if delete_all:
+            threshold_hours = None
+        else:
+            if older_than_hours is not None:
+                try:
+                    threshold_hours = max(0, int(older_than_hours))
+                except Exception:
+                    threshold_hours = 0
+            else:
+                try:
+                    threshold_hours = max(0, int(os.getenv("UPLOAD_RETENTION_HOURS", "48")))
+                except Exception:
+                    threshold_hours = 48
+        summary["threshold_hours"] = threshold_hours
+        threshold_seconds: Optional[float]
+        if threshold_hours is None:
+            threshold_seconds = None
+        else:
+            threshold_seconds = float(threshold_hours * 3600)
+
+        now_dt = datetime.now(timezone.utc)
+        now_ts = time.time()
+
+        job_info: Dict[str, Dict[str, object]] = {}
+
+        # Collect Redis keys per job to determine age and candidates.
+        if not self.use_local_only and self.redis_client:
+            try:
+                for key in self.redis_client.scan_iter(match="file:*"):
+                    key_str = key.decode() if isinstance(key, (bytes, bytearray)) else str(key)
+                    parts = key_str.split(":")
+                    if len(parts) < 2:
+                        continue
+                    job_id = parts[1]
+                    try:
+                        ttl = self.redis_client.ttl(key_str)
+                    except Exception:
+                        ttl = None
+                    if ttl is None:
+                        age_seconds = None
+                    elif ttl < 0:
+                        age_seconds = float(self.file_ttl_seconds)
+                    else:
+                        age_seconds = float(max(0, self.file_ttl_seconds - int(ttl)))
+                    info = job_info.setdefault(job_id, {})
+                    keys = info.setdefault("redis_keys", [])
+                    keys.append(key_str)
+                    info["redis_count"] = int(info.get("redis_count", 0)) + 1
+                    if age_seconds is not None:
+                        current = float(info.get("redis_max_age", 0.0))
+                        if age_seconds > current:
+                            info["redis_max_age"] = age_seconds
+            except Exception as e:
+                summary["redis_error"] = str(e)
+        else:
+            summary["redis_note"] = "redis unavailable"
+
+        # Collect local storage directories per job.
+        try:
+            for entry in self.local_storage.iterdir():
+                try:
+                    if not entry.is_dir():
+                        continue
+                    job_id = entry.name
+                    info = job_info.setdefault(job_id, {})
+                    info["local_path"] = entry
+                    try:
+                        mtime = entry.stat().st_mtime
+                        info["local_age"] = max(0.0, now_ts - mtime)
+                    except Exception:
+                        info["local_age"] = None
+                except Exception:
+                    continue
+        except FileNotFoundError:
+            pass
+        except Exception:
+            summary["local_error"] = "failed to scan local storage"
+
+        # Collect object store uploads metadata.
+        def _parse_dt(val) -> Optional[datetime]:
+            if isinstance(val, datetime):
+                return val.astimezone(timezone.utc) if val.tzinfo else val.replace(tzinfo=timezone.utc)
+            if isinstance(val, str):
+                try:
+                    s = val[:-1] + "+00:00" if val.endswith("Z") else val
+                    dt = datetime.fromisoformat(s)
+                    if dt.tzinfo is None:
+                        dt = dt.replace(tzinfo=timezone.utc)
+                    return dt.astimezone(timezone.utc)
+                except Exception:
+                    return None
+            return None
+
+        if self._s3 is not None:
+            try:
+                objects = self._s3.list_objects("uploads/")
+                for obj in objects:
+                    key = obj.get("key")
+                    if not key or not key.startswith("uploads/"):
+                        continue
+                    parts = key.split("/")
+                    if len(parts) < 3:
+                        continue
+                    job_id = parts[1]
+                    info = job_info.setdefault(job_id, {})
+                    info["s3_count"] = int(info.get("s3_count", 0)) + 1
+                    dt = _parse_dt(obj.get("last_modified"))
+                    if dt is not None:
+                        current = info.get("s3_latest")
+                        if not isinstance(current, datetime) or dt > current:
+                            info["s3_latest"] = dt
+            except Exception as e:
+                summary["s3_error"] = str(e)
+        else:
+            summary["s3_note"] = "object store disabled"
+
+        summary["jobs_considered"] = len(job_info)
+
+        for job_id, info in job_info.items():
+            max_age = 0.0
+            redis_age = float(info.get("redis_max_age", 0.0))
+            if redis_age > max_age:
+                max_age = redis_age
+            local_age = info.get("local_age")
+            if isinstance(local_age, (int, float)) and local_age > max_age:
+                max_age = float(local_age)
+            latest = info.get("s3_latest")
+            if isinstance(latest, datetime):
+                try:
+                    s3_age = max(0.0, (now_dt - latest).total_seconds())
+                    if s3_age > max_age:
+                        max_age = s3_age
+                except Exception:
+                    pass
+
+            should_delete = delete_all
+            if not should_delete and threshold_seconds is not None:
+                if max_age >= threshold_seconds:
+                    should_delete = True
+
+            if not should_delete:
+                continue
+
+            is_active = False
+            if not delete_all:
+                try:
+                    status = self.get_job_status(job_id)
+                    if status and str(status.get("status", "")).upper() in {"RUNNING", "QUEUED"}:
+                        is_active = True
+                except Exception:
+                    is_active = False
+            if is_active:
+                if job_id not in summary["jobs_skipped"]:
+                    summary["jobs_skipped"].append(job_id)
+                continue
+
+            removed_any = False
+
+            redis_keys = info.get("redis_keys") or []
+            if redis_keys and not self.use_local_only and self.redis_client:
+                for key_str in redis_keys:
+                    try:
+                        self._with_retry(self.redis_client.delete, key_str)
+                        summary["redis_keys_deleted"] += 1
+                        removed_any = True
+                    except Exception:
+                        continue
+
+            local_path = info.get("local_path")
+            if local_path:
+                try:
+                    import shutil
+                    shutil.rmtree(local_path, ignore_errors=True)
+                    summary["local_dirs_deleted"] += 1
+                    removed_any = True
+                except Exception:
+                    pass
+
+            if info.get("s3_count") and self._s3 is not None:
+                try:
+                    deleted = int(self._s3.delete_prefix(f"uploads/{job_id}/"))
+                    if deleted > 0:
+                        summary["s3_prefixes_deleted"] += 1
+                        summary["s3_objects_deleted"] += deleted
+                        removed_any = True
+                except Exception as e:
+                    errs = summary.setdefault("s3_delete_errors", [])
+                    errs.append({job_id: str(e)})
+
+            if removed_any:
+                summary["jobs_purged"].append(job_id)
+            else:
+                if job_id not in summary["jobs_skipped"]:
+                    summary["jobs_skipped"].append(job_id)
+
         return summary
 
     def job_storage_summary(self, job_id: str, include_objects: bool = False) -> Dict[str, object]:

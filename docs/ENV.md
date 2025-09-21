@@ -30,6 +30,7 @@ cp .env.example .env
   - `RESULT_RETENTION_HOURS` (기본 720)
   - `SESSIONS_RETENTION_HOURS` (기본 168)
   - `TMP_RETENTION_HOURS` (기본 24, 워커 임시 디렉토리 정리)
+  - `UPLOAD_RETENTION_HOURS` (기본 48, 업로드 원본 정리)
 
 - 워커 디스크 사용 제어(권장)
   - `PERSIST_RESULTS_ON_DISK`
