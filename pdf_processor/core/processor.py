@@ -341,6 +341,7 @@ class PDFProcessor:
         except Exception:
             pass
 
+        results: List[Dict[str, Any]] = []
         # Build a global list of chunk specs across all lessons to maximize key utilization.
         from ..pdf.operations import PDFOperations
         global_tasks: List[tuple] = []  # (lesson_idx, lesson_path, chunk_path_hint, start_page, end_page)
@@ -454,7 +455,6 @@ class PDFProcessor:
                 # Errors are logged inside distribute_tasks; skip here
 
             from ..parsers.result_merger import ResultMerger as _RM
-            results: List[Dict[str, Any]] = []
             for lidx in range(len(lesson_paths)):
                 cresults = per_lesson.get(lidx, [])
                 if not cresults:
