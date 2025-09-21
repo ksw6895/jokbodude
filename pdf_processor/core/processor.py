@@ -202,23 +202,17 @@ class PDFProcessor:
         chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
         if len(chunks) > 1:
             aggregated_results: List[Dict[str, Any]] = []
-            # Extract chunk files once
-            chunk_paths: List[tuple] = []
-            for _, start_page, end_page in chunks:
-                chunk_path = PDFOperations.extract_pages(lesson_path, start_page, end_page)
-                chunk_paths.append((chunk_path, start_page, end_page))
-            try:
-                for jokbo_path in jokbo_paths:
-                    # For lesson-centric chunking, the file being chunked is the lesson,
-                    # and the center (pre-uploaded) file is the jokbo.
-                    result = multi_analyzer.analyze_with_chunk_retry(
-                        "lesson-centric", lesson_path, jokbo_path, chunk_paths
-                    )
-                    aggregated_results.append(result)
-                results = aggregated_results
-            finally:
-                for chunk_path, _, _ in chunk_paths:
-                    Path(chunk_path).unlink(missing_ok=True)
+            # Lazily extract chunk files when each task runs to avoid retaining
+            # dozens of large PDFs on disk simultaneously.
+            chunk_specs: List[tuple] = [(None, start_page, end_page) for _, start_page, end_page in chunks]
+            for jokbo_path in jokbo_paths:
+                # For lesson-centric chunking, the file being chunked is the lesson,
+                # and the center (pre-uploaded) file is the jokbo.
+                result = multi_analyzer.analyze_with_chunk_retry(
+                    "lesson-centric", lesson_path, jokbo_path, chunk_specs
+                )
+                aggregated_results.append(result)
+            results = aggregated_results
         else:
             # Distribute jokbos across APIs without chunking
             file_pairs = [(jokbo_path, lesson_path) for jokbo_path in jokbo_paths]
@@ -499,21 +493,13 @@ class PDFProcessor:
 
             # Build all chunks once for this lesson
             chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
-            chunk_paths = []
-            for _, start_page, end_page in chunks:
-                chunk_path = PDFOperations.extract_pages(lesson_path, start_page, end_page)
-                chunk_paths.append((chunk_path, start_page, end_page))
+            chunk_specs = [(None, start_page, end_page) for _, start_page, end_page in chunks]
 
-            try:
-                # Analyze chunks with retry on different APIs (progress increments per chunk inside)
-                result = multi_analyzer.analyze_with_chunk_retry(
-                    "jokbo-centric", lesson_path, jokbo_path, chunk_paths
-                )
-                results.append(result)
-            finally:
-                # Clean up chunk files
-                for chunk_path, _, _ in chunk_paths:
-                    Path(chunk_path).unlink(missing_ok=True)
+            # Analyze chunks with retry on different APIs (progress increments per chunk inside)
+            result = multi_analyzer.analyze_with_chunk_retry(
+                "jokbo-centric", lesson_path, jokbo_path, chunk_specs
+            )
+            results.append(result)
         
         return results
     

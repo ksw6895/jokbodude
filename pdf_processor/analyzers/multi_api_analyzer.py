@@ -413,7 +413,32 @@ class MultiAPIAnalyzer:
                 raise
             except Exception:
                 pass
-            idx, (chunk_path, start_page, end_page) = task
+            idx, chunk_info = task
+            # chunk_info can be (path, start, end) when the caller pre-generated
+            # files, or (None, start, end)/(start, end) when we should extract lazily.
+            cleanup_path: Optional[str] = None
+            if isinstance(chunk_info, (tuple, list)):
+                if len(chunk_info) == 3:
+                    chunk_path_hint, start_page, end_page = chunk_info
+                elif len(chunk_info) == 2:
+                    chunk_path_hint = None
+                    start_page, end_page = chunk_info
+                else:
+                    raise ValueError(f"Unexpected chunk tuple shape: {chunk_info}")
+            else:
+                raise ValueError(f"Unexpected chunk metadata: {chunk_info}")
+
+            chunk_path = None
+            try:
+                if chunk_path_hint and Path(chunk_path_hint).exists():
+                    chunk_path = chunk_path_hint
+                else:
+                    from ..pdf.operations import PDFOperations  # local import to avoid cycles
+                    chunk_path = PDFOperations.extract_pages(file_path, int(start_page), int(end_page))
+                    cleanup_path = chunk_path
+            except Exception as extract_exc:
+                logger.error(f"Chunk extraction failed for pages {start_page}-{end_page}: {extract_exc}")
+                raise
             # Optional purge per chunk (disabled by default)
             try:
                 import os
@@ -458,7 +483,14 @@ class MultiAPIAnalyzer:
                     chunk_info=(start_page, end_page),
                     original_lesson_path=file_path
                 )
-            return (idx, result)
+            try:
+                return (idx, result)
+            finally:
+                if cleanup_path:
+                    try:
+                        Path(cleanup_path).unlink(missing_ok=True)
+                    except Exception:
+                        pass
         
         # Distribute chunk tasks across APIs in parallel with failover
         # Progress callback: increment chunk completion for this session/job
