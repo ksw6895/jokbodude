@@ -175,11 +175,12 @@
                    + `<button style="margin-top:0.5rem;padding:0.4rem 0.6rem;border:1px solid var(--border);background:rgba(255,255,255,0.06);border-radius:6px;color:var(--muted);cursor:pointer;" onclick="deleteResult('${j.job_id}','${ef}')">🗑️ Delete</button>`
                    + `</div>`;
           }
-          const canCancel = (j.status === 'PENDING' || j.status === 'STARTED' || j.status === 'RETRY');
+          const canCancel = (['PENDING','STARTED','RETRY','QUEUED','RUNNING'].includes(j.status));
           html += `
             <div style="padding:1rem;border-bottom:1px solid var(--border);">
               <div class="status-message" style="text-align:left;">
-                <div><b>Job:</b> ${j.job_id} · <b>Status:</b> ${j.status}</div>
+                <div><b>Job:</b> ${j.job_id} · <b>Status:</b> ${j.status}${j.status_detail ? ` <span style="color:#aaa;">(${j.status_detail})</span>` : ''}</div>
+                ${j.status_updated_at ? `<div style="font-size:0.8rem;color:#777;">업데이트: ${new Date(j.status_updated_at).toLocaleString()}</div>` : ''}
                 <div class="progress-bar" style="margin:0.4rem 0;"><div class="progress-fill" style="width:${pct}%"></div></div>
                 <div style="font-size:0.875rem;color:#666;">${pct}% ${chunks}</div>
                 <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;">${files}</div>

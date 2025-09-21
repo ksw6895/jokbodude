@@ -115,6 +115,34 @@ class S3ObjectStore:
                 break
         return out
 
+    def list_objects(self, prefix: str) -> List[dict]:
+        """Return metadata for objects under a prefix (key, size, last_modified)."""
+        out: List[dict] = []
+        token: Optional[str] = None
+        while True:
+            kwargs = {"Bucket": self.bucket, "Prefix": prefix, "MaxKeys": 1000}
+            if token:
+                kwargs["ContinuationToken"] = token
+            resp = self._client.list_objects_v2(**kwargs)
+            for it in resp.get("Contents", []) or []:
+                key = it.get("Key")
+                if not key:
+                    continue
+                out.append(
+                    {
+                        "key": str(key),
+                        "size": int(it.get("Size") or 0),
+                        "last_modified": it.get("LastModified").isoformat() if it.get("LastModified") else None,
+                    }
+                )
+            if resp.get("IsTruncated"):
+                token = resp.get("NextContinuationToken")
+                if not token:
+                    break
+            else:
+                break
+        return out
+
     def delete_prefix(self, prefix: str) -> int:
         keys = self.list_keys(prefix)
         if not keys:

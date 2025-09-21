@@ -3,13 +3,27 @@ Multi-API manager for handling multiple Gemini API keys.
 Provides load balancing, failure tracking, and automatic failover.
 """
 
-import time
+import importlib.util
 import os
 import random
-from typing import List, Dict, Any, Optional, Callable
-from datetime import datetime, timedelta
 import threading
-from google import genai  # google-genai unified SDK
+import time
+from datetime import datetime, timedelta
+from types import SimpleNamespace
+from typing import Any, Callable, Dict, List, Optional
+
+_GENAI_SPEC = importlib.util.find_spec("google.genai")
+if _GENAI_SPEC is not None:
+    from google import genai  # google-genai unified SDK
+else:  # pragma: no cover - executed only when dependency is missing
+    class _MissingClient:
+        def __init__(self, *args, **kwargs) -> None:
+            raise ModuleNotFoundError(
+                "google-genai is required for multi-key Gemini access. "
+                "Install the 'google-genai' package to enable API access."
+            )
+
+    genai = SimpleNamespace(Client=_MissingClient)
 
 from .client import GeminiAPIClient
 from ..utils.logging import get_logger
