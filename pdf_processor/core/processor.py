@@ -341,34 +341,28 @@ class PDFProcessor:
         except Exception:
             pass
 
-        # Build a global list of chunk tasks across all lessons to maximize key utilization
+        # Build a global list of chunk specs across all lessons to maximize key utilization.
         from ..pdf.operations import PDFOperations
-        global_tasks: List[tuple] = []  # (lesson_idx, lesson_path, chunk_path, start_page, end_page)
-        created_chunks: List[Path] = []
-        try:
-            for lidx, lesson_path in enumerate(lesson_paths):
-                chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
-                if len(chunks) <= 1:
-                    # Extract full as a single chunk for uniform handling
-                    _, s, e = chunks[0]
-                    cpath = PDFOperations.extract_pages(lesson_path, s, e)
-                    created_chunks.append(Path(cpath))
-                    global_tasks.append((lidx, lesson_path, cpath, s, e))
-                else:
-                    logger.info(f"Lesson {Path(lesson_path).name} will be processed in {len(chunks)} chunks")
-                    for _, s, e in chunks:
-                        cpath = PDFOperations.extract_pages(lesson_path, s, e)
-                        created_chunks.append(Path(cpath))
-                        global_tasks.append((lidx, lesson_path, cpath, s, e))
+        global_tasks: List[tuple] = []  # (lesson_idx, lesson_path, chunk_path_hint, start_page, end_page)
+        for lidx, lesson_path in enumerate(lesson_paths):
+            chunks = PDFOperations.split_pdf_for_chunks(lesson_path)
+            if len(chunks) <= 1:
+                # Single chunk covers the whole lesson; reuse the original path to avoid copies.
+                _, s, e = chunks[0]
+                global_tasks.append((lidx, lesson_path, lesson_path, s, e))
+            else:
+                logger.info(f"Lesson {Path(lesson_path).name} will be processed in {len(chunks)} chunks")
+                for _, s, e in chunks:
+                    global_tasks.append((lidx, lesson_path, None, s, e))
 
-            # Determine worker count
-            try:
-                capacity = len(api_manager.api_keys) * max(1, int(getattr(api_manager, 'per_key_limit', 1)))
-                workers = min(len(global_tasks), capacity)
-            except Exception:
-                workers = min(len(global_tasks), len(api_manager.api_keys) or 1)
-            if isinstance(max_workers, int) and max_workers > 0:
-                workers = max(1, min(workers, max_workers))
+        # Determine worker count
+        try:
+            capacity = len(api_manager.api_keys) * max(1, int(getattr(api_manager, 'per_key_limit', 1)))
+            workers = min(len(global_tasks), capacity)
+        except Exception:
+            workers = min(len(global_tasks), len(api_manager.api_keys) or 1)
+        if isinstance(max_workers, int) and max_workers > 0:
+            workers = max(1, min(workers, max_workers))
 
             # Define chunk operation for distribution
             def _op(task, api_client, model):
@@ -382,7 +376,21 @@ class PDFProcessor:
                     raise
                 except Exception:
                     pass
-                lidx, lpath, cpath, start, end = task
+                lidx, lpath, cpath_hint, start, end = task
+                cleanup_path: Optional[str] = None
+                chunk_path = None
+                if cpath_hint and Path(cpath_hint).exists():
+                    chunk_path = cpath_hint
+                else:
+                    try:
+                        from ..pdf.operations import PDFOperations as _PDFOps  # local import to avoid cycles
+                        chunk_path = _PDFOps.extract_pages(lpath, int(start), int(end))
+                        cleanup_path = chunk_path
+                    except Exception as extract_exc:
+                        logger.error(
+                            f"Failed to build chunk for {Path(lpath).name} pages {start}-{end}: {extract_exc}"
+                        )
+                        raise
                 fm = FileManager(api_client)
                 analyzer = JokboCentricAnalyzer(api_client, fm, self.session_id, self.debug_dir)
                 # Propagate jokbo-centric threshold if configured
@@ -393,7 +401,7 @@ class PDFProcessor:
                 except Exception:
                     pass
                 res = analyzer.analyze(
-                    cpath, jokbo_path, preloaded_jokbo_file=None,
+                    chunk_path, jokbo_path, preloaded_jokbo_file=None,
                     chunk_info=(start, end), original_lesson_path=lpath
                 )
                 # Normalize slide filenames to original lesson
@@ -407,7 +415,14 @@ class PDFProcessor:
                                         slide["lesson_filename"] = orig
                 except Exception:
                     pass
-                return (lidx, res)
+                try:
+                    return (lidx, res)
+                finally:
+                    if cleanup_path:
+                        try:
+                            Path(cleanup_path).unlink(missing_ok=True)
+                        except Exception:
+                            pass
 
             # Progress callback per completed chunk
             def _on_progress(_task):
@@ -446,14 +461,7 @@ class PDFProcessor:
                     results.append({"jokbo_pages": []})
                 else:
                     results.append(_RM.merge_chunk_results(cresults, "jokbo-centric"))
-        finally:
-            # Always clean up temp chunk files
-            for p in created_chunks:
-                try:
-                    p.unlink(missing_ok=True)
-                except Exception:
-                    pass
-        
+
         # Log API status
         status = api_manager.get_status_report()
         logger.info(f"API Status: {status['available_apis']}/{status['total_apis']} available")
