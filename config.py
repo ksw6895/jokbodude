@@ -143,13 +143,13 @@ def build_generate_config(
 def build_client(api_key: Optional[str] = None) -> genai.Client:
     """Create a scoped google-genai Client with HTTP timeouts from env.
 
-    Honors GENAI_REQUEST_TIMEOUT_SECS if present; otherwise defaults to 300s.
+    Honors GENAI_REQUEST_TIMEOUT_SECS if present; otherwise defaults to 480s.
     """
     timeout_ms: int
     try:
-        timeout_ms = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "300"))) * 1000
+        timeout_ms = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "480"))) * 1000
     except Exception:
-        timeout_ms = 300_000
+        timeout_ms = 480_000
     http_opts = None
     try:
         if _genai_types is not None:

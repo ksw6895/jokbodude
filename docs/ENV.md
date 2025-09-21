@@ -77,7 +77,7 @@ cp .env.example .env
   - Gemini 파일 업로드 RPC 하드 타임아웃. 단건 업로드 호출이 이 시간을 넘기면 실패 처리.
 - `GENAI_UPLOAD_ACTIVATION_TIMEOUT_SECS` (기본 300)
   - 업로드 후 파일 상태가 `ACTIVE`가 될 때까지의 최대 대기 시간.
-- `GENAI_REQUEST_TIMEOUT_SECS` (기본 300)
+- `GENAI_REQUEST_TIMEOUT_SECS` (기본 480)
   - `models.generateContent` 호출 하드 타임아웃. 무응답/네트워크 hang 방지.
 
 
