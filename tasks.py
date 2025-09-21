@@ -466,8 +466,14 @@ def _prune_path(base: Path, older_than_hours: int | None) -> None:
             pass
 
 
-def _cleanup_once(*, debug_hours: int | None = None, results_hours: int | None = None,
-                  sessions_hours: int | None = None, tmp_hours: int | None = None) -> None:
+def _cleanup_once(
+    *,
+    debug_hours: int | None = None,
+    results_hours: int | None = None,
+    sessions_hours: int | None = None,
+    tmp_hours: int | None = None,
+    uploads_hours: int | None = None,
+) -> None:
     """One-shot cleanup pass for worker-side storage paths.
 
     Optional args override env defaults. Use 0 for immediate deletion.
@@ -491,6 +497,7 @@ def _cleanup_once(*, debug_hours: int | None = None, results_hours: int | None =
                 sessions_hours = 72
 
         # Paths to clean
+        sm: Optional[StorageManager] = None
         try:
             sm = StorageManager()
             results_root = getattr(sm, "results_dir", Path(os.getenv("RENDER_STORAGE_PATH", "output")) / "results")
@@ -501,6 +508,18 @@ def _cleanup_once(*, debug_hours: int | None = None, results_hours: int | None =
         debug_dir = Path("output/debug")
         sessions_dir = Path("output/temp/sessions")
         tmpdir = Path(os.getenv("TMPDIR", tempfile.gettempdir()))
+
+        uploads_hours_eff = uploads_hours
+        if uploads_hours_eff is None:
+            try:
+                uploads_hours_eff = int(os.getenv("UPLOAD_RETENTION_HOURS", "48"))
+            except Exception:
+                uploads_hours_eff = 48
+        if sm is not None:
+            try:
+                sm.purge_stale_uploads(older_than_hours=max(0, int(uploads_hours_eff)))
+            except Exception:
+                pass
 
         _prune_path(debug_dir, debug_hours)
         _prune_path(sessions_dir, sessions_hours)
@@ -575,7 +594,7 @@ def worker_cleanup_now(older_hours: int | None = None) -> dict:
         if oh is None:
             _cleanup_once()
         else:
-            _cleanup_once(debug_hours=oh, results_hours=oh, sessions_hours=oh, tmp_hours=oh)
+            _cleanup_once(debug_hours=oh, results_hours=oh, sessions_hours=oh, tmp_hours=oh, uploads_hours=oh)
         return {"status": "ok", "older_hours": oh}
     except Exception as e:
         return {"status": "error", "error": str(e)}

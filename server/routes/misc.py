@@ -103,17 +103,21 @@ from .auth import get_current_user as _get_current_user  # lazy import to avoid 
 
 @router.post("/admin/cleanup")
 def admin_cleanup(
+    request: Request,
     password: Optional[str] = Query(None),
     clear_cache: bool = Query(True),
     clear_debug: bool = Query(True),
     clear_temp_sessions: bool = Query(True),
     clear_results: bool = Query(False),
-    older_than_hours: int | None = Query(None, ge=1, description="Only delete files older than this many hours"),
+    clear_uploads: bool = Query(False, description="Purge stored uploads (Redis/local/object store)."),
+    older_than_hours: int | None = Query(None, ge=0, description="Only delete files older than this many hours (0 deletes immediately)"),
+    purge_all_uploads: bool = Query(False, description="Force delete all uploads regardless of age."),
     user=Depends(_get_current_user),
 ):
     """Administrative cleanup: clear cache, results, and debug/temp files."""
     _require_admin(password, user)
-    summary: dict[str, dict | bool] = {}
+    summary: dict[str, dict | bool | list | None] = {}
+    storage_manager = getattr(request.app.state, "storage_manager", None)
     if clear_results:
         try:
             base_storage = Path(os.getenv("RENDER_STORAGE_PATH", "output"))
@@ -137,6 +141,20 @@ def admin_cleanup(
             summary["temp_sessions_deleted"] = delete_path_contents(Path("output/temp/sessions"), older_than_hours)
         except Exception as e:
             summary["temp_sessions_deleted"] = {"error": str(e)}
+    if clear_uploads:
+        if storage_manager is None:
+            summary["uploads_deleted"] = {"error": "storage manager unavailable"}
+        else:
+            try:
+                delete_all_flag = bool(purge_all_uploads)
+                if older_than_hours is not None and older_than_hours == 0:
+                    delete_all_flag = True
+                summary["uploads_deleted"] = storage_manager.purge_stale_uploads(
+                    older_than_hours=older_than_hours,
+                    delete_all=delete_all_flag,
+                )
+            except Exception as e:
+                summary["uploads_deleted"] = {"error": str(e)}
     return summary
 
 

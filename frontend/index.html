@@ -452,9 +452,10 @@
                 </div>
                 <div class="form-section" style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;margin-top:0.75rem;">
                     <label for="older_hours">Delete only files older than (hours)</label>
-                    <input id="older_hours" type="number" min="1" placeholder="e.g. 168" style="width:140px;padding:0.5rem 0.75rem;border:1px solid var(--gray-300);border-radius:8px;" />
+                    <input id="older_hours" type="number" min="0" placeholder="e.g. 168 (0 = delete all)" style="width:140px;padding:0.5rem 0.75rem;border:1px solid var(--gray-300);border-radius:8px;" />
                     <button id="run_cleanup_btn" class="tab">Run Cleanup</button>
                     <button id="run_full_cleanup_btn" class="tab">Run Cleanup + Results</button>
+                    <button id="run_upload_cleanup_btn" class="tab" title="Remove uploaded sources after jobs finish">Purge Uploads</button>
                     <button id="worker_cleanup_btn" class="tab" title="Trigger cleanup on workers">Worker Cleanup Now</button>
                     <button id="show_stats_btn" class="tab">Show Web Storage Stats</button>
                     <button id="show_worker_stats_btn" class="tab">Show Worker Storage Stats</button>
@@ -1253,7 +1254,16 @@
             if (input && input.value) return input.value;
             return saved;
         }
-        async function adminCleanup(olderHours = null, includeResults = false) {
+        async function adminCleanup(options = {}) {
+            const {
+                olderHours = null,
+                includeResults = false,
+                includeUploads = false,
+                purgeAllUploads = false,
+                clearCache = true,
+                clearDebug = true,
+                clearTempSessions = true,
+            } = options ?? {};
             try {
                 const params = new URLSearchParams();
                 if (!CURRENT_USER || !CURRENT_USER.admin) {
@@ -1261,11 +1271,15 @@
                     if (!pw) { alert('Enter Admin Password in the Admin Tools section first.'); return; }
                     params.set('password', pw);
                 }
-                params.set('clear_cache', 'true');
-                params.set('clear_debug', 'true');
-                params.set('clear_temp_sessions', 'true');
-                if (includeResults) params.set('clear_results', 'true');
-                if (olderHours && olderHours > 0) params.set('older_than_hours', String(olderHours));
+                params.set('clear_cache', String(!!clearCache));
+                params.set('clear_debug', String(!!clearDebug));
+                params.set('clear_temp_sessions', String(!!clearTempSessions));
+                params.set('clear_results', String(!!includeResults));
+                if (includeUploads) params.set('clear_uploads', 'true');
+                if (purgeAllUploads) params.set('purge_all_uploads', 'true');
+                if (olderHours !== null && !Number.isNaN(olderHours) && olderHours >= 0) {
+                    params.set('older_than_hours', String(olderHours));
+                }
                 const res = await fetch(`/admin/cleanup?${params.toString()}`, { method: 'POST', credentials: 'include' });
                 if (!res.ok) throw new Error('Cleanup request failed');
                 const data = await res.json();
@@ -1281,8 +1295,12 @@
         document.getElementById('clear_cache_btn').addEventListener('click', (e) => {
             e.preventDefault();
             const older = prompt('Delete only files older than N hours? (Leave empty for all)', '');
-            const n = older ? parseInt(older, 10) : null;
-            adminCleanup(isNaN(n) ? null : n);
+            let n = null;
+            if (older !== null && older.trim() !== '') {
+                const parsed = parseInt(older.trim(), 10);
+                if (!Number.isNaN(parsed) && parsed >= 0) n = parsed;
+            }
+            adminCleanup({ olderHours: n });
         });
 
         // Admin tools wiring
@@ -1299,14 +1317,40 @@
         });
         document.getElementById('run_cleanup_btn').addEventListener('click', () => {
             const older = document.getElementById('older_hours').value;
-            const n = older ? parseInt(older, 10) : null;
-            adminCleanup(isNaN(n) ? null : n);
+            let n = null;
+            if (older !== '') {
+                const parsed = parseInt(older, 10);
+                if (!Number.isNaN(parsed) && parsed >= 0) n = parsed;
+            }
+            adminCleanup({ olderHours: n });
         });
         document.getElementById('run_full_cleanup_btn').addEventListener('click', () => {
             const older = document.getElementById('older_hours').value;
-            const n = older ? parseInt(older, 10) : null;
+            let n = null;
+            if (older !== '') {
+                const parsed = parseInt(older, 10);
+                if (!Number.isNaN(parsed) && parsed >= 0) n = parsed;
+            }
             if (!confirm('Delete all stored results? This cannot be undone.')) return;
-            adminCleanup(isNaN(n) ? null : n, true);
+            adminCleanup({ olderHours: n, includeResults: true });
+        });
+        document.getElementById('run_upload_cleanup_btn').addEventListener('click', () => {
+            const olderValue = document.getElementById('older_hours').value;
+            let n = null;
+            if (olderValue !== '') {
+                const parsed = parseInt(olderValue, 10);
+                if (!Number.isNaN(parsed) && parsed >= 0) n = parsed;
+            }
+            const purgeAll = n === 0;
+            if (purgeAll && !confirm('Delete ALL stored uploads (Redis/local/object store)? This cannot be undone.')) return;
+            adminCleanup({
+                olderHours: n,
+                includeUploads: true,
+                purgeAllUploads: purgeAll,
+                clearCache: false,
+                clearDebug: false,
+                clearTempSessions: false,
+            });
         });
         document.getElementById('worker_cleanup_btn').addEventListener('click', async () => {
             try {
