@@ -12,7 +12,7 @@
 ## API Surface (Current)
 - Analyze: `POST /analyze/jokbo-centric`, `POST /analyze/lesson-centric`, `POST /analyze/partial-jokbo`, `POST /analyze/batch`
   - Multipart fields: `jokbo_files`, `lesson_files` (100MB per file)
-  - Query params: `model=flash|pro`, `multi_api=true|false`, `min_relevance=0..110`
+  - Query params: `model=flash|flash-lite|pro`, `multi_api=true|false`, `min_relevance=0..110`
 - Jobs: `GET /status/{task_id}`, `GET /progress/{job_id}`, `GET /results/{job_id}`, `GET /result/{job_id}/{filename}`, `DELETE /result/{job_id}/{filename}`, `POST /jobs/{job_id}/cancel`, `DELETE /jobs/{job_id}`
 - Users: `GET /user/{user_id}/jobs`
 - Auth: `GET /auth/config`, `POST /auth/google`, `POST /auth/dev-login` (optional), `POST /auth/logout`, `GET /me`, admin testers/users
@@ -59,5 +59,5 @@
 
 ## Security & Configuration Tips
 - Do not commit secrets or personal PDFs. Configure `GEMINI_API_KEY` or `GEMINI_API_KEYS`; set `REDIS_URL` for web/worker; on Render ensure `RENDER_STORAGE_PATH` is writable.
-- `GEMINI_MODEL` is fixed to `flash`; prefer multi-API for throughput.
+- `GEMINI_MODEL` is fixed to `flash` (maps to `gemini-flash-latest`); prefer multi-API for throughput.
  - Auth/session: set `AUTH_SECRET_KEY`, `GOOGLE_OAUTH_CLIENT_ID`, `ADMIN_EMAILS`; adjust `COOKIE_SECURE`/`COOKIE_SAMESITE` for your environment.

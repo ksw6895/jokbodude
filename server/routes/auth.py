@@ -77,18 +77,16 @@ def require_user(session: Optional[str] = Cookie(None)) -> dict:
 
 @router.get("/auth/config")
 def auth_config():
-    try:
-        flash_cost = max(0, int(os.getenv("FLASH_TOKENS_PER_CHUNK", "1")))
-    except Exception:
-        flash_cost = 1
-    try:
-        pro_cost = max(0, int(os.getenv("PRO_TOKENS_PER_CHUNK", "4")))
-    except Exception:
-        pro_cost = 4
-    try:
-        initial_tokens = max(0, int(os.getenv("CBT_TOKENS_INITIAL", "200")))
-    except Exception:
-        initial_tokens = 200
+    def _env_int(name: str, default: int) -> int:
+        try:
+            return max(0, int(os.getenv(name, str(default))))
+        except Exception:
+            return default
+
+    flash_cost = _env_int("FLASH_TOKENS_PER_CHUNK", 3)
+    flash_lite_cost = _env_int("FLASH_LITE_TOKENS_PER_CHUNK", 1)
+    pro_cost = _env_int("PRO_TOKENS_PER_CHUNK", 12)
+    initial_tokens = _env_int("CBT_TOKENS_INITIAL", 600)
     client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "").strip()
     allow_dev = os.getenv("ALLOW_DEV_LOGIN", "false").lower() in ("1", "true", "yes")
     enabled = bool(client_id or allow_dev)
@@ -101,7 +99,11 @@ def auth_config():
         "allow_dev_login": allow_dev,
         "feedback_form_url": os.getenv("FEEDBACK_FORM_URL", ""),
         "tokens_enabled": True,
-        "token_costs": {"flash": flash_cost, "pro": pro_cost},
+        "token_costs": {
+            "flash": flash_cost,
+            "flash-lite": flash_lite_cost,
+            "pro": pro_cost,
+        },
         "initial_tokens": initial_tokens,
         "admin_login_via_google": bool(_admin_emails()),
         "login_message": login_message,
@@ -140,7 +142,10 @@ def auth_google(request: Request, response: Response, id_token: str = Form(...))
             pass
         bal = sm.get_user_tokens(sub)
         if bal is None:
-            initial = max(0, int(os.getenv("CBT_TOKENS_INITIAL", "200")))
+            try:
+                initial = max(0, int(os.getenv("CBT_TOKENS_INITIAL", "600")))
+            except Exception:
+                initial = 600
             sm.set_user_tokens(sub, initial)
     except Exception:
         pass
@@ -173,7 +178,10 @@ def dev_login(
             pass
         bal = sm.get_user_tokens(email)
         if bal is None:
-            initial = max(0, int(os.getenv("CBT_TOKENS_INITIAL", "200")))
+            try:
+                initial = max(0, int(os.getenv("CBT_TOKENS_INITIAL", "600")))
+            except Exception:
+                initial = 600
             sm.set_user_tokens(email, initial)
     except Exception:
         pass

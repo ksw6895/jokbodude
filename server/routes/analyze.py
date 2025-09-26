@@ -19,7 +19,7 @@ async def analyze_jokbo_centric(
     request: Request,
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
-    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    model: Optional[str] = Query("flash", regex="^(flash|pro|flash-lite)$"),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     # Frontend sends as form fields named 'multi_api' and 'min_relevance'
@@ -59,7 +59,7 @@ async def analyze_lesson_centric(
     request: Request,
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
-    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    model: Optional[str] = Query("flash", regex="^(flash|pro|flash-lite)$"),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
@@ -98,7 +98,7 @@ async def analyze_batch(
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
     mode: str = Query("jokbo-centric", regex="^(jokbo-centric|lesson-centric)$"),
-    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    model: Optional[str] = Query("flash", regex="^(flash|pro|flash-lite)$"),
     multi_api: bool = Query(False),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
@@ -215,7 +215,7 @@ async def analyze_partial_jokbo(
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
     # Align parameters with other modes for consistent UX
-    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    model: Optional[str] = Query("flash", regex="^(flash|pro|flash-lite)$"),
     multi_api: bool = Query(False),
     # Optional relevance cutoff for consistency (currently informational)
     min_relevance: Optional[int] = Query(None, ge=0, le=110),
@@ -263,7 +263,7 @@ async def analyze_exam_only(
     request: Request,
     jokbo_files: list[UploadFile] = File(...),
     # No lesson files in exam-only mode
-    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    model: Optional[str] = Query("flash", regex="^(flash|pro|flash-lite)$"),
     multi_api: bool = Query(False),
     # Accept these as form overrides too, for consistency with other endpoints
     multi_api_form: Optional[bool] = Form(None, alias="multi_api"),

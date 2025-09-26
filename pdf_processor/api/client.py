@@ -67,7 +67,7 @@ class GeminiAPIClient:
                 self.model_name = (
                     model.get("model_name")
                     or model.get("_model_name")
-                    or "gemini-2.5-flash"
+                    or "gemini-flash-latest"
                 )
                 self.base_generation_config = (
                     model.get("generation_config")
@@ -83,7 +83,7 @@ class GeminiAPIClient:
                 self.model_name = (
                     getattr(model, "model_name", None)
                     or getattr(model, "_model_name", None)
-                    or "gemini-2.5-flash"
+                    or "gemini-flash-latest"
                 )
                 self.base_generation_config = (
                     getattr(model, "generation_config", None)
@@ -94,7 +94,7 @@ class GeminiAPIClient:
                     or getattr(model, "_safety_settings", None)
                 )
         except Exception:
-            self.model_name = self.model_name or "gemini-2.5-flash"
+            self.model_name = self.model_name or "gemini-flash-latest"
             self.base_generation_config = self.base_generation_config or None
             self.safety_settings = self.safety_settings or None
         # Bind API key if provided; in single-key mode default to configured key
@@ -323,7 +323,7 @@ class GeminiAPIClient:
 
                 if self._client is None:
                     raise ContentGenerationError("Client not initialized")
-                model_name = self.model_name or "gemini-2.5-flash"
+                model_name = self.model_name or "gemini-flash-latest"
                 # New SDK prefers `config=`; add compatibility fallback to `generation_config=`
                 gen_kwargs: Dict[str, Any] = {
                     "model": model_name,

@@ -517,7 +517,7 @@ class PDFProcessor:
         # Accept dict-style config or object-style; return normalized dict
         if isinstance(self.model, dict):
             out = {
-                "model_name": self.model.get("model_name") or self.model.get("_model_name") or "gemini-2.5-flash",
+                "model_name": self.model.get("model_name") or self.model.get("_model_name") or "gemini-flash-latest",
                 "generation_config": self.model.get("generation_config") or self.model.get("_generation_config"),
                 "safety_settings": self.model.get("safety_settings") or self.model.get("_safety_settings"),
             }
@@ -525,7 +525,7 @@ class PDFProcessor:
         model_name = (
             getattr(self.model, "_model_name", None)
             or getattr(self.model, "model_name", None)
-            or "gemini-2.5-flash"
+            or "gemini-flash-latest"
         )
         gen_cfg = (
             getattr(self.model, "_generation_config", None)

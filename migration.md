@@ -82,7 +82,7 @@ def build_client(api_key: str | None = None, *, http_timeout_ms: int = 600000) -
 3. **모델 구성은 “문자열 + config”로 반환**
 
 ```python
-MODEL_NAMES = {"pro":"gemini-2.5-pro","flash":"gemini-2.5-flash","flash-lite":"gemini-2.5-flash-lite"}
+MODEL_NAMES = {"pro":"gemini-2.5-pro","flash":"gemini-flash-latest","flash-lite":"gemini-flash-lite-latest"}
 
 def build_generate_config(*, temperature=0.3, top_p=0.95, top_k=40, max_output_tokens=100000):
     return types.GenerateContentConfig(
@@ -237,7 +237,7 @@ def resolve_model_name(model_type: str="pro") -> str:
 client = build_client(api_key=YOUR_KEY)
 cfg = build_generate_config()
 for _ in range(5):
-    r = client.models.generate_content(model="gemini-2.5-flash", contents="ping", config=cfg)
+    r = client.models.generate_content(model="gemini-flash-latest", contents="ping", config=cfg)
     assert r.text and len(r.text) > 0
 ```
 

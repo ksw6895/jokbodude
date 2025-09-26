@@ -2,8 +2,8 @@ CBT (Closed Beta Test) setup
 
 - Google Sign-In: Set `GOOGLE_OAUTH_CLIENT_ID` and `AUTH_SECRET_KEY` in `.env`.
 - Limit testers: Set `ALLOWED_TESTERS` to a comma-separated list of emails.
-- Initial grant: Configure `CBT_TOKENS_INITIAL` (default 200).
-- Token costs per chunk: `FLASH_TOKENS_PER_CHUNK=1`, `PRO_TOKENS_PER_CHUNK=4`.
+- Initial grant: Configure `CBT_TOKENS_INITIAL` (default 600).
+- Token costs per chunk: `FLASH_TOKENS_PER_CHUNK=3`, `FLASH_LITE_TOKENS_PER_CHUNK=1`, `PRO_TOKENS_PER_CHUNK=12`.
 - Optional dev login: set `ALLOW_DEV_LOGIN=true` and `ADMIN_PASSWORD` for local testing.
 - Optional feedback URL: `FEEDBACK_FORM_URL` shows a link in the navbar.
 
@@ -21,8 +21,9 @@ Endpoints
 Token consumption
 
 - Each processed PDF chunk consumes tokens automatically:
-  - flash: 1 token per chunk (default)
-  - pro: 4 tokens per chunk (default)
+  - flash: 3 tokens per chunk (default)
+  - flash-lite: 1 token per chunk (default)
+  - pro: 12 tokens per chunk (default)
 - If the balance is insufficient, the job is cooperatively canceled mid-run with a progress message.
 - Analyze endpoints preflight: if a user_id is present and balance ≤ 0, the submission is rejected (402).
 

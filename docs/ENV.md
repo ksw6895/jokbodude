@@ -52,9 +52,9 @@ cp .env.example .env
 - `SESSION_EXPIRES_SECONDS`
   - 세션 쿠키 만료(초). 기본 7일(604800).
 - `CBT_TOKENS_INITIAL`
-  - 최초 로그인시 지급할 토큰 수. 기본 200.
-- `FLASH_TOKENS_PER_CHUNK`, `PRO_TOKENS_PER_CHUNK`
-  - 청크 1개 처리당 차감 토큰 수. 기본 flash=1, pro=4.
+  - 최초 로그인시 지급할 토큰 수. 기본 600.
+- `FLASH_TOKENS_PER_CHUNK`, `FLASH_LITE_TOKENS_PER_CHUNK`, `PRO_TOKENS_PER_CHUNK`
+  - 청크 1개 처리당 차감 토큰 수. 기본 flash=3, flash-lite=1, pro=12.
 - `FEEDBACK_FORM_URL`
   - 네비게이션에 표시할 공식 설문 링크(선택).
 - 개발 편의(선택):

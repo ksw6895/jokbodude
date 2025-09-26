@@ -1362,7 +1362,7 @@ class StorageManager:
         """Consume tokens for a job owner based on model and chunk increments.
 
         - Looks up job metadata for `user_id` and `model`.
-        - Consumes FLASH_TOKENS_PER_CHUNK or PRO_TOKENS_PER_CHUNK * inc from the owner's balance.
+        - Applies per-model token costs (flash/flash-lite/pro) based on env defaults.
         - If insufficient balance, marks the job as requested to cancel and updates progress message.
         """
         if self.use_local_only or not self.redis_client:
@@ -1375,14 +1375,25 @@ class StorageManager:
                 return
             # Read costs and defaults from environment
             try:
-                flash_cost = max(0, int(os.getenv("FLASH_TOKENS_PER_CHUNK", "1")))
+                flash_cost = max(0, int(os.getenv("FLASH_TOKENS_PER_CHUNK", "3")))
             except Exception:
-                flash_cost = 1
+                flash_cost = 3
             try:
-                pro_cost = max(0, int(os.getenv("PRO_TOKENS_PER_CHUNK", "4")))
+                flash_lite_cost = max(0, int(os.getenv("FLASH_LITE_TOKENS_PER_CHUNK", "1")))
             except Exception:
-                pro_cost = 4
-            per_chunk = pro_cost if str(model).lower() == "pro" else flash_cost
+                flash_lite_cost = 1
+            try:
+                pro_cost = max(0, int(os.getenv("PRO_TOKENS_PER_CHUNK", "12")))
+            except Exception:
+                pro_cost = 12
+            model_key = str(model or "flash").lower().replace("_", "-")
+            if model_key == "flashlite":
+                model_key = "flash-lite"
+            per_chunk = {
+                "flash": flash_cost,
+                "flash-lite": flash_lite_cost,
+                "pro": pro_cost,
+            }.get(model_key, flash_cost)
             to_consume = max(0, int(per_chunk) * max(1, int(inc)))
             if to_consume <= 0:
                 return

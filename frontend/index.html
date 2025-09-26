@@ -74,7 +74,7 @@
             <div class="glass-card p-6 flex flex-col items-start hover:border-blue-500/50 transition-colors duration-300">
                 <div class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-2xl mb-4">💎</div>
                 <h3 class="text-lg font-bold text-white mb-2">Gemini Model</h3>
-                <p class="text-sm text-gray-400">Uses Gemini 2.5 Flash for balanced speed and quality</p>
+                <p class="text-sm text-gray-400">Powered by Gemini Flash Latest for balanced speed and quality</p>
             </div>
             <div class="glass-card p-6 flex flex-col items-start hover:border-blue-500/50 transition-colors duration-300">
                 <div class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-2xl mb-4">📊</div>
@@ -115,8 +115,9 @@
                                 <div>
                                     <label for="jokbo_model" class="block text-sm font-medium text-gray-300 mb-1">AI Model</label>
                                     <select id="jokbo_model" name="model" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                                        <option value="flash" selected>Gemini 2.5 Flash - Balanced</option>
-                                        <option value="pro">Gemini 2.5 Pro - Quality</option>
+                                        <option value="flash" selected>Gemini Flash Latest · Balanced</option>
+                                        <option value="flash-lite">Gemini Flash Lite Latest · Fastest</option>
+                                        <option value="pro">Gemini 2.5 Pro · Highest Quality</option>
                                     </select>
                                 </div>
                                 <div>
@@ -191,8 +192,9 @@
                                 <div>
                                     <label for="lesson_model" class="block text-sm font-medium text-gray-300 mb-1">AI Model</label>
                                     <select id="lesson_model" name="model" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                                        <option value="flash" selected>Gemini 2.5 Flash - Balanced</option>
-                                        <option value="pro">Gemini 2.5 Pro - Quality</option>
+                                        <option value="flash" selected>Gemini Flash Latest · Balanced</option>
+                                        <option value="flash-lite">Gemini Flash Lite Latest · Fastest</option>
+                                        <option value="pro">Gemini 2.5 Pro · Highest Quality</option>
                                     </select>
                                 </div>
                                 <div>
@@ -265,8 +267,9 @@
                                 <div>
                                     <label for="partial_model" class="block text-sm font-medium text-gray-300 mb-1">AI Model</label>
                                     <select id="partial_model" name="model" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                                        <option value="flash" selected>Gemini 2.5 Flash - Balanced</option>
-                                        <option value="pro">Gemini 2.5 Pro - Quality</option>
+                                        <option value="flash" selected>Gemini Flash Latest · Balanced</option>
+                                        <option value="flash-lite">Gemini Flash Lite Latest · Fastest</option>
+                                        <option value="pro">Gemini 2.5 Pro · Highest Quality</option>
                                     </select>
                                 </div>
                                 <div>
@@ -339,8 +342,9 @@
                                 <div>
                                     <label for="exam_model" class="block text-sm font-medium text-gray-300 mb-1">AI Model</label>
                                     <select id="exam_model" name="model" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                                        <option value="flash" selected>Gemini 2.5 Flash - Balanced</option>
-                                        <option value="pro">Gemini 2.5 Pro - Quality</option>
+                                        <option value="flash" selected>Gemini Flash Latest · Balanced</option>
+                                        <option value="flash-lite">Gemini Flash Lite Latest · Fastest</option>
+                                        <option value="pro">Gemini 2.5 Pro · Highest Quality</option>
                                     </select>
                                 </div>
                                 <div>
@@ -508,7 +512,11 @@
             'partial-jokbo': 'Partial Jokbo Analysis',
             'exam-only': 'Exam Only'
         };
-        const MODEL_LABELS = { flash: 'Gemini 2.5 Flash', pro: 'Gemini 2.5 Pro' };
+        const MODEL_LABELS = {
+            flash: 'Gemini Flash Latest',
+            'flash-lite': 'Gemini Flash Lite Latest',
+            pro: 'Gemini 2.5 Pro'
+        };
 
         // Initialize processing mode toggles with server capabilities
         async function initConfigAndToggles() {
@@ -1479,9 +1487,10 @@
                 try {
                     const t = document.getElementById('token_info_line');
                     if (t && AUTH_CONFIG.tokens_enabled) {
-                        const flash = (AUTH_CONFIG.token_costs && AUTH_CONFIG.token_costs.flash) || 1;
-                        const pro = (AUTH_CONFIG.token_costs && AUTH_CONFIG.token_costs.pro) || 4;
-                        t.textContent = `Token costs · Flash: ${flash}/chunk · Pro: ${pro}/chunk`;
+                        const flash = (AUTH_CONFIG.token_costs && AUTH_CONFIG.token_costs.flash) || 3;
+                        const flashLite = (AUTH_CONFIG.token_costs && AUTH_CONFIG.token_costs["flash-lite"]) || 1;
+                        const pro = (AUTH_CONFIG.token_costs && AUTH_CONFIG.token_costs.pro) || 12;
+                        t.textContent = `Token costs · Flash Latest: ${flash}/chunk · Flash Lite Latest: ${flashLite}/chunk · Pro: ${pro}/chunk`;
                         t.style.display = 'block';
                     }
                 } catch {}

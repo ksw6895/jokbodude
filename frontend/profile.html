@@ -78,7 +78,7 @@
   </div>
 
   <script>
-    let AUTH_CONFIG = { tokens_enabled: true, token_costs: { flash: 1, pro: 4 } };
+    let AUTH_CONFIG = { tokens_enabled: true, token_costs: { flash: 3, 'flash-lite': 1, pro: 12 } };
     async function fetchAuthConfig() {
       try {
         const r = await fetch('/auth/config', { credentials: 'include' });
@@ -143,8 +143,8 @@
         loginBtn.style.display = 'none';
         logoutBtn.style.display = 'inline-block';
         document.getElementById('user_title').textContent = me.email || me.name || 'My Jobs';
-        const costs = (AUTH_CONFIG && AUTH_CONFIG.token_costs) || { flash: 1, pro: 4 };
-        const tokenInfo = `Balance: ${me.tokens ?? '-'} · Costs — Flash: ${costs.flash}/chunk, Pro: ${costs.pro}/chunk`;
+        const costs = (AUTH_CONFIG && AUTH_CONFIG.token_costs) || { flash: 3, 'flash-lite': 1, pro: 12 };
+        const tokenInfo = `Balance: ${me.tokens ?? '-'} · Costs — Flash Latest: ${costs.flash}/chunk, Flash Lite Latest: ${costs['flash-lite']}/chunk, Pro: ${costs.pro}/chunk`;
         document.getElementById('token_info').textContent = tokenInfo;
         return me;
       } catch {

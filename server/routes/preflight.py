@@ -19,18 +19,25 @@ router = APIRouter()
 def _per_chunk_tokens(model: Optional[str]) -> int:
     """Return configured tokens-per-chunk for the given model.
 
-    Defaults: flash=1, pro=4 (overridable via env FLASH_TOKENS_PER_CHUNK / PRO_TOKENS_PER_CHUNK).
+    Defaults: flash=3, flash-lite=1, pro=12 (overridable via env).
     """
     m = (model or "flash").strip().lower()
-    try:
-        flash_cost = max(0, int(os.getenv("FLASH_TOKENS_PER_CHUNK", "1")))
-    except Exception:
-        flash_cost = 1
-    try:
-        pro_cost = max(0, int(os.getenv("PRO_TOKENS_PER_CHUNK", "4")))
-    except Exception:
-        pro_cost = 4
-    return pro_cost if m == "pro" else flash_cost
+
+    def _env_int(name: str, default: int) -> int:
+        try:
+            return max(0, int(os.getenv(name, str(default))))
+        except Exception:
+            return default
+
+    flash_cost = _env_int("FLASH_TOKENS_PER_CHUNK", 3)
+    flash_lite_cost = _env_int("FLASH_LITE_TOKENS_PER_CHUNK", 1)
+    pro_cost = _env_int("PRO_TOKENS_PER_CHUNK", 12)
+
+    if m == "pro":
+        return pro_cost
+    if m.replace("_", "-") in {"flash-lite", "flashlite"}:
+        return flash_lite_cost
+    return flash_cost
 
 
 def _build_file_info(path: Path) -> dict:
@@ -49,7 +56,7 @@ def _build_file_info(path: Path) -> dict:
 async def preflight_exam_only(
     request: Request,
     jokbo_files: list[UploadFile] = File(...),
-    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    model: Optional[str] = Query("flash", regex="^(flash|pro|flash-lite)$"),
     multi_api: bool = Query(True),
     multi_api_form: Optional[bool] = Form(None, alias="multi_api"),
     user: dict = Depends(require_user),
@@ -137,7 +144,7 @@ async def preflight_partial_jokbo(
     request: Request,
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
-    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    model: Optional[str] = Query("flash", regex="^(flash|pro|flash-lite)$"),
     multi_api: bool = Query(True),
     # Accept for parity (informational only for now)
     min_relevance: Optional[int] = Query(None, ge=0, le=110),
@@ -228,7 +235,7 @@ async def preflight_jokbo_centric(
     request: Request,
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
-    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    model: Optional[str] = Query("flash", regex="^(flash|pro|flash-lite)$"),
     multi_api: bool = Query(True),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     # Allow overrides when sent as multipart fields (frontend sends 'multi_api' and 'min_relevance')
@@ -320,7 +327,7 @@ async def preflight_lesson_centric(
     request: Request,
     jokbo_files: list[UploadFile] = File(...),
     lesson_files: list[UploadFile] = File(...),
-    model: Optional[str] = Query("flash", regex="^(flash|pro)$"),
+    model: Optional[str] = Query("flash", regex="^(flash|pro|flash-lite)$"),
     multi_api: bool = Query(True),
     min_relevance: Optional[int] = Query(80, ge=0, le=110),
     multi_api_form: Optional[bool] = Form(None, alias="multi_api"),

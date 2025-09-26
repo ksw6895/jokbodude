@@ -45,7 +45,7 @@
 
 ### 새로운 기능들
 - **Google 로그인 + 세션 쿠키**: GIS 로그인 후 서버가 HttpOnly 세션 쿠키 발급
-- **CBT 토큰 과금**: 최초 지급(`CBT_TOKENS_INITIAL`), 청크 처리당 차감(Flash=1/Pro=4 기본)
+- **CBT 토큰 과금**: 최초 지급(`CBT_TOKENS_INITIAL`), 청크 처리당 차감(Flash Latest=3 / Flash Lite Latest=1 / Pro=12 기본)
 - **My Jobs**: 최근 작업 목록/진행률/결과 파일 일괄 조회 및 삭제
 - **진행률/결과 API 갱신**: `/progress/{job_id}`, `/results/{job_id}`, `/result/{job_id}/{filename}` (인증 필요)
 - **자동 압축**: 1MB 이상 파일 자동 압축 (최대 90% 공간 절약)

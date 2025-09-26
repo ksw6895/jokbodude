@@ -123,16 +123,20 @@ def get_safety_settings() -> Optional[List[Dict[str, Any]]]:
 
 # Model name mapping
 MODEL_NAMES = {
-    "flash": "gemini-2.5-flash",
+    "flash": "gemini-flash-latest",
+    "flash-lite": "gemini-flash-lite-latest",
     "pro": "gemini-2.5-pro",
 }
 
 def resolve_model_name(model_type: str = "flash") -> str:
     """Return the concrete Gemini model name for a short model_type.
 
-    Accepts 'flash' or 'pro' (default 'flash'). Falls back to 'flash'.
+    Accepts 'flash', 'flash-lite', or 'pro' (default 'flash'). Falls back to 'flash'.
     """
-    return MODEL_NAMES.get(str(model_type or "flash").lower(), MODEL_NAMES["flash"])
+    key = str(model_type or "flash").strip().lower().replace("_", "-")
+    if key == "flashlite":
+        key = "flash-lite"
+    return MODEL_NAMES.get(key, MODEL_NAMES["flash"])
 
 
 def build_generate_config(
@@ -183,27 +187,22 @@ def create_model(model_type: str = "flash", thinking_budget: Optional[int] = Non
     Create a Gemini model with specified configuration.
     
     Args:
-        model_type: "flash" (default) or "pro"
-        thinking_budget: Optional thinking budget for flash model (0-24576, -1 for auto)
+        model_type: "flash" (default), "flash-lite", or "pro"
+        thinking_budget: Deprecated. Thinking budget is left at the API default.
     
     Returns:
         Model configuration dict for downstream client calls
     """
-    model_name = resolve_model_name(model_type)
+    model_key = str(model_type or "flash").strip().lower().replace("_", "-")
+    if model_key == "flashlite":
+        model_key = "flash-lite"
+    model_name = resolve_model_name(model_key)
     
     # Copy base generation config
     config = GENERATION_CONFIG.copy()
-    
-    # Add thinking budget for flash model
-    if model_type in ["flash"] and thinking_budget is not None:
-        # Note: The thinking_config parameter may need to be passed differently
-        # depending on the exact API version. This is a placeholder implementation.
-        # The actual implementation might require using a different parameter name
-        # or passing it through a different method.
-        print(f"Note: Thinking budget {thinking_budget} will be used for {model_name}")
-        # TODO: Add actual thinking budget configuration when API supports it
-        # config["thinking_budget"] = thinking_budget
-    
+    # Always enable thinking mode and rely on the service default budget.
+    config["thinking_config"] = {"mode": "enabled"}
+
     # Bind a default client so the model is fully scoped without global config
     # New SDK does not require a GenerativeModel instance; we return a config dict.
     return {

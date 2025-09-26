@@ -47,6 +47,29 @@ def _compute_total_chunks(primary_paths: list[str], lesson_paths: list[str]) -> 
         return 1
 
 
+def _tokens_per_chunk(model_type: Optional[str]) -> int:
+    """Read per-chunk token cost for the given model type with sane defaults."""
+
+    def _env_int(name: str, default: int) -> int:
+        try:
+            return max(0, int(os.getenv(name, str(default))))
+        except Exception:
+            return default
+
+    flash_cost = _env_int("FLASH_TOKENS_PER_CHUNK", 3)
+    flash_lite_cost = _env_int("FLASH_LITE_TOKENS_PER_CHUNK", 1)
+    pro_cost = _env_int("PRO_TOKENS_PER_CHUNK", 12)
+
+    model_key = str(model_type or "flash").lower().replace("_", "-")
+    if model_key == "flashlite":
+        model_key = "flash-lite"
+    return {
+        "flash": flash_cost,
+        "flash-lite": flash_lite_cost,
+        "pro": pro_cost,
+    }.get(model_key, flash_cost)
+
+
 def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optional[bool], strategy: ModeStrategy):
     """Generic analysis routine for jokbo/lesson modes using a strategy configuration."""
     storage_manager = StorageManager()
@@ -183,15 +206,7 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
 
             # Establish job-level token budget based on total_chunks × per-chunk cost
             try:
-                try:
-                    flash_cost = max(0, int(os.getenv("FLASH_TOKENS_PER_CHUNK", "1")))
-                except Exception:
-                    flash_cost = 1
-                try:
-                    pro_cost = max(0, int(os.getenv("PRO_TOKENS_PER_CHUNK", "4")))
-                except Exception:
-                    pro_cost = 4
-                per_chunk_cost = pro_cost if str(selected_model).lower() == "pro" else flash_cost
+                per_chunk_cost = _tokens_per_chunk(selected_model)
                 # Guard against unknown total_chunks
                 try:
                     budget_chunks = int(total_chunks)

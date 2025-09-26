@@ -24,7 +24,7 @@ Environment
 - Core: `GEMINI_API_KEY` or `GEMINI_API_KEYS` (comma-separated), `REDIS_URL`.
 - Auth: `AUTH_SECRET_KEY`, `GOOGLE_OAUTH_CLIENT_ID`, `ADMIN_EMAILS` (comma-separated), optional `ADMIN_PASSWORD`.
 - Cookies: `COOKIE_SECURE` (true/false), `COOKIE_SAMESITE` (Lax/None), `SESSION_EXPIRES_SECONDS`.
-- Tokens: `CBT_TOKENS_INITIAL`, `FLASH_TOKENS_PER_CHUNK`, `PRO_TOKENS_PER_CHUNK`.
+- Tokens: `CBT_TOKENS_INITIAL`, `FLASH_TOKENS_PER_CHUNK`, `FLASH_LITE_TOKENS_PER_CHUNK`, `PRO_TOKENS_PER_CHUNK`.
 - Storage: `RENDER_STORAGE_PATH` (writable), retention: `DEBUG_RETENTION_HOURS`, `RESULT_RETENTION_HOURS`.
 
 Runbook
@@ -65,4 +65,3 @@ Troubleshooting
 - Frontend “Failed to fetch”: ensure `credentials: 'include'` on fetch, verify cookie flags (`COOKIE_SECURE`, `COOKIE_SAMESITE`) and CORS settings.
 - 401 on analyze/status/results: user not authenticated; sign in first.
 - 413 on upload: a file exceeded 100MB.
-

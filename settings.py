@@ -39,8 +39,9 @@ try:
         ALLOW_DEV_LOGIN: bool = False
 
         # CBT / Token accounting
-        FLASH_TOKENS_PER_CHUNK: int = 1
-        PRO_TOKENS_PER_CHUNK: int = 4
+        FLASH_TOKENS_PER_CHUNK: int = 3
+        FLASH_LITE_TOKENS_PER_CHUNK: int = 1
+        PRO_TOKENS_PER_CHUNK: int = 12
 
         # Retention / Cleanup
         DEBUG_RETENTION_HOURS: int = 168   # 7 days
@@ -79,12 +80,12 @@ except Exception:
             self.ALLOW_DEV_LOGIN = str(os.getenv("ALLOW_DEV_LOGIN", "false")).lower() in {"1","true","yes","on"}
 
             # CBT / Token accounting
-            self.FLASH_TOKENS_PER_CHUNK = int(os.getenv("FLASH_TOKENS_PER_CHUNK", "1"))
-            self.PRO_TOKENS_PER_CHUNK = int(os.getenv("PRO_TOKENS_PER_CHUNK", "4"))
+            self.FLASH_TOKENS_PER_CHUNK = int(os.getenv("FLASH_TOKENS_PER_CHUNK", "3"))
+            self.FLASH_LITE_TOKENS_PER_CHUNK = int(os.getenv("FLASH_LITE_TOKENS_PER_CHUNK", "1"))
+            self.PRO_TOKENS_PER_CHUNK = int(os.getenv("PRO_TOKENS_PER_CHUNK", "12"))
 
             # Retention / Cleanup
             self.DEBUG_RETENTION_HOURS = int(os.getenv("DEBUG_RETENTION_HOURS", "168"))
             self.RESULT_RETENTION_HOURS = int(os.getenv("RESULT_RETENTION_HOURS", "720"))
 
     settings = _FallbackSettings()
-
