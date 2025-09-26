@@ -200,8 +200,21 @@ def create_model(model_type: str = "flash", thinking_budget: Optional[int] = Non
     
     # Copy base generation config
     config = GENERATION_CONFIG.copy()
-    # Always enable thinking mode and rely on the service default budget.
-    config["thinking_config"] = {"mode": "enabled"}
+
+    def _thinking_budget_for(model_key: str) -> Optional[Dict[str, Any]]:
+        """Return a thinking_config payload with dynamic budget when supported."""
+
+        key = model_key.replace("_", "-")
+        if key not in {"flash", "gemini-flash-latest", "flash-lite", "gemini-flash-lite-latest"}:
+            return None
+
+        # Respect explicit caller override when provided; otherwise default to dynamic (-1).
+        budget = thinking_budget if isinstance(thinking_budget, int) else -1
+        return {"thinking_budget": budget}
+
+    thinking_cfg_payload = _thinking_budget_for(model_name)
+    if thinking_cfg_payload is not None:
+        config["thinking_config"] = thinking_cfg_payload
 
     # Bind a default client so the model is fully scoped without global config
     # New SDK does not require a GenerativeModel instance; we return a config dict.
