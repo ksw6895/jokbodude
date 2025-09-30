@@ -11,7 +11,7 @@
 
 ## API Surface (Current)
 - Analyze: `POST /analyze/jokbo-centric`, `POST /analyze/lesson-centric`, `POST /analyze/partial-jokbo`, `POST /analyze/batch`
-  - Multipart fields: `jokbo_files`, `lesson_files` (100MB per file)
+  - Multipart fields: `jokbo_files`, `lesson_files` (100MB per file, combined upload defaults to 1GB via `MAX_UPLOAD_TOTAL_BYTES`)
   - Query params: `model=flash|flash-lite|pro`, `multi_api=true|false`, `min_relevance=0..110`
 - Jobs: `GET /status/{task_id}`, `GET /progress/{job_id}`, `GET /results/{job_id}`, `GET /result/{job_id}/{filename}`, `DELETE /result/{job_id}/{filename}`, `POST /jobs/{job_id}/cancel`, `DELETE /jobs/{job_id}`
 - Users: `GET /user/{user_id}/jobs`

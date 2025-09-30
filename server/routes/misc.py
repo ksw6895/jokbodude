@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from pdf_processor.pdf.cache import clear_global_cache
 
-from ..core import celery_app
+from ..core import celery_app, MAX_FILE_SIZE, MAX_UPLOAD_TOTAL_BYTES
 from ..utils import delete_path_contents
 
 router = APIRouter()
@@ -62,7 +62,15 @@ def get_config():
     except Exception:
         keys_count = 0
     models = ["flash", "pro"]
-    return {"multi_api_available": True, "api_keys_count": keys_count, "models": models}
+    return {
+        "multi_api_available": True,
+        "api_keys_count": keys_count,
+        "models": models,
+        "upload_limits": {
+            "per_file_bytes": MAX_FILE_SIZE,
+            "combined_bytes": MAX_UPLOAD_TOTAL_BYTES,
+        },
+    }
 
 
 @router.get("/health")

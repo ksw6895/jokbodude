@@ -64,4 +64,4 @@ Development Practices
 Troubleshooting
 - Frontend “Failed to fetch”: ensure `credentials: 'include'` on fetch, verify cookie flags (`COOKIE_SECURE`, `COOKIE_SAMESITE`) and CORS settings.
 - 401 on analyze/status/results: user not authenticated; sign in first.
-- 413 on upload: a file exceeded 100MB.
+- 413 on upload: a single file exceeded 100MB or the combined upload size went over the current limit (default 1GB, override via `MAX_UPLOAD_TOTAL_BYTES`).

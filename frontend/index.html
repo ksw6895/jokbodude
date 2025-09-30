@@ -149,7 +149,7 @@
                                     <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('jokbo_files').click()" role="button" tabindex="0" aria-label="Upload exam PDFs" data-input="jokbo_files" data-list="jokbo_file_list" data-error="jokbo_error" data-mode="jokbo-centric" data-partner="jokbo_lesson_files" data-model="jokbo_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
-                                        <p class="text-xs text-gray-500">PDF, up to 100MB each</p>
+                                        <p class="text-xs text-gray-500 total-upload-note">PDF, up to 100MB each (total 1GB per upload)</p>
                                     </div>
                                     <div class="text-red-400 text-xs mt-2" id="jokbo_error"></div>
                                     <div class="mt-4 space-y-2" id="jokbo_file_list"></div>
@@ -160,7 +160,7 @@
                                     <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('jokbo_lesson_files').click()" role="button" tabindex="0" aria-label="Upload lecture PDFs" data-input="jokbo_lesson_files" data-list="jokbo_lesson_file_list" data-error="jokbo_lesson_error" data-mode="jokbo-centric" data-partner="jokbo_files" data-model="jokbo_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📚</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
-                                        <p class="text-xs text-gray-500">PDF, up to 100MB each</p>
+                                        <p class="text-xs text-gray-500 total-upload-note">PDF, up to 100MB each (total 1GB per upload)</p>
                                     </div>
                                     <div class="text-red-400 text-xs mt-2" id="jokbo_lesson_error"></div>
                                     <div class="mt-4 space-y-2" id="jokbo_lesson_file_list"></div>
@@ -235,7 +235,7 @@
                                     <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('lesson_jokbo_files').click()" role="button" tabindex="0" aria-label="Upload exam PDFs" data-input="lesson_jokbo_files" data-list="lesson_jokbo_file_list" data-error="lesson_jokbo_error" data-mode="lesson-centric" data-partner="lesson_lesson_files" data-model="lesson_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
-                                        <p class="text-xs text-gray-500">PDF, up to 100MB each</p>
+                                        <p class="text-xs text-gray-500 total-upload-note">PDF, up to 100MB each (total 1GB per upload)</p>
                                     </div>
                                     <div class="text-red-400 text-xs mt-2" id="lesson_jokbo_error"></div>
                                     <div class="mt-4 space-y-2" id="lesson_jokbo_file_list"></div>
@@ -300,7 +300,7 @@
                                     <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('partial_jokbo_files').click()" role="button" tabindex="0" aria-label="Upload exam PDFs" data-input="partial_jokbo_files" data-list="partial_jokbo_file_list" data-error="partial_jokbo_error" data-mode="partial-jokbo" data-partner="partial_lesson_files" data-model="partial_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
-                                        <p class="text-xs text-gray-500">PDF, up to 100MB each</p>
+                                        <p class="text-xs text-gray-500 total-upload-note">PDF, up to 100MB each (total 1GB per upload)</p>
                                     </div>
                                     <div class="text-red-400 text-xs mt-2" id="partial_jokbo_error"></div>
                                     <div class="mt-4 space-y-2" id="partial_jokbo_file_list"></div>
@@ -311,7 +311,7 @@
                                     <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('partial_lesson_files').click()" role="button" tabindex="0" aria-label="Upload lecture PDFs" data-input="partial_lesson_files" data-list="partial_lesson_file_list" data-error="partial_lesson_error" data-mode="partial-jokbo" data-partner="partial_jokbo_files" data-model="partial_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📚</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
-                                        <p class="text-xs text-gray-500">PDF, up to 100MB each</p>
+                                        <p class="text-xs text-gray-500 total-upload-note">PDF, up to 100MB each (total 1GB per upload)</p>
                                     </div>
                                     <div class="text-red-400 text-xs mt-2" id="partial_lesson_error"></div>
                                     <div class="mt-4 space-y-2" id="partial_lesson_file_list"></div>
@@ -369,7 +369,7 @@
                                     <div class="file-upload-area p-6 text-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500" onclick="document.getElementById('exam_jokbo_files').click()" role="button" tabindex="0" aria-label="Upload exam PDFs" data-input="exam_jokbo_files" data-list="exam_jokbo_file_list" data-error="exam_jokbo_error" data-mode="exam-only" data-partner="" data-model="exam_model">
                                         <div class="mx-auto h-12 w-12 text-gray-500">📄</div>
                                         <p class="mt-2 text-sm text-gray-400">Click or drag files here</p>
-                                        <p class="text-xs text-gray-500">PDF, up to 100MB each</p>
+                                        <p class="text-xs text-gray-500 total-upload-note">PDF, up to 100MB each (total 1GB per upload)</p>
                                     </div>
                                     <div class="text-red-400 text-xs mt-2" id="exam_jokbo_error"></div>
                                     <div class="mt-4 space-y-2" id="exam_jokbo_file_list"></div>
@@ -482,7 +482,9 @@
     </div>
 
     <script>
-        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+        let MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+        const DEFAULT_MAX_TOTAL_UPLOAD_SIZE = 1024 * 1024 * 1024;
+        let MAX_TOTAL_UPLOAD_SIZE = DEFAULT_MAX_TOTAL_UPLOAD_SIZE;
         let JD_CONFIG = { multi_api_available: false, api_keys_count: 0 };
         // Pro model no longer requires a password; token-based
         // Staged file buckets to allow incremental adds and removals per input
@@ -524,8 +526,20 @@
                 const res = await fetch('/config', { credentials: 'include' });
                 if (res.ok) {
                     JD_CONFIG = await res.json();
+                    if (JD_CONFIG && JD_CONFIG.upload_limits) {
+                        const perFile = Number(JD_CONFIG.upload_limits.per_file_bytes);
+                        if (Number.isFinite(perFile) && perFile > 0) {
+                            MAX_FILE_SIZE = perFile;
+                        }
+                        const combined = Number(JD_CONFIG.upload_limits.combined_bytes);
+                        if (Number.isFinite(combined) && combined > 0) {
+                            MAX_TOTAL_UPLOAD_SIZE = combined;
+                        }
+                    }
                 }
             } catch (e) { /* ignore; use defaults */ }
+
+            refreshTotalUploadNotes();
 
             initProcessingToggle(
                 'jokbo_multi_api_group',
@@ -607,6 +621,15 @@
         function formatNumber(value) {
             if (typeof value !== 'number' || !isFinite(value)) return '0';
             return value.toLocaleString();
+        }
+
+        function refreshTotalUploadNotes() {
+            const perFileLabel = formatFileSize(MAX_FILE_SIZE);
+            const totalLabel = formatFileSize(MAX_TOTAL_UPLOAD_SIZE);
+            document.querySelectorAll('.total-upload-note').forEach(el => {
+                if (!el) return;
+                el.textContent = `PDF, up to ${perFileLabel} each (total ${totalLabel} per upload)`;
+            });
         }
 
         function describeModel(model) {
@@ -710,6 +733,7 @@
             
             uploadArea.classList.add('active');
             let hasError = false;
+            const limitLabel = formatFileSize(MAX_FILE_SIZE);
             
             Array.from(input.files).forEach((file, index) => {
                 const fileItem = document.createElement('div');
@@ -727,18 +751,19 @@
                 
                 fileList.appendChild(fileItem);
             });
-            
+
             if (hasError) {
-                errorElement.textContent = '⚠️ Some files exceed the 100MB limit';
+                errorElement.textContent = `⚠️ Some files exceed the ${limitLabel} limit`;
                 errorElement.classList.add('show');
             }
         }
-        
+
         // Staged file selection helpers (allow multi-step add/remove)
         function addFilesToBucket(inputId, files, errorId) {
             const bucket = stagedFiles[inputId];
             const errorElement = errorId ? document.getElementById(errorId) : null;
             let hasError = false;
+            const limitLabel = formatFileSize(MAX_FILE_SIZE);
             for (const f of files) {
                 if (f.size > MAX_FILE_SIZE) { hasError = true; continue; }
                 const exists = bucket.some(b => b.name === f.name && b.size === f.size && b.lastModified === f.lastModified);
@@ -746,7 +771,7 @@
             }
             if (errorElement) {
                 if (hasError) {
-                    errorElement.textContent = '⚠️ Some files exceeded 100MB and were skipped';
+                    errorElement.textContent = `⚠️ Some files exceeded ${limitLabel} and were skipped`;
                     errorElement.classList.add('show');
                 } else {
                     errorElement.classList.remove('show');
@@ -896,6 +921,20 @@
             }
             return { multiApi, minRel };
         }
+        function totalUploadSize(jokboInputId, lessonInputId) {
+            let total = 0;
+            const jokboFiles = stagedFiles[jokboInputId] || [];
+            for (const f of jokboFiles) {
+                total += Math.max(0, f.size || 0);
+            }
+            if (lessonInputId && lessonInputId !== 'unused') {
+                const lessonFiles = stagedFiles[lessonInputId] || [];
+                for (const f of lessonFiles) {
+                    total += Math.max(0, f.size || 0);
+                }
+            }
+            return total;
+        }
         function buildFormDataFromStaged(jokboInputId, lessonInputId, opts) {
             const fd = new FormData();
             const jokboFiles = stagedFiles[jokboInputId] || [];
@@ -918,7 +957,32 @@
             const res = await fetch(url, { method: 'POST', credentials: 'include', body: fd });
             if (!res.ok) {
                 let msg = 'Preflight failed';
-                try { const e = await res.json(); msg = e.detail || msg; } catch {}
+                if (res.status === 413) {
+                    msg = `Upload too large: combined size exceeds ${formatFileSize(MAX_TOTAL_UPLOAD_SIZE)} limit.`;
+                } else {
+                    const contentType = res.headers.get('content-type') || '';
+                    let parsed = false;
+                    if (contentType.includes('application/json')) {
+                        try {
+                            const payload = await res.clone().json();
+                            if (typeof payload.detail === 'string' && payload.detail.trim()) {
+                                msg = payload.detail.trim();
+                                parsed = true;
+                            } else if (payload.detail) {
+                                msg = JSON.stringify(payload.detail);
+                                parsed = true;
+                            }
+                        } catch {}
+                    }
+                    if (!parsed) {
+                        try {
+                            const text = (await res.text() || '').trim();
+                            if (text) {
+                                msg = text.length > 200 ? `${text.slice(0, 200)}…` : text;
+                            }
+                        } catch {}
+                    }
+                }
                 throw new Error(msg);
             }
             const data = await res.json();
@@ -976,9 +1040,20 @@
                 if (file.size > MAX_FILE_SIZE) {
                     statusBadge.className = 'status-badge error';
                     statusBadge.textContent = 'ERROR';
-                    statusMessage.textContent = 'Please remove files larger than 100MB';
+                    statusMessage.textContent = `Please remove files larger than ${formatFileSize(MAX_FILE_SIZE)}`;
                     return;
                 }
+            }
+            const totalSize = totalUploadSize(jokboInputId, lessonInputId);
+            if (totalSize > MAX_TOTAL_UPLOAD_SIZE) {
+                statusBadge.className = 'status-badge error';
+                statusBadge.textContent = 'ERROR';
+                statusContent.innerHTML = `
+                    <div class="status-message">
+                        ❌ Combined upload size ${formatFileSize(totalSize)} exceeds the ${formatFileSize(MAX_TOTAL_UPLOAD_SIZE)} limit. Please remove files or split the upload.
+                    </div>
+                `;
+                return;
             }
             // Require sign-in before uploading
             if (!CURRENT_USER) {
@@ -1210,6 +1285,12 @@
             if (!CURRENT_USER) return; // require login to preflight (uses server)
             const needsLesson = (mode !== 'exam-only');
             if (jb.length === 0 || (needsLesson && ls.length === 0)) return;
+            const totalSize = totalUploadSize(jokboId, lessonId);
+            if (totalSize > MAX_TOTAL_UPLOAD_SIZE) {
+                LATEST_PREFLIGHT[mode] = null;
+                try { updateEstimate(mode, null); } catch {}
+                return;
+            }
             const opts = currentOptions(mode);
             const fp = filesFingerprint(jokboId, lessonId, model, opts);
             const cached = LATEST_PREFLIGHT[mode];

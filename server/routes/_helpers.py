@@ -8,13 +8,41 @@ from typing import Optional, Tuple
 from fastapi import HTTPException, Request, UploadFile
 from typing import Callable, Dict
 
-from ..core import MAX_FILE_SIZE, celery_app
+from ..core import MAX_FILE_SIZE, MAX_UPLOAD_TOTAL_BYTES, celery_app
 
 
 def _ensure_size_limit(files: list[UploadFile]) -> None:
     for f in files:
-        if f.size and f.size > MAX_FILE_SIZE:
+        size = getattr(f, "size", None)
+        if size is None:
+            try:
+                header = getattr(f, "headers", None)
+                if header is not None:
+                    raw = header.get("content-length")
+                    if raw is not None:
+                        size = int(raw)
+            except Exception:
+                size = None
+        if size is not None and int(size) > MAX_FILE_SIZE:
             raise HTTPException(status_code=413, detail=f"File {f.filename} exceeds maximum size of 100MB")
+
+
+def _exceeds_upload_total(total_bytes: int) -> bool:
+    return total_bytes > MAX_UPLOAD_TOTAL_BYTES
+
+
+def _format_upload_limit(limit_bytes: int) -> str:
+    gb = 1024 * 1024 * 1024
+    mb = 1024 * 1024
+    if limit_bytes % gb == 0:
+        return f"{limit_bytes // gb} GB"
+    if limit_bytes % mb == 0:
+        return f"{limit_bytes // mb} MB"
+    return f"{limit_bytes} bytes"
+
+
+def _combined_limit_detail() -> str:
+    return f"Combined upload size exceeds maximum of {_format_upload_limit(MAX_UPLOAD_TOTAL_BYTES)}"
 
 
 async def save_files_and_metadata(
@@ -43,11 +71,15 @@ async def save_files_and_metadata(
 
     jokbo_keys: list[str] = []
     lesson_keys: list[str] = []
+    total_bytes = 0
     with tempfile.TemporaryDirectory() as temp_dir:
         tdir = Path(temp_dir)
         for f in jokbo_files:
             p = tdir / f.filename
             content = await f.read()
+            total_bytes += len(content)
+            if _exceeds_upload_total(total_bytes):
+                raise HTTPException(status_code=413, detail=_combined_limit_detail())
             p.write_bytes(content)
             k = sm.store_file(p, job_id, "jokbo")
             jokbo_keys.append(k)
@@ -56,6 +88,9 @@ async def save_files_and_metadata(
         for f in lesson_files:
             p = tdir / f.filename
             content = await f.read()
+            total_bytes += len(content)
+            if _exceeds_upload_total(total_bytes):
+                raise HTTPException(status_code=413, detail=_combined_limit_detail())
             p.write_bytes(content)
             k = sm.store_file(p, job_id, "lesson")
             lesson_keys.append(k)
@@ -124,11 +159,15 @@ async def save_files_metadata_with_info(
     lesson_keys: list[str] = []
     jokbo_info: list[Dict] = []
     lesson_info: list[Dict] = []
+    total_bytes = 0
     with tempfile.TemporaryDirectory() as temp_dir:
         tdir = Path(temp_dir)
         for f in jokbo_files:
             p = tdir / f.filename
             content = await f.read()
+            total_bytes += len(content)
+            if _exceeds_upload_total(total_bytes):
+                raise HTTPException(status_code=413, detail=_combined_limit_detail())
             p.write_bytes(content)
             if info_builder is not None:
                 try:
@@ -143,6 +182,9 @@ async def save_files_metadata_with_info(
         for f in lesson_files:
             p = tdir / f.filename
             content = await f.read()
+            total_bytes += len(content)
+            if _exceeds_upload_total(total_bytes):
+                raise HTTPException(status_code=413, detail=_combined_limit_detail())
             p.write_bytes(content)
             if info_builder is not None:
                 try:
