@@ -5,6 +5,10 @@ import uuid
 from pathlib import Path
 from typing import Optional, Tuple
 
+import hashlib
+import re
+import unicodedata
+
 from fastapi import HTTPException, Request, UploadFile
 from typing import Callable, Dict
 
@@ -45,6 +49,33 @@ def _combined_limit_detail() -> str:
     return f"Combined upload size exceeds maximum of {_format_upload_limit(MAX_UPLOAD_TOTAL_BYTES)}"
 
 
+def _safe_filename(original: str, fallback_ext: Optional[str] = None) -> str:
+    base = (original or "upload").split("/")[-1].split("\\")[-1]
+    if not base:
+        base = "upload"
+    stem_path = Path(base)
+    stem = stem_path.stem or "file"
+    ext = stem_path.suffix
+    if not ext and fallback_ext:
+        ext = fallback_ext if fallback_ext.startswith('.') else f".{fallback_ext}"
+
+    normalized = unicodedata.normalize("NFKD", stem)
+    ascii_stem = normalized.encode("ascii", "ignore").decode("ascii")
+    ascii_stem = re.sub(r"[^A-Za-z0-9._-]+", "_", ascii_stem)
+    ascii_stem = re.sub(r"_+", "_", ascii_stem).strip("._-")
+    if not ascii_stem:
+        ascii_stem = "file"
+
+    digest = hashlib.sha1(base.encode("utf-8")).hexdigest()[:8]
+    max_stem_len = max(1, 180 - len(ext))
+    ascii_stem = ascii_stem[:max_stem_len]
+    filename = f"{ascii_stem}-{digest}{ext}"
+    if len(filename) > 200:
+        trimmed = ascii_stem[: max(1, 200 - len(ext) - len(digest) - 1)]
+        filename = f"{trimmed}-{digest}{ext}"
+    return filename
+
+
 async def save_files_and_metadata(
     request: Request,
     jokbo_files: list[UploadFile],
@@ -71,11 +102,14 @@ async def save_files_and_metadata(
 
     jokbo_keys: list[str] = []
     lesson_keys: list[str] = []
+    originals: Dict[str, list[str]] = {"jokbo": [], "lesson": []}
     total_bytes = 0
     with tempfile.TemporaryDirectory() as temp_dir:
         tdir = Path(temp_dir)
         for f in jokbo_files:
-            p = tdir / f.filename
+            original_name = f.filename or "upload"
+            safe_name = _safe_filename(original_name, Path(original_name).suffix)
+            p = tdir / safe_name
             content = await f.read()
             total_bytes += len(content)
             if _exceeds_upload_total(total_bytes):
@@ -85,8 +119,11 @@ async def save_files_and_metadata(
             jokbo_keys.append(k)
             if not sm.verify_file_available(k):
                 raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+            originals["jokbo"].append(original_name)
         for f in lesson_files:
-            p = tdir / f.filename
+            original_name = f.filename or "upload"
+            safe_name = _safe_filename(original_name, Path(original_name).suffix)
+            p = tdir / safe_name
             content = await f.read()
             total_bytes += len(content)
             if _exceeds_upload_total(total_bytes):
@@ -96,6 +133,7 @@ async def save_files_and_metadata(
             lesson_keys.append(k)
             if not sm.verify_file_available(k):
                 raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+            originals["lesson"].append(original_name)
 
     try:
         sm.refresh_ttls(jokbo_keys + lesson_keys)
@@ -111,6 +149,7 @@ async def save_files_and_metadata(
         "min_relevance": min_relevance,
         "user_id": user_id,
     }
+    metadata["original_filenames"] = originals
     sm.store_job_metadata(job_id, metadata)
     try:
         sm.set_job_status(job_id, "QUEUED", detail="대기 중")
@@ -159,11 +198,14 @@ async def save_files_metadata_with_info(
     lesson_keys: list[str] = []
     jokbo_info: list[Dict] = []
     lesson_info: list[Dict] = []
+    originals: Dict[str, list[str]] = {"jokbo": [], "lesson": []}
     total_bytes = 0
     with tempfile.TemporaryDirectory() as temp_dir:
         tdir = Path(temp_dir)
         for f in jokbo_files:
-            p = tdir / f.filename
+            original_name = f.filename or "upload"
+            safe_name = _safe_filename(original_name, Path(original_name).suffix)
+            p = tdir / safe_name
             content = await f.read()
             total_bytes += len(content)
             if _exceeds_upload_total(total_bytes):
@@ -174,13 +216,18 @@ async def save_files_metadata_with_info(
                     info = dict(info_builder(p, "jokbo") or {})
                 except Exception:
                     info = {"filename": p.name}
+                info["filename"] = original_name
+                info["stored_filename"] = p.name
                 jokbo_info.append(info)
             k = sm.store_file(p, job_id, "jokbo")
             jokbo_keys.append(k)
             if not sm.verify_file_available(k):
                 raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+            originals["jokbo"].append(original_name)
         for f in lesson_files:
-            p = tdir / f.filename
+            original_name = f.filename or "upload"
+            safe_name = _safe_filename(original_name, Path(original_name).suffix)
+            p = tdir / safe_name
             content = await f.read()
             total_bytes += len(content)
             if _exceeds_upload_total(total_bytes):
@@ -191,11 +238,14 @@ async def save_files_metadata_with_info(
                     info = dict(info_builder(p, "lesson") or {})
                 except Exception:
                     info = {"filename": p.name}
+                info["filename"] = original_name
+                info["stored_filename"] = p.name
                 lesson_info.append(info)
             k = sm.store_file(p, job_id, "lesson")
             lesson_keys.append(k)
             if not sm.verify_file_available(k):
                 raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
+            originals["lesson"].append(original_name)
 
     try:
         sm.refresh_ttls(jokbo_keys + lesson_keys)
@@ -213,6 +263,8 @@ async def save_files_metadata_with_info(
     }
     if info_builder is not None:
         metadata["preflight_files"] = {"jokbo": jokbo_info, "lesson": lesson_info}
+
+    metadata["original_filenames"] = originals
 
     sm.store_job_metadata(job_id, metadata)
     try:
