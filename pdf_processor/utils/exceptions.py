@@ -66,3 +66,9 @@ class CancelledError(PDFProcessorError):
     exception and mark the task as REVOKED without treating it as a failure.
     """
     pass
+
+
+class InsufficientTokensError(PDFProcessorError):
+    """Raised when a job must stop because the JD token balance is exhausted."""
+
+    pass

@@ -17,7 +17,7 @@ from pdf_creator import PDFCreator
 from storage_manager import StorageManager
 from pdf_processor.pdf.operations import PDFOperations
 from celery import group, chord
-from pdf_processor.utils.exceptions import CancelledError
+from pdf_processor.utils.exceptions import CancelledError, InsufficientTokensError
 from tmpdir import configure_tmpdir
 from dataclasses import dataclass
 
@@ -386,19 +386,41 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
             except Exception:
                 metadata = None
             try:
-                jd_tokens_used = storage_manager.get_token_usage(job_id)
+                usage_details = storage_manager.get_token_usage_details(job_id)
             except Exception:
-                jd_tokens_used = 0
+                usage_details = {}
 
-            if user_id and jd_tokens_used > 0:
+            if isinstance(usage_details, dict):
+                jd_tokens_used = int(
+                    usage_details.get("jd_tokens_running_total", usage_details.get("jd_tokens_total", 0)) or 0
+                )
+            else:
+                jd_tokens_used = storage_manager.get_token_usage(job_id)
+
+            outstanding = 0
+            try:
+                outstanding = storage_manager.get_outstanding_token_charge(job_id)
+            except Exception:
+                outstanding = max(0, jd_tokens_used)
+
+            if user_id and outstanding > 0:
                 try:
-                    if storage_manager.consume_user_tokens(user_id, jd_tokens_used):
+                    if storage_manager.consume_user_tokens(user_id, outstanding):
+                        try:
+                            storage_manager.record_token_usage(
+                                job_id,
+                                0,
+                                jd_tokens_total=jd_tokens_used,
+                                debited_delta=outstanding,
+                            )
+                        except Exception:
+                            pass
                         logger.info(
-                            f"Job {job_id} completed. Consumed {jd_tokens_used} JD tokens for user {user_id}."
+                            f"Job {job_id} completed. Consumed {outstanding} JD tokens for user {user_id}."
                         )
                     else:
                         logger.error(
-                            f"Job {job_id} completed but failed to consume {jd_tokens_used} JD tokens for user {user_id}."
+                            f"Job {job_id} completed but failed to consume {outstanding} JD tokens for user {user_id}."
                         )
                 except Exception as e:
                     logger.error(f"Failed to consume JD tokens for job {job_id}: {e}")
@@ -428,6 +450,39 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
                 pass
             return result_payload
 
+    except InsufficientTokensError as exc:
+        detail = str(exc) or "JD 토큰 잔액이 부족합니다"
+        try:
+            storage_manager.set_job_status(job_id, "FAILED_INSUFFICIENT_TOKENS", detail=detail)
+        except Exception:
+            pass
+        try:
+            progress = int((storage_manager.get_progress(job_id) or {}).get('progress', 0) or 0)
+        except Exception:
+            progress = 0
+        try:
+            storage_manager.update_progress(job_id, progress, "토큰 잔액 부족으로 실패했습니다")
+            storage_manager.finalize_progress(job_id, "실패")
+        except Exception:
+            pass
+        user_id = None
+        try:
+            metadata = storage_manager.get_job_metadata(job_id)
+            if isinstance(metadata, dict):
+                user_id = metadata.get("user_id")
+        except Exception:
+            user_id = None
+        if user_id:
+            try:
+                if not storage_manager.refund_token_usage(job_id, str(user_id)):
+                    logger.error("Failed to refund JD tokens for job %s", job_id)
+            except Exception as refund_exc:
+                logger.error("Error refunding JD tokens for job %s: %s", job_id, refund_exc)
+        current_task.update_state(
+            state='FAILURE',
+            meta={"job_id": job_id, "status": "insufficient_tokens", "detail": detail},
+        )
+        raise Ignore()
     except CancelledError:
         try:
             storage_manager.set_job_status(job_id, "CANCELLED", detail="사용자 취소")

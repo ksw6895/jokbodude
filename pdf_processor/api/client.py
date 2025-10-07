@@ -16,7 +16,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 _GENAI_SPEC = importlib.util.find_spec("google.genai")
 if _GENAI_SPEC is not None:
@@ -41,7 +41,13 @@ else:  # pragma: no cover - executed only when dependency is missing
 
     genai = SimpleNamespace(Client=_MissingClient)
     genai_types = SimpleNamespace(UploadFileConfig=_UploadFileConfig)
-from ..utils.exceptions import APIError, FileUploadError, ContentGenerationError
+from ..utils.exceptions import (
+    APIError,
+    FileUploadError,
+    ContentGenerationError,
+    CancelledError,
+    InsufficientTokensError,
+)
 from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -285,6 +291,7 @@ class GeminiAPIClient:
         # NOTE: response_schema intentionally ignored for stability until validated
         response_schema: Optional[Dict[str, Any]] = None,
         max_output_tokens: Optional[int] = None,
+        stream_handler: Optional[Callable[[Dict[str, Any]], None]] = None,
     ) -> Tuple[Any, int]:
         """
         Generate content with retry logic and error handling.
@@ -334,98 +341,116 @@ class GeminiAPIClient:
                 if self.safety_settings:
                     gen_kwargs["safety_settings"] = self.safety_settings
 
-                # Wrap the call with a hard timeout to avoid indefinite hangs
-                try:
+                # Attempt streaming mode when requested and supported; fall back to normal calls.
+                response = None
+                api_usage_tokens = 0
+                if callable(stream_handler):
                     try:
-                        req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "480")))
-                    except Exception:
-                        req_timeout = 480
-                    _executor = _fut.ThreadPoolExecutor(max_workers=1)
-                    _timed_out = False
+                        streamed = self._try_stream_generate_content(gen_kwargs, stream_handler)
+                    except Exception as stream_exc:
+                        # Propagate cancellation/insufficient token errors directly so that callers
+                        # can handle them without retrying additional chunks.
+                        if isinstance(stream_exc, (CancelledError, )):
+                            raise
+                        if isinstance(stream_exc, InsufficientTokensError):
+                            raise
+                        logger.warning(
+                            "Streaming generate_content failed (%s); falling back to non-stream mode [key=%s]",
+                            stream_exc,
+                            self._key_tag(),
+                        )
+                    else:
+                        if streamed is not None:
+                            response, api_usage_tokens = streamed
+
+                if response is None:
+                    # Wrap the call with a hard timeout to avoid indefinite hangs
                     try:
-                        fut = _executor.submit(self._client.models.generate_content, **gen_kwargs)
-                        response = fut.result(timeout=req_timeout)
-                    except _fut.TimeoutError:
-                        _timed_out = True
-                        raise ContentGenerationError(f"Generation timed out after {req_timeout}s")
-                    finally:
-                        try:
-                            _executor.shutdown(wait=(not _timed_out), cancel_futures=True)
-                        except Exception:
-                            pass
-                except TypeError as te:
-                    msg = str(te).lower()
-                    # If this SDK doesn't support `config`, try legacy `generation_config`
-                    if "unexpected keyword" in msg and "config" in msg:
-                        try:
-                            if final_gen_cfg:
-                                gen_kwargs.pop("config", None)
-                                gen_kwargs["generation_config"] = final_gen_cfg
-                            # Re-wrap with timeout for legacy path as well
-                            try:
-                                req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "480")))
-                            except Exception:
-                                req_timeout = 480
-                            _executor = _fut.ThreadPoolExecutor(max_workers=1)
-                            _timed_out2 = False
-                            try:
-                                fut = _executor.submit(self._client.models.generate_content, **gen_kwargs)
-                                response = fut.result(timeout=req_timeout)
-                            except _fut.TimeoutError:
-                                _timed_out2 = True
-                                raise ContentGenerationError(f"Generation timed out after {req_timeout}s")
-                            finally:
-                                try:
-                                    _executor.shutdown(wait=(not _timed_out2), cancel_futures=True)
-                                except Exception:
-                                    pass
-                        except TypeError as te2:
-                            # If `safety_settings` is also unsupported, drop it and retry once
-                            msg2 = str(te2).lower()
-                            if "unexpected keyword" in msg2 and "safety_settings" in msg2:
-                                gen_kwargs.pop("safety_settings", None)
-                                # Timeout-guarded call again
-                            try:
-                                req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "480")))
-                            except Exception:
-                                req_timeout = 480
-                                _executor = _fut.ThreadPoolExecutor(max_workers=1)
-                                _timed_out3 = False
-                                try:
-                                    fut = _executor.submit(self._client.models.generate_content, **gen_kwargs)
-                                    response = fut.result(timeout=req_timeout)
-                                except _fut.TimeoutError:
-                                    _timed_out3 = True
-                                    raise ContentGenerationError(f"Generation timed out after {req_timeout}s")
-                                finally:
-                                    try:
-                                        _executor.shutdown(wait=(not _timed_out3), cancel_futures=True)
-                                    except Exception:
-                                        pass
-                            else:
-                                raise
-                    # If `safety_settings` alone is unsupported, drop it and retry
-                    elif "unexpected keyword" in msg and "safety_settings" in msg:
-                        gen_kwargs.pop("safety_settings", None)
                         try:
                             req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "480")))
                         except Exception:
                             req_timeout = 480
                         _executor = _fut.ThreadPoolExecutor(max_workers=1)
-                        _timed_out4 = False
+                        _timed_out = False
                         try:
                             fut = _executor.submit(self._client.models.generate_content, **gen_kwargs)
                             response = fut.result(timeout=req_timeout)
                         except _fut.TimeoutError:
-                            _timed_out4 = True
+                            _timed_out = True
                             raise ContentGenerationError(f"Generation timed out after {req_timeout}s")
                         finally:
                             try:
-                                _executor.shutdown(wait=(not _timed_out4), cancel_futures=True)
+                                _executor.shutdown(wait=(not _timed_out), cancel_futures=True)
                             except Exception:
                                 pass
-                    else:
-                        raise
+                    except TypeError as te:
+                        msg = str(te).lower()
+                        if "unexpected keyword" in msg and "config" in msg:
+                            try:
+                                if final_gen_cfg:
+                                    gen_kwargs.pop("config", None)
+                                    gen_kwargs["generation_config"] = final_gen_cfg
+                                try:
+                                    req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "480")))
+                                except Exception:
+                                    req_timeout = 480
+                                _executor = _fut.ThreadPoolExecutor(max_workers=1)
+                                _timed_out2 = False
+                                try:
+                                    fut = _executor.submit(self._client.models.generate_content, **gen_kwargs)
+                                    response = fut.result(timeout=req_timeout)
+                                except _fut.TimeoutError:
+                                    _timed_out2 = True
+                                    raise ContentGenerationError(f"Generation timed out after {req_timeout}s")
+                                finally:
+                                    try:
+                                        _executor.shutdown(wait=(not _timed_out2), cancel_futures=True)
+                                    except Exception:
+                                        pass
+                            except TypeError as te2:
+                                msg2 = str(te2).lower()
+                                if "unexpected keyword" in msg2 and "safety_settings" in msg2:
+                                    gen_kwargs.pop("safety_settings", None)
+                                    try:
+                                        req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "480")))
+                                    except Exception:
+                                        req_timeout = 480
+                                    _executor = _fut.ThreadPoolExecutor(max_workers=1)
+                                    _timed_out3 = False
+                                    try:
+                                        fut = _executor.submit(self._client.models.generate_content, **gen_kwargs)
+                                        response = fut.result(timeout=req_timeout)
+                                    except _fut.TimeoutError:
+                                        _timed_out3 = True
+                                        raise ContentGenerationError(f"Generation timed out after {req_timeout}s")
+                                    finally:
+                                        try:
+                                            _executor.shutdown(wait=(not _timed_out3), cancel_futures=True)
+                                        except Exception:
+                                            pass
+                                else:
+                                    raise
+                        elif "unexpected keyword" in msg and "safety_settings" in msg:
+                            gen_kwargs.pop("safety_settings", None)
+                            try:
+                                req_timeout = max(10, int(os.getenv("GENAI_REQUEST_TIMEOUT_SECS", "480")))
+                            except Exception:
+                                req_timeout = 480
+                            _executor = _fut.ThreadPoolExecutor(max_workers=1)
+                            _timed_out4 = False
+                            try:
+                                fut = _executor.submit(self._client.models.generate_content, **gen_kwargs)
+                                response = fut.result(timeout=req_timeout)
+                            except _fut.TimeoutError:
+                                _timed_out4 = True
+                                raise ContentGenerationError(f"Generation timed out after {req_timeout}s")
+                            finally:
+                                try:
+                                    _executor.shutdown(wait=(not _timed_out4), cancel_futures=True)
+                                except Exception:
+                                    pass
+                        else:
+                            raise
                 
                 # Blocked prompt handling (avoid touching response.text/parts when blocked)
                 try:
@@ -515,12 +540,13 @@ class GeminiAPIClient:
                         raise ContentGenerationError("Response blocked due to safety")
                 
                 api_usage_tokens = 0
-                try:
-                    usage = getattr(response, "usage_metadata", None)
-                    if usage is not None:
-                        api_usage_tokens = int(getattr(usage, "total_token_count", 0) or 0)
-                except Exception:
-                    api_usage_tokens = 0
+                if api_usage_tokens <= 0:
+                    try:
+                        usage = getattr(response, "usage_metadata", None)
+                        if usage is not None:
+                            api_usage_tokens = int(getattr(usage, "total_token_count", 0) or 0)
+                    except Exception:
+                        api_usage_tokens = 0
 
                 return response, api_usage_tokens
                 
@@ -540,7 +566,120 @@ class GeminiAPIClient:
                     raise ContentGenerationError(f"Failed to generate content after {max_retries} attempts: {err}")
         
         raise ContentGenerationError("Maximum retries exceeded")
-    
+
+    def _try_stream_generate_content(
+        self,
+        gen_kwargs: Dict[str, Any],
+        stream_handler: Callable[[Dict[str, Any]], None],
+    ) -> Optional[Tuple[Any, int]]:
+        """Attempt to stream Gemini responses and invoke callbacks per chunk."""
+
+        if self._client is None:
+            return None
+
+        responses_iface = getattr(self._client, "responses", None)
+        if responses_iface is None:
+            return None
+        stream_iface = getattr(getattr(responses_iface, "stream", None), "generate_content", None)
+        if not callable(stream_iface):
+            return None
+
+        aggregated_text: List[str] = []
+        last_usage = None
+        cumulative_tokens = 0
+        chunk_index = 0
+
+        with stream_iface(**gen_kwargs) as stream:
+            for chunk in stream:
+                chunk_index += 1
+                chunk_text = self._extract_stream_text(chunk)
+                if chunk_text:
+                    aggregated_text.append(chunk_text)
+                usage_metadata = getattr(chunk, "usage_metadata", None)
+                if usage_metadata is not None:
+                    last_usage = usage_metadata
+                    try:
+                        cumulative_tokens = int(
+                            getattr(usage_metadata, "total_token_count", cumulative_tokens) or cumulative_tokens
+                        )
+                    except Exception:
+                        pass
+                event = {
+                    "chunk_index": chunk_index,
+                    "text": chunk_text or "",
+                    "usage_metadata": usage_metadata,
+                    "cumulative_gemini_tokens": cumulative_tokens or None,
+                }
+                stream_handler(event)
+
+            response = stream.get_final_response()
+
+        if response is None:
+            return None
+
+        try:
+            resp_text = getattr(response, "text", None)
+        except Exception:
+            resp_text = None
+        if (resp_text is None or len(resp_text) == 0) and aggregated_text:
+            try:
+                setattr(response, "text", "".join(aggregated_text))
+            except Exception:
+                pass
+
+        final_usage = getattr(response, "usage_metadata", None) or last_usage
+        if final_usage is not None:
+            try:
+                final_total = int(getattr(final_usage, "total_token_count", cumulative_tokens) or cumulative_tokens)
+            except Exception:
+                final_total = cumulative_tokens
+            if final_total > cumulative_tokens:
+                cumulative_tokens = final_total
+                event = {
+                    "chunk_index": chunk_index + 1,
+                    "text": "",
+                    "usage_metadata": final_usage,
+                    "cumulative_gemini_tokens": cumulative_tokens,
+                }
+                stream_handler(event)
+            if getattr(response, "usage_metadata", None) is None:
+                try:
+                    setattr(response, "usage_metadata", final_usage)
+                except Exception:
+                    pass
+
+        return response, int(cumulative_tokens)
+
+    @staticmethod
+    def _extract_stream_text(chunk: Any) -> str:
+        """Extract text from a streaming chunk with graceful fallbacks."""
+
+        try:
+            text = getattr(chunk, "text", None)
+            if text:
+                return str(text)
+        except Exception:
+            pass
+
+        parts = None
+        try:
+            parts = getattr(chunk, "parts", None)
+            if parts is None:
+                parts = getattr(getattr(chunk, "content", None), "parts", None)
+        except Exception:
+            parts = None
+
+        texts: List[str] = []
+        if parts:
+            for part in parts:
+                try:
+                    p_text = getattr(part, "text", None)
+                except Exception:
+                    p_text = None
+                if p_text:
+                    texts.append(str(p_text))
+        return "".join(texts)
+
     def get_file(self, file_name: str) -> Optional[Any]:
         """
         Get a file by name.

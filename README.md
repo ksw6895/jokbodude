@@ -81,14 +81,14 @@ CBT 기간에는 Google 로그인(OAuth)과 토큰 기반 사용량 측정을 �
 
 - 환경 설정: `.env`에 `GOOGLE_OAUTH_CLIENT_ID`, `AUTH_SECRET_KEY`(필수), 선택 `ALLOWED_TESTERS`(허용 이메일 목록), `ADMIN_EMAILS`(관리자 구글 이메일, 쉼표 구분) 설정
 - 최초 로그인 시 토큰이 지급됩니다(`CBT_TOKENS_INITIAL`, 기본 600)
-- 처리 청크당 토큰 차감: Flash Latest=3, Flash Lite Latest=1, Pro=12 (환경 변수로 조정 가능)
+- 누적 Gemini 사용량을 기반으로 100 토큰당 1 JD 토큰이 실시간 차감되며, 모델별 배수는 환경 변수(`JD_TOKEN_MULTIPLIER_*`)로 조정 가능합니다.
 - 잔액 부족 시 작업이 중단되며 진행 메시지로 안내됩니다
 - 관리자 토큰 관리: `docs/CBT.md` 참조
 
 ## 인증/토큰 개요
 - 로그인: Google Identity Services(GIS)로 로그인 후, 서버가 세션 쿠키(`session`, HttpOnly)를 발급합니다.
 - 화이트리스트: `ALLOWED_TESTERS`(환경변수)와 동적 화이트리스트(관리자 UI에서 추가/삭제)의 합집합이 로그인 허용 목록입니다. `ADMIN_EMAILS`에 포함된 계정은 항상 로그인 가능하며 관리자 권한이 부여됩니다.
-- 토큰: 최초 로그인 시 `CBT_TOKENS_INITIAL`만큼 지급, 처리 청크당 차감(Flash Latest=3, Flash Lite Latest=1, Pro=12 기본값).
+- 토큰: 최초 로그인 시 `CBT_TOKENS_INITIAL`만큼 지급되며, 스트리밍 누적치 기준으로 100 Gemini 토큰당 1 JD 토큰이 차감됩니다(배수는 환경 변수로 조정).
 - 주요 엔드포인트:
   - `GET /auth/config` 로그인/토큰 UI 설정
   - `POST /auth/google` 폼 `id_token`(x-www-form-urlencoded)
@@ -106,6 +106,11 @@ GEMINI_MODEL=flash        # 기본 flash (pro도 토큰으로 제어)
 REDIS_URL=redis://...
 RENDER_STORAGE_PATH=/data/storage  # 디스크 마운트 경로와 동일하게 설정
 ```
+
+## JD 토큰 과금 & 스트리밍 차감
+- Gemini `usage_metadata.total_token_count`를 스트리밍 청크 단위로 누적해 실시간으로 사용량을 기록합니다.
+- 누적 Gemini 토큰 100개당 1 JD 토큰이 차감되며, 모델별 배수(`JD_TOKEN_MULTIPLIER_*`)가 적용됩니다. 잔액이 부족하면 즉시 작업을 중단하고 `FAILED_INSUFFICIENT_TOKENS` 상태로 표시합니다.
+- Redis에는 `gemini_tokens_total`, `jd_tokens_total`, `jd_tokens_debited_total`, `jd_tokens_refunded_total`을 저장해 감사/롤백을 지원하며, 실패 시 자동으로 환불됩니다.
 
 ## 동작/품질 메모
 - 문제/정답/해설/퀴즈/TBL/기출 형태의 ‘문제 슬라이드’는 관련성에서 제외(프롬프트에 규칙 포함)

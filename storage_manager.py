@@ -1447,32 +1447,132 @@ class StorageManager:
             # Do not disrupt normal flow
             return
 
-    def record_token_usage(self, job_id: str, jd_tokens: int) -> None:
-        """Atomically increment the JD token usage for a job."""
-        if self.use_local_only or not self.redis_client or jd_tokens <= 0:
+    def record_token_usage(
+        self,
+        job_id: str,
+        jd_tokens: int,
+        *,
+        gemini_tokens_total: Optional[int] = None,
+        jd_tokens_total: Optional[int] = None,
+        debited_delta: Optional[int] = None,
+    ) -> None:
+        """Record incremental and absolute token usage metadata for a job.
+
+        Args:
+            job_id: The job identifier.
+            jd_tokens: Incremental JD tokens calculated for this update.
+            gemini_tokens_total: Optional cumulative Gemini token count to
+                persist for auditing.
+            jd_tokens_total: Optional cumulative JD token total derived from the
+                Gemini usage (after conversion).
+            debited_delta: Optional incremental JD tokens that were actually
+                deducted from the user's balance during this update. Defaults to
+                ``0`` so legacy callers that only track usage do not mark
+                balances as charged.
+        """
+
+        if self.use_local_only or not self.redis_client:
             return
+
+        jd_tokens_delta = int(jd_tokens or 0)
+        debited_inc = int(debited_delta or 0)
+
+        if jd_tokens_delta <= 0 and debited_inc <= 0 and gemini_tokens_total is None and jd_tokens_total is None:
+            return
+
         try:
             key = f"job:{job_id}:usage"
-            self._with_retry(self.redis_client.hincrby, key, "jd_tokens_total", int(jd_tokens))
-            self._with_retry(self.redis_client.expire, key, 2592000)
+            pipe = self.redis_client.pipeline()
+            if jd_tokens_delta != 0:
+                pipe.hincrby(key, "jd_tokens_total", jd_tokens_delta)
+            if debited_inc != 0:
+                pipe.hincrby(key, "jd_tokens_debited_total", debited_inc)
+            if jd_tokens_total is not None:
+                pipe.hset(key, "jd_tokens_running_total", int(jd_tokens_total))
+            if gemini_tokens_total is not None:
+                pipe.hset(key, "gemini_tokens_total", int(gemini_tokens_total))
+            pipe.hset(key, "last_updated_at", int(time.time()))
+            pipe.expire(key, 2592000)
+            self._with_retry(pipe.execute)
         except Exception as e:
             logger.error(f"Failed to record JD token usage for job {job_id}: {e}")
 
-    def get_token_usage(self, job_id: str) -> int:
-        """Retrieve the total JD token usage for a job."""
+    def get_token_usage_details(self, job_id: str) -> dict[str, int]:
+        """Return the raw token usage metadata stored for a job."""
+
         if self.use_local_only or not self.redis_client:
-            return 0
+            return {}
+
         try:
             key = f"job:{job_id}:usage"
-            tokens = self._with_retry(self.redis_client.hget, key, "jd_tokens_total")
-            if tokens is None:
-                return 0
-            try:
-                return int(tokens if isinstance(tokens, (bytes, bytearray)) else tokens)
-            except Exception:
-                return int(tokens.decode() if isinstance(tokens, (bytes, bytearray)) else tokens)
+            data = self._with_retry(self.redis_client.hgetall, key) or {}
         except Exception:
+            return {}
+
+        details: dict[str, int] = {}
+        for raw_key, raw_value in data.items():
+            try:
+                key_str = raw_key.decode() if isinstance(raw_key, (bytes, bytearray)) else str(raw_key)
+                if isinstance(raw_value, (bytes, bytearray)):
+                    val = int(raw_value.decode())
+                else:
+                    val = int(raw_value)
+            except Exception:
+                continue
+            details[key_str] = val
+        return details
+
+    def get_token_usage(self, job_id: str) -> int:
+        """Retrieve the cumulative JD token usage for a job."""
+
+        details = self.get_token_usage_details(job_id)
+        if not details:
             return 0
+        if "jd_tokens_running_total" in details:
+            return int(details.get("jd_tokens_running_total", 0))
+        return int(details.get("jd_tokens_total", 0))
+
+    def get_outstanding_token_charge(self, job_id: str) -> int:
+        """Return the number of JD tokens still needing to be charged for a job."""
+
+        details = self.get_token_usage_details(job_id)
+        if not details:
+            return 0
+        total = int(details.get("jd_tokens_running_total", details.get("jd_tokens_total", 0)) or 0)
+        debited = int(details.get("jd_tokens_debited_total", 0) or 0)
+        outstanding = total - debited
+        return max(0, outstanding)
+
+    def refund_token_usage(self, job_id: str, user_id: str) -> bool:
+        """Refund any JD tokens previously charged for a job back to the user."""
+
+        if self.use_local_only or not self.redis_client or not user_id:
+            return False
+
+        details = self.get_token_usage_details(job_id)
+        if not details:
+            return True
+
+        debited = int(details.get("jd_tokens_debited_total", 0) or 0)
+        refunded = int(details.get("jd_tokens_refunded_total", 0) or 0)
+        outstanding = debited - refunded
+        if outstanding <= 0:
+            return True
+
+        credited = self.add_user_tokens(user_id, outstanding)
+        if credited is None:
+            return False
+
+        try:
+            key = f"job:{job_id}:usage"
+            pipe = self.redis_client.pipeline()
+            pipe.hincrby(key, "jd_tokens_refunded_total", int(outstanding))
+            pipe.hset(key, "last_refund_at", int(time.time()))
+            pipe.expire(key, 2592000)
+            self._with_retry(pipe.execute)
+        except Exception:
+            pass
+        return True
 
     # --- Public token helpers ---
     def _token_key(self, user_id: str) -> str:
