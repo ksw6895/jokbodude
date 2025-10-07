@@ -1,5 +1,6 @@
 # tasks.py
 import os
+import re
 import tempfile
 from pathlib import Path
 import pymupdf as fitz
@@ -97,6 +98,9 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
 
         jokbo_keys = metadata["jokbo_keys"]
         lesson_keys = metadata["lesson_keys"]
+        originals = metadata.get("original_filenames") if isinstance(metadata, dict) else None
+        original_jokbo_names = list((originals or {}).get("jokbo") or [])
+        original_lesson_names = list((originals or {}).get("lesson") or [])
         primary_keys = jokbo_keys if strategy.primary_kind == "jokbo" else lesson_keys
         secondary_keys = lesson_keys if strategy.secondary_kind == "lesson" else jokbo_keys
 
@@ -131,13 +135,14 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
             lesson_dir.mkdir(parents=True, exist_ok=True)
             output_dir.mkdir(parents=True, exist_ok=True)
 
-            def _plan_downloads(keys: list[str], base_dir: Path) -> list[dict]:
+            def _plan_downloads(keys: list[str], base_dir: Path, original_names: list[str]) -> list[dict]:
                 plan: list[dict] = []
                 for idx, key in enumerate(keys):
                     parts = key.split(":")
                     filename = parts[-2] if len(parts) >= 2 else f"file_{idx}"
                     local_path = base_dir / filename
-                    plan.append({"key": key, "path": local_path, "name": filename})
+                    original_name = original_names[idx] if idx < len(original_names) else None
+                    plan.append({"key": key, "path": local_path, "name": filename, "original_name": original_name})
                 return plan
 
             def _ensure_local(entry: dict) -> Path:
@@ -150,19 +155,41 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
                     storage_manager.save_file_locally(entry["key"], path)
                 return path
 
-            jokbo_plan = _plan_downloads(list(jokbo_keys), jokbo_dir)
-            lesson_plan = _plan_downloads(list(lesson_keys), lesson_dir)
+            jokbo_plan = _plan_downloads(list(jokbo_keys), jokbo_dir, original_jokbo_names)
+            lesson_plan = _plan_downloads(list(lesson_keys), lesson_dir, original_lesson_names)
+
+            def _add_override(overrides: dict[str, str], stored_name: str, original_name: Optional[str]) -> None:
+                if not stored_name or not original_name:
+                    return
+                keys = {stored_name, Path(stored_name).name}
+                try:
+                    stripped = re.sub(r"^(?:jokbo|lesson|족보|강의자료)[\s_\-]+", "", Path(stored_name).name, flags=re.IGNORECASE)
+                except re.error:
+                    stripped = Path(stored_name).name
+                if stripped:
+                    keys.add(stripped)
+                for key in keys:
+                    overrides[key] = original_name
 
             # Lessons are needed for chunk estimation regardless of mode.
             lesson_paths: list[str] = []
+            lesson_display_map: dict[str, str] = {}
             for entry in lesson_plan:
                 lesson_paths.append(str(_ensure_local(entry)))
+                _add_override(lesson_display_map, entry.get("name") or "", entry.get("original_name"))
 
             jokbo_paths: list[str]
+            jokbo_display_map: dict[str, str] = {}
             if strategy.secondary_kind == "jokbo":
-                jokbo_paths = [str(_ensure_local(entry)) for entry in jokbo_plan]
+                jokbo_paths = []
+                for entry in jokbo_plan:
+                    jokbo_paths.append(str(_ensure_local(entry)))
+                    _add_override(jokbo_display_map, entry.get("name") or "", entry.get("original_name"))
             else:
-                jokbo_paths = [str(entry["path"]) for entry in jokbo_plan]
+                jokbo_paths = []
+                for entry in jokbo_plan:
+                    jokbo_paths.append(str(entry["path"]))
+                    _add_override(jokbo_display_map, entry.get("name") or "", entry.get("original_name"))
 
             primary_plan = jokbo_plan if strategy.primary_kind == "jokbo" else lesson_plan
             primary_paths = [str(entry["path"]) for entry in primary_plan]
@@ -265,6 +292,16 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
                         aggregated_warnings["failed_chunks"] += int(w.get("failed_chunks"))
                 except Exception:
                     pass
+
+                analysis_result["_display_name_overrides"] = {
+                    "lesson": dict(lesson_display_map),
+                    "jokbo": dict(jokbo_display_map),
+                }
+                primary_display = entry.get("original_name")
+                if primary_display:
+                    analysis_result["_primary_display_name"] = primary_display
+                else:
+                    analysis_result.pop("_primary_display_name", None)
 
                 # PDF generation message
                 try:
