@@ -306,6 +306,39 @@ class PDFCreator:
         normalized = self._normalize_korean(name)
         return self._insert_soft_breaks(normalized)
 
+    def _resolve_display_override(self, name: str, overrides: Optional[Dict[str, str]]) -> str:
+        """Return the preferred display name using override mappings when provided."""
+        if not name or not overrides:
+            return name
+        candidates = [name]
+        try:
+            base = Path(name).name
+            if base not in candidates:
+                candidates.append(base)
+            try:
+                stripped = re.sub(r"^(?:jokbo|lesson|족보|강의자료)[\s_\-]+", "", base, flags=re.IGNORECASE)
+            except re.error:
+                stripped = base
+            if stripped and stripped not in candidates:
+                candidates.append(stripped)
+        except Exception:
+            pass
+        for cand in candidates:
+            if cand in overrides:
+                return overrides[cand]
+            try:
+                normalized = self._normalize_korean(cand)
+                if normalized in overrides:
+                    return overrides[normalized]
+            except Exception:
+                pass
+        return name
+
+    def _format_with_overrides(self, name: str, overrides: Optional[Dict[str, str]]) -> str:
+        """Format a filename for display, applying overrides when available."""
+        resolved = self._resolve_display_override(name, overrides)
+        return self._format_display_filename(resolved)
+
     @staticmethod
     def _safe_int(value, default: int = 0) -> int:
         """Coerce common stringy numbers like "12", "p12", "12-13" to an int (first number)."""
@@ -889,8 +922,13 @@ class PDFCreator:
         
         doc = fitz.open()
         lesson_pdf = fitz.open(lesson_path)
+        overrides = analysis_result.get("_display_name_overrides") or {}
+        lesson_overrides = overrides.get("lesson") or {}
+        jokbo_overrides = overrides.get("jokbo") or {}
         lesson_basename = Path(lesson_path).name
-        display_lesson_basename = self._format_display_filename(lesson_basename)
+        primary_display = analysis_result.get("_primary_display_name")
+        lesson_display_name = primary_display or self._resolve_display_override(lesson_basename, lesson_overrides)
+        display_lesson_basename = self._format_display_filename(lesson_display_name)
 
         # Build an index of related questions by lesson page
         related_by_page: Dict[int, List[Dict[str, Any]]] = {}
@@ -962,7 +1000,8 @@ class PDFCreator:
                 explanation_page = doc.new_page()
                 text_content = f"=== 문제 {question.get('question_number')} 해설 ===\n\n"
                 text_content += f"※ 앞 페이지의 문제 {question.get('question_number')}번을 참고하세요\n\n"
-                src_name = self._format_display_filename(str(question.get('jokbo_filename') or ''))
+                raw_jokbo_name = str(question.get('jokbo_filename') or '')
+                src_name = self._format_with_overrides(raw_jokbo_name, jokbo_overrides)
                 text_content += f"[출처: {src_name} - {question.get('jokbo_page')}페이지]\n\n"
                 # Slide-level importance score (if available)
                 if page_num in importance_by_page:
@@ -1093,8 +1132,13 @@ class PDFCreator:
             return
         
         doc = fitz.open()
+        overrides = analysis_result.get("_display_name_overrides") or {}
+        lesson_overrides = overrides.get("lesson") or {}
+        jokbo_overrides = overrides.get("jokbo") or {}
         jokbo_filename = Path(jokbo_path).name
-        display_jokbo_filename = self._format_display_filename(jokbo_filename)
+        primary_display = analysis_result.get("_primary_display_name")
+        jokbo_display_name = primary_display or self._resolve_display_override(jokbo_filename, jokbo_overrides)
+        display_jokbo_filename = self._format_display_filename(jokbo_display_name)
         
         # Get PDF page count thread-safely
         jokbo_pdf = self.get_jokbo_pdf(jokbo_path)  # get_jokbo_pdf already handles locking
@@ -1265,7 +1309,7 @@ class PDFCreator:
                 text_content += "관련 강의 슬라이드:\n"
                 for i, slide_info in enumerate(related_slides, 1):
                     # Defensive fetches
-                    fname = self._format_display_filename(slide_info.get('lesson_filename') or 'Unknown.pdf')
+                    fname = self._format_with_overrides(slide_info.get('lesson_filename') or 'Unknown.pdf', lesson_overrides)
                     page_no = slide_info.get('lesson_page')
                     score = slide_info.get('relevance_score')
                     if score is None:
