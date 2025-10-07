@@ -16,7 +16,7 @@ from ..parsers.response_parser import ResponseParser
 from ..parsers.result_merger import ResultMerger
 from ..utils.billing import BillingConverter
 from ..utils.logging import get_logger
-from ..utils.exceptions import PDFProcessorError, ContentGenerationError
+from ..utils.exceptions import PDFProcessorError, ContentGenerationError, InsufficientTokensError
 
 logger = get_logger(__name__)
 
@@ -49,6 +49,11 @@ class BaseAnalyzer(ABC):
         self._sm = None
         # Latest usage metadata from Gemini (for billing conversion)
         self._last_usage_metadata: Optional[Any] = None
+        # Streaming usage accounting state
+        self._streaming_gemini_tokens: int = 0
+        self._streaming_jd_total: int = 0
+        self._user_id: Optional[str] = None
+        self._user_id_loaded: bool = False
 
     def _sm_cached(self):
         """Lazily create and cache a StorageManager for this analyzer instance."""
@@ -62,6 +67,160 @@ class BaseAnalyzer(ABC):
             return self._sm
         except Exception:
             return None
+
+    def _resolve_user_id(self) -> Optional[str]:
+        """Retrieve the user identifier associated with the current job."""
+
+        if self._user_id_loaded:
+            return self._user_id
+
+        sm = self._sm_cached()
+        user_id: Optional[str] = None
+        if sm is not None:
+            try:
+                metadata = sm.get_job_metadata(self.session_id)
+                if isinstance(metadata, dict):
+                    raw = metadata.get("user_id")
+                    if raw:
+                        user_id = str(raw)
+            except Exception:
+                user_id = None
+        self._user_id = user_id
+        self._user_id_loaded = True
+        return self._user_id
+
+    def _handle_stream_chunk(self, payload: Dict[str, Any]) -> None:
+        """Process streaming chunk metadata to update token accounting."""
+
+        if not isinstance(payload, dict):
+            return
+
+        usage_metadata = payload.get("usage_metadata")
+        if usage_metadata is not None:
+            self._last_usage_metadata = usage_metadata
+
+        gemini_total = payload.get("cumulative_gemini_tokens")
+        try:
+            gemini_total_int = int(gemini_total) if gemini_total is not None else None
+        except Exception:
+            gemini_total_int = None
+
+        chunk_text = payload.get("text") or ""
+
+        self._apply_streaming_usage(gemini_total_int, chunk_text, usage_metadata)
+
+    def _apply_streaming_usage(
+        self,
+        gemini_total: Optional[int],
+        chunk_text: str,
+        usage_metadata: Any,
+    ) -> None:
+        """Update Redis with streaming usage and trigger JD token charges."""
+
+        sm = self._sm_cached()
+        if sm is None:
+            return
+
+        total_tokens = gemini_total if gemini_total is not None and gemini_total > 0 else None
+        if total_tokens is None:
+            estimated = self._estimate_tokens_from_text(chunk_text)
+            if estimated <= 0:
+                return
+            total_tokens = self._streaming_gemini_tokens + estimated
+
+        if total_tokens < self._streaming_gemini_tokens:
+            total_tokens = self._streaming_gemini_tokens
+
+        self._streaming_gemini_tokens = total_tokens
+
+        model_name = getattr(self.api_client, "model_name", None)
+        jd_total = BillingConverter.api_to_jd(
+            api_total=total_tokens,
+            model=model_name,
+            usage_details=usage_metadata,
+        )
+
+        if jd_total < self._streaming_jd_total:
+            jd_total = self._streaming_jd_total
+
+        delta = jd_total - self._streaming_jd_total
+        debited = 0
+        if delta > 0:
+            debited = self._charge_streaming_tokens(delta)
+            self._streaming_jd_total += delta
+
+        try:
+            sm.record_token_usage(
+                self.session_id,
+                delta,
+                gemini_tokens_total=self._streaming_gemini_tokens,
+                jd_tokens_total=self._streaming_jd_total,
+                debited_delta=debited,
+            )
+        except Exception as exc:
+            logger.warning(
+                "Failed to persist streaming token usage for job %s: %s",
+                self.session_id,
+                exc,
+            )
+
+    def _charge_streaming_tokens(self, delta: int) -> int:
+        """Attempt to deduct JD tokens for the current streaming increment."""
+
+        if delta <= 0:
+            return 0
+
+        sm = self._sm_cached()
+        if sm is None:
+            return 0
+
+        user_id = self._resolve_user_id()
+        if not user_id:
+            return 0
+
+        try:
+            if sm.consume_user_tokens(user_id, delta):
+                return delta
+        except Exception as exc:
+            logger.error(
+                "Failed to consume streaming JD tokens for job %s: %s",
+                self.session_id,
+                exc,
+            )
+            raise
+
+        # Token balance exhausted – request cancellation and surface the error.
+        try:
+            sm.request_cancel(self.session_id)
+        except Exception:
+            pass
+        try:
+            progress = (sm.get_progress(self.session_id) or {}).get("progress", 0)
+        except Exception:
+            progress = 0
+        try:
+            sm.update_progress(
+                self.session_id,
+                int(progress or 0),
+                "토큰 잔액 부족으로 작업이 중지되었습니다",
+            )
+        except Exception:
+            pass
+
+        raise InsufficientTokensError("JD token balance exhausted during streaming")
+
+    @staticmethod
+    def _estimate_tokens_from_text(chunk_text: str) -> int:
+        """Rudimentary token estimation when metadata is unavailable."""
+
+        if not chunk_text:
+            return 0
+        try:
+            approx = max(1, int(len(chunk_text) / 4))
+        except Exception:
+            approx = 1
+        return approx
+
         
     @abstractmethod
     def get_mode(self) -> str:
@@ -230,7 +389,16 @@ class BaseAnalyzer(ABC):
                         usage_details=usage_details,
                     )
                     if jd_tokens > 0:
-                        sm.record_token_usage(self.session_id, jd_tokens)
+                        pending = max(0, jd_tokens - self._streaming_jd_total)
+                        self._streaming_jd_total = max(self._streaming_jd_total, jd_tokens)
+                        self._streaming_gemini_tokens = max(self._streaming_gemini_tokens, api_usage_tokens)
+                        sm.record_token_usage(
+                            self.session_id,
+                            pending,
+                            gemini_tokens_total=self._streaming_gemini_tokens,
+                            jd_tokens_total=self._streaming_jd_total,
+                            debited_delta=0,
+                        )
             except Exception as e:
                 logger.warning(
                     f"Failed to record JD token usage for job {self.session_id}: {e}"
@@ -364,6 +532,9 @@ class BaseAnalyzer(ABC):
         last_error: Exception | None = None
         mode = self.get_mode()
         attempts = 1 if getattr(self, "prefer_single_attempt", False) else max(1, retries + 1)
+        # Reset streaming accounting state for this generation run
+        self._streaming_gemini_tokens = 0
+        self._streaming_jd_total = 0
         for attempt in range(1, attempts + 1):
             try:
                 from ..utils.exceptions import CancelledError
@@ -377,7 +548,10 @@ class BaseAnalyzer(ABC):
                 pass
             try:
                 response, api_usage_tokens = self.api_client.generate_content(
-                    content, max_retries=1, backoff_factor=1
+                    content,
+                    max_retries=1,
+                    backoff_factor=1,
+                    stream_handler=self._handle_stream_chunk,
                 )
                 try:
                     self._last_usage_metadata = getattr(response, "usage_metadata", None)
