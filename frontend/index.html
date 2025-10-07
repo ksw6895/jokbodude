@@ -43,7 +43,7 @@
           </button>
           <div id="auth_area" class="nav-auth">
             <span id="user_badge" class="chip" style="display:none;"></span>
-            <span id="token_badge" class="chip" style="display:none;">Tokens: -</span>
+            <span id="token_badge" class="chip" style="display:none;">JD Tokens: -</span>
             <button id="login_btn" class="accent-button">Sign in</button>
             <div id="gsi_btn" style="display:none;"></div>
             <button id="logout_btn" class="ghost-button" style="display:none;">Logout</button>
@@ -425,7 +425,7 @@
                         <div id="testers_list" class="status-content" style="display:block;align-items:stretch;justify-content:flex-start;margin-top:.75rem;padding:.75rem;min-height:auto;"></div>
                     </div>
                       <div class="form-section">
-                          <h3 class="form-section-title">User Tokens</h3>
+                          <h3 class="form-section-title">User JD Tokens</h3>
                           <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
                               <input type="email" id="user_search_email" placeholder="Search by email (exact)" style="min-width:260px;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;"/>
                               <button id="search_users_btn" class="tab">Search</button>
@@ -641,9 +641,7 @@
                 const modal = document.getElementById('preflight_modal');
                 if (!modal) {
                     const chunks = pf?.total_chunks || 0;
-                    const tokens = pf?.estimated_tokens || 0;
-                    const perChunk = pf?.tokens_per_chunk || 0;
-                    const fallback = `총 청크: ${chunks}\n예상 토큰: ${tokens} (청크당 ${perChunk})\n\n이대로 분석을 시작할까요?`;
+                    const fallback = `총 청크: ${chunks}\n\n이대로 분석을 시작할까요?`;
                     resolve(window.confirm(fallback));
                     return;
                 }
@@ -664,13 +662,10 @@
                     ? `${formatNumber(jokboCount)} exam file${jokboCount === 1 ? '' : 's'}`
                     : `${formatNumber(jokboCount)} exam · ${formatNumber(lessonCount)} lecture`;
                 const chunkCount = formatNumber(pf?.total_chunks || 0);
-                const tokenCount = formatNumber(pf?.estimated_tokens || 0);
-                const perChunk = formatNumber(pf?.tokens_per_chunk || 0);
 
                 details.innerHTML = `
                     <div class="preflight-stat"><span>Files</span><span>${fileSummary}</span></div>
                     <div class="preflight-stat"><span>Chunks</span><span>${chunkCount}</span></div>
-                    <div class="preflight-stat"><span>Estimated tokens</span><span>${tokenCount} (${perChunk} / chunk)</span></div>
                 `;
 
                 title.textContent = 'Ready to start the analysis?';
@@ -1004,8 +999,6 @@
             const jbCnt = (pf && pf.files && pf.files.jokbo) ? pf.files.jokbo.length : 0;
             const lsCnt = (pf && pf.files && pf.files.lesson) ? pf.files.lesson.length : 0;
             const tc = pf.total_chunks || 0;
-            const tpc = pf.tokens_per_chunk || 0;
-            const et = pf.estimated_tokens || 0;
             const filesLine = (mode === 'exam-only')
               ? `Files: ${formatNumber(jbCnt)} exam`
               : `Files: ${formatNumber(jbCnt)} exam · ${formatNumber(lsCnt)} lecture`;
@@ -1013,7 +1006,7 @@
               <div class="mt-2 p-2 theme-surface rounded text-sm space-y-1">
                 <div>${filesLine}</div>
                 <div>Chunks: <strong>${formatNumber(tc)}</strong></div>
-                <div>Tokens: ~ <strong>${formatNumber(et)}</strong> (${formatNumber(tpc)} / chunk)</div>
+                <div class="text-xs text-gray-400">JD 토큰은 작업 완료 후 실제 사용량을 기준으로 차감됩니다.</div>
               </div>` : '';
         }
 
@@ -1219,6 +1212,16 @@
                           } catch { return ''; }
                         })();
 
+                        const tokensSummary = (() => {
+                          try {
+                            const used = data?.result?.jd_tokens_used;
+                            if (!used || used <= 0) return '';
+                            return `<div style="margin:.5rem 0; color: var(--gray-300);">JD 토큰 사용량: <strong>${formatNumber(used)}</strong></div>`;
+                          } catch {
+                            return '';
+                          }
+                        })();
+
                         statusContent.innerHTML = `
                             <div>
                                 <div class="status-message">
@@ -1226,10 +1229,13 @@
                             <small class="text-gray-500">Job ID: ${jobId}</small>
                                 </div>
                                 ${warningsHtml}
+                                ${tokensSummary}
                                 ${downloadLinks}
                             </div>
                         `;
-                        
+
+                        try { await refreshAuthUI(); } catch {}
+
                     } else if (data.status === 'FAILURE') {
                         clearInterval(interval);
                         statusBadge.className = 'status-badge error';
@@ -1241,7 +1247,7 @@
                             const pj = await pr.json();
                             const msg = (pj && pj.message) || '';
                             if (msg.includes('토큰 잔액 부족')) {
-                              extra = `<div style="margin-top:.5rem;color:#b44;">Insufficient tokens. Please contact admin for a top-up.</div>`;
+                              extra = `<div style="margin-top:.5rem;color:#b44;">Insufficient JD tokens. Please contact admin for a top-up.</div>`;
                             }
                           }
                         } catch {}
@@ -1568,10 +1574,7 @@
                 try {
                     const t = document.getElementById('token_info_line');
                     if (t && AUTH_CONFIG.tokens_enabled) {
-                        const flash = (AUTH_CONFIG.token_costs && AUTH_CONFIG.token_costs.flash) || 3;
-                        const flashLite = (AUTH_CONFIG.token_costs && AUTH_CONFIG.token_costs["flash-lite"]) || 1;
-                        const pro = (AUTH_CONFIG.token_costs && AUTH_CONFIG.token_costs.pro) || 12;
-                        t.textContent = `Token costs · Flash Latest: ${flash}/chunk · Flash Lite Latest: ${flashLite}/chunk · Pro: ${pro}/chunk`;
+                        t.textContent = 'JD 토큰은 작업 완료 후 실제 Gemini usage_metadata를 환산해 차감됩니다.';
                         t.style.display = 'block';
                     }
                 } catch {}
@@ -1635,7 +1638,7 @@
             if (CURRENT_USER) {
                 userBadge.textContent = CURRENT_USER.email || CURRENT_USER.name || 'Signed in';
                 userBadge.style.display = 'inline-block';
-                tokenBadge.textContent = `Tokens: ${CURRENT_USER.tokens ?? '-'}`;
+                tokenBadge.textContent = `JD Tokens: ${CURRENT_USER.tokens ?? '-'}`;
                 tokenBadge.style.display = 'inline-block';
                 loginBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-block';
@@ -1769,7 +1772,7 @@
                 const escUid = encodeURIComponent(uid);
                 html += `<div style="padding:.5rem 0;border-bottom:1px solid var(--border);">`+
                         `<div style=\"display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;\">`+
-                        `<b>${email}</b> <span style=\"color:var(--muted)\">(${uid})</span> · <span>Tokens: ${tokens}</span>`+
+                        `<b>${email}</b> <span style=\"color:var(--muted)\">(${uid})</span> · <span>JD Tokens: ${tokens}</span>`+
                         `</div>`+
                         `<div style=\"display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.4rem;\">`+
                         `<input type=\"number\" id=\"set_${escUid}\" placeholder=\"Set amount\" style=\"width:140px;padding:.4rem .6rem;border:1px solid var(--border);border-radius:8px;\"/>`+

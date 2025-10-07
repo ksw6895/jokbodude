@@ -1,6 +1,3 @@
-import os
-import tempfile
-import uuid
 from pathlib import Path
 from typing import Optional
 
@@ -14,30 +11,6 @@ from .auth import require_user
 from pdf_processor.pdf.operations import PDFOperations
 
 router = APIRouter()
-
-
-def _per_chunk_tokens(model: Optional[str]) -> int:
-    """Return configured tokens-per-chunk for the given model.
-
-    Defaults: flash=3, flash-lite=1, pro=12 (overridable via env).
-    """
-    m = (model or "flash").strip().lower()
-
-    def _env_int(name: str, default: int) -> int:
-        try:
-            return max(0, int(os.getenv(name, str(default))))
-        except Exception:
-            return default
-
-    flash_cost = _env_int("FLASH_TOKENS_PER_CHUNK", 3)
-    flash_lite_cost = _env_int("FLASH_LITE_TOKENS_PER_CHUNK", 1)
-    pro_cost = _env_int("PRO_TOKENS_PER_CHUNK", 12)
-
-    if m == "pro":
-        return pro_cost
-    if m.replace("_", "-") in {"flash-lite", "flashlite"}:
-        return flash_lite_cost
-    return flash_cost
 
 
 def _build_file_info(path: Path) -> dict:
@@ -105,9 +78,6 @@ async def preflight_exam_only(
         except Exception:
             total_chunks = len(joker_info) if joker_info else 1
         total_chunks = max(1, int(total_chunks))
-        tokens_per_chunk = _per_chunk_tokens(model)
-        est_tokens = tokens_per_chunk * total_chunks
-        pct_per_chunk = 100 / total_chunks if total_chunks > 0 else 100
 
         # Augment metadata as preflight
         try:
@@ -115,8 +85,6 @@ async def preflight_exam_only(
             meta["preflight_stats"] = {
                 "jokbo": joker_info,
                 "total_chunks": total_chunks,
-                "tokens_per_chunk": tokens_per_chunk,
-                "estimated_tokens": est_tokens,
             }
             storage_manager.store_job_metadata(job_id, meta)
         except Exception:
@@ -129,9 +97,6 @@ async def preflight_exam_only(
             "multi_api": effective_multi,
             "files": {"jokbo": joker_info},
             "total_chunks": total_chunks,
-            "tokens_per_chunk": tokens_per_chunk,
-            "estimated_tokens": est_tokens,
-            "pct_per_chunk": pct_per_chunk,
         }
     except HTTPException:
         raise
@@ -196,9 +161,6 @@ async def preflight_partial_jokbo(
         if lesson_chunks_sum <= 0:
             lesson_chunks_sum = 1
         total_chunks = max(1, len(jokbo_info) * lesson_chunks_sum)
-        tokens_per_chunk = _per_chunk_tokens(model)
-        est_tokens = tokens_per_chunk * total_chunks
-        pct_per_chunk = 100 / total_chunks if total_chunks > 0 else 100
 
         try:
             meta["preflight"] = True
@@ -206,8 +168,6 @@ async def preflight_partial_jokbo(
                 "jokbo": jokbo_info,
                 "lesson": lesson_info,
                 "total_chunks": total_chunks,
-                "tokens_per_chunk": tokens_per_chunk,
-                "estimated_tokens": est_tokens,
             }
             storage_manager.store_job_metadata(job_id, meta)
         except Exception:
@@ -221,9 +181,6 @@ async def preflight_partial_jokbo(
             "min_relevance": effective_min_rel,
             "files": {"jokbo": jokbo_info, "lesson": lesson_info},
             "total_chunks": total_chunks,
-            "tokens_per_chunk": tokens_per_chunk,
-            "estimated_tokens": est_tokens,
-            "pct_per_chunk": pct_per_chunk,
         }
     except HTTPException:
         raise
@@ -286,9 +243,6 @@ async def preflight_jokbo_centric(
             except Exception:
                 lesson_chunks += 1
         total_chunks = max(1, total_jokbos * lesson_chunks)
-        pct_per_chunk = 100 / total_chunks if total_chunks > 0 else 100
-        tokens_per_chunk = _per_chunk_tokens(model)
-        est_tokens = tokens_per_chunk * total_chunks
 
         try:
             meta["preflight"] = True
@@ -296,8 +250,6 @@ async def preflight_jokbo_centric(
                 "jokbo": jokbo_info,
                 "lesson": lesson_info,
                 "total_chunks": total_chunks,
-                "tokens_per_chunk": tokens_per_chunk,
-                "estimated_tokens": est_tokens,
             }
             storage_manager.store_job_metadata(job_id, meta)
         except Exception:
@@ -311,9 +263,6 @@ async def preflight_jokbo_centric(
             "min_relevance": effective_min_rel,
             "files": {"jokbo": jokbo_info, "lesson": lesson_info},
             "total_chunks": total_chunks,
-            "tokens_per_chunk": tokens_per_chunk,
-            "estimated_tokens": est_tokens,
-            "pct_per_chunk": pct_per_chunk,
         }
     except HTTPException:
         # rethrow known HTTP errors
@@ -375,9 +324,6 @@ async def preflight_lesson_centric(
             except Exception:
                 lesson_chunks += 1
         total_chunks = max(1, lesson_chunks * max(1, total_jokbos))
-        pct_per_chunk = 100 / total_chunks if total_chunks > 0 else 100
-        tokens_per_chunk = _per_chunk_tokens(model)
-        est_tokens = tokens_per_chunk * total_chunks
 
         try:
             meta["preflight"] = True
@@ -385,8 +331,6 @@ async def preflight_lesson_centric(
                 "jokbo": jokbo_info,
                 "lesson": lesson_info,
                 "total_chunks": total_chunks,
-                "tokens_per_chunk": tokens_per_chunk,
-                "estimated_tokens": est_tokens,
             }
             storage_manager.store_job_metadata(job_id, meta)
         except Exception:
@@ -400,9 +344,6 @@ async def preflight_lesson_centric(
             "min_relevance": effective_min_rel,
             "files": {"jokbo": jokbo_info, "lesson": lesson_info},
             "total_chunks": total_chunks,
-            "tokens_per_chunk": tokens_per_chunk,
-            "estimated_tokens": est_tokens,
-            "pct_per_chunk": pct_per_chunk,
         }
     except HTTPException:
         raise

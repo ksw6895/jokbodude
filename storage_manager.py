@@ -1447,6 +1447,33 @@ class StorageManager:
             # Do not disrupt normal flow
             return
 
+    def record_token_usage(self, job_id: str, jd_tokens: int) -> None:
+        """Atomically increment the JD token usage for a job."""
+        if self.use_local_only or not self.redis_client or jd_tokens <= 0:
+            return
+        try:
+            key = f"job:{job_id}:usage"
+            self._with_retry(self.redis_client.hincrby, key, "jd_tokens_total", int(jd_tokens))
+            self._with_retry(self.redis_client.expire, key, 2592000)
+        except Exception as e:
+            logger.error(f"Failed to record JD token usage for job {job_id}: {e}")
+
+    def get_token_usage(self, job_id: str) -> int:
+        """Retrieve the total JD token usage for a job."""
+        if self.use_local_only or not self.redis_client:
+            return 0
+        try:
+            key = f"job:{job_id}:usage"
+            tokens = self._with_retry(self.redis_client.hget, key, "jd_tokens_total")
+            if tokens is None:
+                return 0
+            try:
+                return int(tokens if isinstance(tokens, (bytes, bytearray)) else tokens)
+            except Exception:
+                return int(tokens.decode() if isinstance(tokens, (bytes, bytearray)) else tokens)
+        except Exception:
+            return 0
+
     # --- Public token helpers ---
     def _token_key(self, user_id: str) -> str:
         return f"user:{user_id}:tokens"
