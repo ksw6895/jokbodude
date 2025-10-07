@@ -377,11 +377,39 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
             except Exception:
                 pass
 
+            jd_tokens_used = 0
+            user_id = None
+            try:
+                metadata = storage_manager.get_job_metadata(job_id)
+                if isinstance(metadata, dict):
+                    user_id = metadata.get("user_id")
+            except Exception:
+                metadata = None
+            try:
+                jd_tokens_used = storage_manager.get_token_usage(job_id)
+            except Exception:
+                jd_tokens_used = 0
+
+            if user_id and jd_tokens_used > 0:
+                try:
+                    if storage_manager.consume_user_tokens(user_id, jd_tokens_used):
+                        logger.info(
+                            f"Job {job_id} completed. Consumed {jd_tokens_used} JD tokens for user {user_id}."
+                        )
+                    else:
+                        logger.error(
+                            f"Job {job_id} completed but failed to consume {jd_tokens_used} JD tokens for user {user_id}."
+                        )
+                except Exception as e:
+                    logger.error(f"Failed to consume JD tokens for job {job_id}: {e}")
+
             result_payload = {
                 "status": "Complete",
                 "job_id": job_id,
                 "files_generated": len(list(output_dir.glob("*.pdf")))
             }
+            if jd_tokens_used > 0:
+                result_payload["jd_tokens_used"] = int(jd_tokens_used)
             try:
                 if aggregated_warnings["failed_files"] or aggregated_warnings["failed_chunks"]:
                     uniq = []

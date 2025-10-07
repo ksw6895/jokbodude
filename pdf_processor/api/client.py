@@ -16,7 +16,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 _GENAI_SPEC = importlib.util.find_spec("google.genai")
 if _GENAI_SPEC is not None:
@@ -285,7 +285,7 @@ class GeminiAPIClient:
         # NOTE: response_schema intentionally ignored for stability until validated
         response_schema: Optional[Dict[str, Any]] = None,
         max_output_tokens: Optional[int] = None,
-    ) -> Any:
+    ) -> Tuple[Any, int]:
         """
         Generate content with retry logic and error handling.
         
@@ -514,7 +514,15 @@ class GeminiAPIClient:
                             continue
                         raise ContentGenerationError("Response blocked due to safety")
                 
-                return response
+                api_usage_tokens = 0
+                try:
+                    usage = getattr(response, "usage_metadata", None)
+                    if usage is not None:
+                        api_usage_tokens = int(getattr(usage, "total_token_count", 0) or 0)
+                except Exception:
+                    api_usage_tokens = 0
+
+                return response, api_usage_tokens
                 
             except Exception as e:
                 err = str(e)

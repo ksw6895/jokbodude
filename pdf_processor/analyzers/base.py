@@ -14,6 +14,7 @@ from ..api.file_manager import FileManager
 from ..pdf.operations import PDFOperations
 from ..parsers.response_parser import ResponseParser
 from ..parsers.result_merger import ResultMerger
+from ..utils.billing import BillingConverter
 from ..utils.logging import get_logger
 from ..utils.exceptions import PDFProcessorError, ContentGenerationError
 
@@ -46,6 +47,8 @@ class BaseAnalyzer(ABC):
         self.prefer_single_attempt: bool = False
         # Lazily cached StorageManager for hot cancel/progress paths
         self._sm = None
+        # Latest usage metadata from Gemini (for billing conversion)
+        self._last_usage_metadata: Optional[Any] = None
 
     def _sm_cached(self):
         """Lazily create and cache a StorageManager for this analyzer instance."""
@@ -215,7 +218,24 @@ class BaseAnalyzer(ABC):
                 pass
 
             content = [prompt] + uploaded_files
-            return self._generate_with_quality_retry(content)
+            response_text, api_usage_tokens = self._generate_with_quality_retry(content)
+            try:
+                sm = self._sm_cached()
+                if sm and api_usage_tokens > 0:
+                    usage_details = getattr(self, "_last_usage_metadata", None)
+                    model_name = getattr(self.api_client, "model_name", None)
+                    jd_tokens = BillingConverter.api_to_jd(
+                        api_total=api_usage_tokens,
+                        model=model_name,
+                        usage_details=usage_details,
+                    )
+                    if jd_tokens > 0:
+                        sm.record_token_usage(self.session_id, jd_tokens)
+            except Exception as e:
+                logger.warning(
+                    f"Failed to record JD token usage for job {self.session_id}: {e}"
+                )
+            return response_text
         finally:
             for file in uploaded_files:
                 self.file_manager.delete_file_safe(file)
@@ -334,20 +354,20 @@ class BaseAnalyzer(ABC):
             # If anything is off, don't incorrectly treat as empty
             return False
 
-    def _generate_with_quality_retry(self, content: List[Any], retries: int = 2) -> str:
+    def _generate_with_quality_retry(
+        self, content: List[Any], retries: int = 2
+    ) -> Tuple[str, int]:
         """
         Generate content and retry if output looks suspicious per parser heuristics.
         Retries are performed with the same API key and same uploaded files.
         """
         last_error: Exception | None = None
         mode = self.get_mode()
-        # Limit attempts to a single call when Multi-API orchestrates failover,
-        # otherwise allow up to (retries+1) attempts (default 3 total) in single-key mode.
-        attempts = 1 if getattr(self, 'prefer_single_attempt', False) else max(1, retries + 1)
+        attempts = 1 if getattr(self, "prefer_single_attempt", False) else max(1, retries + 1)
         for attempt in range(1, attempts + 1):
-            # Check cancellation before each attempt
             try:
                 from ..utils.exceptions import CancelledError
+
                 sm = self._sm_cached()
                 if sm and sm.is_cancelled(self.session_id):
                     raise CancelledError("cancelled")
@@ -356,50 +376,49 @@ class BaseAnalyzer(ABC):
             except Exception:
                 pass
             try:
-                # Prefer fast-fail per key; multi-API manager will rotate keys when needed
-                response = self.api_client.generate_content(content, max_retries=1, backoff_factor=1)
+                response, api_usage_tokens = self.api_client.generate_content(
+                    content, max_retries=1, backoff_factor=1
+                )
+                try:
+                    self._last_usage_metadata = getattr(response, "usage_metadata", None)
+                except Exception:
+                    self._last_usage_metadata = None
                 text = response.text
                 try:
                     parsed = ResponseParser.parse_response(text, mode)
-                    # Treat empty results as valid (no matches) rather than fatal
                     if self._is_empty_result(parsed, mode):
                         logger.warning(
                             f"Empty {mode} result detected; treating as valid with no matches"
                         )
                         try:
-                            # Return normalized JSON to ensure downstream parser consistency
-                            return json.dumps(parsed, ensure_ascii=False)
+                            normalized = json.dumps(parsed, ensure_ascii=False)
+                            return normalized, api_usage_tokens
                         except Exception:
-                            # Fallback to raw text if serialization fails
-                            return text
+                            return text, api_usage_tokens
                     if ResponseParser.is_result_suspicious(parsed, mode):
-                        logger.warning(f"Suspicious {mode} result detected (attempt {attempt}/{attempts}); retrying...")
+                        logger.warning(
+                            f"Suspicious {mode} result detected (attempt {attempt}/{attempts}); retrying..."
+                        )
                         if attempt < attempts:
                             continue
-                        else:
-                            raise ContentGenerationError("Suspicious content after retries")
+                        raise ContentGenerationError("Suspicious content after retries")
                 except Exception as pe:
-                    # Parsing failed or suspicious; if more attempts, continue
                     last_error = pe
                     logger.warning(f"Parsing/quality check failed: {pe}")
                     if attempt < attempts:
                         continue
                     raise
-                # Looks good
-                return text
+                return text, api_usage_tokens
             except Exception as e:
+                self._last_usage_metadata = None
                 last_error = e
                 msg = str(e)
                 logger.error(f"Generation failed on attempt {attempt}/{attempts}: {msg}")
-                # Do not retry locally for prompt-block cases; give control back to
-                # the multi-API layer to potentially try a different key only when
-                # appropriate (e.g., true rate limits signaled via HTTP 429).
                 if "Prompt blocked:" in msg:
                     raise ContentGenerationError(msg)
                 if attempt < attempts:
                     continue
                 raise ContentGenerationError(msg)
-        # Should not reach here
         if last_error:
             raise last_error
         raise ContentGenerationError("Unknown generation error")

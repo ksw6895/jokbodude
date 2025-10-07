@@ -124,7 +124,7 @@
           'Partial Jokbo creates a sharp cram sheet with cropped questions.',
           'Exam Only exports a polished jokbo without lecture matches.'
         ],
-        heroNote: 'Every mode shares the same 100 MB upload limit and token billing. Multi-API still works when multiple Gemini keys are configured.',
+        heroNote: 'Every mode shares the same 100 MB upload limit. JD tokens are charged after completion based on actual Gemini usage metadata.',
         heroCta: 'Open quick start',
         tabLabel: 'Guide sections',
         tabHint: 'Tip: switch tabs or language without losing your place.',
@@ -202,7 +202,7 @@
             },
             {
               title: 'Review the preflight summary',
-              description: 'Check how many pages and chunks will run. Cancel or continue before tokens are consumed.'
+              description: 'Check how many pages and chunks will run. Confirm when ready—JD tokens are deducted only after the job finishes.'
             },
             {
               title: 'Track progress & download',
@@ -213,7 +213,7 @@
           reminders: [
             'Uploads must stay under 100 MB per PDF.',
             'Jobs keep running in the background. Reopen My Jobs to fetch the final files.',
-            'Gemini Flash costs 1 token per chunk, Pro uses 4 tokens — check the profile page for your balance.'
+            'JD tokens are calculated from Gemini usage metadata — check the result card after each job to see the actual amount consumed.'
           ]
         },
         tips: {
@@ -240,7 +240,7 @@
               title: 'Operations',
               items: [
                 'Use My Jobs to re-download completed outputs or clean up files you no longer need.',
-                'Cancel jobs from the status card or profile page to stop remaining chunks without burning extra tokens.',
+                'Cancel jobs from the status card or profile page to stop remaining chunks and prevent additional JD token usage.',
                 'Admins can monitor quota with /admin/storage-stats and trigger /admin/cleanup when needed.'
               ]
             }
@@ -260,11 +260,11 @@
             },
             {
               q: 'What if the run is blocked or fails?',
-              a: 'We surface Gemini safety blocks immediately. Adjust the content, lower minimum relevance, or split the PDF and try again. Tokens are only deducted for completed chunks.'
+              a: 'We surface Gemini safety blocks immediately. Adjust the content, lower minimum relevance, or split the PDF and try again. JD tokens are only deducted for work that already ran.'
             },
             {
               q: 'Can I cancel a job mid-run?',
-              a: 'Yes. Use the Cancel button on the status card or under My Jobs → Job details. Remaining chunks stop and no extra tokens are spent.'
+              a: 'Yes. Use the Cancel button on the status card or under My Jobs → Job details. Remaining chunks stop and no additional JD tokens are charged.'
             }
           ]
         },
@@ -281,7 +281,7 @@
           'Partial Jokbo 모드는 잘린 문제 요약으로 벼락치기용 요약을 만듭니다.',
           'Exam Only 모드는 강의 매칭 없이 깔끔한 족보만 출력합니다.'
         ],
-        heroNote: '모든 모드는 PDF 당 100MB 업로드 제한과 동일한 토큰 규칙을 따릅니다. 여러 Gemini 키가 설정된 경우 Multi-API도 계속 병렬로 동작합니다.',
+        heroNote: '모든 모드는 PDF 당 100MB 업로드 제한을 공유합니다. 작업이 완료되면 Gemini usage_metadata를 환산해 JD 토큰이 차감됩니다.',
         heroCta: '빠른 시작 열기',
         tabLabel: '가이드 섹션',
         tabHint: 'Tip: 언어를 바꿔도 현재 탭과 위치는 유지됩니다.',
@@ -359,7 +359,7 @@
             },
             {
               title: '4. 사전 점검 확인',
-              description: '처리 예정 페이지와 청크 수를 먼저 보여줍니다. 토큰이 사용되기 전에 취소하거나 진행을 결정하세요.'
+              description: '처리 예정 페이지와 청크 수를 먼저 보여줍니다. 준비가 되면 진행을 확정하세요. JD 토큰은 작업 완료 후 실제 사용량을 기준으로 차감됩니다.'
             },
             {
               title: '5. 진행 상황 확인 & 다운로드',
@@ -370,7 +370,7 @@
           reminders: [
             'PDF는 파일당 100MB 이하만 업로드할 수 있습니다.',
             '작업은 백그라운드에서 계속 진행됩니다. My Jobs에서 다시 열어 결과를 내려받으세요.',
-            'Gemini Flash는 청크당 1토큰, Pro는 4토큰을 사용합니다. 잔액은 프로필 페이지에서 확인하세요.'
+            'JD 토큰은 Gemini usage_metadata를 환산해 계산됩니다. 작업 완료 후 결과 카드에서 실제 사용량을 확인하세요.'
           ]
         },
         tips: {
@@ -397,7 +397,7 @@
               title: '운영',
               items: [
                 'My Jobs 페이지에서 완료된 파일을 다시 내려받거나 필요 없는 결과를 삭제하세요.',
-                '상태 카드나 프로필에서 Cancel 버튼을 누르면 남은 청크가 중단되어 토큰을 아낄 수 있습니다.',
+                '상태 카드나 프로필에서 Cancel 버튼을 누르면 남은 청크가 중단되어 추가 JD 토큰 사용을 막을 수 있습니다.',
                 '관리자는 /admin/storage-stats로 여유 공간을 확인하고 필요 시 /admin/cleanup을 실행할 수 있습니다.'
               ]
             }
@@ -417,11 +417,11 @@
             },
             {
               q: '실행이 차단되거나 실패하면?',
-              a: 'Gemini 안전 필터가 차단되면 즉시 안내합니다. 콘텐츠를 조정하거나 최소 연관도를 낮춘 뒤 다시 시도하세요. 완료된 청크에만 토큰이 사용됩니다.'
+              a: 'Gemini 안전 필터가 차단되면 즉시 안내합니다. 콘텐츠를 조정하거나 최소 연관도를 낮춘 뒤 다시 시도하세요. 이미 처리된 청크에 대해서만 JD 토큰이 차감됩니다.'
             },
             {
               q: '진행 중인 작업을 취소할 수 있나요?',
-              a: '가능합니다. 상태 카드 또는 My Jobs 상세 화면에서 Cancel을 누르면 남은 청크는 중단되고 추가 토큰도 사용되지 않습니다.'
+              a: '가능합니다. 상태 카드 또는 My Jobs 상세 화면에서 Cancel을 누르면 남은 청크는 중단되고 추가 JD 토큰도 사용되지 않습니다.'
             }
           ]
         },
