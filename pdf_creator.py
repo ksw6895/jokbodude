@@ -17,6 +17,13 @@ import threading
 from validators import PDFValidator
 import unicodedata
 import re
+
+try:  # Local prototype for precise question spans
+    from sample_snniper import ProblemSnipper, ProblemSegment  # type: ignore
+except Exception:  # pragma: no cover - optional dependency during tests
+    ProblemSnipper = None  # type: ignore
+    ProblemSegment = None  # type: ignore
+
 from pdf_processor.pdf.operations import PDFOperations
 
 class PDFCreator:
@@ -30,6 +37,9 @@ class PDFCreator:
         self._jokbo_dir_cache = {}
         # Cache for question-number index per jokbo file: {abs_path: {qnum: [pages...]}}
         self._qindex_cache = {}
+        # Cache segments extracted via ProblemSnipper per jokbo path
+        self._snipper_segment_cache: Dict[str, List[ProblemSegment]] = {}
+        self._snipper_lock = threading.Lock()
 
     def _close_cached_pdfs(self, only_paths: Optional[List[str]] = None) -> None:
         """Close and remove cached jokbo PDFs to prevent memory growth.
@@ -57,6 +67,202 @@ class PDFCreator:
         except Exception:
             # Best-effort cleanup; do not disrupt callers
             pass
+
+    # ---------- ProblemSnipper integration ----------
+    def _get_snipper_segments(self, jokbo_path: str) -> List[ProblemSegment]:
+        """Return cached ProblemSnipper segments for ``jokbo_path`` if available."""
+
+        if ProblemSnipper is None:
+            return []
+        abs_path = str(Path(jokbo_path).resolve())
+        with self._snipper_lock:
+            cached = self._snipper_segment_cache.get(abs_path)
+        if cached is not None:
+            return cached
+        try:
+            snipper = ProblemSnipper()
+            segments = snipper.extract(abs_path, assign_qids=False)
+            # Ensure metadata contains basic fields for downstream lookups
+        except Exception as exc:
+            self.log_debug(f"ProblemSnipper extract failed for {abs_path}: {exc}")
+            segments = []
+        with self._snipper_lock:
+            self._snipper_segment_cache[abs_path] = segments
+        return segments
+
+    @staticmethod
+    def _normalize_question_label(value: object) -> str:
+        text = str(value or "").strip()
+        if not text:
+            return ""
+        text = unicodedata.normalize("NFKC", text)
+        return re.sub(r"[^0-9A-Za-z]+", "", text)
+
+    def _segment_primary_page(self, segment: ProblemSegment) -> int:
+        try:
+            if segment.metadata and "page" in segment.metadata:
+                page_val = self._safe_int(segment.metadata.get("page"), 0)
+                if page_val > 0:
+                    return page_val
+        except Exception:
+            pass
+        try:
+            page_indexes = list(segment.page_spans.keys())
+            if page_indexes:
+                return min(int(idx) for idx in page_indexes) + 1
+        except Exception:
+            pass
+        return 0
+
+    def _select_snipper_segment(
+        self,
+        segments: List[ProblemSegment],
+        jokbo_page: int,
+        question_number: object,
+        question_text: str = "",
+    ) -> Optional[ProblemSegment]:
+        if not segments:
+            return None
+        qn_int = self._safe_int(question_number, 0)
+        qn_label = self._normalize_question_label(question_number)
+        candidates: List[Tuple[int, int, ProblemSegment]] = []
+        fallback: List[Tuple[int, int, ProblemSegment]] = []
+        qt_norm = (question_text or "").strip()
+        for segment in segments:
+            seg_label = self._normalize_question_label(segment.display_number)
+            seg_int = self._safe_int(segment.display_number, 0)
+            seg_page = self._segment_primary_page(segment)
+            distance = abs(seg_page - jokbo_page) if (jokbo_page and seg_page) else 0
+            meta_num = self._safe_int(segment.metadata.get("question_number")) if segment.metadata else 0
+            meta_label = self._normalize_question_label(segment.metadata.get("question_number")) if segment.metadata else ""
+
+            matched = False
+            if qn_int and seg_int and qn_int == seg_int:
+                matched = True
+            elif qn_int and meta_num and qn_int == meta_num:
+                matched = True
+            elif qn_label and seg_label and qn_label == seg_label:
+                matched = True
+            elif qn_label and meta_label and qn_label == meta_label:
+                matched = True
+
+            if matched:
+                candidates.append((distance, segment.index, segment))
+                continue
+
+            if qt_norm:
+                try:
+                    seg_text = segment.text.strip()
+                    if seg_text and qt_norm[:40] and qt_norm[:40] in seg_text:
+                        fallback.append((distance + 5, segment.index, segment))
+                        continue
+                except Exception:
+                    pass
+
+            # Fallback candidate based purely on page ordering
+            if seg_page and jokbo_page and seg_page == jokbo_page:
+                fallback.append((distance + 10, segment.index, segment))
+
+        chosen: Optional[ProblemSegment] = None
+        if candidates:
+            _, _, chosen = min(candidates, key=lambda t: (t[0], t[1]))
+        elif fallback:
+            _, _, chosen = min(fallback, key=lambda t: (t[0], t[1]))
+        return chosen
+
+    @staticmethod
+    def _clip_rect_with_margin(
+        rects: List[Tuple[float, float, float, float]],
+        page_rect: fitz.Rect,
+        margin: float = 6.0,
+    ) -> Optional[fitz.Rect]:
+        if not rects:
+            return None
+        x0 = min(r[0] for r in rects)
+        y0 = min(r[1] for r in rects)
+        x1 = max(r[2] for r in rects)
+        y1 = max(r[3] for r in rects)
+        clip = fitz.Rect(x0 - margin, y0 - margin, x1 + margin, y1 + margin)
+        clip &= page_rect
+        if clip.width <= 1 or clip.height <= 1:
+            return None
+        return clip
+
+    @staticmethod
+    def _clip_from_blocks(
+        block_rects: List[Tuple[float, float, float, float]],
+        page_rect: fitz.Rect,
+        margin: float = 6.0,
+    ) -> Optional[fitz.Rect]:
+        """Return a clip rectangle limited to the union of the participating text blocks."""
+
+        if not block_rects:
+            return None
+        x0 = min(rect[0] for rect in block_rects)
+        y0 = min(rect[1] for rect in block_rects)
+        x1 = max(rect[2] for rect in block_rects)
+        y1 = max(rect[3] for rect in block_rects)
+        clip = fitz.Rect(x0 - margin, y0 - margin, x1 + margin, y1 + margin)
+        clip &= page_rect
+        if clip.width <= 1 or clip.height <= 1:
+            return None
+        return clip
+
+    def _render_snipper_segment(self, jokbo_path: str, segment: ProblemSegment) -> Optional[fitz.Document]:
+        try:
+            src = self.get_jokbo_pdf(jokbo_path)
+        except Exception as exc:
+            self.log_debug(f"ProblemSnipper render failed to open source PDF: {exc}")
+            return None
+        doc = fitz.open()
+        inserted = 0
+        for page_index in sorted(segment.page_spans.keys()):
+            rects = segment.page_spans.get(page_index) or []
+            if page_index < 0 or page_index >= len(src):
+                continue
+            block_rect_map = segment.page_block_rects.get(page_index) if segment.page_block_rects else {}
+            block_rects = list(block_rect_map.values()) if block_rect_map else []
+            clip = None
+            if block_rects:
+                clip = self._clip_from_blocks(block_rects, src[page_index].rect)
+            if clip is None:
+                clip = self._clip_rect_with_margin(rects, src[page_index].rect)
+            if clip is None:
+                continue
+            new_page = doc.new_page(width=clip.width, height=clip.height)
+            new_page.show_pdf_page(fitz.Rect(0, 0, clip.width, clip.height), src, page_index, clip=clip)
+            inserted += 1
+        if inserted == 0:
+            doc.close()
+            return None
+        return doc
+
+    def _extract_question_with_snipper(
+        self,
+        jokbo_path: str,
+        jokbo_page: int,
+        question_number: object,
+        question_text: str = "",
+    ) -> Optional[fitz.Document]:
+        if ProblemSnipper is None:
+            return None
+        segments = self._get_snipper_segments(jokbo_path)
+        if not segments:
+            return None
+        segment = self._select_snipper_segment(segments, jokbo_page, question_number, question_text)
+        if not segment:
+            return None
+        try:
+            doc = self._render_snipper_segment(jokbo_path, segment)
+            if doc is not None:
+                self.log_debug(
+                    "ProblemSnipper extraction succeeded: "
+                    f"page={jokbo_page}, question={question_number}, segment_index={segment.index}"
+                )
+            return doc
+        except Exception as exc:
+            self.log_debug(f"ProblemSnipper rendering failed, falling back: {exc}")
+            return None
 
     # ---------- Text / Filename utilities ----------
     @staticmethod
@@ -467,6 +673,10 @@ class PDFCreator:
         if jokbo_page < 1 or (total_pages and jokbo_page > total_pages):
             print(f"Warning: Page {jokbo_page} does not exist in {jokbo_filename}")
             return None
+
+        snipper_doc = self._extract_question_with_snipper(str(jokbo_path), int(jokbo_page), question_number, question_text)
+        if snipper_doc is not None:
+            return snipper_doc
 
         # Decide parameters for the unified cropper
         qnum_int = self._safe_int(question_number, 0)
