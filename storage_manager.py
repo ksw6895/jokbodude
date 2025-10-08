@@ -194,39 +194,75 @@ class StorageManager:
                 logger.warning(f"Operation failed, retrying in {wait_time}s: {e}")
                 time.sleep(wait_time)
         
+    @staticmethod
+    def _fingerprint_file(file_path: Path) -> tuple[str, int]:
+        """Return a short hash and size for the given file."""
+
+        digest = hashlib.md5()
+        total = 0
+        with file_path.open("rb") as handle:
+            while True:
+                chunk = handle.read(1024 * 1024)
+                if not chunk:
+                    break
+                digest.update(chunk)
+                total += len(chunk)
+        return digest.hexdigest()[:8], total
+
+    @staticmethod
+    def _derive_s3_key(file_key: str) -> Optional[str]:
+        parts = file_key.split(":")
+        if len(parts) < 4:
+            return None
+        job_id = parts[1]
+        file_type = parts[2]
+        if len(parts) == 4:
+            filename = parts[3]
+        else:
+            filename = ":".join(parts[3:-1])
+        return f"uploads/{job_id}/{file_type}/{filename}"
+
+    def _delete_file_key(self, file_key: str) -> None:
+        if self.use_local_only or not self.redis_client:
+            return
+        try:
+            self._with_retry(self.redis_client.delete, file_key)
+        except Exception as e:
+            logger.warning(f"Failed to delete file key {file_key}: {e}")
+
     def store_file(self, file_path: Path, job_id: str, file_type: str) -> str:
         """Store a file and make it available across services"""
-        # Read file content
-        with open(file_path, 'rb') as f:
-            content = f.read()
-        
-        # Generate file key
-        file_hash = hashlib.md5(content).hexdigest()[:8]
+
+        file_hash, file_size = self._fingerprint_file(file_path)
         file_key = f"file:{job_id}:{file_type}:{file_path.name}:{file_hash}"
-        
+
         # If S3 is enabled, upload file and store a pointer in Redis
         if self._s3 is not None:
             try:
                 s3_key = f"uploads/{job_id}/{file_type}/{file_path.name}"
                 self._s3.upload_file(file_path, s3_key)
                 if not self.use_local_only and self.redis_client:
-                    self._with_retry(
-                        self.redis_client.hset,
-                        file_key,
-                        mapping={
-                            "storage": "s3",
-                            "bucket": self._s3_bucket or "",
-                            "key": s3_key,
-                            "original_size": str(len(content)),
-                        },
-                    )
-                    self._with_retry(self.redis_client.expire, file_key, self.file_ttl_seconds)
+                    metadata = {
+                        "storage": "s3",
+                        "bucket": self._s3_bucket or "",
+                        "key": s3_key,
+                        "original_size": str(file_size),
+                        "uploaded_at": datetime.utcnow().isoformat() + "Z",
+                    }
+                    try:
+                        self._with_retry(self.redis_client.hset, file_key, mapping=metadata)
+                        self._with_retry(self.redis_client.expire, file_key, self.file_ttl_seconds)
+                    except Exception as e:
+                        logger.warning(f"Failed to persist metadata for {file_key}: {e}")
                 return file_key
             except Exception as e:
                 logger.error(f"Failed to upload to S3; falling back to Redis storage: {e}")
                 # continue to Redis path below
 
-        # Try compression for large files (Redis path only)
+        # Redis fallback path retains legacy behaviour
+        with open(file_path, "rb") as f:
+            content = f.read()
+
         if len(content) > 1024 * 1024:  # > 1MB
             compressed = zlib.compress(content, level=6)
             compression_ratio = len(compressed) / len(content)
@@ -243,30 +279,21 @@ class StorageManager:
             content_to_store = content
             is_compressed = False
 
-        # Store in Redis with retry if not in local-only mode
         if not self.use_local_only and self.redis_client:
             try:
-                # Store with metadata
-                self._with_retry(
-                    self.redis_client.hset,
-                    file_key,
-                    mapping={
-                        "data": content_to_store,
-                        "compressed": str(is_compressed),
-                        "original_size": str(len(content)),
-                    },
-                )
-                # Set expiration using configured TTL
+                payload = {
+                    "data": content_to_store,
+                    "compressed": str(is_compressed),
+                    "original_size": str(len(content)),
+                    "storage": "redis",
+                    "uploaded_at": datetime.utcnow().isoformat() + "Z",
+                }
+                self._with_retry(self.redis_client.hset, file_key, mapping=payload)
                 self._with_retry(self.redis_client.expire, file_key, self.file_ttl_seconds)
             except Exception as e:
                 logger.error(f"Failed to store in Redis, falling back to local: {e}")
                 self.use_local_only = True
-        
-        # Always save locally as backup (disabled to prevent disk growth)
-        # local_path = self.local_storage / job_id / file_type / file_path.name
-        # local_path.parent.mkdir(parents=True, exist_ok=True)
-        # local_path.write_bytes(content)
-        
+
         return file_key
     
     def get_file(self, file_key: str) -> Optional[bytes]:
@@ -321,29 +348,48 @@ class StorageManager:
     
     def save_file_locally(self, file_key: str, target_path: Path) -> Path:
         """Save a file from Redis to local filesystem"""
-        # If this file is an S3 pointer, stream directly to destination
+        metadata: Dict[str, str] = {}
         if not self.use_local_only and self.redis_client:
             try:
-                data = self._with_retry(self.redis_client.hgetall, file_key) or {}
-                storage = data.get(b"storage") or data.get("storage")
-                if storage and (storage.decode() if isinstance(storage, (bytes, bytearray)) else str(storage)) == "s3":
-                    keyv = data.get(b"key") or data.get("key")
-                    if keyv and self._s3 is not None:
-                        s3_key = keyv.decode() if isinstance(keyv, (bytes, bytearray)) else str(keyv)
-                        # Safety check for target path under temp dir
-                        tmp_root = Path(os.getenv("TMPDIR", tempfile.gettempdir())).resolve()
-                        resolved_target = target_path.resolve()
+                raw = self._with_retry(self.redis_client.hgetall, file_key) or {}
+
+                def _decode(value) -> Optional[str]:
+                    if value is None:
+                        return None
+                    if isinstance(value, (bytes, bytearray)):
                         try:
-                            resolved_target.relative_to(tmp_root)
-                        except ValueError:
-                            raise ValueError(
-                                f"Refusing to write outside temp dir: {resolved_target} not under {tmp_root}"
-                            )
-                        target_path.parent.mkdir(parents=True, exist_ok=True)
-                        self._s3.download_file(s3_key, resolved_target)
-                        return resolved_target
-            except Exception:
-                pass
+                            return value.decode()
+                        except Exception:
+                            return None
+                    return str(value)
+
+                metadata = {k.decode() if isinstance(k, (bytes, bytearray)) else str(k): _decode(v) for k, v in raw.items()}
+            except Exception as e:
+                logger.warning(f"Failed to fetch metadata for {file_key}: {e}")
+
+        storage_backend = (metadata.get("storage") or "").lower()
+        s3_key = metadata.get("key") or self._derive_s3_key(file_key)
+        is_s3_pointer = (
+            self._s3 is not None
+            and s3_key is not None
+            and (
+                storage_backend == "s3"
+                or (not metadata and self.object_store_mode == "s3")
+            )
+        )
+
+        if is_s3_pointer:
+            tmp_root = Path(os.getenv("TMPDIR", tempfile.gettempdir())).resolve()
+            resolved_target = target_path.resolve()
+            try:
+                resolved_target.relative_to(tmp_root)
+            except ValueError:
+                raise ValueError(f"Refusing to write outside temp dir: {resolved_target} not under {tmp_root}")
+
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            self._s3.download_file(s3_key, resolved_target)
+            self._delete_file_key(file_key)
+            return resolved_target
 
         content = self.get_file(file_key)
         if not content:
@@ -359,6 +405,7 @@ class StorageManager:
 
         target_path.parent.mkdir(parents=True, exist_ok=True)
         target_path.write_bytes(content)
+        self._delete_file_key(file_key)
         return target_path
 
     # --- TTL helpers and verification ---

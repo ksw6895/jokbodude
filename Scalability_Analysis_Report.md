@@ -66,8 +66,8 @@
 ## 체크리스트 (Action Item Checklist)
 | 우선순위 | 항목 | 세부 작업 |
 | --- | --- | --- |
-| **단기 (1주 이내)** | Redis 파일 저장 해소 | 운영 환경은 이미 `OBJECT_STORE=s3`로 R2를 사용 중이므로, Redis에는 메타데이터만 남기고 실제 파일 바이트를 쓰지 않도록 `store_file` 경로를 리팩터링한다. 워커가 다운로드를 완료하면 `file:*` 키를 즉시 삭제하는 로직을 추가한다.【F:storage_manager.py†L197-L270】 |
-|  | 업로드 경로 비동기화 | `save_files_and_metadata` 내 파일 저장을 백그라운드 스레드/작업으로 분리하고, 요청 처리 스레드를 즉시 반환하도록 수정.【F:server/routes/_helpers.py†L107-L136】 |
+| **단기 (1주 이내)** | Redis 파일 저장 해소 (✅ 완료) | 운영 환경은 이미 `OBJECT_STORE=s3`로 R2를 사용 중이므로, Redis에는 메타데이터만 남기고 실제 파일 바이트를 쓰지 않도록 `store_file` 경로를 리팩터링한다. 워커가 다운로드를 완료하면 `file:*` 키를 즉시 삭제하는 로직을 추가한다.【F:storage_manager.py†L197-L270】 |
+|  | 업로드 경로 비동기화 (✅ 완료) | `save_files_and_metadata` 내 파일 저장을 백그라운드 스레드/작업으로 분리하고, 요청 처리 스레드를 즉시 반환하도록 수정.【F:server/routes/_helpers.py†L107-L136】 |
 |  | 워커 병렬성 증가 | Render 대시보드에서 `CELERY_CONCURRENCY`를 4 이상으로 조정하고, 워커 인스턴스를 2대 이상으로 확장. 블루프린트는 해당 변수를 `sync: false`로 두어 수동 조정값을 보존하므로 큐 분리 계획과 병행해 적용 가능하다.【F:render.yaml†L53-L78】 |
 | **중기 (1~4주)** | PDF 메타데이터 캐싱 | 업로드 단계에서 페이지 수/청크 메타를 저장하고, 분석 시 재사용하도록 Processor를 리팩터링.【F:tasks.py†L35-L214】 |
 |  | MultiAPI 재설계 | 키당 동시 처리량을 높이고, 비블로킹 스케줄링으로 재작성. Rate limit 관측 및 경보 추가.【F:pdf_processor/api/multi_api_manager.py†L133-L213】 |
