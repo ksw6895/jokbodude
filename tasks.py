@@ -1,7 +1,9 @@
 # tasks.py
+import hashlib
 import os
 import re
 import tempfile
+import unicodedata
 from pathlib import Path
 import pymupdf as fitz
 from celery import Celery, current_task
@@ -69,6 +71,39 @@ def _tokens_per_chunk(model_type: Optional[str]) -> int:
         "flash-lite": flash_lite_cost,
         "pro": pro_cost,
     }.get(model_key, flash_cost)
+
+
+def _derive_output_stem(original_name: Optional[str], fallback_stem: str) -> str:
+    """Derive a safe filename stem that preserves the original upload name when possible."""
+
+    source_name = (original_name or "").strip()
+    if source_name:
+        try:
+            base = Path(source_name).stem or source_name
+        except Exception:
+            base = source_name
+    else:
+        base = fallback_stem or "result"
+
+    normalized = unicodedata.normalize("NFKC", base)
+    normalized = normalized.replace("/", "_").replace("\\", "_")
+    normalized = re.sub(r"\s+", "_", normalized)
+    normalized = re.sub(r"[^0-9A-Za-z가-힣._()\-\[\]]+", "", normalized)
+    normalized = re.sub(r"_+", "_", normalized).strip("._-")
+    if not normalized:
+        normalized = fallback_stem or "result"
+
+    normalized = normalized[:150]
+
+    digest_source = source_name or fallback_stem or normalized
+    try:
+        digest = hashlib.sha1(digest_source.encode("utf-8", "ignore")).hexdigest()[:8]
+    except Exception:
+        digest = ""
+    if digest and not normalized.endswith(digest):
+        normalized = f"{normalized}_{digest}"
+
+    return normalized or "result"
 
 
 def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optional[bool], strategy: ModeStrategy):
@@ -315,7 +350,8 @@ def run_analysis_task(job_id: str, model_type: Optional[str], multi_api: Optiona
                     pass
 
                 # Generate output (retry PDF creation locally, do NOT redo analysis)
-                output_filename = strategy.output_template.format(stem=prim_path.stem)
+                output_stem = _derive_output_stem(entry.get("original_name"), prim_path.stem)
+                output_filename = strategy.output_template.format(stem=output_stem)
                 output_path = output_dir / output_filename
                 pdf_attempts = 3
                 last_err = None

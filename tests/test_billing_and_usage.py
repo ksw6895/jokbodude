@@ -73,22 +73,45 @@ class FakeStorageManager(StorageManager):
         return self.redis_client.incrby(key, delta)
 
 
-def test_billing_converter_uses_hundred_token_unit(monkeypatch):
+def test_billing_converter_uses_pricing_with_usage_metadata(monkeypatch):
     monkeypatch.delenv("JD_TOKEN_MULTIPLIER_DEFAULT", raising=False)
-    assert BillingConverter.api_to_jd(0, "flash") == 0
-    assert BillingConverter.api_to_jd(99, "flash") == 1
-    assert BillingConverter.api_to_jd(199, "flash") == 2
+    BillingConverter._load_multipliers.cache_clear()
+    BillingConverter._usd_per_jd.cache_clear()
+
+    usage = types.SimpleNamespace(
+        input_token_count=1000,
+        output_token_count=400,
+        total_token_count=1400,
+    )
+    converted = BillingConverter.api_to_jd(1400, "flash", usage)
+    assert converted == 1
 
 
 def test_billing_converter_applies_model_multiplier(monkeypatch):
-    monkeypatch.setenv("JD_TOKEN_MULTIPLIER_PRO", "1.5")
+    monkeypatch.setenv("JD_TOKEN_MULTIPLIER_PRO", "2")
     try:
         BillingConverter._load_multipliers.cache_clear()
-        converted = BillingConverter.api_to_jd(200, "gemini-pro")
-        assert converted == 3  # ceil((200/100)*1.5) -> ceil(3.0)
+        BillingConverter._usd_per_jd.cache_clear()
+        usage = types.SimpleNamespace(
+            input_token_count=10_000,
+            output_token_count=4_000,
+            total_token_count=14_000,
+        )
+        converted = BillingConverter.api_to_jd(14_000, "gemini-pro", usage)
+        assert converted == 53
     finally:
         monkeypatch.delenv("JD_TOKEN_MULTIPLIER_PRO", raising=False)
         BillingConverter._load_multipliers.cache_clear()
+        BillingConverter._usd_per_jd.cache_clear()
+
+
+def test_billing_converter_falls_back_when_usage_missing(monkeypatch):
+    BillingConverter._load_multipliers.cache_clear()
+    BillingConverter._usd_per_jd.cache_clear()
+    monkeypatch.delenv("JD_TOKEN_MULTIPLIER_DEFAULT", raising=False)
+
+    converted = BillingConverter.api_to_jd(1000, "flash", None)
+    assert converted == 1
 
 
 def test_storage_manager_records_and_refunds_streaming_usage():
