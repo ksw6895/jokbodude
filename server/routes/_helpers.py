@@ -80,10 +80,20 @@ def _safe_filename(original: str, fallback_ext: Optional[str] = None) -> str:
 async def _write_temp_file(upload: UploadFile, destination: Path) -> int:
     """Persist the uploaded file to a temporary path using a background thread."""
 
-    content = await upload.read()
-    size = len(content)
-    await asyncio.to_thread(destination.write_bytes, content)
-    return size
+    def _copy_stream() -> int:
+        total = 0
+        upload.file.seek(0)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with destination.open("wb") as out:
+            while True:
+                chunk = upload.file.read(1024 * 1024)
+                if not chunk:
+                    break
+                out.write(chunk)
+                total += len(chunk)
+        return total
+
+    return await asyncio.to_thread(_copy_stream)
 
 
 async def _storage_call(sm, method_name: str, *args, **kwargs):
