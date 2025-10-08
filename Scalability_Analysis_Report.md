@@ -1,7 +1,7 @@
 # JokboDude 확장성 진단 보고서
 
 ## 개요 (Executive Summary)
-- **Redis에 대한 과도한 파일 의존성**: 현재 업로드/결과 파일을 Redis 해시에 그대로 저장하며, 객체 스토리지 설정이 빠지면 수백 MB~GB의 데이터를 Redis가 직접 보유하게 된다. 저장/조회 시 동기식 블로킹 I/O와 재시도 루프가 FastAPI 이벤트 루프를 붙잡고 있어 동시 사용자 증가 시 웹 레이어가 쉽게 교착된다.【F:storage_manager.py†L197-L306】【F:server/routes/_helpers.py†L79-L157】
+- **Redis에 대한 과도한 파일 의존성**: 현재 업로드/결과 파일을 Redis 해시에 그대로 저장하며, R2가 활성화된 환경에서도 모든 파일을 메모리에 읽어 들인 뒤 Redis에 포인터/데이터를 쓰는 동기식 흐름을 유지한다. 저장/조회 시 블로킹 I/O와 재시도 루프가 FastAPI 이벤트 루프를 붙잡고 있어 동시 사용자 증가 시 웹 레이어가 쉽게 교착된다.【F:storage_manager.py†L197-L306】【F:server/routes/_helpers.py†L79-L157】
 - **단일 워커·직렬 처리에 따른 처리량 한계**: Render 배포 설정이 웹 1대·워커 1대(동시 작업 1개)이며, 멀티 API 키 매니저 또한 기본적으로 키당 동시 1건만 허용하도록 잠금되어 있다. 대용량 업로드가 들어오면 큐에 쌓인 다른 작업이 모두 대기하게 되고, Noisy Neighbor 상황이 빈번해질 수 있다.【F:render.yaml†L47-L90】【F:pdf_processor/api/multi_api_manager.py†L119-L213】
 - **PDF 파이프라인의 반복 연산과 메모리 관리 미비**: 각 분석 작업이 매번 PDF 페이지 수/청크를 다시 계산하기 위해 파일을 반복해서 열고, 전역 PDF 캐시에는 상한선이 없어 워커 프로세스 메모리가 선형으로 증가한다. 캐시 정리 전략 및 청크 메타데이터 재사용이 필요하다.【F:tasks.py†L35-L214】【F:pdf_processor/pdf/operations.py†L411-L464】【F:pdf_processor/pdf/cache.py†L17-L160】
 
@@ -10,9 +10,9 @@
 - **웹 업로드 경로의 블로킹 I/O**: 업로드된 파일을 `await f.read()`로 메모리에 올린 뒤 동기식 `write_bytes`, `StorageManager.store_file`을 호출한다. `store_file`은 로컬 파일을 다시 읽고 Redis에 `hset`/`expire`를 수행하는 동안 `time.sleep` 기반 재시도가 포함돼 있다. FastAPI의 async 엔드포인트에서 이러한 블로킹 호출이 증가하면 이벤트 루프가 막혀 다른 요청을 처리하지 못한다.【F:server/routes/_helpers.py†L107-L136】【F:storage_manager.py†L197-L263】
   - **개선**: 업로드 수신을 백그라운드 작업 큐로 넘기거나 `run_in_executor`/Streaming을 사용해 파일 쓰기와 Redis 업로드를 별도 스레드로 오프로드한다. 또한 Redis 대신 객체 스토리지에 직접 스트리밍 업로드하도록 변경하면 Redis 호출을 제거할 수 있다.
 - **멀티 API 키 매니저의 잠금 구조**: `MultiAPIManager`는 `Condition`과 `per_key_limit`(기본 1)로 키당 단일 작업만 허용하며, 실패 후 60초까지 `wait()`하면서 전체 작업을 블로킹한다. 동시에 `_global_tried_indices`가 활성화되면 동일 작업에서 재시도 가능한 키가 빠르게 고갈된다.【F:pdf_processor/api/multi_api_manager.py†L133-L213】
-  - **개선**: `per_key_limit` 기본값을 환경설정 기반으로 늘리고(예: 2~3), 장기 `wait` 대신 즉시 다른 키로 넘어가도록 비동기 큐/비블로킹 구조로 재작성한다. 실패 시 키당 서킷 브레이커를 두고, 전역 잠금 없이 asyncio.Queue 또는 Celery 내 worker 수준에서 분산시키는 것이 바람직하다. 최신 코드베이스는 `google-genai` SDK로 이미 전환되어 있으며, `GEMINI_PER_KEY_CONCURRENCY` 환경변수로 키당 동시 처리 제한을 주입하도록 유지돼 있으므로(웹/워커 모두 동일 변수 사용) 값 상향 시 SDK와 충돌하지 않는다.【F:requirements.txt†L1-L4】【F:pdf_processor/api/client.py†L1-L128】【F:settings.py†L19-L91】
+  - **개선**: `per_key_limit` 기본값을 환경설정 기반으로 늘리고(예: 2~3), 장기 `wait` 대신 즉시 다른 키로 넘어가도록 비동기 큐/비블로킹 구조로 재작성한다. 실패 시 키당 서킷 브레이커를 두고, 전역 잠금 없이 asyncio.Queue 또는 Celery 내 worker 수준에서 분산시키는 것이 바람직하다. 최신 코드베이스는 `google-genai` SDK로 이미 전환되어 있으며, `GEMINI_PER_KEY_CONCURRENCY` 환경변수로 키당 동시 처리 제한을 주입하도록 유지돼 있으므로(웹/워커 모두 동일 변수 사용) 값 상향 시 SDK와 충돌하지 않는다. Render 블루프린트에서도 해당 변수는 `sync: false`로 선언되어 있어 대시보드에서 조정한 값이 배포 시 덮어쓰이지 않고 워커와 웹 프로세스에 그대로 반영된다.【F:requirements.txt†L1-L4】【F:pdf_processor/api/client.py†L1-L128】【F:settings.py†L19-L91】【F:render.yaml†L64-L76】
 - **Celery 워커 병렬성 부족**: Render 설정에서 `CELERY_CONCURRENCY`를 1로 고정해 단일 작업만 수행한다. 장시간 분석이 실행되면 다른 작업은 모두 큐에서 대기한다.【F:render.yaml†L47-L90】
-  - **개선**: CPU/메모리 한도를 고려해 최소 4~6 프로세스로 확장하고, 작업 유형별로 큐를 분리(업로드 정규화, 분석, PDF 생성 등)하여 짧은 작업이 긴 작업에 가로막히지 않도록 한다. `worker_prefetch_multiplier`가 1이므로 큐 분리 후에도 공정성은 유지된다.【F:celeryconfig.py†L59-L154】
+  - **개선**: CPU/메모리 한도를 고려해 최소 4~6 프로세스로 확장하고, 작업 유형별로 큐를 분리(업로드 정규화, 분석, PDF 생성 등)하여 짧은 작업이 긴 작업에 가로막히지 않도록 한다. `worker_prefetch_multiplier`가 1이므로 큐 분리 후에도 공정성은 유지된다. 블루프린트에서는 `CELERY_CONCURRENCY`를 더 이상 고정값으로 제공하지 않고 `sync: false` 처리해 Render 대시보드에서 변경한 값이 워커 시작 명령의 `--concurrency ${CELERY_CONCURRENCY:-1}` 인자에 곧바로 반영된다.【F:celeryconfig.py†L59-L154】【F:render.yaml†L47-L76】
 
 ### 2. 성능 병목
 - **청크 수 재계산의 중복 비용**: `_compute_total_chunks`와 진행률 초기화 구간에서 `split_pdf_for_chunks`를 반복 호출해 매번 PDF 파일을 열어 페이지 수를 계산한다. 한 작업에서 동일한 교안 PDF를 여러 번 열어 O(n×m) 비용이 발생한다.【F:tasks.py†L35-L213】【F:pdf_processor/pdf/operations.py†L411-L464】
@@ -48,8 +48,8 @@
 ### 2. 스토리지 확장성 및 안정성
 - **Redis 메모리 압박 및 Disk 한계**: Redis 무료 플랜은 메모리와 연결 수가 제한적이며, `render.yaml` 디스크 볼륨도 1GB에 불과하다.【F:render.yaml†L42-L45】
   - **개선**: Redis는 최소 Pro 플랜으로 업그레이드하거나 자체 관리형 Redis Cluster로 이전한다. 동시에 객체 스토리지 사용을 의무화하여 Redis와 디스크 사용량을 최소화한다.
-- **R2 마이그레이션 진행 상태 확인 필요**: 문서상 R2 마이그레이션 가이드가 있으나, 실제 설정(`OBJECT_STORE`)이 비어 있으면 여전히 Redis에 파일을 저장한다.【F:storage_manager.py†L37-L70】【F:docs/R2_MIGRATION.md†L1-L110】
-  - **개선**: 운영 환경에서 `OBJECT_STORE=s3`를 설정하고, 업로드/결과 파일을 즉시 R2로 보낸 뒤 Redis에는 포인터만 남긴다. 마이그레이션 스크립트로 기존 결과물을 이전하고 로컬 디스크를 비운다.
+- **R2 전환 이후 Redis 잔존 의존성**: 운영 환경은 이미 `OBJECT_STORE=s3`로 구성돼 R2(R2 호환 S3 API)를 사용하고 있으나, 코드상 여전히 업로드 파일 전체를 메모리에 적재해 해시 키를 만들고 Redis에 포인터/백업 데이터를 기록한다. 장애 시 Redis 저장 경로로 즉시 폴백하면서 R2 사용 이점을 잃을 위험이 있다.【F:storage_manager.py†L37-L306】
+  - **개선**: R2 업로드 성공 시 Redis에는 최소한의 메타데이터만 남기고, 실패 시에도 폴백 대신 재시도/경고로 전환한다. 업로드 파이프라인을 스트리밍 방식으로 바꿔 대용량 파일을 메모리에 보관하지 않도록 하고, Redis 백업 경로는 운영 설정에서 완전히 비활성화한다.
 
 ### 3. 배포 및 유지보수
 - **무중단 배포 전략 부재**: 현재 Render 기본 롤링 배포를 사용하면 새로운 이미지를 올리는 동안 단일 인스턴스가 교체되어 짧은 다운타임이 발생할 수 있다.
@@ -66,9 +66,9 @@
 ## 체크리스트 (Action Item Checklist)
 | 우선순위 | 항목 | 세부 작업 |
 | --- | --- | --- |
-| **단기 (1주 이내)** | Redis 파일 저장 해소 | 운영 환경에서 `OBJECT_STORE=s3` 설정, 업로드/결과를 R2로 전환, 워커가 다운로드 후 `file:*` 키 삭제 로직 추가.【F:storage_manager.py†L197-L270】【F:docs/R2_MIGRATION.md†L60-L110】 |
+| **단기 (1주 이내)** | Redis 파일 저장 해소 | 운영 환경은 이미 `OBJECT_STORE=s3`로 R2를 사용 중이므로, Redis에는 메타데이터만 남기고 실제 파일 바이트를 쓰지 않도록 `store_file` 경로를 리팩터링한다. 워커가 다운로드를 완료하면 `file:*` 키를 즉시 삭제하는 로직을 추가한다.【F:storage_manager.py†L197-L270】 |
 |  | 업로드 경로 비동기화 | `save_files_and_metadata` 내 파일 저장을 백그라운드 스레드/작업으로 분리하고, 요청 처리 스레드를 즉시 반환하도록 수정.【F:server/routes/_helpers.py†L107-L136】 |
-|  | 워커 병렬성 증가 | Render 대시보드에서 `CELERY_CONCURRENCY`를 4 이상으로 조정하고, 워커 인스턴스를 2대 이상으로 확장. 큐 분리 계획 수립.【F:render.yaml†L53-L78】 |
+|  | 워커 병렬성 증가 | Render 대시보드에서 `CELERY_CONCURRENCY`를 4 이상으로 조정하고, 워커 인스턴스를 2대 이상으로 확장. 블루프린트는 해당 변수를 `sync: false`로 두어 수동 조정값을 보존하므로 큐 분리 계획과 병행해 적용 가능하다.【F:render.yaml†L53-L78】 |
 | **중기 (1~4주)** | PDF 메타데이터 캐싱 | 업로드 단계에서 페이지 수/청크 메타를 저장하고, 분석 시 재사용하도록 Processor를 리팩터링.【F:tasks.py†L35-L214】 |
 |  | MultiAPI 재설계 | 키당 동시 처리량을 높이고, 비블로킹 스케줄링으로 재작성. Rate limit 관측 및 경보 추가.【F:pdf_processor/api/multi_api_manager.py†L133-L213】 |
 |  | 캐시/임시파일 관리 | `PDFCache`에 LRU 상한 도입, Celery 종료 시 캐시 정리. `_cleanup_loop`의 실패 감지 및 경보 추가.【F:pdf_processor/pdf/cache.py†L17-L160】【F:tasks.py†L730-L808】 |
