@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import tempfile
 import uuid
 from pathlib import Path
@@ -76,6 +77,20 @@ def _safe_filename(original: str, fallback_ext: Optional[str] = None) -> str:
     return filename
 
 
+async def _write_temp_file(upload: UploadFile, destination: Path) -> int:
+    """Persist the uploaded file to a temporary path using a background thread."""
+
+    content = await upload.read()
+    size = len(content)
+    await asyncio.to_thread(destination.write_bytes, content)
+    return size
+
+
+async def _storage_call(sm, method_name: str, *args, **kwargs):
+    method = getattr(sm, method_name)
+    return await asyncio.to_thread(method, *args, **kwargs)
+
+
 async def save_files_and_metadata(
     request: Request,
     jokbo_files: list[UploadFile],
@@ -110,33 +125,31 @@ async def save_files_and_metadata(
             original_name = f.filename or "upload"
             safe_name = _safe_filename(original_name, Path(original_name).suffix)
             p = tdir / safe_name
-            content = await f.read()
-            total_bytes += len(content)
+            bytes_written = await _write_temp_file(f, p)
+            total_bytes += bytes_written
             if _exceeds_upload_total(total_bytes):
                 raise HTTPException(status_code=413, detail=_combined_limit_detail())
-            p.write_bytes(content)
-            k = sm.store_file(p, job_id, "jokbo")
+            k = await _storage_call(sm, "store_file", p, job_id, "jokbo")
             jokbo_keys.append(k)
-            if not sm.verify_file_available(k):
+            if not await _storage_call(sm, "verify_file_available", k):
                 raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
             originals["jokbo"].append(original_name)
         for f in lesson_files:
             original_name = f.filename or "upload"
             safe_name = _safe_filename(original_name, Path(original_name).suffix)
             p = tdir / safe_name
-            content = await f.read()
-            total_bytes += len(content)
+            bytes_written = await _write_temp_file(f, p)
+            total_bytes += bytes_written
             if _exceeds_upload_total(total_bytes):
                 raise HTTPException(status_code=413, detail=_combined_limit_detail())
-            p.write_bytes(content)
-            k = sm.store_file(p, job_id, "lesson")
+            k = await _storage_call(sm, "store_file", p, job_id, "lesson")
             lesson_keys.append(k)
-            if not sm.verify_file_available(k):
+            if not await _storage_call(sm, "verify_file_available", k):
                 raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
             originals["lesson"].append(original_name)
 
     try:
-        sm.refresh_ttls(jokbo_keys + lesson_keys)
+        await _storage_call(sm, "refresh_ttls", jokbo_keys + lesson_keys)
     except Exception:
         pass
 
@@ -150,17 +163,17 @@ async def save_files_and_metadata(
         "user_id": user_id,
     }
     metadata["original_filenames"] = originals
-    sm.store_job_metadata(job_id, metadata)
+    await _storage_call(sm, "store_job_metadata", job_id, metadata)
     try:
-        sm.set_job_status(job_id, "QUEUED", detail="대기 중")
+        await _storage_call(sm, "set_job_status", job_id, "QUEUED", detail="대기 중")
     except Exception:
         pass
 
     if user_id:
-        sm.add_user_job(user_id, job_id)
+        await _storage_call(sm, "add_user_job", user_id, job_id)
         # Optional preflight: require positive token balance
         try:
-            bal = sm.get_user_tokens(user_id)
+            bal = await _storage_call(sm, "get_user_tokens", user_id)
             if bal is not None and bal <= 0:
                 raise HTTPException(status_code=402, detail="Insufficient tokens for analysis. Contact admin.")
         except HTTPException:
@@ -206,11 +219,10 @@ async def save_files_metadata_with_info(
             original_name = f.filename or "upload"
             safe_name = _safe_filename(original_name, Path(original_name).suffix)
             p = tdir / safe_name
-            content = await f.read()
-            total_bytes += len(content)
+            bytes_written = await _write_temp_file(f, p)
+            total_bytes += bytes_written
             if _exceeds_upload_total(total_bytes):
                 raise HTTPException(status_code=413, detail=_combined_limit_detail())
-            p.write_bytes(content)
             if info_builder is not None:
                 try:
                     info = dict(info_builder(p, "jokbo") or {})
@@ -219,20 +231,19 @@ async def save_files_metadata_with_info(
                 info["filename"] = original_name
                 info["stored_filename"] = p.name
                 jokbo_info.append(info)
-            k = sm.store_file(p, job_id, "jokbo")
+            k = await _storage_call(sm, "store_file", p, job_id, "jokbo")
             jokbo_keys.append(k)
-            if not sm.verify_file_available(k):
+            if not await _storage_call(sm, "verify_file_available", k):
                 raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
             originals["jokbo"].append(original_name)
         for f in lesson_files:
             original_name = f.filename or "upload"
             safe_name = _safe_filename(original_name, Path(original_name).suffix)
             p = tdir / safe_name
-            content = await f.read()
-            total_bytes += len(content)
+            bytes_written = await _write_temp_file(f, p)
+            total_bytes += bytes_written
             if _exceeds_upload_total(total_bytes):
                 raise HTTPException(status_code=413, detail=_combined_limit_detail())
-            p.write_bytes(content)
             if info_builder is not None:
                 try:
                     info = dict(info_builder(p, "lesson") or {})
@@ -241,14 +252,14 @@ async def save_files_metadata_with_info(
                 info["filename"] = original_name
                 info["stored_filename"] = p.name
                 lesson_info.append(info)
-            k = sm.store_file(p, job_id, "lesson")
+            k = await _storage_call(sm, "store_file", p, job_id, "lesson")
             lesson_keys.append(k)
-            if not sm.verify_file_available(k):
+            if not await _storage_call(sm, "verify_file_available", k):
                 raise HTTPException(status_code=503, detail=f"Storage unavailable for {f.filename}; please retry later")
             originals["lesson"].append(original_name)
 
     try:
-        sm.refresh_ttls(jokbo_keys + lesson_keys)
+        await _storage_call(sm, "refresh_ttls", jokbo_keys + lesson_keys)
     except Exception:
         pass
 
@@ -266,16 +277,16 @@ async def save_files_metadata_with_info(
 
     metadata["original_filenames"] = originals
 
-    sm.store_job_metadata(job_id, metadata)
+    await _storage_call(sm, "store_job_metadata", job_id, metadata)
     try:
-        sm.set_job_status(job_id, "QUEUED", detail="대기 중")
+        await _storage_call(sm, "set_job_status", job_id, "QUEUED", detail="대기 중")
     except Exception:
         pass
 
     if user_id:
-        sm.add_user_job(user_id, job_id)
+        await _storage_call(sm, "add_user_job", user_id, job_id)
         try:
-            bal = sm.get_user_tokens(user_id)
+            bal = await _storage_call(sm, "get_user_tokens", user_id)
             if bal is not None and bal <= 0:
                 raise HTTPException(status_code=402, detail="Insufficient tokens for analysis. Contact admin.")
         except HTTPException:
