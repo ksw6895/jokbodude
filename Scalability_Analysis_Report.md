@@ -10,7 +10,7 @@
 - **웹 업로드 경로의 블로킹 I/O**: 업로드된 파일을 `await f.read()`로 메모리에 올린 뒤 동기식 `write_bytes`, `StorageManager.store_file`을 호출한다. `store_file`은 로컬 파일을 다시 읽고 Redis에 `hset`/`expire`를 수행하는 동안 `time.sleep` 기반 재시도가 포함돼 있다. FastAPI의 async 엔드포인트에서 이러한 블로킹 호출이 증가하면 이벤트 루프가 막혀 다른 요청을 처리하지 못한다.【F:server/routes/_helpers.py†L107-L136】【F:storage_manager.py†L197-L263】
   - **개선**: 업로드 수신을 백그라운드 작업 큐로 넘기거나 `run_in_executor`/Streaming을 사용해 파일 쓰기와 Redis 업로드를 별도 스레드로 오프로드한다. 또한 Redis 대신 객체 스토리지에 직접 스트리밍 업로드하도록 변경하면 Redis 호출을 제거할 수 있다.
 - **멀티 API 키 매니저의 잠금 구조**: `MultiAPIManager`는 `Condition`과 `per_key_limit`(기본 1)로 키당 단일 작업만 허용하며, 실패 후 60초까지 `wait()`하면서 전체 작업을 블로킹한다. 동시에 `_global_tried_indices`가 활성화되면 동일 작업에서 재시도 가능한 키가 빠르게 고갈된다.【F:pdf_processor/api/multi_api_manager.py†L133-L213】
-  - **개선**: `per_key_limit` 기본값을 환경설정 기반으로 늘리고(예: 2~3), 장기 `wait` 대신 즉시 다른 키로 넘어가도록 비동기 큐/비블로킹 구조로 재작성한다. 실패 시 키당 서킷 브레이커를 두고, 전역 잠금 없이 asyncio.Queue 또는 Celery 내 worker 수준에서 분산시키는 것이 바람직하다.
+  - **개선**: `per_key_limit` 기본값을 환경설정 기반으로 늘리고(예: 2~3), 장기 `wait` 대신 즉시 다른 키로 넘어가도록 비동기 큐/비블로킹 구조로 재작성한다. 실패 시 키당 서킷 브레이커를 두고, 전역 잠금 없이 asyncio.Queue 또는 Celery 내 worker 수준에서 분산시키는 것이 바람직하다. 최신 코드베이스는 `google-genai` SDK로 이미 전환되어 있으며, `GEMINI_PER_KEY_CONCURRENCY` 환경변수로 키당 동시 처리 제한을 주입하도록 유지돼 있으므로(웹/워커 모두 동일 변수 사용) 값 상향 시 SDK와 충돌하지 않는다.【F:requirements.txt†L1-L4】【F:pdf_processor/api/client.py†L1-L128】【F:settings.py†L19-L91】
 - **Celery 워커 병렬성 부족**: Render 설정에서 `CELERY_CONCURRENCY`를 1로 고정해 단일 작업만 수행한다. 장시간 분석이 실행되면 다른 작업은 모두 큐에서 대기한다.【F:render.yaml†L47-L90】
   - **개선**: CPU/메모리 한도를 고려해 최소 4~6 프로세스로 확장하고, 작업 유형별로 큐를 분리(업로드 정규화, 분석, PDF 생성 등)하여 짧은 작업이 긴 작업에 가로막히지 않도록 한다. `worker_prefetch_multiplier`가 1이므로 큐 분리 후에도 공정성은 유지된다.【F:celeryconfig.py†L59-L154】
 
@@ -40,8 +40,8 @@
 
 ## II. 코드 외부 환경 문제 분석 (Environment & DevOps Scalability)
 ### 1. 서버 아키텍처 및 확장성
-- **Render 단일 인스턴스 구조**: `render.yaml`은 웹/워커 각각 1대, Redis는 무료 플랜으로 정의돼 있으며, 오토스케일이나 헬스체크 기반 확장 정책이 없다. 동시 사용자 수백 명을 처리하려면 인스턴스 플릿과 로드밸런싱이 필요하다.【F:render.yaml†L1-L90】
-  - **개선**: Render의 autoscaling 플랜을 활용하거나 Kubernetes/Container 기반 배포로 이전해 HPA(수평 확장)을 구성한다. 웹 인스턴스는 최소 2대 이상으로 늘리고, Celery 워커 그룹은 분석 큐/보조 큐로 분리해 작업 우선순위를 제어한다.
+- **Render 단일 인스턴스 구조**: `render.yaml`은 웹/워커 각각 1대, Redis는 무료·Starter 플랜으로 정의돼 있으며, 오토스케일이나 헬스체크 기반 확장 정책이 없다. 운영 환경에서 세 서비스가 이미 Standard 플랜으로 승격된 상태라면(IaC와 대시보드 간 설정 불일치) 재배포 시 다운그레이드 위험이 크다.【F:render.yaml†L1-L90】
+  - **개선**: Render의 autoscaling 플랜을 활용하거나 Kubernetes/Container 기반 배포로 이전해 HPA(수평 확장)을 구성한다. 웹 인스턴스는 최소 2대 이상으로 늘리고, Celery 워커 그룹은 분석 큐/보조 큐로 분리해 작업 우선순위를 제어한다. 또한 IaC 정의를 Standard 플랜으로 갱신하고, Terraform/Render Blueprint 등의 소스 관리와 실제 운영 설정이 일치하는지 정기적으로 검증한다.
 - **큐 분리 미흡**: Celery 라우팅은 `analysis` 큐 하나에 모든 분석·집계 작업을 넣는다.【F:celeryconfig.py†L77-L154】
   - **개선**: 업로드 전처리, 분석, PDF 생성, 정리 작업을 개별 큐/워커 풀로 분리하여 리소스를 세분화하고, SLA가 다른 작업을 독립적으로 확장한다.
 
@@ -75,4 +75,5 @@
 | **장기 (4주 이상)** | 아키텍처 확장 | 오토스케일 가능한 인프라(Kubernetes 등)로 이전하고, 웹/워커/배치 서비스 분리. Redis를 전용 캐시/메타데이터 스토어로 축소하고, 장기적으로는 메시지 브로커(RabbitMQ 등) 검토.【F:render.yaml†L1-L90】 |
 |  | 모니터링 및 배포 파이프라인 | CI/CD에 환경 변수 검증, 헬스체크, Blue-Green 배포 추가. Prometheus와 Alertmanager를 통해 KPI 모니터링 체계 구축.【F:config.py†L26-L73】 |
 |  | 비용 최적화 | 객체 스토리지 수명 주기 정책으로 결과물을 자동 파기하고, Redis 플랜 업그레이드 대비 비용을 분석하여 멀티 테넌시(예: 사용자별 버킷, CDN) 도입 여부 평가. |
+|  | Render 플랜 정합성 유지 | 운영에서 Standard 플랜을 사용한다면 `render.yaml`의 plan 값을 `standard`로 갱신하고, 배포 자동화에 drift 감지 단계를 추가.【F:render.yaml†L1-L90】 |
 
