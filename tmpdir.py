@@ -18,21 +18,78 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 _DEF_SUBDIR = "tmp"
+_PATCHED_GETTEMP = False
+_CURRENT_TARGET: Optional[str] = None
 
 
-def _resolve_base_dir(subdir: str) -> Path:
-    """Return the desired base directory for temporary files.
+def _ensure_directory(path: Path) -> Path:
+    """Create *path* (including parents) and verify it is usable."""
 
-    Preference order:
-    1. WORKER_TMPDIR / APP_TMPDIR (explicit override)
-    2. Existing TMPDIR if it is not pointing at /tmp
-    3. RENDER_STORAGE_PATH/<subdir>
-    4. output/temp/<subdir>
+    path.mkdir(parents=True, exist_ok=True)
+    if not path.exists():  # pragma: no cover - defensive guard
+        raise FileNotFoundError(path)
+    # Require execute (directory traversal) and write permissions
+    if not os.access(path, os.W_OK | os.X_OK):  # pragma: no cover - environment specific
+        raise PermissionError(f"Directory {path} is not writable")
+    return path
+
+
+def _patch_tempfile_guard() -> None:
+    """Ensure tempfile always recreates the configured directory if missing."""
+
+    global _PATCHED_GETTEMP
+    if _PATCHED_GETTEMP:
+        return
+
+    original_gettempdir = tempfile._gettempdir
+
+    def _wrapped_gettempdir() -> str:
+        value = original_gettempdir()
+        try:
+            _ensure_directory(Path(value))
+        except Exception as exc:  # pragma: no cover - defensive logging
+            logger.warning("Failed to ensure temp dir %s: %s", value, exc)
+        return value
+
+    tempfile._gettempdir = _wrapped_gettempdir
+    _PATCHED_GETTEMP = True
+
+
+def _apply_tempdir(target: Path) -> None:
+    """Write environment variables and patch tempfile for *target*."""
+
+    global _CURRENT_TARGET
+
+    path_str = str(target)
+    os.environ["TMPDIR"] = path_str
+    os.environ["TMP"] = path_str
+    os.environ["TEMP"] = path_str
+    tempfile.tempdir = path_str
+    _patch_tempfile_guard()
+    if _CURRENT_TARGET != path_str:
+        logger.info("TMPDIR configured to %s", path_str)
+        _CURRENT_TARGET = path_str
+
+
+def _candidate_dirs(subdir: str) -> list[Path]:
+    """Generate candidate directories in preference order.
+
+    Preference order matches previous behaviour but allows graceful
+    fallback when a preferred location is unusable.
     """
 
+    candidates: list[Path] = []
+
+    def _add(path: Optional[str | Path]) -> None:
+        if not path:
+            return
+        candidate = Path(path).expanduser()
+        if candidate in candidates:
+            return
+        candidates.append(candidate)
+
     override = os.getenv("WORKER_TMPDIR") or os.getenv("APP_TMPDIR")
-    if override:
-        return Path(override).expanduser()
+    _add(override)
 
     existing = os.getenv("TMPDIR")
     if existing:
@@ -48,14 +105,19 @@ def _resolve_base_dir(subdir: str) -> Path:
         except AttributeError:
             if str(resolved).startswith("/tmp"):
                 resolved = None
-        if resolved:
-            return resolved
+        _add(resolved)
 
     storage_root = os.getenv("RENDER_STORAGE_PATH")
     if storage_root:
-        return Path(storage_root).expanduser() / subdir
+        _add(Path(storage_root).expanduser() / subdir)
 
-    return Path("output") / "temp" / subdir
+    # Project-local fallback (ensures deterministic behaviour in tests/dev)
+    _add(Path("output") / "temp" / subdir)
+
+    # Last resort: allow the system default temp dir
+    _add(Path(tempfile.gettempdir()) / subdir)
+
+    return candidates
 
 
 def configure_tmpdir(subdir: Optional[str] = None) -> Path:
@@ -66,24 +128,25 @@ def configure_tmpdir(subdir: Optional[str] = None) -> Path:
     still occur if the fallback is hit.
     """
 
-    target = _resolve_base_dir(subdir or _DEF_SUBDIR)
-    try:
-        target.mkdir(parents=True, exist_ok=True)
-    except Exception as exc:  # pragma: no cover - defensive logging
-        logger.warning("Failed to create temp dir %s: %s", target, exc)
-        return target
+    final_target: Optional[Path] = None
+    errors: list[tuple[Path, Exception]] = []
 
-    try:
-        resolved = target.resolve()
-    except Exception:
-        resolved = target
+    for candidate in _candidate_dirs(subdir or _DEF_SUBDIR):
+        try:
+            prepared = _ensure_directory(candidate)
+            final_target = prepared.resolve()
+            break
+        except Exception as exc:  # pragma: no cover - defensive logging
+            errors.append((candidate, exc))
+            continue
 
-    path_str = str(resolved)
-    os.environ["TMPDIR"] = path_str
-    os.environ["TMP"] = path_str
-    os.environ["TEMP"] = path_str
-    tempfile.tempdir = path_str
-    logger.info("TMPDIR configured to %s", path_str)
-    return resolved
+    if final_target is None:
+        for candidate, exc in errors:
+            logger.warning("Failed to prepare temp dir %s: %s", candidate, exc)
+        fallback = Path(tempfile.gettempdir()).resolve()
+        final_target = _ensure_directory(fallback)
+
+    _apply_tempdir(final_target)
+    return final_target
 
 __all__ = ["configure_tmpdir"]
