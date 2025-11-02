@@ -506,7 +506,7 @@ class ResponseParser:
                         sc = ResponseParser._snap_score(s.get("relevance_score"), allow_zero=True)
                         rs = (s.get("relevance_reason") or s.get("reason") or "").strip()
                         # Filter explicit self-reference: same page number with inflated score
-                        is_page_collision = page_no > 0 and lp == page_no
+                        is_page_collision = page_no > 0 and lp in (page_no, page_no + 1)
                         is_score_inflation = sc >= 90
                         if is_page_collision and is_score_inflation:
                             logger.warning(
