@@ -21,12 +21,13 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         """Get the analyzer mode name."""
         return "lesson-centric"
     
-    def build_prompt(self, jokbo_filename: str) -> str:
+    def build_prompt(self, jokbo_filename: str, lesson_filename: str) -> str:
         """
         Build the lesson-centric analysis prompt.
         
         Args:
             jokbo_filename: Name of the jokbo file being analyzed
+            lesson_filename: Name of the lesson file being analyzed
             
         Returns:
             Complete prompt string
@@ -37,22 +38,26 @@ class LessonCentricAnalyzer(BaseAnalyzer):
             EXPLANATION_GUIDELINES,
             LESSON_CENTRIC_TASK, LESSON_CENTRIC_OUTPUT_FORMAT
         )
-        
-        prompt = f"""
-{COMMON_PROMPT_INTRO}
+        jokbo_display_name = f"족보_{jokbo_filename}"
+        lesson_display_name = f"강의자료_{lesson_filename}"
 
-분석 대상 족보 파일명: {jokbo_filename}
-
-{LESSON_CENTRIC_TASK}
-
-{COMMON_WARNINGS}
-
-{RELEVANCE_CRITERIA}
-
-{EXPLANATION_GUIDELINES}
-
-{LESSON_CENTRIC_OUTPUT_FORMAT}
-"""
+        prompt_parts = [
+            COMMON_PROMPT_INTRO.format(
+                jokbo_display_name=jokbo_display_name,
+                lesson_display_name=lesson_display_name,
+            ),
+            f"분석 대상 족보 파일명: {jokbo_display_name} (원본: {jokbo_filename})",
+            f"분석 대상 강의자료 파일명: {lesson_display_name} (원본: {lesson_filename})",
+            LESSON_CENTRIC_TASK,
+            COMMON_WARNINGS.format(
+                jokbo_display_name=jokbo_display_name,
+                lesson_display_name=lesson_display_name,
+            ),
+            RELEVANCE_CRITERIA,
+            EXPLANATION_GUIDELINES,
+            LESSON_CENTRIC_OUTPUT_FORMAT,
+        ]
+        prompt = "\n\n".join(prompt_parts)
         return prompt.strip()
     
     def analyze(self, jokbo_path: str, lesson_path: str, 
@@ -79,7 +84,7 @@ class LessonCentricAnalyzer(BaseAnalyzer):
             return self._analyze_with_chunks(jokbo_path, lesson_path)
 
         # Build prompt
-        prompt = self.build_prompt(jokbo_filename)
+        prompt = self.build_prompt(jokbo_filename, lesson_filename)
         
         if preloaded_lesson_file:
             # Use pre-uploaded lesson file

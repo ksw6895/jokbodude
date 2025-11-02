@@ -505,6 +505,16 @@ class ResponseParser:
                             continue
                         sc = ResponseParser._snap_score(s.get("relevance_score"), allow_zero=True)
                         rs = (s.get("relevance_reason") or s.get("reason") or "").strip()
+                        # Filter explicit self-reference: same page number with inflated score
+                        is_page_collision = page_no > 0 and lp == page_no
+                        is_score_inflation = sc >= 90
+                        if is_page_collision and is_score_inflation:
+                            logger.warning(
+                                "Discarding slide (self-reference detected): "
+                                f"question={qnum}, jokbo_page={page_no}, "
+                                f"lesson_filename={lf}, lesson_page={lp}, score={sc}"
+                            )
+                            continue
                         # Parser-level filtering: drop slides with score < 80
                         if sc >= 80:
                             key = (lf.lower(), lp)

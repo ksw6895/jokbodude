@@ -32,21 +32,29 @@ class PartialJokboAnalyzer(BaseAnalyzer):
             lessons_str = ", ".join(lesson_filenames)
         except Exception:
             lessons_str = ", ".join(str(x) for x in (lesson_filenames or []))
+        if not lessons_str:
+            lessons_str = "없음"
 
-        prompt = f"""
-{COMMON_PROMPT_INTRO}
+        jokbo_display_name = f"족보_{jokbo_filename}"
+        lesson_display_names = [f"강의자료_{name}" for name in (lesson_filenames or [])]
+        lesson_display_label = ", ".join(lesson_display_names) if lesson_display_names else "강의자료_미지정"
 
-분석 대상 족보 파일명: {jokbo_filename}
-참조 강의자료 파일들: {lessons_str}
-
-{PARTIAL_JOKBO_TASK}
-
-{COMMON_WARNINGS}
-
-{EXPLANATION_GUIDELINES}
-
-{PARTIAL_JOKBO_OUTPUT_FORMAT}
-"""
+        prompt_parts = [
+            COMMON_PROMPT_INTRO.format(
+                jokbo_display_name=jokbo_display_name,
+                lesson_display_name=lesson_display_label,
+            ),
+            f"분석 대상 족보 파일명: {jokbo_display_name} (원본: {jokbo_filename})",
+            f"참조 강의자료 파일들: {lesson_display_label} (원본: {lessons_str})",
+            PARTIAL_JOKBO_TASK,
+            COMMON_WARNINGS.format(
+                jokbo_display_name=jokbo_display_name,
+                lesson_display_name=lesson_display_label,
+            ),
+            EXPLANATION_GUIDELINES,
+            PARTIAL_JOKBO_OUTPUT_FORMAT,
+        ]
+        prompt = "\n\n".join(prompt_parts)
         return prompt.strip()
 
     def analyze(self, jokbo_path: str, lesson_paths: List[str]) -> Dict[str, Any]:
