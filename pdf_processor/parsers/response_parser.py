@@ -503,6 +503,9 @@ class ResponseParser:
                         lp = ResponseParser._to_int_safe(s.get("lesson_page"), 0)
                         if not lf or lp <= 0:
                             continue
+                        if page_no > 0 and lp == page_no:
+                            # Drop slides that mirror the jokbo page number to avoid context collisions
+                            continue
                         sc = ResponseParser._snap_score(s.get("relevance_score"), allow_zero=True)
                         rs = (s.get("relevance_reason") or s.get("reason") or "").strip()
                         # Parser-level filtering: drop slides with score < 80

@@ -21,7 +21,7 @@ class LessonCentricAnalyzer(BaseAnalyzer):
         """Get the analyzer mode name."""
         return "lesson-centric"
     
-    def build_prompt(self, jokbo_filename: str) -> str:
+    def build_prompt(self, jokbo_filename: str, lesson_filename: str) -> str:
         """
         Build the lesson-centric analysis prompt.
         
@@ -37,15 +37,27 @@ class LessonCentricAnalyzer(BaseAnalyzer):
             EXPLANATION_GUIDELINES,
             LESSON_CENTRIC_TASK, LESSON_CENTRIC_OUTPUT_FORMAT
         )
-        
-        prompt = f"""
-{COMMON_PROMPT_INTRO}
 
-분석 대상 족보 파일명: {jokbo_filename}
+        jokbo_display_name = f"족보_{jokbo_filename}"
+        lesson_display_name = f"강의자료_{lesson_filename}"
+        formatted_intro = COMMON_PROMPT_INTRO.format(
+            jokbo_display_name=jokbo_display_name,
+            lesson_display_name=lesson_display_name,
+        )
+        formatted_warnings = COMMON_WARNINGS.format(
+            jokbo_display_name=jokbo_display_name,
+            lesson_display_name=lesson_display_name,
+        )
+
+        prompt = f"""
+{formatted_intro}
+
+분석 대상 강의자료 파일명: {lesson_display_name} (원본: {lesson_filename})
+분석 대상 족보 파일명: {jokbo_display_name} (원본: {jokbo_filename})
 
 {LESSON_CENTRIC_TASK}
 
-{COMMON_WARNINGS}
+{formatted_warnings}
 
 {RELEVANCE_CRITERIA}
 
@@ -79,7 +91,7 @@ class LessonCentricAnalyzer(BaseAnalyzer):
             return self._analyze_with_chunks(jokbo_path, lesson_path)
 
         # Build prompt
-        prompt = self.build_prompt(jokbo_filename)
+        prompt = self.build_prompt(jokbo_filename, lesson_filename)
         
         if preloaded_lesson_file:
             # Use pre-uploaded lesson file
