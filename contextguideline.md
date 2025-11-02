@@ -92,25 +92,19 @@ AI 응답을 처음 파싱하고 정제하는 \*\*`pdf_processor/parsers/respons
     ```python
     # ... (lp, sc 변수 추출 후) ...
 
-    # --- ⭐️ 강화된 방어 로직 (AND 조건) ⭐️ ---
+    # --- ⭐️ 강화된 방어 로직 ⭐️ ---
 
-    # 휴리스틱 1: 페이지 번호가 겹치는가? (AI가 '10페이지'를 혼동함)
-    is_page_collision = (lp == page_no) 
+    # 휴리스틱: 페이지 번호가 겹치는가? (AI가 '10페이지'를 혼동함)
+    is_page_collision = (lp == page_no)
 
-    # 휴리스틱 2: 점수가 비정상적으로 높은가? (AI가 '족보 문제'를 '강의 자료'에서 찾았다고 확신함)
-    # 90점 이상은 '거의 동일한 내용'일 때만 부여되므로, 이는 족보-족보 자기 참조의 강력한 신호임.
-    is_score_inflation = (sc >= 90) 
-
-    # [수정됨] 두 휴리스틱이 '모두(AND)' 참일 때만 필터링
-    if is_page_collision and is_score_inflation:
-        # 이는 '페이지 번호가 같고, 점수도 90점 이상'인 명백한 자기 참조의 증상임.
+    if is_page_collision:
+        # 이는 '페이지 번호가 같음'에서 비롯된 명백한 자기 참조의 증상임.
         # 이 경우에만 해당 슬라이드를 버그로 간주하고 필터링합니다.
-        
         logger.warning(
             f"Discarding slide (Self-Reference Detected): Q={qnum}, JokboPage={page_no}, "
-            f"LessonPage={lp}, Score={sc}. (Collision AND Inflation = True)"
+            f"LessonPage={lp}, Score={sc}."
         )
-        continue # 이 '오염된' 슬라이드만 버리고 다음 슬라이드로 넘어감
+        continue  # 이 '오염된' 슬라이드만 버리고 다음 슬라이드로 넘어감
         
     # --- ⭐️ 로직 종료 ⭐️ ---
 
@@ -123,8 +117,7 @@ AI 응답을 처음 파싱하고 정제하는 \*\*`pdf_processor/parsers/respons
 #### 3.3. 기대 효과
 
   * **족보 문제 누락 방지:** `continue`는 `related_lesson_slides` 배열에 해당 슬라이드가 추가되는 것만 막습니다. 족보 문제 자체(`question`)는 `cleaned_questions`에 정상적으로 포함되며, 최종 PDF에 **문제는 절대 누락되지 않습니다.**
-  * **정상 데이터 보호:** `AND` 조건을 사용함으로써, (1) 페이지 번호는 다르지만 진짜 90점짜리 매칭이나 (2) 페이지 번호는 같지만 점수가 80점인 정상적인 매칭이 필터링되는 것을 방지합니다.
-  * **정밀한 버그 수정:** 이 로직은 사용자가 지적한 두 가지 증상(페이지 충돌, 90+점수)이 **동시에(AND) 발생하는** '자기 참조' 오류만 정밀하게 필터링합니다.
+  * **정밀한 버그 수정:** 이 로직은 사용자가 지적한 핵심 증상(페이지 충돌)으로 인한 '자기 참조' 오류만 정밀하게 필터링합니다.
   * **정확한 결과물:** 최종 PDF의 해설 페이지에는 잘못된 강의자료가 삽입되는 대신, "관련 슬라이드: 없음" (또는 올바르게 연결된 다른 슬라이드)이 표시됩니다.
 
 -----
@@ -137,6 +130,7 @@ AI 응답을 처음 파싱하고 정제하는 \*\*`pdf_processor/parsers/respons
 | Layer 1 | `pdf_processor/analyzers/jokbo_centric.py` | `build_prompt` | `constants` 템플릿에 `.format()`으로 `display_name` 변수 주입 |
 | Layer 1 | `pdf_processor/analyzers/jokbo_centric.py` | `analyze` | `build_prompt` 호출 시 두 파일명 모두 전달 |
 | Layer 1 | `pdf_processor/analyzers/lesson_centric.py` | `build_prompt`, `analyze` | `jokbo_centric.py`와 동일하게 수정 |
-| **Layer 2** | **`pdf_processor/parsers/response_parser.py`** | **`_sanitize_parsed_response`** | `jokbo-centric` 모드 로직 내, `related_lesson_slides` 순회 시 **`(lp == page_no) AND (sc >= 90)`** 충돌 탐지 및 `continue` 필터링 로직 추가 |
-| Test | 테스트 환경 | - | 페이지 번호가 겹치면서(AND) 90+점인 테스트 케이스 실행 |
-| Verify | 테스트 결과 | - | (수정 전) 버그 재현 -\> (수정 후) 잘못된 슬라이드만 정밀하게 필터링되고 족보 문제는 정상 출력됨을 확인 |
+| **Layer 2** | **`pdf_processor/parsers/response_parser.py`** | **`_sanitize_parsed_response`** | `jokbo-centric` 모드 로직 내, `related_lesson_slides` 순회 시 **`lp == page_no`** 충돌 탐지 및 `continue` 필터링 로직 추가 |
+| Test | 테스트 환경 | - | 페이지 번호가 겹쳤을 때(자기 참조) 필터가 정상 동작하는지 확인 |
+| Verify | 테스트 결과 | - | (수정 전) 버그 재현 -> (수정 후) 페이지 충돌 슬라이드만 정밀하게 필터링되고 족보 문제는 정상 출력됨을 확인 |
+
