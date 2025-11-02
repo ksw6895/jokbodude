@@ -33,15 +33,28 @@ class PartialJokboAnalyzer(BaseAnalyzer):
         except Exception:
             lessons_str = ", ".join(str(x) for x in (lesson_filenames or []))
 
-        prompt = f"""
-{COMMON_PROMPT_INTRO}
+        jokbo_display_name = f"족보_{jokbo_filename}"
+        lesson_display_names = [f"강의자료_{name}" for name in lesson_filenames]
+        lesson_display_name = ", ".join(lesson_display_names) if lesson_display_names else "강의자료_없음"
 
-분석 대상 족보 파일명: {jokbo_filename}
-참조 강의자료 파일들: {lessons_str}
+        formatted_intro = COMMON_PROMPT_INTRO.format(
+            jokbo_display_name=jokbo_display_name,
+            lesson_display_name=lesson_display_name,
+        )
+        formatted_warnings = COMMON_WARNINGS.format(
+            jokbo_display_name=jokbo_display_name,
+            lesson_display_name=lesson_display_name,
+        )
+
+        prompt = f"""
+{formatted_intro}
+
+분석 대상 족보 파일명: {jokbo_display_name} (원본: {jokbo_filename})
+참조 강의자료 파일들: {lesson_display_name} (원본: {lessons_str})
 
 {PARTIAL_JOKBO_TASK}
 
-{COMMON_WARNINGS}
+{formatted_warnings}
 
 {EXPLANATION_GUIDELINES}
 
